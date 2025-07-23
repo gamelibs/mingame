@@ -31,19 +31,6 @@ class GameEngine {
         this.loadedSounds = new Map();
         this.loadedImages = new Map();
 
-        // 常量
-        this.commCode = "2E283EB2E6AA1448861CDF2DED8C4824";
-        this.compName = "PulicComp";
-        this.mainType = {
-            "KTSZ": 2,
-            "TYSZ": 3,
-            "TYSZ_NO_WUYA": 4,
-            "TYSZ_NO": 5,
-            "TYSZ_NO_ONE": 6,
-            "TYRZ": 7,
-            "TZZJ": 8,
-            "TYSZ_BEFOR": 9
-        };
     }
 
     async init() {
@@ -55,19 +42,22 @@ class GameEngine {
             this.preloadCriticalLibs()
         ]);
 
-        // 初始化DOM元素
-        this.initDOMElements();
         this.applyConfig();
 
-        // 异步加载剩余资源，不阻塞UI
-        // setTimeout(async () => {
-            // 开始加载游戏资源
-            await this.loadGameResources();
+        // 开始加载游戏资源
+        await this.loadGameResources();
 
-            // 初始化游戏加载器
-            await this.initGameLoader();
+        // 加载预加载器组件
+        await this.loadPreloader();
 
-            console.log('Game Engine Ready!');
+        this.hideLoading();
+        // // 加载游戏模板配置
+        // await this.loadGameTemplate();
+
+        // // 加载核心游戏文件
+        await this.loadCoreGameFiles();
+
+        console.log('Game Engine Ready!');
         // }, 0);
     }
 
@@ -126,6 +116,38 @@ class GameEngine {
     }
 
     initDOMElements() {
+
+    }
+
+    applyStageTransform() {
+        if (!this.stage) return;
+
+        // 应用变换到 stage
+        this.stage.rotation = this.stageRotation;
+        this.stage.x = this.stageX;
+        this.stage.y = this.stageY;
+        this.stage.scaleX = this.stageScale;
+        this.stage.scaleY = this.stageScale;
+
+        // 更新 stage
+        this.stage.update();
+
+        // console.log(`Stage transform applied: rotation=${this.stageRotation}, x=${this.stageX}, y=${this.stageY}, scale=${this.stageScale}`);
+    }
+
+    async loadConfig() {
+        try {
+            const response = await fetch('./manifest.json?v=' + Math.random());
+            this.config = await response.json();
+            console.log('Config loaded:', this.config);
+        } catch (error) {
+            console.error('Failed to load config:', error);
+            throw error;
+        }
+    }
+
+    applyConfig() {
+
         this.gameContainer = document.getElementById('game-container');
         this.animationContainer = document.getElementById('animation_container');
         this.canvas = document.getElementById('canvas');
@@ -182,36 +204,7 @@ class GameEngine {
 
         // 添加事件监听
         window.addEventListener('resize', this.resizeHandler);
-    }
 
-    applyStageTransform() {
-        if (!this.stage) return;
-
-        // 应用变换到 stage
-        this.stage.rotation = this.stageRotation;
-        this.stage.x = this.stageX;
-        this.stage.y = this.stageY;
-        this.stage.scaleX = this.stageScale;
-        this.stage.scaleY = this.stageScale;
-
-        // 更新 stage
-        this.stage.update();
-
-        console.log(`Stage transform applied: rotation=${this.stageRotation}, x=${this.stageX}, y=${this.stageY}, scale=${this.stageScale}`);
-    }
-
-    async loadConfig() {
-        try {
-            const response = await fetch('./manifest.json?v=' + Math.random());
-            this.config = await response.json();
-            console.log('Config loaded:', this.config);
-        } catch (error) {
-            console.error('Failed to load config:', error);
-            throw error;
-        }
-    }
-
-    applyConfig() {
         const { width = 1920, height = 1080, orientation = 'landscape', backgroundColor = '#CED1D3' } = this.config.scene || {};
 
         // 保存设计尺寸
@@ -259,26 +252,6 @@ class GameEngine {
         console.log('所有脚本加载完成');
     }
 
-    async initGameLoader() {
-        // 初始化CreateJS舞台
-        this.stage = new createjs.Stage(this.canvas);
-        createjs.Ticker.framerate = this.config.scene?.fps || 30;
-        createjs.Ticker.addEventListener("tick", this.stageUpdateHandler.bind(this));
-
-        // Stage 创建后立即应用变换
-        this.applyStageTransform();
-
-        // 加载预加载器组件
-        await this.loadPreloader();
-
-        this.hideLoading();
-        // // 加载游戏模板配置
-        // await this.loadGameTemplate();
-
-        // // 加载核心游戏文件
-        await this.loadCoreGameFiles();
-
-    }
 
     async loadPreloader() {
         return new Promise((resolve) => {
@@ -329,6 +302,14 @@ class GameEngine {
     }
 
     createLoadingElement(lib) {
+
+        // 初始化CreateJS舞台
+        this.stage = new createjs.Stage(this.canvas);
+        createjs.Ticker.framerate = this.config.scene?.fps || 30;
+        createjs.Ticker.addEventListener("tick", this.stageUpdateHandler.bind(this));
+
+        // Stage 创建后立即应用变换
+        this.applyStageTransform();
         // 创建loading元件
         this.gl_mc = new lib.loading();
         this.gl_loadBar = this.gl_mc["loadBar"];
@@ -756,10 +737,10 @@ class GameEngine {
         }
     }
 
-   
+
 
     async loadCoreGameFiles() {
-       
+
         const mainJson = this.config.gameconfig
 
         return new Promise((resolve) => {
@@ -994,33 +975,33 @@ class GameEngine {
     // initGameMain() {
     //     console.log("Initializing game main...");
 
-        // 创建游戏根对象
-        // this.publicRoot = new this.pubLib[this.compName]();
-        // this.exportRoot = new this.mainLib[this.mainName]();
+    // 创建游戏根对象
+    // this.publicRoot = new this.pubLib[this.compName]();
+    // this.exportRoot = new this.mainLib[this.mainName]();
 
-        // 添加到舞台
-        // this.stage.addChild(this.exportRoot);
-        // this.stage.addChild(this.publicRoot);
+    // 添加到舞台
+    // this.stage.addChild(this.exportRoot);
+    // this.stage.addChild(this.publicRoot);
 
-        // 应用加载器的变换属性
-        // this.exportRoot.rotation = this.publicRoot.rotation = this.gl_mc.rotation;
-        // this.exportRoot.x = this.publicRoot.x = this.gl_mc.x;
-        // this.exportRoot.y = this.publicRoot.y = this.gl_mc.y;
-        // this.exportRoot.scaleX = this.publicRoot.scaleX = this.gl_mc.scaleX;
-        // this.exportRoot.scaleY = this.publicRoot.scaleY = this.gl_mc.scaleY;
+    // 应用加载器的变换属性
+    // this.exportRoot.rotation = this.publicRoot.rotation = this.gl_mc.rotation;
+    // this.exportRoot.x = this.publicRoot.x = this.gl_mc.x;
+    // this.exportRoot.y = this.publicRoot.y = this.gl_mc.y;
+    // this.exportRoot.scaleX = this.publicRoot.scaleX = this.gl_mc.scaleX;
+    // this.exportRoot.scaleY = this.publicRoot.scaleY = this.gl_mc.scaleY;
 
-        // 停止所有子元素动画
-        // for (const k in this.publicRoot.children) {
-        //     if (typeof utile !== 'undefined' && utile.goStop) {
-        //         utile.goStop(this.publicRoot.children[k]);
-        //     }
-        // }
+    // 停止所有子元素动画
+    // for (const k in this.publicRoot.children) {
+    //     if (typeof utile !== 'undefined' && utile.goStop) {
+    //         utile.goStop(this.publicRoot.children[k]);
+    //     }
+    // }
 
-        // for (const k in this.exportRoot.children) {
-        //     if (typeof utile !== 'undefined' && utile.goStop) {
-        //         utile.goStop(this.exportRoot.children[k], true);
-        //     }
-        // }
+    // for (const k in this.exportRoot.children) {
+    //     if (typeof utile !== 'undefined' && utile.goStop) {
+    //         utile.goStop(this.exportRoot.children[k], true);
+    //     }
+    // }
 
     //     // 启用触摸和鼠标交互
     //     createjs.Touch.enable(this.stage);

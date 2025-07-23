@@ -100,7 +100,8 @@ class GameServer {
 
         const userData = this.userDataCache.get(userId);
 
-        if (!userData) {
+        // 测试默认true
+        if (true ) {//|| !userData
             // 新用户
             const newUserData = {
                 userId: userId,
