@@ -1,4 +1,68 @@
 var utile = utile || {};
+
+/**
+ * 查找影片剪辑
+ */
+findMc = function (name, mc) {
+    if (!mc) return null;
+    if (mc.name == name) return mc;
+    // if (mc["children"] && mc.children.length > 0) {
+    //     for (var k in mc.children) {
+    //         var t = findMc(name, mc.children[k]);
+    //         if (t) return t;
+    //     }
+    // }
+    const _mc = null;
+    // 方法1: 直接通过名称查找 _mc
+    if (mc.getChildByName) {
+        let _mc = this.exportRoot.getChildByName('guide_mc');
+        if (_mc) {
+            console.log('✅ 通过名称找到引导手势: guide_mc');
+            return _mc;
+        }
+    }
+
+    // 方法2: 遍历查找名称为 guide_mc 的元件
+    if (mc.children) {
+        for (let child of mc.children) {
+            const _name = child.name || '';
+            if (_name === name) {
+                _mc = child;
+                console.log('✅ 通过遍历找到引导手势: guide_mc');
+                return _mc;
+            }
+        }
+    }
+
+    // 方法3: 检查构造函数名称是否包含 guide_mc
+    if (mc.children) {
+        for (let child of mc.children) {
+            const constructorName = child.constructor.name || '';
+            if (constructorName.toLowerCase().includes(name) ||
+                constructorName === name) {
+                _mc = child;
+                console.log('✅ 通过构造函数名找到引导手势:', constructorName);
+                return _mc;
+            }
+        }
+    }
+
+
+}
+
+/**
+     * 打印可用的子元件名称（用于调试）
+     */
+utile.logAvailableChildren = function () {
+    console.log('🔍 可用的子元件列表:');
+    if (this.exportRoot && this.exportRoot.children) {
+        this.exportRoot.children.forEach((child, index) => {
+            console.log(`  ${index}: name="${child.name || 'unnamed'}", constructor="${child.constructor.name}"`);
+        });
+    }
+}
+
+
 /**
  * 默认不可见不绘制
  * 使影片剪辑停止播放
@@ -99,89 +163,89 @@ utile.randomWord = function (long, range) {
  */
 var turnArr = [];
 var turnIndex = 0;
-utile.randomWordByTurn = function(long, totalLevel, answerLength, maxTurn) {
+utile.randomWordByTurn = function (long, totalLevel, answerLength, maxTurn) {
     var result = [];
 
     turnIndex++;
 
-    if(turnIndex>maxTurn) {
+    if (turnIndex > maxTurn) {
         turnIndex = 1;
     }
 
-    var startIndex = (turnIndex-1)*totalLevel;
-    if(startIndex>(long-1)) {
+    var startIndex = (turnIndex - 1) * totalLevel;
+    if (startIndex > (long - 1)) {
         turnIndex = 1;
     }
 
-    if(turnIndex == 1) {
-        turnArr = utile.randomWord(long,long);
+    if (turnIndex == 1) {
+        turnArr = utile.randomWord(long, long);
     }
-    
-    var endIndex = turnIndex*totalLevel;
-    if(endIndex>turnArr.length) {
+
+    var endIndex = turnIndex * totalLevel;
+    if (endIndex > turnArr.length) {
         endIndex = turnArr.length;
     }
 
-    
+
 
     var tempList = [];
-    for(var i=startIndex; i<endIndex; i++) {
+    for (var i = startIndex; i < endIndex; i++) {
         tempList.push(turnArr[i]);
     }
 
-    if(tempList.length<totalLevel) {
-        var tempArr = utile.copyAry(turnArr).slice(0, startIndex-1);
-        tempArr = utile.getRandomByNum(tempArr, totalLevel-tempList.length);
+    if (tempList.length < totalLevel) {
+        var tempArr = utile.copyAry(turnArr).slice(0, startIndex - 1);
+        tempArr = utile.getRandomByNum(tempArr, totalLevel - tempList.length);
         tempList = tempList.concat(tempArr);
     }
 
-    for(var j=0; j<tempList.length; j++) {
+    for (var j = 0; j < tempList.length; j++) {
         var tObj = {};
         tObj.answer = tempList[j];
-        var tOptions = utile.getRanNumWithout(turnArr, answerLength-1, tObj.answer).concat([tObj.answer]);
+        var tOptions = utile.getRanNumWithout(turnArr, answerLength - 1, tObj.answer).concat([tObj.answer]);
         utile.randomArray(tOptions)
         tObj.options = tOptions;
         result.push(tObj);
     }
 
-    
+
 
     return result;
 }
 
-utile.randomWordByTurnNoAnswer = function(long, totalLevel, maxTurn) {
+utile.randomWordByTurnNoAnswer = function (long, totalLevel, maxTurn) {
     var result = [];
 
     turnIndex++;
 
-    if(turnIndex>maxTurn) {
+    if (turnIndex > maxTurn) {
         turnIndex = 1;
     }
 
-    var startIndex = (turnIndex-1)*totalLevel;
-    if(startIndex>(long-1)) {
+    var startIndex = (turnIndex - 1) * totalLevel;
+    if (startIndex > (long - 1)) {
         turnIndex = 1;
     }
 
-    if(turnIndex == 1) {
-        turnArr = utile.randomWord(long,long);
+    if (turnIndex == 1) {
+        turnArr = utile.randomWord(long, long);
     }
-    
-    var endIndex = turnIndex*totalLevel;
-    if(endIndex>turnArr.length) {
+
+    var endIndex = turnIndex * totalLevel;
+    if (endIndex > turnArr.length) {
         endIndex = turnArr.length;
     }
 
-    
+
 
     var tempList = [];
-    for(var i=startIndex; i<endIndex; i++) {
+    for (var i = startIndex; i < endIndex; i++) {
         tempList.push(turnArr[i]);
     }
 
-    if(tempList.length<totalLevel) {
-        var tempArr = utile.copyAry(turnArr).slice(0, startIndex-1);
-        tempArr = utile.getRandomByNum(tempArr, totalLevel-tempList.length);
+    if (tempList.length < totalLevel) {
+        var tempArr = utile.copyAry(turnArr).slice(0, startIndex - 1);
+        tempArr = utile.getRandomByNum(tempArr, totalLevel - tempList.length);
         tempList = tempList.concat(tempArr);
     }
 
@@ -237,7 +301,7 @@ utile.getMultRandom = function (min, max, num) {
 }
 
 /** 打乱数组 */
-utile.randomArray = utile.randomAry  = function (value) {
+utile.randomArray = utile.randomAry = function (value) {
     //Fisher–Yates随机算法:
     let m = value.length, t, i;
     while (m) {
@@ -389,29 +453,29 @@ utile.copyAry = function (value) {
 }
 
 
-utile.shake = function(mc) {
-    if(createjs.Tween.hasActiveTweens(mc)){
+utile.shake = function (mc) {
+    if (createjs.Tween.hasActiveTweens(mc)) {
         return;
     }
 
-	let initx = mc.x;
-	let inity = mc.y;
-	createjs.Tween.get(mc)
-        .to({x:mc.x+30},30)
+    let initx = mc.x;
+    let inity = mc.y;
+    createjs.Tween.get(mc)
+        .to({ x: mc.x + 30 }, 30)
         .wait(50)
-        .to({x:mc.x-30},30)
+        .to({ x: mc.x - 30 }, 30)
         .wait(50)
-        .to({x:mc.x+20},20)
+        .to({ x: mc.x + 20 }, 20)
         .wait(50)
-        .to({x:mc.x-20},20)
+        .to({ x: mc.x - 20 }, 20)
         .wait(50)
-        .to({x:mc.x+10},10)
+        .to({ x: mc.x + 10 }, 10)
         .wait(50)
-        .to({x:mc.x-10},10)
-		.wait(50)
-		.call(()=>{
-			mc.x = initx;
-			mc.y = inity;
+        .to({ x: mc.x - 10 }, 10)
+        .wait(50)
+        .call(() => {
+            mc.x = initx;
+            mc.y = inity;
             createjs.Tween.removeTweens(mc);
-		})
+        })
 }

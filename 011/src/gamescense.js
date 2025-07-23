@@ -674,48 +674,17 @@ class GameScense {
     findGuideGesture() {
         console.log('🔍 查找引导手势元件 guide_mc...');
 
-        this.guideGesture = null;
+        this.guideGesture = utile.findMc(this.exportRoot,'guide_mc');
 
-        // 方法1: 直接通过名称查找 guide_mc
-        if (this.exportRoot && this.exportRoot.getChildByName) {
-            this.guideGesture = this.exportRoot.getChildByName('guide_mc');
-            if (this.guideGesture) {
-                console.log('✅ 通过名称找到引导手势: guide_mc');
-            }
-        }
-
-        // 方法2: 遍历查找名称为 guide_mc 的元件
-        if (!this.guideGesture && this.exportRoot && this.exportRoot.children) {
-            for (let child of this.exportRoot.children) {
-                const name = child.name || '';
-                if (name === 'guide_mc') {
-                    this.guideGesture = child;
-                    console.log('✅ 通过遍历找到引导手势: guide_mc');
-                    break;
-                }
-            }
-        }
-
-        // 方法3: 检查构造函数名称是否包含 guide_mc
-        if (!this.guideGesture && this.exportRoot && this.exportRoot.children) {
-            for (let child of this.exportRoot.children) {
-                const constructorName = child.constructor.name || '';
-                if (constructorName.toLowerCase().includes('guide_mc') ||
-                    constructorName === 'guide_mc') {
-                    this.guideGesture = child;
-                    console.log('✅ 通过构造函数名找到引导手势:', constructorName);
-                    break;
-                }
-            }
-        }
+        
 
         // 方法4: 递归查找子元件中的 guide_mc
-        if (!this.guideGesture) {
-            this.guideGesture = this.findChildByName(this.exportRoot, 'guide_mc');
-            if (this.guideGesture) {
-                console.log('✅ 通过递归查找找到引导手势: guide_mc');
-            }
-        }
+        // if (!this.guideGesture) {
+        //     this.guideGesture = this.findChildByName(this.exportRoot, 'guide_mc');
+        //     if (this.guideGesture) {
+        //         console.log('✅ 通过递归查找找到引导手势: guide_mc');
+        //     }
+        // }
 
         if (this.guideGesture) {
             console.log('✅ 找到引导手势元件 guide_mc:', this.guideGesture);
@@ -724,7 +693,7 @@ class GameScense {
         } else {
             console.warn('⚠️ 未找到引导手势元件 guide_mc');
             // 打印可用的子元件名称用于调试
-            this.logAvailableChildren();
+            // this.logAvailableChildren();
         }
     }
 
@@ -750,17 +719,7 @@ class GameScense {
         return null;
     }
 
-    /**
-     * 打印可用的子元件名称（用于调试）
-     */
-    logAvailableChildren() {
-        console.log('🔍 可用的子元件列表:');
-        if (this.exportRoot && this.exportRoot.children) {
-            this.exportRoot.children.forEach((child, index) => {
-                console.log(`  ${index}: name="${child.name || 'unnamed'}", constructor="${child.constructor.name}"`);
-            });
-        }
-    }
+  
 
     /**
      * 移动引导手势到目标位置

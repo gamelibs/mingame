@@ -278,14 +278,6 @@ class GameEngine {
         // // 加载核心游戏文件
         await this.loadCoreGameFiles();
 
-        // // 加载音频资源
-        // await this.loadAudioResources();
-
-        // // 加载图片资源
-        // await this.loadImageResources();
-
-        // // 启动游戏
-        // this.startGame();
     }
 
     async loadPreloader() {
@@ -764,38 +756,10 @@ class GameEngine {
         }
     }
 
-    // async loadGameTemplate() {
-    //     return new Promise((resolve) => {
-    //         const loader = new createjs.LoadQueue(false);
-    //         loader.on("fileload", (evt) => {
-    //             const result = evt.result;
-    //             for (const k in result) {
-    //                 if (result[k].compName) {
-    //                     this.config_data[result[k].compName] = result[k];
-    //                 }
-    //             }
-
-    //             this.template = this.mainType[this.config_data.model.attr];
-    //             this.mainCode = this.config_data.gameID.attr;
-    //             this.mainName = this.config_data.gameName.attr;
-
-    //             this.goPlayFrameEnd(this.gl_loadBar, 1);
-    //             resolve();
-    //         });
-
-    //         loader.loadFile("./model/model_template.json");
-    //     });
-    // }
+   
 
     async loadCoreGameFiles() {
-        // const mainJson = [
-        //     { id: "utile", src: "./src/utile.js" },
-        //     { id: "PulicComp", src: "./src/" + this.compName + ".js" },
-        //     { id: "game", src: "./src/game.js" },
-        //     { id: "Template", src: "./src/template/Template" + this.template + ".js" },
-        //     { id: this.mainName, src: "./yanyu/" + this.mainName + ".js" },
-        //     { id: "resdata_" + this.mainName, src: "./model/resdata_" + this.mainName + ".json" }
-        // ];
+       
         const mainJson = this.config.gameconfig
 
         return new Promise((resolve) => {
