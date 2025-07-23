@@ -1,0 +1,218 @@
+[
+  {
+    "name": "游戏结束了",
+    "route": null,
+    "soundid": "gamewin",
+    "soundData": "GameWinSound",
+    "image": null,
+    "imgid": "PulicComp_atlas_1",
+    "imgData": "PulicComp_atlas_1.png"
+  },
+  {
+    "name": "正确声",
+    "route": null,
+    "soundid": "good",
+    "soundData": "good",
+    "image": "huibiandademogu/",
+    "imgid": "huibiandademogu_atlas_1",
+    "imgData": "huibiandademogu_atlas_1.png"
+  },
+  {
+    "name": "试一试",
+    "route": null,
+    "soundid": "try",
+    "soundData": "try",
+    "image": "huibiandademogu/",
+    "imgid": "huibiandademogu_atlas_2",
+    "imgData": "huibiandademogu_atlas_2.png"
+  },
+  {
+    "name": "下一关过度",
+    "route": null,
+    "soundid": "next",
+    "soundData": "HappyWinGame",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": "点击",
+    "route": null,
+    "soundid": "click",
+    "soundData": "click",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": "星星",
+    "route": null,
+    "soundid": "goodmin",
+    "soundData": "goodmin",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": "点错",
+    "route": null,
+    "soundid": "wrong",
+    "soundData": "wrong",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": "火箭",
+    "route": "huibiandademogu/",
+    "soundid": "right",
+    "soundData": "bor",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": "标题声",
+    "route": "huibiandademogu/",
+    "soundid": "game",
+    "soundData": "Y-2-会变大的蘑菇",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": "开始声",
+    "route": "huibiandademogu/",
+    "soundid": "gamedes",
+    "soundData": "Y-2-会变大的蘑菇-Z",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": "文字读音",
+    "route": "huibiandademogu/",
+    "soundid": null,
+    "soundData": null,
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": "文字读音",
+    "route": "huibiandademogu/",
+    "soundid": "word0",
+    "soundData": "Y-2-025 黄瓜",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": null,
+    "route": "huibiandademogu/",
+    "soundid": "word1",
+    "soundData": "Y-2-026 西红柿",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": null,
+    "route": "huibiandademogu/",
+    "soundid": "word2",
+    "soundData": "Y-2-027 芹菜",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": null,
+    "route": "huibiandademogu/",
+    "soundid": "word3",
+    "soundData": "Y-2-028 白菜",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": null,
+    "route": "huibiandademogu/",
+    "soundid": "word4",
+    "soundData": "Y-2-029 胡萝卜",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": null,
+    "route": "huibiandademogu/",
+    "soundid": "word5",
+    "soundData": "Y-2-030 茄子",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": null,
+    "route": "huibiandademogu/",
+    "soundid": "word6",
+    "soundData": "Y-2-031 南瓜",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": null,
+    "route": "huibiandademogu/",
+    "soundid": "word7",
+    "soundData": "Y-2-032 土豆",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": null,
+    "route": "huibiandademogu/",
+    "soundid": "word8",
+    "soundData": "Y-2-033 沙滩",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": null,
+    "route": "huibiandademogu/",
+    "soundid": "word9",
+    "soundData": "Y-2-034 海洋",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": null,
+    "route": "huibiandademogu/",
+    "soundid": "word10",
+    "soundData": "Y-2-035 天空",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": null,
+    "route": "huibiandademogu/",
+    "soundid": "word11",
+    "soundData": "Y-2-036 田地",
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  },
+  {
+    "name": null,
+    "route": null,
+    "soundid": null,
+    "soundData": null,
+    "image": null,
+    "imgid": null,
+    "imgData": null
+  }
+]

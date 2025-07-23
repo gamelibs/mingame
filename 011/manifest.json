@@ -1,0 +1,39 @@
+{
+    "scene": {
+        "width": 1080,
+        "height": 1920,
+        "orientation": "portrait",
+        "backgroundColor": "#ffffff",
+        "fps": 30
+    },
+    "compositions": {
+        "loading": {
+            "id": "12AB51DFDAB942FF88C62B7BF520AB4C",
+            "src": "loading.js",
+            "description": "Loading screen composition"
+        },
+        "game": {
+            "id": "994179DFE830400BA68CFA701D2BB3AB",
+            "src": "flygame.js",
+            "description": "Main game composition"
+        }
+    },
+    "initial": ["libs/modules/easeljs.min.js", "libs/modules/tweenjs.min.js", "libs/modules/preloadjs.min.js", "libs/modules/soundjs.min.js"],
+    "game": ["src/utile.js", "loading.js"],
+    "gameconfig": {
+        "scripts": [
+            { "id": "GameServer", "src": "src/Localservices/gameserver.js", "type": "script" },
+            { "id": "flygame", "src": "flygame.js", "type": "script" },
+            { "id": "GameScense", "src": "./src/gamescense.js", "type": "script" }
+        ],
+        "sounds": [
+            { "id": "bgm", "src": "sound/bgm.mp3", "type": "sound" },
+            { "id": "click", "src": "sound/click.mp3", "type": "sound" },
+            { "id": "win", "src": "sound/win.mp3", "type": "sound" }
+        ],
+        "images": [
+            { "id": "bg", "src": "images/background.jpg", "type": "image" },
+            { "id": "logo", "src": "images/logo.png", "type": "image" }
+        ]
+    }
+}

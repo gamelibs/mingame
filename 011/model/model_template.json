@@ -1,0 +1,271 @@
+[
+{
+    "compName": "gl_gameWin",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "gl_fail",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "gl_starBar",
+    "isShow": true,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "gl_listenAgain",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "gl_lookAgain",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "gl_startMc",
+    "isShow": true,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "gl_startMc#TitleLabel",
+    "isShow": true,
+    "playAction": "stop",
+    "label": "",
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "gl_startMc#SubTitle",
+    "isShow": true,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "gl_startMc#BodyLabel",
+    "isShow": true,
+    "playAction": "stop",
+    "label": "",
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "gl_startMc#startBtn",
+    "isShow": true,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "gameID",
+    "isShow": null,
+    "playAction": null,
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": "D2CCC677576B470995D05670C8117A37"
+},
+{
+    "compName": "gameName",
+    "isShow": null,
+    "playAction": null,
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": "huibiandademogu"
+},
+{
+    "compName": "model",
+    "isShow": null,
+    "playAction": null,
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": "KTSZ"
+},
+{
+    "compName": "bg",
+    "isShow": true,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "wuya",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "wuya#stand",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "wuya#run1",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "wuya#run2",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "wuya#run3",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "wuya#run4",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "wuya#run5",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "options",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": null,
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "options#mc1",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": "right",
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "options#mc2",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": "right",
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "options#mc3",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": "right",
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "options#mc4",
+    "isShow": false,
+    "playAction": "stop",
+    "label": null,
+    "soundId": "right",
+    "labelArr": null,
+    "mp3Arr": null,
+    "attr": null
+},
+{
+    "compName": "wordArr",
+    "isShow": null,
+    "playAction": null,
+    "label": null,
+    "soundId": null,
+    "labelArr": ["黄瓜", "西红柿", "芹菜", "白菜", "胡萝卜", "茄子", "南瓜", "土豆", "沙滩", "海洋", "天空", "田地"],
+    "mp3Arr": null,
+    "attr": null
+}]
