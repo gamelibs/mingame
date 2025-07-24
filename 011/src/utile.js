@@ -2,63 +2,91 @@ var utile = utile || {};
 
 /**
  * 查找影片剪辑
+ * @param {Object} mc - 要搜索的容器对象
+ * @param {string} name - 要查找的元件名称
+ * @returns {Object|null} 找到的元件或null
  */
-findMc = function (name, mc) {
-    if (!mc) return null;
-    if (mc.name == name) return mc;
-    // if (mc["children"] && mc.children.length > 0) {
-    //     for (var k in mc.children) {
-    //         var t = findMc(name, mc.children[k]);
-    //         if (t) return t;
-    //     }
-    // }
-    const _mc = null;
-    // 方法1: 直接通过名称查找 _mc
+utile.findMc = function (mc, name) {
+    if (!mc || !name) {
+        console.warn('⚠️ findMc: 参数无效', { mc: !!mc, name });
+        return null;
+    }
+
+    console.log(`🔍 在容器中查找元件: ${name}`);
+
+    // 检查当前元件本身
+    if (mc.name === name) {
+        console.log(`✅ 找到目标元件 (自身): ${name}`);
+        return mc;
+    }
+
+    // 方法1: 直接通过名称查找
     if (mc.getChildByName) {
-        let _mc = this.exportRoot.getChildByName('guide_mc');
-        if (_mc) {
-            console.log('✅ 通过名称找到引导手势: guide_mc');
-            return _mc;
+        const found = mc.getChildByName(name);
+        if (found) {
+            console.log(`✅ 通过 getChildByName 找到元件: ${name}`);
+            return found;
         }
     }
 
-    // 方法2: 遍历查找名称为 guide_mc 的元件
-    if (mc.children) {
+    // 方法2: 遍历查找名称匹配的元件
+    if (mc.children && mc.children.length > 0) {
         for (let child of mc.children) {
-            const _name = child.name || '';
-            if (_name === name) {
-                _mc = child;
-                console.log('✅ 通过遍历找到引导手势: guide_mc');
-                return _mc;
+            const childName = child.name || '';
+            if (childName === name) {
+                console.log(`✅ 通过遍历找到元件: ${name}`);
+                return child;
             }
         }
     }
 
-    // 方法3: 检查构造函数名称是否包含 guide_mc
-    if (mc.children) {
+    // 方法3: 检查构造函数名称
+    if (mc.children && mc.children.length > 0) {
         for (let child of mc.children) {
             const constructorName = child.constructor.name || '';
-            if (constructorName.toLowerCase().includes(name) ||
+            if (constructorName.toLowerCase().includes(name.toLowerCase()) ||
                 constructorName === name) {
-                _mc = child;
-                console.log('✅ 通过构造函数名找到引导手势:', constructorName);
-                return _mc;
+                console.log(`✅ 通过构造函数名找到元件: ${name} (构造函数: ${constructorName})`);
+                return child;
             }
         }
     }
 
+    // 方法4: 递归查找子元件
+    if (mc.children && mc.children.length > 0) {
+        for (let child of mc.children) {
+            const found = utile.findMc(child, name);
+            if (found) {
+                console.log(`✅ 通过递归查找找到元件: ${name}`);
+                return found;
+            }
+        }
+    }
 
+    console.log(`❌ 未找到元件: ${name}`);
+    return null;
 }
 
 /**
-     * 打印可用的子元件名称（用于调试）
-     */
-utile.logAvailableChildren = function () {
+ * 打印可用的子元件名称（用于调试）
+ * @param {Object} mc - 要检查的容器对象
+ */
+utile.logAvailableChildren = function (mc) {
     console.log('🔍 可用的子元件列表:');
-    if (this.exportRoot && this.exportRoot.children) {
-        this.exportRoot.children.forEach((child, index) => {
-            console.log(`  ${index}: name="${child.name || 'unnamed'}", constructor="${child.constructor.name}"`);
+    if (mc && mc.children) {
+        mc.children.forEach((child, index) => {
+            const name = child.name || 'unnamed';
+            const constructor = child.constructor.name || 'unknown';
+            console.log(`  ${index}: name="${name}", constructor="${constructor}"`);
+
+            // 特别标记包含特定关键词的元件
+            if (name.includes('guide') || constructor.includes('guide') ||
+                name.includes('egg') || constructor.includes('egg')) {
+                console.log(`    🎯 这可能是目标元件！`);
+            }
         });
+    } else {
+        console.log('  ❌ 容器为空或没有子元件');
     }
 }
 

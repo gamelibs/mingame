@@ -199,7 +199,7 @@ class GameEngine {
             }
 
             this.applyStageTransform();
-            console.log(`Stage resized: ${stageWidth}x${stageHeight}, scale: ${this.stageScale}, rotation: ${this.stageRotation}`);
+            // console.log(`Stage resized: ${stageWidth}x${stageHeight}, scale: ${this.stageScale}, rotation: ${this.stageRotation}`);
         }
 
         // 添加事件监听
@@ -673,7 +673,7 @@ class GameEngine {
         });
     }
 
-    startGameLogic() {
+    async startGameLogic() {
         console.log('🎮 启动游戏逻辑...');
 
         try {
@@ -716,11 +716,15 @@ class GameEngine {
                     gameConfig: gameConfigData
                 };
 
-                console.log('🎯 准备初始化 GameScense，传递数据:', gameData);
+                // console.log('🎯 准备初始化 GameScense，传递数据:', gameData);
 
-                // 初始化游戏场景
-                window.GameScense.init(gameData);
-                console.log('✅ GameScense 初始化成功');
+                // 初始化游戏场景（异步）
+                try {
+                    await window.GameScense.init(gameData);
+                    console.log('✅ GameScense 初始化成功');
+                } catch (error) {
+                    console.error('❌ GameScense 初始化失败:', error);
+                }
 
             } else {
                 console.error('❌ GameScense 未找到或 init 方法不存在');
@@ -741,7 +745,28 @@ class GameEngine {
 
     async loadCoreGameFiles() {
 
-        const mainJson = this.config.gameconfig
+        const gameConfig = this.config.gameconfig;
+        console.log('🔍 gameConfig:', gameConfig);
+
+        // 将 gameconfig 转换为 preloadjs 期望的数组格式
+        const mainJson = [];
+
+        if (gameConfig && gameConfig.scripts) {
+            mainJson.push(...gameConfig.scripts);
+        }
+        if (gameConfig && gameConfig.sounds) {
+            mainJson.push(...gameConfig.sounds);
+        }
+        if (gameConfig && gameConfig.images) {
+            mainJson.push(...gameConfig.images);
+        }
+
+        console.log('📦 准备加载的资源清单:', mainJson);
+
+        if (mainJson.length === 0) {
+            console.log('⚠️ 没有资源需要加载，直接完成');
+            return Promise.resolve();
+        }
 
         return new Promise((resolve) => {
             const loader = new createjs.LoadQueue(false);

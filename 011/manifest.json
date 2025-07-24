@@ -22,6 +22,8 @@
     "game": ["src/utile.js", "loading.js"],
     "gameconfig": {
         "scripts": [
+            { "id": "OvoAstar4", "src": "src/Localservices/ovoastar4.js", "type": "script" },
+            { "id": "OvoAstar8", "src": "src/Localservices/ovoastar8.js", "type": "script" },
             { "id": "GameServer", "src": "src/Localservices/gameserver.js", "type": "script" },
             { "id": "flygame", "src": "flygame.js", "type": "script" },
             { "id": "GameScense", "src": "./src/gamescense.js", "type": "script" }
