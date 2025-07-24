@@ -212,9 +212,9 @@ class GameServer {
                         y: cellData.y,
                         centerX: cellData.centerX,
                         centerY: cellData.centerY,
-                        type: window.graphType ? window.graphType.open : 0,
-                        walkable: true,
-                        occupied: false
+                        type: cellData.hasEgg ? (window.graphType ? window.graphType.wall : 1) : (window.graphType ? window.graphType.open : 0),
+                        walkable: !cellData.hasEgg,
+                        occupied: cellData.hasEgg
                     };
                 }
             }
@@ -788,48 +788,7 @@ class GameServer {
         };
     }
 
-    /**
-     * 处理蛋元件移动请求
-     * @param {number} fromCellId - 起始格子ID
-     * @param {number} toCellId - 目标格子ID
-     * @returns {Object} 移动结果
-     */
-    processEggMove(fromCellId, toCellId) {
-        console.log(`🔄 处理蛋移动: ${fromCellId} -> ${toCellId}`);
 
-        return new Promise((resolve) => {
-            // 验证移动的有效性
-            const moveResult = this.validateEggMove(fromCellId, toCellId);
-
-            if (moveResult.code === -1) {
-                resolve(moveResult);
-                return;
-            }
-
-            // 生成移动路径
-            const fromPos = this.cellIdToPosition(fromCellId);
-            const toPos = this.cellIdToPosition(toCellId);
-            const path = this.findPath(fromPos, toPos);
-
-            if (path.length === 0) {
-                resolve({
-                    code: -1,
-                    message: "无法找到移动路径"
-                });
-                return;
-            }
-
-            // 返回移动指令
-            resolve({
-                code: 0,
-                step: 2, // 移动步骤
-                fromCellId: fromCellId,
-                toCellId: toCellId,
-                path: path,
-                message: "开始移动"
-            });
-        });
-    }
 
     /**
      * 验证蛋移动的有效性
@@ -858,36 +817,6 @@ class GameServer {
         };
     }
 
-    /**
-     * 移动完成后检查合成条件
-     * @param {number} cellId - 移动到的格子ID
-     * @returns {Object} 合成检查结果
-     */
-    checkEggSynthesis(cellId) {
-        console.log(`🔍 检查格子 ${cellId} 的合成条件`);
-
-        return new Promise((resolve) => {
-            const synthesisResult = this.findSynthesisMatches(cellId);
-
-            if (synthesisResult.matches.length >= 3) {
-                resolve({
-                    code: 0,
-                    step: 3, // 合成步骤
-                    matches: synthesisResult.matches,
-                    eggType: synthesisResult.eggType,
-                    newEggType: synthesisResult.newEggType,
-                    synthesisPosition: synthesisResult.synthesisPosition,
-                    score: synthesisResult.score,
-                    message: "找到合成匹配"
-                });
-            } else {
-                resolve({
-                    code: -1,
-                    message: "没有找到合成匹配"
-                });
-            }
-        });
-    }
 
     /**
      * 查找合成匹配
@@ -974,79 +903,79 @@ class GameServer {
      * @param {Object} gameState - 当前游戏状态
      * @returns {Promise<Object>} 操作结果
      */
-    processEggAction(action, cellId, gameState) {
-        console.log(`🎮 处理蛋操作: ${action}, 格子: ${cellId}`);
+    // processEggAction(action, cellId, gameState) {
+    //     console.log(`🎮 处理蛋操作: ${action}, 格子: ${cellId}`);
 
-        return new Promise((resolve) => {
-            // 如果已经选中了蛋
-            if (gameState.selectedEgg) {
-                // 检查是否点击同一个蛋（取消选择）
-                if (gameState.selectedEgg.cellId === cellId && gameState.selectedEgg.isSelected) {
-                    resolve({
-                        code: 0,
-                        step: 3, // 取消选择
-                        cellId: cellId,
-                        message: "取消选择蛋"
-                    });
-                    return;
-                }
+    //     return new Promise((resolve) => {
+    //         // 如果已经选中了蛋
+    //         if (gameState.selectedEgg) {
+    //             // 检查是否点击同一个蛋（取消选择）
+    //             if (gameState.selectedEgg.cellId === cellId && gameState.selectedEgg.isSelected) {
+    //                 resolve({
+    //                     code: 0,
+    //                     step: 3, // 取消选择
+    //                     cellId: cellId,
+    //                     message: "取消选择蛋"
+    //                 });
+    //                 return;
+    //             }
 
-                // 检查目标位置是否为空（可以移动）
-                if (!gameState.cells[cellId] || !gameState.cells[cellId].hasEgg) {
-                    // 生成移动路径
-                    const fromPos = this.cellIdToPosition(gameState.selectedEgg.cellId);
-                    const toPos = this.cellIdToPosition(cellId);
-                    const path = this.findPath(fromPos, toPos);
+    //             // 检查目标位置是否为空（可以移动）
+    //             if (!gameState.cells[cellId] || !gameState.cells[cellId].hasEgg) {
+    //                 // 生成移动路径
+    //                 const fromPos = this.cellIdToPosition(gameState.selectedEgg.cellId);
+    //                 const toPos = this.cellIdToPosition(cellId);
+    //                 const path = this.findPath(fromPos, toPos);
 
-                    if (path.length === 0) {
-                        resolve({
-                            code: -1,
-                            cellId: gameState.selectedEgg.cellId,
-                            message: "无法找到移动路径"
-                        });
-                        return;
-                    }
+    //                 if (path.length === 0) {
+    //                     resolve({
+    //                         code: -1,
+    //                         cellId: gameState.selectedEgg.cellId,
+    //                         message: "无法找到移动路径"
+    //                     });
+    //                     return;
+    //                 }
 
-                    resolve({
-                        code: 0,
-                        step: 2, // 移动步骤
-                        fromCellId: gameState.selectedEgg.cellId,
-                        toCellId: cellId,
-                        eggType: gameState.selectedEgg.eggType,
-                        path: path,
-                        message: "开始移动蛋"
-                    });
-                    return;
-                } else {
-                    // 目标位置有蛋，切换选择
-                    resolve({
-                        code: 0,
-                        step: 4, // 切换选择
-                        oldCellId: gameState.selectedEgg.cellId,
-                        newCellId: cellId,
-                        message: "切换选择的蛋"
-                    });
-                    return;
-                }
-            } else {
-                // 没有选中蛋，检查点击位置是否有蛋
-                if (gameState.cells[cellId] && gameState.cells[cellId].hasEgg) {
-                    resolve({
-                        code: 0,
-                        step: 1, // 选择蛋
-                        cellId: cellId,
-                        eggType: gameState.cells[cellId].eggType,
-                        message: "选择蛋"
-                    });
-                } else {
-                    resolve({
-                        code: -1,
-                        message: "该位置没有蛋"
-                    });
-                }
-            }
-        });
-    }
+    //                 resolve({
+    //                     code: 0,
+    //                     step: 2, // 移动步骤
+    //                     fromCellId: gameState.selectedEgg.cellId,
+    //                     toCellId: cellId,
+    //                     eggType: gameState.selectedEgg.eggType,
+    //                     path: path,
+    //                     message: "开始移动蛋"
+    //                 });
+    //                 return;
+    //             } else {
+    //                 // 目标位置有蛋，切换选择
+    //                 resolve({
+    //                     code: 0,
+    //                     step: 4, // 切换选择
+    //                     oldCellId: gameState.selectedEgg.cellId,
+    //                     newCellId: cellId,
+    //                     message: "切换选择的蛋"
+    //                 });
+    //                 return;
+    //             }
+    //         } else {
+    //             // 没有选中蛋，检查点击位置是否有蛋
+    //             if (gameState.cells[cellId] && gameState.cells[cellId].hasEgg) {
+    //                 resolve({
+    //                     code: 0,
+    //                     step: 1, // 选择蛋
+    //                     cellId: cellId,
+    //                     eggType: gameState.cells[cellId].eggType,
+    //                     message: "选择蛋"
+    //                 });
+    //             } else {
+    //                 resolve({
+    //                     code: -1,
+    //                     message: "该位置没有蛋"
+    //                 });
+    //             }
+    //         }
+    //     });
+    // }
 
     /**
      * 检查蛋合成条件（类似 getMosterClearList）
@@ -1080,11 +1009,11 @@ class GameServer {
     }
 
     /**
-     * 查找蛋合成匹配（类似 mosterClearSerch）
-     * @param {number} cellId - 起始格子ID
-     * @param {Object} gameState - 游戏状态
-     * @returns {Object|null} 匹配结果
-     */
+ * 查找蛋匹配（用于合成检查）
+ * @param {number} cellId - 检查的格子ID（移动到的目标位置）
+ * @param {Object} gameState - 游戏状态
+ * @returns {Object|null} 匹配结果
+ */
     findEggMatches(cellId, gameState) {
         const cell = gameState.cells[cellId];
         if (!cell || !cell.hasEgg) {
@@ -1097,41 +1026,32 @@ class GameServer {
         const queue = [cellId];
         visited.add(cellId);
 
-        console.log(`🔍 查找类型 ${targetEggType} (${this.getEggTypeName(targetEggType)}) 的相邻蛋...`);
-
         // BFS 查找相邻的相同类型蛋
         while (queue.length > 0) {
             const currentCellId = queue.shift();
             matches.push(currentCellId);
 
-            // 获取相邻格子
             const adjacentCells = this.getAdjacentCells(currentCellId);
-
             for (const adjCellId of adjacentCells) {
                 if (!visited.has(adjCellId)) {
                     const adjCell = gameState.cells[adjCellId];
-
-                    // 检查相邻格子是否有相同类型的蛋
                     if (adjCell && adjCell.hasEgg && adjCell.eggType === targetEggType) {
                         visited.add(adjCellId);
                         queue.push(adjCellId);
-                        console.log(`✅ 找到相邻的相同蛋: 格子 ${adjCellId}`);
                     }
                 }
             }
         }
 
         if (matches.length >= 3) {
-            const newEggType = Math.min(targetEggType + 1, 6); // 最高级别是6
+            const newEggType = Math.min(targetEggType + 1, 6);
             const score = this.calculateSynthesisScore(matches.length, targetEggType);
-
-            console.log(`🎉 找到 ${matches.length} 个 ${this.getEggTypeName(targetEggType)} 蛋，可合成 ${this.getEggTypeName(newEggType)} 蛋`);
 
             return {
                 matches: matches,
                 eggType: targetEggType,
                 newEggType: newEggType,
-                synthesisPosition: cellId,
+                synthesisPosition: cellId,  // 合成位置就是目标位置
                 score: score
             };
         }
@@ -1283,44 +1203,33 @@ class GameServer {
     }
 
     /**
-     * 根据最高解锁等级获取可用蛋类型
-     * @param {number} maxUnlockedEggType - 最高解锁的蛋类型
-     * @returns {Array} 可用蛋类型数组
-     */
+ * 获取可用的蛋类型（基于解锁等级）
+ * @param {number} maxUnlockedEggType - 最高解锁等级
+ * @returns {Array} 可用蛋类型数组
+ */
     getAvailableEggTypes(maxUnlockedEggType) {
         const availableTypes = [];
-
-        // 从0到最高解锁等级的所有类型都可用
         for (let i = 0; i <= Math.min(maxUnlockedEggType, 6); i++) {
             availableTypes.push(i);
         }
-
-        // 如果没有解锁任何类型，至少提供基础类型0
-        if (availableTypes.length === 0) {
-            availableTypes.push(0);
-        }
-
-        console.log(`🔓 可用蛋类型: [${availableTypes}] (最高解锁: ${maxUnlockedEggType})`);
+        console.log(`🎯 可用蛋类型: [${availableTypes.join(', ')}] (解锁到: ${maxUnlockedEggType})`);
         return availableTypes;
     }
 
     /**
-     * 从可用类型中随机选择指定数量的蛋类型
-     * @param {Array} availableTypes - 可用蛋类型数组
-     * @param {number} count - 需要选择的数量
-     * @returns {Array} 选中的蛋类型
-     */
+  * 从可用类型中随机选择蛋类型
+  * @param {Array} availableTypes - 可用蛋类型数组
+  * @param {number} count - 需要的数量
+  * @returns {Array} 随机选择的蛋类型
+  */
     selectRandomEggTypes(availableTypes, count) {
-        const selected = [];
-
+        const selectedTypes = [];
         for (let i = 0; i < count; i++) {
             const randomIndex = Math.floor(Math.random() * availableTypes.length);
-            const selectedType = availableTypes[randomIndex];
-            selected.push(selectedType);
+            selectedTypes.push(availableTypes[randomIndex]);
         }
-
-        console.log(`🎲 随机选择蛋类型: [${selected}]`);
-        return selected;
+        console.log(`🎲 随机选择蛋类型: [${selectedTypes.join(', ')}]`);
+        return selectedTypes;
     }
 
     /**
@@ -1329,7 +1238,7 @@ class GameServer {
      * @param {number} newEggType - 新解锁的蛋等级
      */
     updateMaxUnlockedEggType(userId, newEggType) {
-        const userData = this.getUserData(userId);
+        const userData = this.checkUserStatus(userId);
         if (userData) {
             const currentMax = userData.maxUnlockedEggType || 0;
             if (newEggType > currentMax) {
@@ -1497,7 +1406,7 @@ class GameServer {
             console.log(`🚶 尝试移动蛋到空位置: ${this.selectionState.selectedEgg.cellId} -> ${cellId}`);
 
             // 调用移动处理逻辑
-            const moveResult = this.processEggAction('move', this.selectionState.selectedEgg.cellId, cellId);
+            const moveResult = this.processEggMove(this.selectionState.selectedEgg.cellId, cellId);
 
             if (moveResult.code === 0) {
                 // 移动成功，清除选中状态
@@ -1510,6 +1419,8 @@ class GameServer {
                     toCellId: moveResult.toCellId,
                     path: moveResult.path,
                     eggType: moveResult.eggType,
+                    synthesis: moveResult.synthesis,  // 添加合成数据
+                    newEggs: moveResult.newEggs,      // 添加新蛋数据
                     message: "移动蛋"
                 };
             } else {
@@ -1607,25 +1518,7 @@ class GameServer {
         this.selectionState.isSelected = false;
     }
 
-    /**
-     * 处理蛋操作（移动、合成等）
-     * @param {string} action - 操作类型 ('move', 'synthesize')
-     * @param {number} fromCellId - 起始格子ID
-     * @param {number} toCellId - 目标格子ID
-     * @returns {Object} 操作结果
-     */
-    processEggAction(action, fromCellId, toCellId) {
-        console.log(`🎮 处理蛋操作: ${action}, ${fromCellId} -> ${toCellId}`);
 
-        if (action === 'move') {
-            return this.processEggMove(fromCellId, toCellId);
-        }
-
-        return {
-            code: -1,
-            message: `不支持的操作类型: ${action}`
-        };
-    }
 
     /**
      * 处理蛋移动
@@ -1673,7 +1566,30 @@ class GameServer {
         // 占用目标位置
         this.occupyPosition(toCellId, eggType, piece);
 
-        console.log(`✅ 蛋移动成功: ${fromCellId} -> ${toCellId}`);
+
+        // 5. 检查移动后是否可以合成
+        const synthesisResult = this.findEggMatches(toCellId, { cells: this.mapState.cells });
+
+        let synthesisData = { canSynthesize: false };
+        if (synthesisResult && synthesisResult.matches.length >= 3) {
+            synthesisData = {
+                canSynthesize: true,
+                matches: synthesisResult.matches,
+                eggType: synthesisResult.eggType,
+                newEggType: synthesisResult.newEggType,
+                synthesisPosition: toCellId,  // 合成位置就是移动的目标位置
+                score: synthesisResult.score,
+                removedPositions: synthesisResult.matches.filter(cellId => cellId !== toCellId)  // 需要删除的位置
+            };
+
+            // 如果可以合成，先处理合成逻辑（移除旧蛋，更新地图状态）
+            this.processSynthesisResult(synthesisResult, toCellId);
+        }
+
+        // 6. 无论是否合成都生成新蛋位置（基于最新地图状态）
+        const newEggs = this.generateRandomEggsFromMapState(3);
+
+        console.log(`✅ 蛋移动处理完成: ${fromCellId} -> ${toCellId}`);
 
         return {
             code: 0,
@@ -1681,9 +1597,87 @@ class GameServer {
             toCellId: toCellId,
             path: path,
             eggType: eggType,
-            message: "移动成功"
+            synthesis: synthesisData,
+            newEggs: newEggs,
+            message: "移动处理完成"
         };
     }
+
+    /**
+ * 处理合成结果（更新地图状态）
+ * @param {Object} synthesisResult - 合成结果
+ * @param {number} targetCellId - 移动的目标位置（合成位置）
+ */
+    processSynthesisResult(synthesisResult, targetCellId) {
+        console.log('🎬 处理合成结果，更新地图状态...');
+
+        // 移除被合成的蛋（除了目标位置）
+        for (const cellId of synthesisResult.matches) {
+            if (cellId !== targetCellId) {
+                this.releasePosition(cellId);
+                console.log(`🗑️ 移除合成位置: ${cellId}`);
+            }
+        }
+
+        // 更新目标位置的蛋类型为合成后的新类型
+        const targetCell = this.mapState.cells[targetCellId];
+        if (targetCell) {
+            targetCell.eggType = synthesisResult.newEggType;
+            console.log(`🥚 目标位置 ${targetCellId} 更新为 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋`);
+        }
+
+        console.log(`✅ 合成处理完成，生成 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋`);
+    }
+
+
+    /**
+ * 从地图状态生成随机蛋
+ * @param {number} count - 生成数量
+ * @returns {Array} 生成的蛋数据
+ */
+    generateRandomEggsFromMapState(count = 3) {
+        console.log(`🎲 从地图状态生成 ${count} 个随机蛋...`);
+
+        // 从地图状态获取空闲位置
+        const emptyCells = Array.from(this.mapState.emptyCells);
+
+        if (emptyCells.length < count) {
+            console.warn(`⚠️ 空闲位置不足，需要 ${count} 个，只有 ${emptyCells.length} 个`);
+            count = emptyCells.length;
+        }
+
+        // 获取用户解锁状态
+        const userStatus = this.checkUserStatus('currentUser');
+        const maxUnlockedEggType = userStatus ? (userStatus.maxUnlockedEggType || 0) : 0;
+
+        // 获取可用蛋类型并随机选择
+        const availableTypes = this.getAvailableEggTypes(maxUnlockedEggType);
+        const selectedTypes = this.selectRandomEggTypes(availableTypes, count);
+
+        const newEggs = [];
+        for (let i = 0; i < count; i++) {
+            // 随机选择位置
+            const randomIndex = Math.floor(Math.random() * emptyCells.length);
+            const cellId = emptyCells.splice(randomIndex, 1)[0];
+
+            // 使用预选的蛋类型
+            const eggType = selectedTypes[i];
+
+            // 预留位置
+            this.occupyPosition(cellId, eggType);
+
+            newEggs.push({
+                cellId: cellId,
+                eggType: eggType,
+                eggName: this.getEggTypeName(eggType)
+            });
+
+            console.log(`🥚 在格子 ${cellId} 生成 ${this.getEggTypeName(eggType)} 蛋 (egg_mc${eggType})`);
+        }
+
+        return newEggs;
+    }
+
 
     /**
      * 寻找移动路径
@@ -1693,6 +1687,9 @@ class GameServer {
      */
     findMovePath(fromCellId, toCellId) {
         console.log(`🔍 寻找移动路径: ${fromCellId} -> ${toCellId}`);
+
+        // 更新寻路网格状态（同步当前地图状态）
+        this.updatePathfindingGrid();
 
         // 转换为行列坐标
         const fromPos = this.getCellPosition(fromCellId);
@@ -1715,6 +1712,34 @@ class GameServer {
         }
     }
 
+
+    /**
+     * 更新寻路网格状态
+     */
+    updatePathfindingGrid() {
+        if (!this.pathfindingGrid || !this.pathfindingGrid.nodes) {
+            console.warn('⚠️ 寻路网格未初始化');
+            return;
+        }
+
+        const { nodes, rows, cols } = this.pathfindingGrid;
+
+        // 遍历所有格子，更新可通行状态
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                const cellId = this.getCellId(i, j);
+                const cellData = this.mapState.cells[cellId];
+                const node = nodes[i][j];
+
+                // 根据地图状态更新节点
+                node.walkable = !cellData.hasEgg;
+                node.occupied = cellData.hasEgg;
+                node.type = cellData.hasEgg ? (window.graphType ? window.graphType.wall : 1) : (window.graphType ? window.graphType.open : 0);
+            }
+        }
+
+        console.log('🔄 寻路网格状态已更新');
+    }
     /**
      * 根据格子ID获取位置坐标
      * @param {number} cellId - 格子ID

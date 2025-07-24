@@ -202,81 +202,6 @@ class GameScense {
         });
     }
 
-    // 删除了数据状态管理方法，改为纯渲染模式
-
-    /**
-     * 初始化寻路系统
-     */
-    async initPathfinding() {
-        console.log('🗺️ 初始化寻路系统...');
-
-        try {
-            // 使用棋盘配置初始化寻路网格
-            const pathfindingData = await window.GameServer.initPathfindingGrid(
-                this.chessboard.rows,    // 8 行
-                this.chessboard.cols,    // 6 列
-                this.chessboard.cellWidth, // 150 格子大小
-                4  // 4方向寻路
-            );
-
-            console.log('✅ 寻路系统初始化完成:', pathfindingData.config);
-
-            // 同步棋盘状态到寻路网格
-            this.syncChessboardToPathfinding();
-
-        } catch (error) {
-            console.error('❌ 寻路系统初始化失败:', error);
-        }
-    }
-
-    /**
-     * 同步棋盘状态到寻路网格
-     */
-    syncChessboardToPathfinding() {
-        console.log('🔄 同步棋盘状态到寻路网格...');
-
-        // 遍历所有格子，更新寻路网格的可通行状态
-        for (let row = 0; row < this.chessboard.rows; row++) {
-            for (let col = 0; col < this.chessboard.cols; col++) {
-                const cellId = this.getCellId(row, col);
-                const cellData = this.getCellData(cellId);
-
-                if (cellData) {
-                    // 如果格子被占用，设置为不可通行
-                    const walkable = cellData.isEmpty;
-                    const occupied = !cellData.isEmpty;
-
-                    window.GameServer.updateGridCell(row, col, walkable, occupied);
-                }
-            }
-        }
-
-        console.log('✅ 棋盘状态同步完成');
-    }
-
-    /**
-     * 为元件寻找移动路径
-     * @param {number} fromCellId - 起始格子ID
-     * @param {number} toCellId - 目标格子ID
-     * @returns {Array} 路径数组
-     */
-    findMovePath(fromCellId, toCellId) {
-        const fromPos = this.getRowCol(fromCellId);
-        const toPos = this.getRowCol(toCellId);
-
-        console.log(`🔍 寻找移动路径: 格子${fromCellId}(${fromPos.row},${fromPos.col}) -> 格子${toCellId}(${toPos.row},${toPos.col})`);
-
-        const path = window.GameServer.findPath(fromPos, toPos);
-
-        if (path.length > 0) {
-            console.log(`📍 找到路径，步数: ${path.length}`);
-            // 转换路径格式为格子ID数组
-            return path.map(step => this.getCellId(step.row, step.col));
-        } else {
-            console.log('❌ 未找到可行路径');
-            return [];
-        }
-    }
 
     /**
      * 移动元件到指定位置（带寻路动画）
@@ -314,7 +239,7 @@ class GameScense {
         }
 
         let currentIndex = 0;
-        const moveSpeed = 300; // 每步移动时间(毫秒)
+        const moveSpeed = 200; // 每步移动时间(毫秒)
 
         const moveToNextCell = () => {
             if (currentIndex >= pathCellIds.length) {
@@ -392,7 +317,7 @@ class GameScense {
             return cellId;
         }
 
-        console.log(`❌ 超出范围: 行${row}(0-${this.chessboard.rows-1}), 列${col}(0-${this.chessboard.cols-1})`);
+        console.log(`❌ 超出范围: 行${row}(0-${this.chessboard.rows - 1}), 列${col}(0-${this.chessboard.cols - 1})`);
         return -1; // 无效位置
     }
 
@@ -411,26 +336,6 @@ class GameScense {
         };
     }
 
-    /**
-     * 移动元件到指定位置（纯渲染操作）
-     */
-    moveElementToPosition(piece, cellId) {
-        if (!piece) {
-            console.error(`❌ 元件为空，无法移动到格子 ${cellId}`);
-            return false;
-        }
-
-        const position = this.getCellPosition(cellId);
-        piece.x = position.centerX;
-        piece.y = position.centerY;
-        piece.cellId = cellId;
-
-        // 更新本地映射
-        this.chessboard.pieces.set(cellId, piece);
-
-        console.log(`📍 移动元件到格子 ${cellId}`);
-        return true;
-    }
 
     /**
      * 移除指定格子的元件（纯渲染操作）
@@ -454,38 +359,6 @@ class GameScense {
         }
         return null;
     }
-
-    /**
-     * 获取相邻格子
-     */
-    getAdjacentCells(cellId) {
-        const { row, col } = this.getRowCol(cellId);
-        const adjacent = [];
-
-        // 上下左右四个方向
-        const directions = [
-            { dr: -1, dc: 0 },  // 上
-            { dr: 1, dc: 0 },   // 下
-            { dr: 0, dc: -1 },  // 左
-            { dr: 0, dc: 1 }    // 右
-        ];
-
-        directions.forEach(({ dr, dc }) => {
-            const newRow = row + dr;
-            const newCol = col + dc;
-
-            if (newRow >= 0 && newRow < this.chessboard.rows &&
-                newCol >= 0 && newCol < this.chessboard.cols) {
-                adjacent.push(this.getCellId(newRow, newCol));
-            }
-        });
-
-        return adjacent;
-    }
-
-
-    // 删除了前端格子初始化，格子数据完全由后端 GameServer 管理
-
 
 
     /**
@@ -636,37 +509,6 @@ class GameScense {
         }
     }
 
-
-
-    /**
-     * 根据游戏数据初始化棋盘
-     */
-    initGameBoard() {
-        if (!this.gameData || !this.gameData.success || !this.gameData.data) {
-            console.warn('⚠️ 没有游戏数据，跳过棋盘初始化');
-            return;
-        }
-
-        const { eggSeat, eggType, pointSeat } = this.gameData.data;
-
-        console.log('🥚 初始化蛋的位置:', eggSeat);
-        console.log('🎨 蛋的类型:', eggType);
-        console.log('📍 指示位置:', pointSeat);
-        console.log('📋 游戏信息:', {
-            isNewUser: this.gameData.isNewUser,
-            level: this.gameData.level,
-            step: this.gameData.step
-        });
-
-        // 清空现有棋盘
-        this.clearBoard();
-
-        // 放置蛋
-        this.placeEggs(eggSeat, eggType);
-
-        // 显示指示位置
-        this.showPointSeats(pointSeat);
-    }
 
     /**
      * 清空棋盘
@@ -1013,7 +855,7 @@ class GameScense {
         return null;
     }
 
-  
+
 
     /**
      * 移动引导手势到目标位置
@@ -1506,8 +1348,9 @@ class GameScense {
         // 添加选中效果
         const cellData = this.getCellData(result.cellId);
         if (cellData && !cellData.isEmpty) {
-            this.addSelectionEffect(cellData.piece);
-            this.selectedPiece = cellData.piece;
+            const piece = this.chessboard.pieces.get(result.cellId);  // 直接从前端获取
+            this.addSelectionEffect(piece);
+            this.selectedPiece = piece;
             this.selectedCellId = result.cellId;
         }
     }
@@ -1518,22 +1361,32 @@ class GameScense {
     async handleStep2(result) {
         console.log(`🚶 移动蛋: ${result.fromCellId} -> ${result.toCellId}`);
 
-        const fromCellData = this.getCellData(result.fromCellId);
-        if (!fromCellData || fromCellData.isEmpty) {
-            console.error('❌ 起始位置没有蛋');
+        // 直接从前端获取蛋元件，不依赖后端数据
+        const piece = this.chessboard.pieces.get(result.fromCellId);
+
+        if (!piece) {
+            console.error('❌ 前端找不到蛋元件:', result.fromCellId);
             return;
         }
-
-        const piece = fromCellData.piece;
-
         // 移除选中效果
         this.removeSelectionEffect(piece);
 
         // 执行移动动画
         await this.executeEggMovement(piece, result.fromCellId, result.toCellId, result.path);
 
-        // 移动完成后检查合成
-        await this.checkEggSynthesisAfterMove(result.toCellId);
+        // 检查是否有合成
+        if (result.synthesis && result.synthesis.canSynthesize) {
+            console.log('🎉 移动后可以合成，开始合成动画');
+            await this.executeSynthesisAnimation(result.synthesis);
+        }
+
+        // 如果有新蛋数据，创建新蛋
+        // if (result.newEggs && result.newEggs.length > 0) {
+        //     console.log('🥚 创建新蛋');
+        //     for (const eggData of result.newEggs) {
+        //         await this.createEggAtPosition(eggData.cellId, eggData.eggType);
+        //     }
+        // }
 
         // 清除选中状态
         this.gameDataState.selectedEgg = null;
@@ -1594,15 +1447,20 @@ class GameScense {
      */
     async executeEggMovement(piece, fromCellId, toCellId, path) {
         console.log(`🚶 执行蛋移动动画: ${fromCellId} -> ${toCellId}`);
+        console.log('🔍 原始路径数据:', path);
+
+        // 修正路径转换：A* 返回的是 {x: row, y: col} 格式
+        const pathCellIds = path.map(step => this.getCellId(step.x, step.y));
+        console.log('🔍 转换后的路径格子ID:', pathCellIds);
 
         return new Promise((resolve) => {
-            // 从原位置移除
-            this.removeElement(fromCellId);
+            // 只更新映射关系，不移除元件
+            this.chessboard.pieces.delete(fromCellId);
 
             // 执行路径动画
-            this.animateAlongPath(piece, path.map(step => this.getCellId(step.row, step.col)), () => {
-                // 移动完成，放置到目标位置
-                this.moveElementToPosition(piece, toCellId);
+            this.animateAlongPath(piece, pathCellIds, (success) => {
+                console.log('🔍 动画完成，成功:', success);
+
 
                 console.log('✅ 蛋移动完成');
                 resolve();
@@ -1649,11 +1507,11 @@ class GameScense {
         // 收集要合成的蛋元件
         const eggsToSynthesize = [];
         for (const cellId of matches) {
-            const cellData = this.getCellData(cellId);
-            if (cellData && !cellData.isEmpty) {
+            const piece = this.chessboard.pieces.get(cellId);  // 直接从前端获取
+            if (piece) {
                 eggsToSynthesize.push({
                     cellId: cellId,
-                    piece: cellData.piece
+                    piece: piece
                 });
             }
         }
@@ -1675,44 +1533,56 @@ class GameScense {
         console.log(`✅ 合成完成！${window.GameServer.getEggTypeName(eggType)} -> ${window.GameServer.getEggTypeName(newEggType)}`);
     }
 
+
     /**
      * 播放蛋收集动画
      * @param {Array} eggs - 要收集的蛋数组
      * @param {number} targetCellId - 目标位置
      */
     async playEggCollectionAnimation(eggs, targetCellId) {
-        const targetCellData = this.getCellData(targetCellId);
-        if (!targetCellData) return;
+        const targetPosition = this.getCellPosition(targetCellId);
+        if (!targetPosition) {
+            console.error(`❌ 无法获取目标位置 ${targetCellId} 的坐标`);
+            return;
+        }
+
+        console.log(`🎯 合成目标位置 ${targetCellId}: (${targetPosition.centerX}, ${targetPosition.centerY})`);
 
         const promises = [];
 
         for (const eggData of eggs) {
             if (eggData.cellId === targetCellId) {
-                // 目标位置的蛋播放特效
-                this.addSynthesisEffect(eggData.piece);
+                // 目标位置的蛋播放特效，不移动
+                if (eggData.piece) {
+                    this.addSynthesisEffect(eggData.piece);
+                }
                 continue;
             }
 
             // 其他蛋移动到目标位置
-            const promise = new Promise((resolve) => {
-                createjs.Tween.get(eggData.piece)
-                    .to({
-                        x: targetCellData.centerX,
-                        y: targetCellData.centerY,
-                        scaleX: 0.5,
-                        scaleY: 0.5,
-                        alpha: 0.8
-                    }, 500, createjs.Ease.quadInOut)
-                    .call(() => {
-                        // 移除蛋元件和状态
-                        this.gamebox.removeChild(eggData.piece);
-                        this.removePiece(eggData.cellId);
-                        this.clearGameState(eggData.cellId);
-                        resolve();
-                    });
-            });
+            if (eggData.piece) {
+                console.log(`🚶 蛋从格子 ${eggData.cellId} 移动到目标位置 ${targetCellId}`);
 
-            promises.push(promise);
+                const promise = new Promise((resolve) => {
+                    createjs.Tween.get(eggData.piece)
+                        .to({
+                            x: targetPosition.centerX,
+                            y: targetPosition.centerY,
+                            scaleX: 0.5,
+                            scaleY: 0.5,
+                            alpha: 0.8
+                        }, 500, createjs.Ease.quadInOut)
+                        .call(() => {
+                            // 移除蛋元件和状态
+                            this.gamebox.removeChild(eggData.piece);
+                            this.chessboard.pieces.delete(eggData.cellId);
+                            console.log(`🗑️ 移除格子 ${eggData.cellId} 的蛋元件`);
+                            resolve();
+                        });
+                });
+
+                promises.push(promise);
+            }
         }
 
         await Promise.all(promises);
@@ -1725,11 +1595,23 @@ class GameScense {
      * @param {number} newEggType - 新蛋类型
      */
     async createSynthesizedEgg(cellId, newEggType) {
-        console.log(`🥚 创建合成蛋: 格子 ${cellId}, 类型 ${newEggType}`);
+        console.log(`🥚 在格子 ${cellId} 创建类型 ${newEggType} 的合成蛋 (egg_mc${newEggType})`);
 
-        // 移除原来的蛋
-        this.removePiece(cellId);
-        this.clearGameState(cellId);
+        // 获取正确的位置坐标
+        const position = this.getCellPosition(cellId);
+        if (!position) {
+            console.error(`❌ 无法获取格子 ${cellId} 的位置坐标`);
+            return;
+        }
+
+        console.log(`📍 合成蛋位置: 格子${cellId} -> (${position.centerX}, ${position.centerY})`);
+
+        // 移除原来的蛋（如果存在）
+        const oldPiece = this.chessboard.pieces.get(cellId);
+        if (oldPiece) {
+            this.gamebox.removeChild(oldPiece);
+            this.chessboard.pieces.delete(cellId);
+        }
 
         // 创建新蛋
         const newEgg = this.getEggFromFlygame(newEggType);
@@ -1737,16 +1619,23 @@ class GameScense {
             newEgg.eggType = newEggType;
             newEgg.cellId = cellId;
 
+            // 设置正确位置
+            newEgg.x = position.centerX;
+            newEgg.y = position.centerY;
+
             // 添加到 gamebox
             this.gamebox.addChild(newEgg);
 
-            // 放置到格子中
-            this.moveElementToPosition(newEgg, cellId);
+            // 更新映射
+            this.chessboard.pieces.set(cellId, newEgg);
 
             // 播放合成特效
             this.playSynthesisEffect(newEgg);
 
-            console.log(`✅ 成功创建 ${window.GameServer.getEggTypeName(newEggType)} 蛋`);
+            // 显示合成信息
+            this.showSynthesisInfo(newEggType);
+
+            console.log(`✅ 成功创建 ${this.getEggTypeName(newEggType)} 蛋 (egg_mc${newEggType})`);
         }
     }
 
@@ -1792,6 +1681,26 @@ class GameScense {
             this.playEggAppearAnimation(egg);
         }
     }
+    /**
+        * 移动元件到指定位置（纯渲染操作）
+        */
+    moveElementToPosition(piece, cellId) {
+        if (!piece) {
+            console.error(`❌ 元件为空，无法移动到格子 ${cellId}`);
+            return false;
+        }
+
+        const position = this.getCellPosition(cellId);
+        piece.x = position.centerX;
+        piece.y = position.centerY;
+        piece.cellId = cellId;
+
+        // 更新本地映射
+        this.chessboard.pieces.set(cellId, piece);
+
+        console.log(`📍 移动元件到格子 ${cellId}`);
+        return true;
+    }
 
     /**
      * 播放蛋出现动画
@@ -1806,17 +1715,6 @@ class GameScense {
             .to({ scaleX: 1, scaleY: 1, alpha: 1 }, 300, createjs.Ease.backOut);
     }
 
-    /**
-     * 更新分数
-     * @param {number} score - 获得的分数
-     */
-    updateScore(score) {
-        this.gameDataState.score += score;
-        console.log(`📊 获得分数: +${score}, 总分: ${this.gameDataState.score}`);
-
-        // 这里可以更新UI显示
-        // this.updateScoreDisplay(this.gameState.score);
-    }
 
     /**
      * 引导点击成功处理
@@ -1867,74 +1765,7 @@ class GameScense {
         this.addSelectionEffect(this.selectedPiece);
     }
 
-    /**
-     * 移动选中的元件到目标位置
-     */
-    moveSelectedPieceToTarget(targetCellId) {
-        if (!this.selectedPiece || this.selectedCellId === null) {
-            console.warn('⚠️ 没有选中的元件');
-            return;
-        }
 
-        const targetCellData = this.getCellData(targetCellId);
-        if (!targetCellData || !targetCellData.isEmpty) {
-            console.warn(`⚠️ 目标格子 ${targetCellId} 不可用`);
-            return;
-        }
-
-        console.log(`🚶 开始移动元件: 格子${this.selectedCellId} -> 格子${targetCellId}`);
-
-        // 移除选中效果
-        this.removeSelectionEffect(this.selectedPiece);
-
-        // 保存选中的元件引用（在移动开始前）
-        const pieceToMove = this.selectedPiece;
-        const fromCellId = this.selectedCellId;
-
-        console.log(`🔍 开始移动: piece=${pieceToMove}, from=${fromCellId}, to=${targetCellId}`);
-
-        if (!pieceToMove) {
-            console.error('❌ 没有选中的元件可移动');
-            return;
-        }
-
-        // 先从原位置移除元件
-        this.removePiece(fromCellId);
-
-        // 使用寻路移动元件
-        this.moveElementWithPathfinding(
-            pieceToMove,
-            fromCellId,
-            targetCellId,
-            async (success) => {
-                if (success) {
-                    console.log('✅ 元件移动完成');
-
-                    // 放置到目标位置
-                    const placementSuccess = this.placePiece(targetCellId, pieceToMove);
-
-                    if (!placementSuccess) {
-                        console.error('❌ 放置元件失败');
-                        // 恢复到原位置
-                        this.placePiece(fromCellId, pieceToMove);
-                        return;
-                    }
-
-                    // 清除选中状态
-                    this.clearSelection();
-
-                    // 检查合成条件
-                    await this.checkAndProcessSynthesis(targetCellId);
-                } else {
-                    console.log('❌ 元件移动失败');
-                    // 恢复到原位置
-                    this.placePiece(fromCellId, pieceToMove);
-                    // 恢复选中效果
-                    this.addSelectionEffect(pieceToMove);
-                }
-            }
-        );
-    }
 
     /**
      * 添加选中效果
@@ -1995,109 +1826,6 @@ class GameScense {
     }
 
     /**
-     * 检查并处理合成
-     * @param {number} cellId - 移动到的格子ID
-     */
-    async checkAndProcessSynthesis(cellId) {
-        console.log(`🔍 检查格子 ${cellId} 的合成条件...`);
-
-        try {
-            // 查找相邻的相同类型蛋
-            const synthesisData = this.findEggSynthesisMatches(cellId);
-
-            if (synthesisData.matches.length >= 3) {
-                console.log(`🎉 找到 ${synthesisData.matches.length} 个相同蛋，开始合成！`);
-                console.log('合成位置:', synthesisData.matches);
-
-                // 执行合成动画
-                await this.processSynthesisAnimation(synthesisData);
-            } else {
-                console.log('❌ 没有找到足够的相同蛋进行合成');
-            }
-        } catch (error) {
-            console.error('❌ 合成检查失败:', error);
-        }
-    }
-
-    /**
-     * 查找蛋合成匹配
-     * @param {number} cellId - 检查的格子ID
-     * @returns {Object} 匹配结果
-     */
-    findEggSynthesisMatches(cellId) {
-        const cellData = this.getCellData(cellId);
-        if (!cellData || cellData.isEmpty) {
-            return { matches: [], eggType: null };
-        }
-
-        const targetEggType = cellData.piece.eggType;
-        const matches = [];
-        const visited = new Set();
-        const queue = [cellId];
-        visited.add(cellId);
-
-        console.log(`🔍 查找类型 ${targetEggType} 的相邻蛋...`);
-
-        // BFS 查找相邻的相同类型蛋
-        while (queue.length > 0) {
-            const currentCellId = queue.shift();
-            matches.push(currentCellId);
-
-            // 获取相邻格子（四个方向）
-            const adjacentCells = this.getAdjacentCellIds(currentCellId);
-
-            for (const adjCellId of adjacentCells) {
-                if (!visited.has(adjCellId)) {
-                    const adjCellData = this.getCellData(adjCellId);
-
-                    // 检查相邻格子是否有相同类型的蛋
-                    if (adjCellData && !adjCellData.isEmpty &&
-                        adjCellData.piece.eggType === targetEggType) {
-                        visited.add(adjCellId);
-                        queue.push(adjCellId);
-                        console.log(`✅ 找到相邻的相同蛋: 格子 ${adjCellId}`);
-                    }
-                }
-            }
-        }
-
-        return {
-            matches: matches,
-            eggType: targetEggType,
-            newEggType: targetEggType + 1, // 合成后升级
-            synthesisPosition: cellId // 合成位置（保留一个蛋的位置）
-        };
-    }
-
-    /**
-     * 获取相邻格子ID（四个方向）
-     * @param {number} cellId - 格子ID
-     * @returns {Array} 相邻格子ID数组
-     */
-    getAdjacentCellIds(cellId) {
-        const { row, col } = this.getRowCol(cellId);
-        const adjacent = [];
-
-        // 四个方向：上、下、左、右
-        const directions = [
-            [-1, 0], [1, 0], [0, -1], [0, 1]
-        ];
-
-        for (const [dRow, dCol] of directions) {
-            const newRow = row + dRow;
-            const newCol = col + dCol;
-
-            if (newRow >= 0 && newRow < this.chessboard.rows &&
-                newCol >= 0 && newCol < this.chessboard.cols) {
-                const adjCellId = this.getCellId(newRow, newCol);
-                adjacent.push(adjCellId);
-            }
-        }
-
-        return adjacent;
-    }
-
-    /**
      * 处理合成动画
      * @param {Object} synthesisData - 合成数据
      */
@@ -2126,7 +1854,7 @@ class GameScense {
         await this.createSynthesizedEgg(synthesisPosition, newEggType);
 
         // 4. 更新分数
-        this.updateScore(matches.length, eggType);
+        // this.updateScore(matches.length, eggType);
 
         console.log('✅ 合成完成！');
     }
@@ -2245,10 +1973,15 @@ class GameScense {
     }
 
     /**
-     * 添加合成特效
-     * @param {Object} piece - 蛋元件
-     */
+  * 添加合成特效
+  * @param {Object} piece - 蛋元件
+  */
     addSynthesisEffect(piece) {
+        if (!piece) {
+            console.warn('⚠️ 蛋元件为空，无法添加合成特效');
+            return;
+        }
+
         // 创建发光效果
         const glowEffect = new createjs.Shape();
         glowEffect.graphics.beginRadialGradientFill(
@@ -2292,19 +2025,22 @@ class GameScense {
      * @param {number} eggCount - 合成的蛋数量
      * @param {number} eggType - 蛋类型
      */
-    updateScore(eggCount, eggType) {
-        const baseScore = 10;
-        const typeBonus = eggType * 5;
-        const countBonus = (eggCount - 3) * 5; // 超过3个的额外奖励
-        const totalScore = baseScore + typeBonus + countBonus;
+    updateScore(score) {
+        // 确保分数是数字
+        const validScore = typeof score === 'number' && !isNaN(score) ? score : 0;
 
-        console.log(`📊 获得分数: ${totalScore} (基础:${baseScore} + 类型奖励:${typeBonus} + 数量奖励:${countBonus})`);
+        if (!this.gameDataState.score) {
+            this.gameDataState.score = 0;
+        }
 
-        // 这里可以更新UI显示分数
-        // this.updateScoreDisplay(totalScore);
+        this.gameDataState.score += validScore;
+        console.log(`📊 获得分数: +${validScore}, 总分: ${this.gameDataState.score}`);
+
+        // 这里可以更新UI显示
+        // this.updateScoreDisplay(this.gameDataState.score);
     }
 
-   
+
 
     /**
      * 选中或移除元件
@@ -2389,155 +2125,7 @@ class GameScense {
         return this.gamebox;
     }
 
-    /**
-     * 调试初始化状态
-     */
-    debugInitializationState() {
-        console.log('🔍 调试初始化状态:');
-        console.log('  - chessboard:', this.chessboard);
-        console.log('  - gameDataState:', this.gameDataState);
-        console.log('  - gamebox:', this.gamebox);
-        console.log('  - gameData:', this.gameData);
 
-        if (this.chessboard) {
-            console.log('  - chessboard.pieces:', this.chessboard.pieces);
-            console.log('  - chessboard.pieces.size:', this.chessboard.pieces.size);
-        }
-
-        if (window.GameServer) {
-            console.log('  - GameServer.mapState:', window.GameServer.mapState);
-            console.log('  - GameServer.mapState.isInitialized:', window.GameServer.mapState.isInitialized);
-        }
-    }
-
-    /**
-     * 测试点击交互逻辑
-     */
-    testClickInteraction() {
-        console.log('🧪 测试点击交互逻辑...');
-
-        // 1. 测试点击空位置
-        console.log('1️⃣ 测试点击空位置...');
-        this.handleCellClick(0);
-
-        setTimeout(() => {
-            // 2. 测试选择蛋
-            console.log('2️⃣ 测试选择蛋...');
-            this.handleCellClick(7); // 假设位置7有蛋
-
-            setTimeout(() => {
-                // 3. 测试取消选择
-                console.log('3️⃣ 测试取消选择...');
-                this.handleCellClick(7); // 再次点击同一个蛋
-
-                setTimeout(() => {
-                    // 4. 测试切换选择
-                    console.log('4️⃣ 测试切换选择...');
-                    this.handleCellClick(7);  // 先选择
-                    setTimeout(() => {
-                        this.handleCellClick(44); // 切换到另一个蛋
-                        console.log('✅ 点击交互测试完成');
-                    }, 1000);
-                }, 1000);
-            }, 1000);
-        }, 1000);
-    }
-
-    /**
-     * 获取当前选择状态（调试用）
-     */
-    getSelectionInfo() {
-        const serverState = window.GameServer.getSelectionState();
-        const frontendState = {
-            selectedPiece: this.selectedPiece,
-            selectedCellId: this.selectedCellId
-        };
-
-        console.log('🔍 选择状态信息:');
-        console.log('  后端状态:', serverState);
-        console.log('  前端状态:', frontendState);
-
-        return { serverState, frontendState };
-    }
-
-
-    /**
-     * 验证前后端配置一致性
-     */
-    verifyConfigConsistency() {
-        console.log('🔍 验证前后端配置一致性...');
-
-        const serverMapInfo = window.GameServer.getMapStateInfo();
-        const frontendConfig = this.chessboard;
-
-        console.log('📊 后端配置:', serverMapInfo.config);
-        console.log('📊 前端配置:', frontendConfig);
-
-        // 检查关键配置是否一致
-        const checks = [
-            { name: 'rows', server: serverMapInfo.config.rows, frontend: frontendConfig.rows },
-            { name: 'cols', server: serverMapInfo.config.cols, frontend: frontendConfig.cols },
-            { name: 'cellWidth', server: serverMapInfo.config.cellWidth, frontend: frontendConfig.cellWidth },
-            { name: 'cellHeight', server: serverMapInfo.config.cellHeight, frontend: frontendConfig.cellHeight },
-            { name: 'offsetX', server: serverMapInfo.config.offsetX, frontend: frontendConfig.offsetX },
-            { name: 'offsetY', server: serverMapInfo.config.offsetY, frontend: frontendConfig.offsetY }
-        ];
-
-        let allConsistent = true;
-        checks.forEach(check => {
-            const isConsistent = check.server === check.frontend;
-            console.log(`  ${check.name}: ${isConsistent ? '✅' : '❌'} 后端=${check.server}, 前端=${check.frontend}`);
-            if (!isConsistent) allConsistent = false;
-        });
-
-        if (allConsistent) {
-            console.log('✅ 前后端配置完全一致');
-        } else {
-            console.error('❌ 前后端配置不一致，需要检查');
-        }
-
-        return allConsistent;
-    }
-
-    /**
-     * 测试蛋移动功能
-     */
-    testEggMovement() {
-        console.log('🧪 测试蛋移动功能...');
-
-        // 1. 先选择一个蛋
-        console.log('1️⃣ 选择蛋...');
-        this.handleCellClick(7); // 假设位置7有蛋
-
-        setTimeout(() => {
-            // 2. 点击空位置尝试移动
-            console.log('2️⃣ 尝试移动到空位置...');
-            this.handleCellClick(13); // 假设位置13是空的
-
-            setTimeout(() => {
-                console.log('✅ 蛋移动测试完成');
-            }, 3000); // 等待动画完成
-        }, 1000);
-    }
-
-    /**
-     * 获取移动相关状态信息（调试用）
-     */
-    getMoveStateInfo() {
-        const serverSelection = window.GameServer.getSelectionState();
-        const serverMapInfo = window.GameServer.getMapStateInfo();
-
-        console.log('🔍 移动状态信息:');
-        console.log('  选择状态:', serverSelection);
-        console.log('  地图占用情况:', serverMapInfo.occupiedCells);
-        console.log('  空闲位置数:', serverMapInfo.emptyCells);
-        console.log('  前端选中:', {
-            selectedPiece: this.selectedPiece,
-            selectedCellId: this.selectedCellId
-        });
-
-        return { serverSelection, serverMapInfo };
-    }
 }
 
 // 直接创建全局对象，避免类名冲突
