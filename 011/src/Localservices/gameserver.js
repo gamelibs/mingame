@@ -1419,9 +1419,10 @@ class GameServer {
                     toCellId: moveResult.toCellId,
                     path: moveResult.path,
                     eggType: moveResult.eggType,
+                    positionsToDelete: moveResult.positionsToDelete, // 添加需要删除的位置
                     synthesis: moveResult.synthesis,  // 添加合成数据
                     newEggs: moveResult.newEggs,      // 添加新蛋数据
-                    message: "移动蛋"
+                    message: "点击空位置，移动蛋"
                 };
             } else {
                 // 移动失败
@@ -1570,6 +1571,7 @@ class GameServer {
         // 5. 检查移动后是否可以合成
         const synthesisResult = this.findEggMatches(toCellId, { cells: this.mapState.cells });
 
+        let positionsToDelete = [fromCellId]; // 默认只删除起始位置
         let synthesisData = { canSynthesize: false };
         if (synthesisResult && synthesisResult.matches.length >= 3) {
             synthesisData = {
@@ -1578,9 +1580,20 @@ class GameServer {
                 eggType: synthesisResult.eggType,
                 newEggType: synthesisResult.newEggType,
                 synthesisPosition: toCellId,  // 合成位置就是移动的目标位置
-                score: synthesisResult.score,
-                removedPositions: synthesisResult.matches.filter(cellId => cellId !== toCellId)  // 需要删除的位置
+                score: synthesisResult.score
+
             };
+
+            // 如果可以合成，需要删除所有参与合成的位置（除了目标位置）
+            positionsToDelete = synthesisResult.matches.filter(cellId => cellId !== toCellId);
+
+            // 添加起始位置（如果不在合成列表中）
+            if (!positionsToDelete.includes(fromCellId)) {
+                positionsToDelete.push(fromCellId);
+            }
+
+            console.log(`🗑️ 合成时需要删除的位置: [${positionsToDelete}]`);
+
 
             // 如果可以合成，先处理合成逻辑（移除旧蛋，更新地图状态）
             this.processSynthesisResult(synthesisResult, toCellId);
@@ -1597,6 +1610,7 @@ class GameServer {
             toCellId: toCellId,
             path: path,
             eggType: eggType,
+            positionsToDelete: positionsToDelete, // 返回需要删除的位置列表
             synthesis: synthesisData,
             newEggs: newEggs,
             message: "移动处理完成"
@@ -1654,27 +1668,40 @@ class GameServer {
         const availableTypes = this.getAvailableEggTypes(maxUnlockedEggType);
         const selectedTypes = this.selectRandomEggTypes(availableTypes, count);
 
-        const newEggs = [];
-        for (let i = 0; i < count; i++) {
-            // 随机选择位置
-            const randomIndex = Math.floor(Math.random() * emptyCells.length);
-            const cellId = emptyCells.splice(randomIndex, 1)[0];
+        // 随机选择位置
+        const selectedPositions = this.selectRandomPositions(emptyCells, count);
 
-            // 使用预选的蛋类型
+        // 立即更新后端地图状态
+        for (let i = 0; i < selectedPositions.length; i++) {
+            const cellId = selectedPositions[i];
             const eggType = selectedTypes[i];
 
-            // 预留位置
-            this.occupyPosition(cellId, eggType);
-
-            newEggs.push({
-                cellId: cellId,
-                eggType: eggType,
-                eggName: this.getEggTypeName(eggType)
-            });
-
-            console.log(`🥚 在格子 ${cellId} 生成 ${this.getEggTypeName(eggType)} 蛋 (egg_mc${eggType})`);
+            this.occupyPosition(cellId, eggType, null); // piece为null，等前端创建后再关联
         }
 
+        // 返回生成的蛋数据
+        const newEggs = selectedPositions.map((cellId, index) => ({
+            cellId: cellId,
+            eggType: selectedTypes[index]
+        }));
+
+        // utile.__sdklog3(`✅ 生成 ${newEggs.length} 个新蛋，后端状态已同步`,);
+        // 打印当前地图所有已存在蛋的状态
+        console.log('🗺️ 当前地图蛋状态:');
+        const existingEggs = [];
+        Object.keys(this.mapState.cells).forEach(cellId => {
+            const cell = this.mapState.cells[cellId];
+            if (cell.hasEgg) {
+                existingEggs.push({
+                    cellId: parseInt(cellId),
+                    eggType: cell.eggType,
+                    hasPiece: !!cell.piece
+                });
+                console.log(`  格子${cellId}: 蛋类型${cell.eggType} ${this.getEggTypeName(cell.eggType)} ${cell.piece ? '(有前端元件)' : '(无前端元件)'}`);
+            }
+        });
+
+        utile.__sdklog3(`📊 地图统计: 总共${existingEggs.length}个蛋, 空闲格子${this.mapState.emptyCells.size}个, 占用格子${this.mapState.occupiedCells.size}个`);
         return newEggs;
     }
 

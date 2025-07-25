@@ -507,3 +507,70 @@ utile.shake = function (mc) {
             createjs.Tween.removeTweens(mc);
         })
 }
+
+
+utile.__sdklog = function (...args) {
+    const formatParam = (arg) => {
+        if (typeof arg === 'string') return `'${arg}'`;
+        if (typeof arg === 'object') return JSON.stringify(arg);
+        return String(arg);
+    };
+
+    const params = args.map(formatParam).join(' ');
+
+    console.log(
+        `%c ***CPSDK***: ${params}`,
+
+        'background-color: #f9f9f9; ' +
+        'border: 2px solid #8e44ad; ' +
+        'color: #333; ' +
+        'padding: 5px 15px; ' +
+        'border-radius: 5px; ' +
+        'font-weight: 500; ' +
+        'box-shadow: 0 0 5px rgba(142, 68, 173, 0.3);'
+    );
+}
+
+
+utile.__sdklog2 = function (...args) {
+    const formatParam = (arg) => {
+        if (typeof arg === 'string') return `'${arg}'`;
+        if (typeof arg === 'object') return JSON.stringify(arg);
+        return String(arg);
+    };
+
+    const params = args.map(formatParam).join(' ');
+
+    console.log(
+        `%c ***CPSDK***: ${params}`,
+        'background: linear-gradient(to right, #8e44ad, #ba43ff); ' +
+        'color: white; ' +
+        'padding: 5px 15px; ' +
+        'border-radius: 5px; ' +
+        'font-weight: bold; ' +
+        'text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);'
+
+    );
+}
+
+
+utile.__sdklog3 = function (...args) {
+    const formatParam = (arg) => {
+        if (typeof arg === 'string') return `'${arg}'`;
+        if (typeof arg === 'object') return JSON.stringify(arg);
+        return String(arg);
+    };
+
+    const params = args.map(formatParam).join(' ');
+
+    console.log(
+        `%c ***DOTGTAG***: ${params}`,
+        'background: linear-gradient(to right,rgb(68, 173, 166),rgb(4, 170, 173)); ' +
+        'color: white; ' +
+        'padding: 5px 15px; ' +
+        'border-radius: 5px; ' +
+        'font-weight: bold; ' +
+        'text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);'
+
+    );
+}
