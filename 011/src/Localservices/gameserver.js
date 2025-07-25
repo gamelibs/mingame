@@ -458,58 +458,6 @@ class GameServer {
         };
     }
 
-    /**
-     * 生成随机蛋位置（临时算法）
-     */
-    generateRandomEggSeats(level) {
-        const baseCount = 3 + Math.floor(level / 2);
-        const seats = [];
-        const usedSeats = new Set();
-
-        while (seats.length < baseCount && seats.length < 48) {
-            const randomSeat = Math.floor(Math.random() * 48);
-            if (!usedSeats.has(randomSeat)) {
-                seats.push(randomSeat);
-                usedSeats.add(randomSeat);
-            }
-        }
-
-        return seats.sort((a, b) => a - b);
-    }
-
-    /**
-     * 生成随机蛋类型（临时算法）
-     */
-    generateRandomEggTypes(level) {
-        const typeCount = Math.min(4, 2 + Math.floor(level / 3));
-        const types = [];
-
-        for (let i = 0; i < this.generateRandomEggSeats(level).length; i++) {
-            types.push(Math.floor(Math.random() * typeCount) + 1);
-        }
-
-        return types;
-    }
-
-    /**
-     * 生成随机指示位置（临时算法）
-     */
-    generateRandomPointSeats(level) {
-        if (level < 3) {
-            // 前几关有指示
-            const pointCount = Math.max(1, 3 - level);
-            const points = [];
-
-            for (let i = 0; i < pointCount; i++) {
-                points.push(Math.floor(Math.random() * 48));
-            }
-
-            return points;
-        } else {
-            // 后面的关卡没有指示
-            return [-1];
-        }
-    }
 
     /**
      * 保存用户数据
@@ -1090,68 +1038,7 @@ class GameServer {
         return eggNames[eggType] || '未知';
     }
 
-    /**
-     * 生成随机蛋位置
-     * @param {Object} gameState - 游戏状态
-     * @param {number} count - 生成数量，默认3个
-     * @returns {Array} 生成的蛋数据
-     */
-    generateRandomEggs(gameState, count = 3) {
-        console.log(`🎲 生成 ${count} 个随机蛋...`);
 
-        // 获取空闲位置
-        const emptyCells = [];
-        for (let cellId in gameState.cells) {
-            if (!gameState.cells[cellId].hasEgg) {
-                emptyCells.push(parseInt(cellId));
-            }
-        }
-
-        if (emptyCells.length < count) {
-            console.warn(`⚠️ 空闲位置不足，需要 ${count} 个，只有 ${emptyCells.length} 个`);
-            count = emptyCells.length;
-        }
-
-        const newEggs = [];
-        for (let i = 0; i < count; i++) {
-            // 随机选择位置
-            const randomIndex = Math.floor(Math.random() * emptyCells.length);
-            const cellId = emptyCells.splice(randomIndex, 1)[0];
-
-            // 随机生成蛋类型（偏向低级蛋）
-            const eggType = this.generateRandomEggType();
-
-            newEggs.push({
-                cellId: cellId,
-                eggType: eggType,
-                eggName: this.getEggTypeName(eggType)
-            });
-
-            console.log(`🥚 在格子 ${cellId} 生成 ${this.getEggTypeName(eggType)} 蛋 (egg_mc${eggType})`);
-        }
-
-        return newEggs;
-    }
-
-    /**
-     * 生成随机蛋类型（偏向低级蛋）
-     * @returns {number} 蛋类型 (0-6)
-     */
-    generateRandomEggType() {
-        // 权重分布：低级蛋出现概率更高
-        const weights = [40, 25, 15, 10, 5, 3, 2]; // 对应 egg_mc0 到 egg_mc6
-        const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
-
-        let random = Math.random() * totalWeight;
-        for (let i = 0; i < weights.length; i++) {
-            random -= weights[i];
-            if (random <= 0) {
-                return i;
-            }
-        }
-
-        return 0; // 默认返回最低级
-    }
 
     /**
      * 计算空位置（从游戏状态获取）
@@ -1224,13 +1111,52 @@ class GameServer {
   */
     selectRandomEggTypes(availableTypes, count) {
         const selectedTypes = [];
+
         for (let i = 0; i < count; i++) {
-            const randomIndex = Math.floor(Math.random() * availableTypes.length);
-            selectedTypes.push(availableTypes[randomIndex]);
+            // 使用权重分布：低级蛋出现概率更高
+            const eggType = this.generateWeightedRandomEggType(availableTypes);
+            selectedTypes.push(eggType);
         }
-        console.log(`🎲 随机选择蛋类型: [${selectedTypes.join(', ')}]`);
+
+        console.log(`🎲 随机选择蛋类型: [${selectedTypes.join(', ')}] (可用范围: [${availableTypes.join(', ')}])`);
         return selectedTypes;
     }
+
+    /**
+     * 根据权重生成随机蛋类型
+     * @param {Array} availableTypes - 可用蛋类型数组
+     * @returns {number} 选中的蛋类型
+     */
+    generateWeightedRandomEggType(availableTypes) {
+        if (availableTypes.length === 0) return 0;
+        if (availableTypes.length === 1) return availableTypes[0];
+
+        // 为每个可用类型分配权重（低级蛋权重更高）
+        const weights = [];
+        const maxType = Math.max(...availableTypes);
+
+        for (const eggType of availableTypes) {
+            // 权重计算：最高级的权重最低，最低级的权重最高
+            const weight = Math.max(1, (maxType - eggType + 1) * 10);
+            weights.push(weight);
+        }
+
+        // 根据权重随机选择
+        const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+        let random = Math.random() * totalWeight;
+
+        for (let i = 0; i < availableTypes.length; i++) {
+            random -= weights[i];
+            if (random <= 0) {
+                console.log(`🎯 权重选择: 类型${availableTypes[i]} (权重${weights[i]}/${totalWeight})`);
+                return availableTypes[i];
+            }
+        }
+
+        // 兜底返回最低级
+        return availableTypes[0];
+    }
+
 
     /**
      * 更新用户的最高解锁蛋等级
@@ -1238,14 +1164,32 @@ class GameServer {
      * @param {number} newEggType - 新解锁的蛋等级
      */
     updateMaxUnlockedEggType(userId, newEggType) {
-        const userData = this.checkUserStatus(userId);
-        if (userData) {
-            const currentMax = userData.maxUnlockedEggType || 0;
-            if (newEggType > currentMax) {
-                userData.maxUnlockedEggType = newEggType;
-                this.saveUserData(userId, userData);
-                console.log(`🎉 用户 ${userId} 解锁了新蛋等级: ${newEggType} (${this.getEggTypeName(newEggType)})`);
-            }
+        // 🔥 直接从缓存获取，避免重新创建对象
+        const userData = this.userDataCache.get(userId);
+
+        if (!userData) {
+            console.error(`❌ 用户数据不存在: ${userId}`);
+            return;
+        }
+
+        const currentMax = userData.maxUnlockedEggType || 0;
+        console.log(`🔍 当前解锁等级检查: ${currentMax} vs 新等级: ${newEggType}`);
+
+        if (newEggType > currentMax) {
+            // 直接修改缓存中的数据
+            userData.maxUnlockedEggType = newEggType;
+
+            // 保存到localStorage和更新缓存
+            this.saveUserData(userId, userData);
+
+            console.log(`🎉 用户 ${userId} 解锁了新蛋等级: ${newEggType} (${this.getEggTypeName(newEggType)})`);
+            console.log(`📈 解锁进度: ${currentMax} -> ${newEggType}`);
+
+            // 验证更新是否成功
+            const verifyData = this.userDataCache.get(userId);
+            console.log(`✅ 验证更新结果: maxUnlockedEggType = ${verifyData.maxUnlockedEggType}`);
+        } else {
+            console.log(`📊 用户 ${userId} 当前最高解锁等级: ${currentMax}, 合成等级: ${newEggType} (无需更新)`);
         }
     }
 
@@ -1389,6 +1333,8 @@ class GameServer {
      */
     processEggClick(cellId) {
         console.log(`🖱️ 处理蛋点击: 格子${cellId}`);
+
+        this.printMapState();
 
         // 检查格子是否存在
         if (!this.mapState.cells[cellId]) {
@@ -1618,10 +1564,10 @@ class GameServer {
     }
 
     /**
- * 处理合成结果（更新地图状态）
- * @param {Object} synthesisResult - 合成结果
- * @param {number} targetCellId - 移动的目标位置（合成位置）
- */
+     * 处理合成结果（更新地图状态）
+     * @param {Object} synthesisResult - 合成结果
+     * @param {number} targetCellId - 移动的目标位置（合成位置）
+     */
     processSynthesisResult(synthesisResult, targetCellId) {
         console.log('🎬 处理合成结果，更新地图状态...');
 
@@ -1639,6 +1585,9 @@ class GameServer {
             targetCell.eggType = synthesisResult.newEggType;
             console.log(`🥚 目标位置 ${targetCellId} 更新为 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋`);
         }
+
+        // 🔥 关键修复：合成成功后更新解锁等级
+        this.onEggSynthesisSuccess('currentUser', synthesisResult.newEggType, synthesisResult.matches.length);
 
         console.log(`✅ 合成处理完成，生成 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋`);
     }
@@ -1664,6 +1613,8 @@ class GameServer {
         const userStatus = this.checkUserStatus('currentUser');
         const maxUnlockedEggType = userStatus ? (userStatus.maxUnlockedEggType || 0) : 0;
 
+        console.log(`🏆 用户当前最高解锁等级: ${maxUnlockedEggType}`);
+
         // 获取可用蛋类型并随机选择
         const availableTypes = this.getAvailableEggTypes(maxUnlockedEggType);
         const selectedTypes = this.selectRandomEggTypes(availableTypes, count);
@@ -1685,8 +1636,6 @@ class GameServer {
             eggType: selectedTypes[index]
         }));
 
-        // utile.__sdklog3(`✅ 生成 ${newEggs.length} 个新蛋，后端状态已同步`,);
-        // 打印当前地图所有已存在蛋的状态
         console.log('🗺️ 当前地图蛋状态:');
         const existingEggs = [];
         Object.keys(this.mapState.cells).forEach(cellId => {
@@ -1776,6 +1725,30 @@ class GameServer {
         const row = Math.floor(cellId / this.mapConfig.cols);
         const col = cellId % this.mapConfig.cols;
         return { row: row, col: col };
+    }
+
+
+    /**
+ * 打印当前地图状态（调试用）
+ */
+    printMapState() {
+        console.log('🗺️ 当前后端地图状态:');
+
+        const occupiedCells = [];
+        for (const [cellId, cellData] of Object.entries(this.mapState.cells)) {
+            if (!cellData.isEmpty && cellData.hasEgg) {
+                occupiedCells.push({
+                    cellId: parseInt(cellId),
+                    eggType: cellData.eggType,
+                    hasEgg: cellData.hasEgg,
+                    occupied: cellData.occupied
+                });
+                utile.__sdklog3(`  格子${cellId}: 蛋类型${cellData.eggType} ${this.getEggTypeName(cellData.eggType)}`);
+            }
+        }
+
+        console.log(`📊 后端地图统计: 总共${occupiedCells.length}个蛋`);
+        return occupiedCells;
     }
 }
 

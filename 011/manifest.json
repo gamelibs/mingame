@@ -30,6 +30,8 @@
         ],
         "sounds": [
             { "id": "bgm", "src": "sound/bgm.mp3", "type": "sound" },
+            { "id": "popo", "src": "sound/popo.mp3", "type": "sound" },
+            { "id": "goodmin", "src": "sound/goodmin.mp3", "type": "sound" },
             { "id": "click", "src": "sound/click.mp3", "type": "sound" },
             { "id": "win", "src": "sound/win.mp3", "type": "sound" }
         ],

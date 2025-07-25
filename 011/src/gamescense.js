@@ -240,6 +240,8 @@ class GameScense {
         const moveSpeed = 200; // 每步移动时间(毫秒)
 
         const moveToNextCell = () => {
+            // 播放点击音效
+
             if (currentIndex >= pathCellIds.length) {
                 console.log('✅ 路径移动完成');
                 if (onComplete) onComplete(true);
@@ -251,7 +253,9 @@ class GameScense {
 
             if (cellData) {
                 // console.log(`🚶 移动到格子 ${cellId} (${cellData.centerX}, ${cellData.centerY})`);
-
+                if (this.engine && this.loadedSounds.has('popo')) {
+                    this.engine.playSound('popo');
+                }
                 // 使用 CreateJS Tween 进行平滑移动
                 createjs.Tween.get(piece)
                     .to({ x: cellData.centerX, y: cellData.centerY }, moveSpeed, createjs.Ease.quadOut)
@@ -1018,8 +1022,8 @@ class GameScense {
         }
 
         // 播放点击音效
-        if (this.engine && this.loadedSounds.has('click')) {
-            this.engine.playSound('click');
+        if (this.engine && this.loadedSounds.has('popo')) {
+            this.engine.playSound('popo');
         }
     }
 
@@ -1135,7 +1139,7 @@ class GameScense {
                     return this.executeSynthesisAnimation(result.synthesis, result.positionsToDelete);
                 } else {
                     this.chessboard.pieces.set(result.toCellId, piece);
-                    
+
                     utile.__sdklog(`📍 更新目标位置映射: 格子${result.toCellId}`);
                 }
                 return Promise.resolve();
@@ -1194,19 +1198,31 @@ class GameScense {
             this.removeSelectionEffect(this.selectedPiece);
         }
 
-        // 选择新蛋
-        const newCellData = this.getCellData(result.newCellId);
-        if (newCellData && !newCellData.isEmpty) {
-            this.addSelectionEffect(newCellData.piece);
-            this.selectedPiece = newCellData.piece;
+        // 直接从前端映射获取新蛋元件
+        const newPiece = this.chessboard.pieces.get(result.newCellId);
+        if (newPiece) {
+            console.log(`✅ 找到新选择的蛋: 格子${result.newCellId}, 类型${newPiece.eggType}`);
+
+            // 添加选中效果
+            this.addSelectionEffect(newPiece);
+            this.selectedPiece = newPiece;
             this.selectedCellId = result.newCellId;
 
             // 更新游戏状态
             this.gameDataState.selectedEgg = {
                 cellId: result.newCellId,
-                eggType: newCellData.piece.eggType,
+                eggType: newPiece.eggType,
                 isSelected: true
             };
+        } else {
+            console.error(`❌ 前端映射中找不到格子${result.newCellId}的蛋元件`);
+            console.log('🔍 当前前端映射状态:');
+            this.printCurrentPiecesMapping();
+
+            // 清除选中状态
+            this.selectedPiece = null;
+            this.selectedCellId = null;
+            this.gameDataState.selectedEgg = null;
         }
     }
 
@@ -1313,7 +1329,10 @@ class GameScense {
         console.log(`🔍 要处理的蛋数量: ${eggs.length}`);
 
         const promises = [];
-
+        // 播放合成音乐
+        if (this.engine && this.loadedSounds.has('goodmin')) {
+            this.engine.playSound('goodmin');
+        }
         for (const eggData of eggs) {
             if (eggData.piece) {
                 console.log(`🔍 处理格子 ${eggData.cellId} 的蛋，元件名称: ${eggData.piece.name || 'unnamed'}`);
