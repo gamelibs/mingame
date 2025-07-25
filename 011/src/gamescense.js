@@ -252,7 +252,7 @@ class GameScense {
             const cellData = this.getCellData(cellId);
 
             if (cellData) {
-                console.log(`🚶 移动到格子 ${cellId} (${cellData.centerX}, ${cellData.centerY})`);
+                // console.log(`🚶 移动到格子 ${cellId} (${cellData.centerX}, ${cellData.centerY})`);
 
                 // 使用 CreateJS Tween 进行平滑移动
                 createjs.Tween.get(piece)
@@ -1377,16 +1377,20 @@ class GameScense {
         // 检查是否有合成
         if (result.synthesis && result.synthesis.canSynthesize) {
             console.log('🎉 移动后可以合成，开始合成动画');
+            console.log('🎉 移动后可以合成，开始合成动画');
+            console.log('🔍 合成数据详情:', result.synthesis);
+            console.log('🔍 matches数组:', result.synthesis.matches);
+            console.log('🔍 matches长度:', result.synthesis.matches.length);
             await this.executeSynthesisAnimation(result.synthesis);
         }
 
         // 如果有新蛋数据，创建新蛋
-        // if (result.newEggs && result.newEggs.length > 0) {
-        //     console.log('🥚 创建新蛋');
-        //     for (const eggData of result.newEggs) {
-        //         await this.createEggAtPosition(eggData.cellId, eggData.eggType);
-        //     }
-        // }
+        if (result.newEggs && result.newEggs.length > 0) {
+            console.log('🥚 创建新蛋');
+            for (const eggData of result.newEggs) {
+                await this.createEggAtPosition(eggData.cellId, eggData.eggType);
+            }
+        }
 
         // 清除选中状态
         this.gameDataState.selectedEgg = null;
@@ -1468,32 +1472,32 @@ class GameScense {
         });
     }
 
-    /**
-     * 移动后检查蛋合成
-     * @param {number} cellId - 移动到的格子ID
-     */
-    async checkEggSynthesisAfterMove(cellId) {
-        console.log(`🔍 检查移动后的合成条件: 格子 ${cellId}`);
+    // /**
+    //  * 移动后检查蛋合成
+    //  * @param {number} cellId - 移动到的格子ID
+    //  */
+    // async checkEggSynthesisAfterMove(cellId) {
+    //     console.log(`🔍 检查移动后的合成条件: 格子 ${cellId}`);
 
-        try {
-            // 调用 GameServer 检查合成
-            const synthesisResult = await window.GameServer.checkEggSynthesis(cellId, this.gameDataState);
+    //     try {
+    //         // 调用 GameServer 检查合成
+    //         const synthesisResult = await window.GameServer.checkEggSynthesis(cellId, this.gameDataState);
 
-            if (synthesisResult.code === 0) {
-                console.log('🎉 找到合成匹配，开始合成动画');
-                await this.executeSynthesisAnimation(synthesisResult);
+    //         if (synthesisResult.code === 0) {
+    //             console.log('🎉 找到合成匹配，开始合成动画');
+    //             await this.executeSynthesisAnimation(synthesisResult);
 
-                // 合成完成后生成新蛋
-                await this.generateNewEggs();
-            } else {
-                console.log('❌ 没有找到合成匹配');
-                // 直接生成新蛋
-                await this.generateNewEggs();
-            }
-        } catch (error) {
-            console.error('❌ 合成检查失败:', error);
-        }
-    }
+    //             // 合成完成后生成新蛋
+    //             await this.generateNewEggs();
+    //         } else {
+    //             console.log('❌ 没有找到合成匹配');
+    //             // 直接生成新蛋
+    //             await this.generateNewEggs();
+    //         }
+    //     } catch (error) {
+    //         console.error('❌ 合成检查失败:', error);
+    //     }
+    // }
 
     /**
      * 执行合成动画
@@ -1504,31 +1508,46 @@ class GameScense {
 
         const { matches, eggType, newEggType, synthesisPosition, score } = synthesisData;
 
-        // 收集要合成的蛋元件
-        const eggsToSynthesize = [];
+        // 收集所有参与合成的蛋元件（包括目标位置）
+        const allEggsToSynthesize = [];
         for (const cellId of matches) {
-            const piece = this.chessboard.pieces.get(cellId);  // 直接从前端获取
+            const piece = this.chessboard.pieces.get(cellId);
             if (piece) {
-                eggsToSynthesize.push({
+                allEggsToSynthesize.push({
                     cellId: cellId,
-                    piece: piece
+                    piece: piece,
+                    isTarget: cellId === synthesisPosition  // 标记是否为目标位置
                 });
+                console.log(`🥚 找到参与合成的蛋: 格子${cellId} ${cellId === synthesisPosition ? '(目标位置)' : ''}`);
             }
         }
 
-        // 播放收集动画
-        await this.playEggCollectionAnimation(eggsToSynthesize, synthesisPosition);
+        console.log(`🔍 总共 ${allEggsToSynthesize.length} 个蛋参与合成`);
 
-        // 创建合成后的新蛋
-        await this.createSynthesizedEgg(synthesisPosition, newEggType);
-
-        // 更新分数
-        this.updateScore(score);
-
-        // 通知 GameServer 合成成功，更新用户数据
-        if (window.GameServer && window.GameServer.onEggSynthesisSuccess) {
-            window.GameServer.onEggSynthesisSuccess('currentUser', newEggType, matches.length);
+        // 先在目标位置播放粒子效果
+        const targetPiece = this.chessboard.pieces.get(synthesisPosition);
+        if (targetPiece) {
+            this.addSynthesisEffect(targetPiece);
+            console.log(`✨ 在目标位置 ${synthesisPosition} 播放粒子效果`);
         }
+
+        // 播放收集动画（传入所有蛋）
+        await this.playEggCollectionAnimation(allEggsToSynthesize, synthesisPosition);
+
+        setTimeout(() => {
+            
+            // 创建合成后的新蛋
+            //await 
+            this.createSynthesizedEgg(synthesisPosition, newEggType);
+    
+            // 更新分数
+            this.updateScore(score);
+    
+            // 通知 GameServer 合成成功，更新用户数据
+            if (window.GameServer && window.GameServer.onEggSynthesisSuccess) {
+                window.GameServer.onEggSynthesisSuccess('currentUser', newEggType, matches.length);
+            }
+        }, 3000);
 
         console.log(`✅ 合成完成！${window.GameServer.getEggTypeName(eggType)} -> ${window.GameServer.getEggTypeName(newEggType)}`);
     }
@@ -1536,7 +1555,7 @@ class GameScense {
 
     /**
      * 播放蛋收集动画
-     * @param {Array} eggs - 要收集的蛋数组
+     * @param {Array} eggs - 所有参与合成的蛋数组
      * @param {number} targetCellId - 目标位置
      */
     async playEggCollectionAnimation(eggs, targetCellId) {
@@ -1547,53 +1566,59 @@ class GameScense {
         }
 
         console.log(`🎯 合成目标位置 ${targetCellId}: (${targetPosition.centerX}, ${targetPosition.centerY})`);
+        console.log(`🔍 要处理的蛋数量: ${eggs.length}`);
 
         const promises = [];
 
         for (const eggData of eggs) {
-            if (eggData.cellId === targetCellId) {
-                // 目标位置的蛋播放特效，不移动
-                if (eggData.piece) {
-                    this.addSynthesisEffect(eggData.piece);
-                }
-                continue;
-            }
-
-            // 其他蛋移动到目标位置
             if (eggData.piece) {
-                console.log(`🚶 蛋从格子 ${eggData.cellId} 移动到目标位置 ${targetCellId}`);
+                if (eggData.isTarget) {
+                    // 目标位置的蛋：只播放特效，不移动
+                    console.log(`🎯 目标位置蛋 ${eggData.cellId} 播放特效`);
+                    // 目标位置的蛋会在最后统一删除
+                } else {
+                    // 非目标位置的蛋：移动到目标位置
+                    console.log(`🚶 蛋从格子 ${eggData.cellId} 移动到目标位置 ${targetCellId}`);
 
-                const promise = new Promise((resolve) => {
-                    createjs.Tween.get(eggData.piece)
-                        .to({
-                            x: targetPosition.centerX,
-                            y: targetPosition.centerY,
-                            scaleX: 0.5,
-                            scaleY: 0.5,
-                            alpha: 0.8
-                        }, 500, createjs.Ease.quadInOut)
-                        .call(() => {
-                            // 移除蛋元件和状态
-                            this.gamebox.removeChild(eggData.piece);
-                            this.chessboard.pieces.delete(eggData.cellId);
-                            console.log(`🗑️ 移除格子 ${eggData.cellId} 的蛋元件`);
-                            resolve();
-                        });
-                });
+                    const promise = new Promise((resolve) => {
+                        createjs.Tween.get(eggData.piece)
+                            .to({
+                                x: targetPosition.centerX,
+                                y: targetPosition.centerY,
+                                alpha: 0.8
+                            }, 500, createjs.Ease.quadInOut)
+                            .wait(1000)
+                            .call(() => {
+                                console.log(`🚶 格子 ${eggData.cellId} 的蛋移动完成`);
+                                resolve();
+                            });
+                    });
 
-                promises.push(promise);
+                    promises.push(promise);
+                }
             }
         }
 
+        // 等待所有移动动画完成
         await Promise.all(promises);
-        console.log('📦 蛋收集动画完成');
+
+        // 统一删除所有参与合成的蛋（包括目标位置）
+        for (const eggData of eggs) {
+            if (eggData.piece) {
+                this.gamebox.removeChild(eggData.piece);
+                this.chessboard.pieces.delete(eggData.cellId);
+                console.log(`🗑️ 删除合成蛋: 格子${eggData.cellId} ${eggData.isTarget ? '(目标位置)' : ''}`);
+            }
+        }
+
+        console.log('📦 蛋收集动画完成，所有参与合成的蛋已删除');
     }
 
     /**
-     * 创建合成后的新蛋
-     * @param {number} cellId - 合成位置
-     * @param {number} newEggType - 新蛋类型
-     */
+ * 创建合成后的新蛋
+ * @param {number} cellId - 合成位置
+ * @param {number} newEggType - 新蛋类型
+ */
     async createSynthesizedEgg(cellId, newEggType) {
         console.log(`🥚 在格子 ${cellId} 创建类型 ${newEggType} 的合成蛋 (egg_mc${newEggType})`);
 
@@ -1605,13 +1630,6 @@ class GameScense {
         }
 
         console.log(`📍 合成蛋位置: 格子${cellId} -> (${position.centerX}, ${position.centerY})`);
-
-        // 移除原来的蛋（如果存在）
-        const oldPiece = this.chessboard.pieces.get(cellId);
-        if (oldPiece) {
-            this.gamebox.removeChild(oldPiece);
-            this.chessboard.pieces.delete(cellId);
-        }
 
         // 创建新蛋
         const newEgg = this.getEggFromFlygame(newEggType);
@@ -1825,122 +1843,6 @@ class GameScense {
         console.log('🔄 清除了选中状态');
     }
 
-    /**
-     * 处理合成动画
-     * @param {Object} synthesisData - 合成数据
-     */
-    async processSynthesisAnimation(synthesisData) {
-        console.log('🎬 开始合成动画...');
-
-        const { matches, eggType, newEggType, synthesisPosition } = synthesisData;
-
-        // 1. 收集要合成的蛋元件
-        const eggsToSynthesize = [];
-        for (const cellId of matches) {
-            const cellData = this.getCellData(cellId);
-            if (cellData && !cellData.isEmpty) {
-                eggsToSynthesize.push({
-                    cellId: cellId,
-                    piece: cellData.piece,
-                    cellData: cellData
-                });
-            }
-        }
-
-        // 2. 播放收集动画（所有蛋向合成位置移动）
-        await this.playCollectionAnimation(eggsToSynthesize, synthesisPosition);
-
-        // 3. 移除旧蛋，创建新蛋
-        await this.createSynthesizedEgg(synthesisPosition, newEggType);
-
-        // 4. 更新分数
-        // this.updateScore(matches.length, eggType);
-
-        console.log('✅ 合成完成！');
-    }
-
-    /**
-     * 播放收集动画
-     * @param {Array} eggs - 要收集的蛋数组
-     * @param {number} targetCellId - 目标位置
-     */
-    async playCollectionAnimation(eggs, targetCellId) {
-        const targetCellData = this.getCellData(targetCellId);
-        if (!targetCellData) return;
-
-        const promises = [];
-
-        for (const eggData of eggs) {
-            if (eggData.cellId === targetCellId) {
-                // 目标位置的蛋不需要移动，但要播放特效
-                this.addSynthesisEffect(eggData.piece);
-                continue;
-            }
-
-            // 其他蛋移动到目标位置
-            const promise = new Promise((resolve) => {
-                createjs.Tween.get(eggData.piece)
-                    .to({
-                        x: targetCellData.centerX,
-                        y: targetCellData.centerY,
-                        scaleX: 0.5,
-                        scaleY: 0.5,
-                        alpha: 0.8
-                    }, 500, createjs.Ease.quadInOut)
-                    .call(() => {
-                        // 移除蛋元件
-                        this.gamebox.removeChild(eggData.piece);
-                        this.removePiece(eggData.cellId);
-                        resolve();
-                    });
-            });
-
-            promises.push(promise);
-        }
-
-        // 等待所有动画完成
-        await Promise.all(promises);
-        console.log('📦 收集动画完成');
-    }
-
-    /**
-     * 创建合成后的新蛋
-     * @param {number} cellId - 合成位置
-     * @param {number} newEggType - 新蛋类型
-     */
-    async createSynthesizedEgg(cellId, newEggType) {
-        // 检查是否超过最高级别
-        if (newEggType > 6) {
-            console.log('🎉 已达到最高级别 egg_mc6，无法继续合成');
-            newEggType = 6; // 保持最高级别
-        }
-
-        console.log(`🥚 在格子 ${cellId} 创建类型 ${newEggType} 的合成蛋 (egg_mc${newEggType})`);
-
-        // 移除原来的蛋
-        this.removePiece(cellId);
-
-        // 创建新蛋
-        const newEgg = this.getEggFromFlygame(newEggType);
-        if (newEgg) {
-            newEgg.eggType = newEggType;
-            newEgg.cellId = cellId;
-
-            // 添加到 gamebox
-            this.gamebox.addChild(newEgg);
-
-            // 放置到格子中
-            this.placePiece(cellId, newEgg);
-
-            // 播放合成特效
-            this.playSynthesisEffect(newEgg);
-
-            // 显示合成信息
-            this.showSynthesisInfo(newEggType);
-
-            console.log(`✅ 成功创建 ${this.getEggTypeName(newEggType)} 蛋 (egg_mc${newEggType})`);
-        }
-    }
 
     /**
      * 获取蛋类型名称
