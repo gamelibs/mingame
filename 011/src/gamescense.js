@@ -548,6 +548,8 @@ class GameScense {
     handlePostInitialization() {
         const isNewUser = this.gameData ? this.gameData.isNewUser : true;
 
+        this.startBackgroundMusic();
+
         if (isNewUser) {
             // 新用户：等待引导完成后生成蛋
             if (this.pointSeats.length === 0) {
@@ -957,7 +959,7 @@ class GameScense {
         console.log('📦 gamebox 子元件列表:');
         for (let i = 0; i < this.gamebox.children.length; i++) {
             const child = this.gamebox.children[i];
-            console.log(`  - [${i}] ${child.name || child.constructor.name}:`, child);
+            // console.log(`  - [${i}] ${child.name || child.constructor.name}:`, child);
         }
 
         // 这里可以获取游戏中的具体元件
@@ -1794,7 +1796,17 @@ class GameScense {
         return this.gamebox;
     }
 
-
+    /**
+     * 开始播放背景音乐
+     */
+    startBackgroundMusic() {
+        if (this.engine && this.loadedSounds.has('bgm')) {
+            console.log('🎵 开始播放背景音乐');
+            this.engine.playSound('bgm', { loop: -1, volume: 0.5 });
+        } else {
+            console.warn('⚠️ 背景音乐未加载或引擎未初始化');
+        }
+    }
 
     /**
  * 打印当前前端蛋映射状态

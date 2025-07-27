@@ -1,9 +1,9 @@
 // 图形类型枚举
-const graphType = {
-    open: 0,
-    wall: 1,
-    clos: -1
-};
+// const graphType = {
+//     open: 0,
+//     wall: 1,
+//     clos: -1
+// };
 
 // A* 8方向寻路算法类
 class OvoAstar8 {

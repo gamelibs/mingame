@@ -57,14 +57,14 @@ class GameServer {
 
         // 地图系统
         this.mapConfig = {
-            rows: 8,
+            rows: 6,
             cols: 6,
             cellWidth: 150,
             cellHeight: 150,
-            totalCells: 48,
+            totalCells: 36,
             // 前端渲染需要的配置
             width: 900,           // gamebox 宽度
-            height: 1200,         // gamebox 高度
+            height: 900,         // gamebox 高度
             offsetX: 0,           // 棋盘在 gamebox 中的 X 偏移
             offsetY: 0            // 棋盘在 gamebox 中的 Y 偏移
         };
