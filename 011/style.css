@@ -12,7 +12,6 @@ body {
     font-family: Arial, sans-serif;
 }
 
-
 #game-container {
     position: relative;
     width: 100vw;
@@ -30,7 +29,6 @@ canvas {
     background-color: #000000;
 }
 
-
 #dom_overlay_container {
     position: absolute;
     top: 0;
@@ -42,27 +40,13 @@ canvas {
     display: none;
 }
 
-#preload_container {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.8);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-}
-
 .loading-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     text-align: center;
     color: white;
-}
-
-.loading-text {
-    font-size: 24px;
-    margin-bottom: 20px;
 }
 
 .loading-bar {
@@ -71,6 +55,7 @@ canvas {
     background-color: rgba(255, 255, 255, 0.3);
     border-radius: 3px;
     overflow: hidden;
+    margin-top: 20px;
 }
 
 .loading-progress {
@@ -81,17 +66,20 @@ canvas {
     transition: width 0.3s ease;
 }
 
-/* 响应式适配 */
-@media (max-aspect-ratio: 16/9) {
-    #animation_container {
-        width: 100vw;
-        height: calc(100vw * 9 / 16);
-    }
+#preload_container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10;
+    background-color: #000;
+    opacity: 1;
+    transition: opacity 0.5s ease-out;
 }
 
-@media (min-aspect-ratio: 16/9) {
-    #animation_container {
-        width: calc(100vh * 16 / 9);
-        height: 100vh;
-    }
+.loading-text {
+    color: white;
+    font-size: 18px;
+    margin-bottom: 10px;
 }

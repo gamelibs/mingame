@@ -50,18 +50,16 @@ class GameEngine {
         // 开始加载游戏资源
         await this.loadGameResources();
 
+        this.hideBasicLoading();
         // 加载预加载器组件
         await this.loadPreloader();
 
-        this.hideLoading();
-        // // 加载游戏模板配置
-        // await this.loadGameTemplate();
 
         // // 加载核心游戏文件
         await this.loadCoreGameFiles();
 
         console.log('Game Engine Ready!');
-        // }, 0);
+
     }
 
     async preloadCriticalLibs() {
@@ -277,7 +275,6 @@ class GameEngine {
 
                 loader.addEventListener("complete", () => {
                     loader.removeAllEventListeners();
-                    this.canvas.style.display = 'block';
 
                     const ss = comp.getSpriteSheet();
                     const ssMetadata = lib.ssMetadata;
@@ -296,8 +293,7 @@ class GameEngine {
 
                 loader.loadManifest(lib.properties.manifest);
             } else {
-                // 没有manifest时直接创建loading元件
-                this.canvas.style.display = 'block';
+
                 this.createLoadingElement(lib);
                 resolve();
             }
@@ -311,21 +307,33 @@ class GameEngine {
         createjs.Ticker.framerate = this.config.scene?.fps || 30;
         createjs.Ticker.addEventListener("tick", this.stageUpdateHandler.bind(this));
 
+
         // Stage 创建后立即应用变换
         this.applyStageTransform();
+
+
         // 创建loading元件
         this.gl_mc = new lib.loading();
         this.gl_loadBar = this.gl_mc["loadBar"];
         this.gl_loadBar.gotoAndStop(0);
+
+        // 🔥 确保loading元件背景透明
+        if (this.gl_mc.graphics) {
+            this.gl_mc.graphics.clear();
+        }
+
         this.stage.addChild(this.gl_mc);
 
         // 获取进度条总帧数
         this.loadBarTotalFrames = this.gl_loadBar.totalFrames || 100;
         console.log(`Loading bar total frames: ${this.loadBarTotalFrames}`);
 
+
         // 开始加载游戏配置资源
         this.startGameConfigLoading();
     }
+
+
 
     async startGameConfigLoading() {
         try {
@@ -354,7 +362,24 @@ class GameEngine {
             // 显示初始进度
             this.updateLoadingProgress(0);
 
-            // 阶段1: 加载脚本文件
+            //. 优先加载图片资源（背景和Logo）
+            console.log('🖼️ 优先加载UI资源...');
+            for (const imageConfig of images) {
+                try {
+                    await this.loadResource(imageConfig, loadedResources, totalResources);
+                    loadedResources++;
+
+                    // 🔥 图片加载完成后立即应用到UI
+                    if (imageConfig.id === 'bg' || imageConfig.id === 'logo') {
+                        // this.applyLoadingAssets();
+                    }
+                } catch (error) {
+                    console.warn(`⚠️ 图片加载失败: ${imageConfig.src}`, error.message);
+                    loadedResources++;
+                }
+            }
+
+            // 加载脚本文件
             console.log('📜 阶段1: 加载脚本文件...');
             for (const scriptConfig of scripts) {
                 try {
@@ -365,7 +390,7 @@ class GameEngine {
                 loadedResources++;
             }
 
-            // 阶段2: 加载声音文件
+            // 加载声音文件
             console.log('🎵 阶段2: 加载声音文件...');
             for (const soundConfig of sounds) {
                 try {
@@ -377,17 +402,6 @@ class GameEngine {
                 loadedResources++;
             }
 
-            // 阶段3: 加载图片文件
-            console.log('🖼️ 阶段3: 加载图片文件...');
-            for (const imageConfig of images) {
-                try {
-                    await this.loadResource(imageConfig, loadedResources, totalResources);
-                } catch (error) {
-                    // 图片加载失败已经在 loadResource 中处理，这里不应该到达
-                    console.error(`图片加载异常: ${imageConfig.src}`, error);
-                }
-                loadedResources++;
-            }
 
             console.log('🎉 所有游戏资源加载完成！');
 
@@ -552,7 +566,7 @@ class GameEngine {
             };
 
             img.onerror = (error) => {
-                clearTimeout(timeout);
+                clearTimeout(timeout); v
                 console.error(`🖼️ 图片加载失败: ${id}`, error);
                 reject(new Error(`Image load failed: ${src} - ${error.message || 'Unknown error'}`));
             };
@@ -589,49 +603,68 @@ class GameEngine {
         }
     }
 
-    switchToGameScene() {
-        console.log('Switching to GameScene...');
+    async switchToGameScene() {
+        console.log('🎬 准备切换到游戏场景...');
 
-        // 删除 loading 场景
-        if (this.gl_mc) {
-            this.stage.removeChild(this.gl_mc);
-            this.gl_mc = null;
-            this.gl_loadBar = null;
+        try {
+            // 🔥 第一步：先加载GameScene（保持loading界面显示）
+            console.log('📦 预加载GameScene资源...');
+            await this.preloadGameScene();
+
+            // 🔥 第二步：GameScene准备完成后，开始切换动画
+            console.log('✅ GameScene准备完成，开始切换动画');
+            await this.performSceneTransition();
+
+            // 🔥 第三步：清理loading场景
+            this.cleanupLoadingScene();
+
+            // 🔥 第四步：激活GameScene
+            await this.activateGameScene();
+
+            console.log('🎉 场景切换完成！');
+
+        } catch (error) {
+            console.error('❌ 场景切换失败:', error);
+            // 失败时也要清理loading场景，避免卡住
+            this.cleanupLoadingScene();
         }
-
-        // 清空舞台
-        this.stage.removeAllChildren();
-
-        // 加载并切入 GameScene
-        this.loadGameScene().then(() => {
-            console.log('GameScene loaded successfully!');
-        }).catch((error) => {
-            console.error('Failed to load GameScene:', error);
-        });
     }
 
-    async loadGameScene() {
-        return new Promise((resolve) => {
+    /**
+ * 预加载GameScene资源
+ */
+    async preloadGameScene() {
+        return new Promise((resolve, reject) => {
             // 动态获取游戏组合ID
             const gameCompositionId = this.getGameCompositionId();
-            console.log('使用游戏组合ID:', gameCompositionId);
+            console.log('🎮 预加载游戏组合ID:', gameCompositionId);
 
             const comp = AdobeAn.getComposition(gameCompositionId);
             const lib = comp.getLibrary();
-            const loader = new createjs.LoadQueue(false);
 
             // 检查是否有manifest需要加载
             if (lib.properties.manifest && lib.properties.manifest.length > 0) {
+                const loader = new createjs.LoadQueue(false);
+                let loadedCount = 0;
+                const totalCount = lib.properties.manifest.length;
+
                 loader.addEventListener("fileload", (evt) => {
+                    loadedCount++;
+                    const progress = loadedCount / totalCount;
+
+                    // 🔥 更新loading进度条显示预加载进度
+                    this.updateLoadingProgress(0.8 + progress * 0.2); // 80%-100%
+
                     const images = comp.getImages();
                     if (evt && evt.item.type === "image") {
                         images[evt.item.id] = evt.result;
                     }
+
+                    console.log(`📦 GameScene资源加载: ${loadedCount}/${totalCount}`);
                 });
 
                 loader.addEventListener("complete", () => {
                     loader.removeAllEventListeners();
-                    this.canvas.style.display = 'block';
 
                     const ss = comp.getSpriteSheet();
                     const ssMetadata = lib.ssMetadata;
@@ -643,37 +676,203 @@ class GameEngine {
                         });
                     }
 
+                    // 🔥 预创建GameScene对象（但不添加到舞台）
+                    this.preloadedGameScene = {
+                        comp: comp,
+                        lib: lib,
+                        exportRoot: new lib.flygame()
+                    };
 
-                    // 创建完整的 flygame 文档场景
-                    this.exportRoot = new lib.flygame();
-                    this.stage.addChild(this.exportRoot);
-
-                    console.log('Flygame document loaded successfully');
-
-                    // 启动游戏逻辑
-                    this.startGameLogic();
-
+                    console.log('✅ GameScene资源预加载完成');
                     resolve();
                 });
 
+                loader.addEventListener("error", (evt) => {
+                    console.error('❌ GameScene资源加载失败:', evt);
+                    reject(new Error(`GameScene资源加载失败: ${evt.item.src}`));
+                });
+
+                // 设置超时
+                setTimeout(() => {
+                    if (loadedCount < totalCount) {
+                        console.warn('⚠️ GameScene加载超时，强制继续');
+                        loader.removeAllEventListeners();
+                        resolve();
+                    }
+                }, 10000); // 10秒超时
+
                 loader.loadManifest(lib.properties.manifest);
             } else {
-                // 没有manifest时直接创建 flygame 文档场景
-                this.canvas.style.display = 'block';
-
-                // 创建完整的 flygame 文档场景
-                this.exportRoot = new lib.flygame();
-                this.stage.addChild(this.exportRoot);
-
-                console.log('Flygame document loaded successfully (no manifest)');
-
-                // 启动游戏逻辑
-                this.startGameLogic();
-
+                // 没有manifest时直接创建
+                console.log('📦 GameScene无manifest，直接创建');
+                const lib = comp.getLibrary();
+                this.preloadedGameScene = {
+                    comp: comp,
+                    lib: lib,
+                    exportRoot: new lib.flygame()
+                };
                 resolve();
             }
-
         });
+    }
+
+    /**
+     * 执行场景切换动画
+     */
+    async performSceneTransition() {
+        return new Promise((resolve) => {
+            if (!this.gl_mc) {
+                resolve();
+                return;
+            }
+
+            console.log('🎭 执行loading淡出动画');
+
+            // loading场景淡出动画
+            createjs.Tween.get(this.gl_mc)
+                .to({ alpha: 0 }, 500, createjs.Ease.quadOut)
+                .call(() => {
+                    console.log('✅ Loading淡出完成');
+                    resolve();
+                });
+        });
+    }
+
+    /**
+     * 清理loading场景
+     */
+    cleanupLoadingScene() {
+        console.log('🧹 清理loading场景');
+
+        // 删除 loading 场景
+        if (this.gl_mc) {
+            this.stage.removeChild(this.gl_mc);
+            this.gl_mc = null;
+            this.gl_loadBar = null;
+        }
+
+        // 清空舞台
+        this.stage.removeAllChildren();
+    }
+
+    /**
+     * 激活GameScene
+     */
+    async activateGameScene() {
+        console.log('🚀 激活GameScene');
+
+        if (!this.preloadedGameScene) {
+            console.error('❌ 预加载的GameScene不存在');
+            return;
+        }
+
+
+
+        // this.stopAllMovieClips(this.exportRoot);
+
+        // 🔥 添加预加载的GameScene到舞台
+        this.exportRoot = this.preloadedGameScene.exportRoot;
+
+        for (var k in this.exportRoot.children) {
+            utile.goStop(this.exportRoot.children[k], true);
+        }
+
+        this.stage.addChild(this.exportRoot);
+
+        // GameScene淡入动画
+        // createjs.Tween.get(this.exportRoot)
+        //     .to({ alpha: 1 }, 500, createjs.Ease.quadIn)
+        //     .call(() => {
+        //         console.log('✅ GameScene淡入完成');
+        //         // 启动游戏逻辑
+        //     });
+        this.startGameLogic();
+
+        // 清理预加载数据
+        this.preloadedGameScene = null;
+    }
+
+
+    /**
+     * 更新loading进度（支持更精细的进度控制）
+     */
+    updateLoadingProgress(progress) {
+        if (!this.gl_loadBar) return;
+
+        // 确保进度在0-1之间
+        progress = Math.max(0, Math.min(1, progress));
+
+        // 将进度转换为帧数（从0开始）
+        const targetFrame = Math.floor(progress * (this.loadBarTotalFrames - 1));
+
+        // 更新进度条
+        this.gl_loadBar.gotoAndStop(targetFrame);
+
+        // 更新舞台显示
+        if (this.stage) {
+            this.stage.update();
+        }
+
+        const percentage = Math.round(progress * 100);
+        console.log(`📊 Loading progress: ${percentage}% (frame: ${targetFrame}/${this.loadBarTotalFrames - 1})`);
+
+        // 如果达到100%，显示完成信息
+        if (progress >= 1.0) {
+            console.log('🎯 Loading complete!');
+        }
+    }
+
+    async startGameConfigLoading() {
+        try {
+            console.log('🚀 开始加载gameconfig资源...');
+
+            const gameConfig = this.config.gameconfig || {};
+            const scripts = gameConfig.scripts || [];
+            const sounds = gameConfig.sounds || [];
+            const images = gameConfig.images || [];
+
+            const totalResources = scripts.length + sounds.length + images.length;
+
+            if (totalResources === 0) {
+                console.log('没有gameconfig资源需要加载，直接切换场景');
+                this.updateLoadingProgress(1.0);
+                setTimeout(() => {
+                    this.switchToGameScene();
+                }, 300);
+                return;
+            }
+
+            let loadedResources = 0;
+            this.updateLoadingProgress(0);
+
+            // 加载所有资源（进度0-80%）
+            const allResources = [...scripts, ...sounds, ...images];
+            for (const resourceConfig of allResources) {
+                try {
+                    await this.loadResource(resourceConfig, loadedResources, totalResources);
+                } catch (error) {
+                    console.warn(`⚠️ 资源加载失败: ${resourceConfig.src}`, error.message);
+                }
+                loadedResources++;
+
+                // 🔥 gameconfig资源占用0-80%的进度
+                const progress = (loadedResources / totalResources) * 0.8;
+                this.updateLoadingProgress(progress);
+            }
+
+            console.log('🎉 gameconfig资源加载完成，准备切换场景');
+
+            // 🔥 延迟一下再切换，让用户看到进度
+            setTimeout(() => {
+                this.switchToGameScene();
+            }, 500);
+
+        } catch (error) {
+            console.error('gameconfig资源加载失败:', error);
+            setTimeout(() => {
+                this.switchToGameScene();
+            }, 1000);
+        }
     }
 
     async startGameLogic() {
@@ -994,10 +1193,18 @@ class GameEngine {
         }
     }
 
-    hideLoading() {
+    /**
+     * 隐藏基本加载界面
+     */
+    hideBasicLoading() {
+        console.log('🎯 基本资源加载完成，隐藏HTML加载界面');
         const preloadContainer = document.getElementById('preload_container');
-        preloadContainer.style.display = 'none';
-        this.canvas.style.display = 'block';
+        if (preloadContainer) {
+            preloadContainer.style.opacity = '0';
+            setTimeout(() => {
+                preloadContainer.style.display = 'none';
+            }, 500);
+        }
     }
 
     // initGameMain() {

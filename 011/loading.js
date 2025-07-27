@@ -3,7 +3,7 @@
 var p; // shortcut to reference prototypes
 var lib={};var ss={};var img={};
 lib.ssMetadata = [
-		{name:"loading_atlas_1", frames: [[0,0,1080,1920]]}
+		{name:"loading_atlas_1", frames: [[0,0,1080,1920],[1082,0,512,512]]}
 ];
 
 
@@ -27,9 +27,16 @@ lib.ssMetadata = [
 
 
 
-(lib.minfly3 = function() {
+(lib.background = function() {
 	this.initialize(ss["loading_atlas_1"]);
 	this.gotoAndStop(0);
+}).prototype = p = new cjs.Sprite();
+
+
+
+(lib.logo = function() {
+	this.initialize(ss["loading_atlas_1"]);
+	this.gotoAndStop(1);
 }).prototype = p = new cjs.Sprite();
 
 
@@ -124,34 +131,40 @@ p.nominalBounds = new cjs.Rectangle(-181,-181,362,362);
 
 // stage content:
 (lib.loading = function(mode,startPosition,loop,reversed) {
-if (loop == null) { loop = true; }
+if (loop == null) { loop = false; }
 if (reversed == null) { reversed = false; }
 	var props = new Object();
 	props.mode = mode;
 	props.startPosition = startPosition;
-	props.labels = {loadingText:0};
+	props.labels = {};
 	props.loop = loop;
 	props.reversed = reversed;
 	cjs.MovieClip.apply(this,[props]);
 
-	// Layer_2
+	// logo_png
+	this.instance = new lib.logo();
+	this.instance.setTransform(284,433);
+
+	this.timeline.addTween(cjs.Tween.get(this.instance).wait(1));
+
+	// logo
 	this.shape = new cjs.Shape();
 	this.shape.graphics.f("#FFCC00").s().p("ADBCqQgQgEgLgKQgLgKgGgTQgGgSAAgcQAAgbAGgSQAGgSALgLQALgJAQgEQAPgEAVAAQATAAAQAEQAQAEALAJQAKALAHASQAFASAAAbQAAAcgFASQgHATgKAKQgLAKgQAEQgQAEgTAAQgVAAgPgEgADVAhQgGADgDAGQgEAFgBAKIgBAYIABAZQABAKAEAFQADAGAGADQAGACAKAAQAJAAAGgCQAFgDAEgGQADgFABgKQACgKAAgPQAAgOgCgKQgBgKgDgFQgEgGgFgDQgGgCgJAAQgKAAgGACgAkHCqQgQgEgLgKQgKgKgHgTQgFgSAAgcQAAgbAFgSQAHgSAKgLQALgJAQgEQAQgEATAAQAVAAAPAEQAQAEALAJQALALAGASQAFASAAAbQAAAcgFASQgGATgLAKQgLAKgQAEQgPAEgVAAQgTAAgQgEgAjzAhQgGADgDAGQgDAFgBAKQgCAKAAAOQAAAPACAKQABAKADAFQADAGAGADQAGACAJAAQAKAAAGgCQAFgDAEgGQAEgFABgKIABgZIgBgYQgBgKgEgFQgEgGgFgDQgGgCgKAAQgJAAgGACgAg9ClIh2lSIBsAAIBHDqIACAAIBLjqIBmAAIh4FSg");
 	this.shape.setTransform(540,1315.05);
 
 	this.timeline.addTween(cjs.Tween.get(this.shape).wait(1));
 
-	// loadbar
+	// loadBar
 	this.loadBar = new lib.loadbar();
 	this.loadBar.name = "loadBar";
 	this.loadBar.setTransform(540.05,1315.05,0.295,0.295,0,0,0,0.1,0);
 
 	this.timeline.addTween(cjs.Tween.get(this.loadBar).wait(1));
 
-	// bg
-	this.instance = new lib.minfly3();
+	// background_png
+	this.instance_1 = new lib.background();
 
-	this.timeline.addTween(cjs.Tween.get(this.instance).wait(1));
+	this.timeline.addTween(cjs.Tween.get(this.instance_1).wait(1));
 
 	this._renderFirstFrame();
 
