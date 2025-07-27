@@ -31,6 +31,9 @@ class GameScense {
         this.waitingForClick = false;
         this.expectedClickCellId = null;
 
+        // 开始选择
+        this.startMc = null;
+
         // 元件移动相关
         this.selectedPiece = null;        // 当前选中的元件
         this.selectedCellId = null;       // 选中元件所在的格子ID
@@ -73,11 +76,11 @@ class GameScense {
             await this.initializeAsync();
 
             // 初始化引导手势
-            this.initGuideGesture();
+            // this.initGuideGesture();
 
 
             // 根据用户类型决定是否生成蛋
-            this.handlePostInitialization();
+            // this.handlePostInitialization();
 
             this.isInitialized = true;
             console.log('✅ GameScense 初始化完成');
@@ -96,20 +99,22 @@ class GameScense {
         console.log('🔄 开始异步初始化...');
 
         try {
+
+            this.selectDifficulty();
             // 1. 从 GameServer 获取地图配置
-            await this.initMapFromServer();
+            // await this.initMapFromServer();
 
             // 2. 获取游戏场景中的 gamebox 元件
-            this.getGamebox();
+            // this.getGamebox();
 
             // 3. 初始化游戏元素
-            this.initGameElements();
+            // this.initGameElements();
 
             // 4. 设置事件监听
-            this.setupEventListeners();
+            // this.setupEventListeners();
 
             // 5. 验证接收到的数据
-            this.verifyGameData();
+            // this.verifyGameData();
 
             // 6. 根据游戏配置初始化棋盘内容
             // this.initGameBoard();
@@ -122,6 +127,136 @@ class GameScense {
         }
     }
 
+
+    selectDifficulty() {
+        console.log('🎮 选择游戏难度...');
+        this.startMc = utile.findMc(this.exportRoot, 'mc_select');
+
+        if (this.startMc) {
+            console.log('✅ 找到难度选择界面');
+
+            // 显示难度选择界面
+            this.startMc.visible = true;
+
+            // 查找三个难度按钮
+            const btnEasy = utile.findMc(this.startMc, 'btn_e');
+            const btnNormal = utile.findMc(this.startMc, 'btn_n');
+            const btnHard = utile.findMc(this.startMc, 'btn_h');
+
+           this.stage.on('click', (event) => {
+        const target = event.target;
+        console.log('🎯 舞台点击事件，目标:', target);
+        console.log('🎯 目标名称:', target.name);
+        console.log('🎯 目标父级:', target.parent);
+        
+        // 向上查找按钮容器
+        const clickedButton = this.findButtonContainer(target, [btnEasy, btnNormal, btnHard]);
+        
+        if (clickedButton === btnEasy) {
+            console.log('🟢 检测到简单难度按钮点击');
+            this.onDifficultySelected('easy');
+        } else if (clickedButton === btnNormal) {
+            console.log('🟡 检测到普通难度按钮点击');
+            this.onDifficultySelected('normal');
+        } else if (clickedButton === btnHard) {
+            console.log('🔴 检测到困难难度按钮点击');
+            this.onDifficultySelected('hard');
+        } else {
+            console.log('🎯 点击了其他区域，目标路径:', this.getTargetPath(target));
+        }
+    });
+            // 设置按钮样式
+            [btnEasy, btnNormal, btnHard].forEach(btn => {
+                if (btn) {
+                    btn.mouseEnabled = true;
+                    btn.cursor = "pointer";
+                }
+            });
+        } else {
+            console.warn('⚠️ 未找到难度选择界面，跳过难度选择');
+            this.onDifficultySelected('normal');
+        }
+
+
+    }
+/**
+ * 查找按钮容器
+ * @param {Object} target - 点击的目标对象
+ * @param {Array} buttons - 按钮数组
+ * @returns {Object|null} 找到的按钮容器
+ */
+findButtonContainer(target, buttons) {
+    let current = target;
+    
+    // 向上遍历父级，最多查找5层
+    for (let i = 0; i < 5 && current; i++) {
+        // 检查当前对象是否是按钮之一
+        for (const button of buttons) {
+            if (current === button) {
+                console.log(`✅ 找到按钮容器: ${button.name} (向上${i}层)`);
+                return button;
+            }
+        }
+        current = current.parent;
+    }
+    
+    return null;
+}
+/**
+ * 获取目标对象的路径（用于调试）
+ * @param {Object} target - 目标对象
+ * @returns {string} 路径字符串
+ */
+getTargetPath(target) {
+    const path = [];
+    let current = target;
+    
+    for (let i = 0; i < 5 && current; i++) {
+        const name = current.name || current.constructor.name;
+        path.push(name);
+        current = current.parent;
+    }
+    
+    return path.join(' -> ');
+}
+
+    // 辅助方法：检查target是否是parent的子元素
+    isChildOf(target, parent) {
+        if (!target || !parent) return false;
+        let current = target.parent;
+        while (current) {
+            if (current === parent) return true;
+            current = current.parent;
+        }
+        return false;
+    }
+
+    /**
+ * 处理难度选择
+ * @param {string} difficulty - 选择的难度 ('easy', 'normal', 'hard')
+ */
+    onDifficultySelected(difficulty) {
+        console.log(`🎯 用户选择难度: ${difficulty}`);
+
+        // 播放点击音效
+        if (this.engine && this.loadedSounds.has('popo')) {
+            this.engine.playSound('popo');
+        }
+
+        // 隐藏难度选择界面
+        if (this.startMc) {
+            this.startMc.visible = false;
+        }
+
+        // 保存选择的难度
+        this.selectedDifficulty = difficulty;
+
+        // 根据难度设置游戏参数
+        // this.applyDifficultySettings(difficulty);
+
+        // 继续游戏初始化流程
+        // this.continueInitialization();
+    }
     /**
      * 从 GameServer 初始化地图配置
      */
@@ -165,13 +300,13 @@ class GameScense {
             console.error('❌ 地图配置获取失败:', error);
             // 使用默认配置（与后端保持一致）
             this.chessboard = {
-                rows: 8,
+                rows: 6,
                 cols: 6,
                 cellWidth: 150,
                 cellHeight: 150,
-                totalCells: 48,
+                totalCells: 36,
                 width: 900,
-                height: 1200,
+                height: 900,
                 offsetX: 0,
                 offsetY: 0,
                 pieces: new Map()

@@ -37,7 +37,7 @@ class GameEngine {
         console.log('Game Engine Starting...');
 
         // 添加用户交互检测
-        this.setupAutoplayHandler();
+        // this.setupAutoplayHandler();
 
         // 并行执行：加载配置 + 预加载关键库文件
         await Promise.all([
@@ -897,10 +897,10 @@ class GameEngine {
             // 2. 获取用户数据和游戏配置
             console.log('👤 获取用户数据...');
             const userStatus = window.GameServer.checkUserStatus();
-            const gameConfigData = window.GameServer.getGameData(userStatus);
+            // const gameConfigData = window.GameServer.getGameData(userStatus);
 
             console.log('📊 用户状态:', userStatus);
-            console.log('🎯 游戏配置数据:', gameConfigData);
+            // console.log('🎯 游戏配置数据:', gameConfigData);
 
             // 3. 检查 GameScense 是否已加载并且有 init 方法
             if (typeof window.GameScense !== 'undefined' && typeof window.GameScense.init === 'function') {
@@ -914,8 +914,8 @@ class GameEngine {
                     loadedSounds: this.loadedSounds,
                     loadedImages: this.loadedImages,
                     // 添加用户数据和游戏配置
-                    userStatus: userStatus,
-                    gameConfig: gameConfigData
+                    userStatus: userStatus//,
+                    // gameConfig: gameConfigData
                 };
 
                 // console.log('🎯 准备初始化 GameScense，传递数据:', gameData);
@@ -1347,21 +1347,21 @@ class GameEngine {
                 this.audioEnabled = true;
 
                 // 尝试播放背景音乐
-                if (this.loadedSounds && this.loadedSounds.has('bgm')) {
-                    this.playSound('bgm', { loop: -1, volume: 0.5 });
-                }
+                // if (this.loadedSounds && this.loadedSounds.has('bgm')) {
+                //     this.playSound('bgm', { loop: -1, volume: 0.5 });
+                // }
             }
 
             // 移除事件监听器
-            document.removeEventListener('click', enableAudio);
-            document.removeEventListener('touchstart', enableAudio);
-            document.removeEventListener('keydown', enableAudio);
+            // document.removeEventListener('click', enableAudio);
+            // document.removeEventListener('touchstart', enableAudio);
+            // document.removeEventListener('keydown', enableAudio);
         };
 
         // 添加多种用户交互事件监听
-        document.addEventListener('click', enableAudio);
-        document.addEventListener('touchstart', enableAudio);
-        document.addEventListener('keydown', enableAudio);
+        // document.addEventListener('click', enableAudio);
+        // document.addEventListener('touchstart', enableAudio);
+        // document.addEventListener('keydown', enableAudio);
     }
     // 图片管理方法
     getImage(id) {
