@@ -85,7 +85,8 @@ class GameScense {
             // 根据用户类型决定是否生成蛋
             // this.handlePostInitialization();
 
-            this.showFailure();
+            // this.showFailure();
+            this.hideFailure();
 
             this.isInitialized = true;
             console.log('✅ GameScense 初始化完成');
