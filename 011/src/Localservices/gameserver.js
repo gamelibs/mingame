@@ -8,6 +8,14 @@ class GameServer {
         this.isInitialized = false;
         this.serverVersion = '1.0.0';
 
+        // 分数系统
+        this.scoreSystem = {
+            currentScore: 0,
+            totalScore: 0,
+            sessionScore: 0,
+            synthesisHistory: [] // 合成历史记录
+        };
+
         // 用户数据缓存
         this.userDataCache = new Map();
 
@@ -355,10 +363,13 @@ class GameServer {
      * @param {number} step - 步骤
      * @returns {Object} 游戏数据
      */
-    getGameData(userStatus = null, userId = 'currentUser', level = null, step = null) {
+    getGameData(userStatus = null, userId = 'currentUser', level = null, step = null, difficultyLevel = 4) {
         console.log('📊 获取游戏数据...');
 
-        // const userStatus = this.checkUserStatus(userId);
+        // 如果没有传入用户状态，获取当前用户状态
+        if (!userStatus) {
+            userStatus = this.checkUserStatus('currentUser');
+        }
 
         // 使用传入的参数或用户当前进度
         const currentLevel = level !== null ? level : userStatus.currentLevel;
@@ -372,12 +383,13 @@ class GameServer {
     }
 
     /**
-     * 获取新用户引导数据
-     * @param {number} level - 关卡等级
-     * @param {number} step - 步骤
-     * @returns {Object} 新用户引导数据
-     */
-    getNewUserGuideData(level, step) {
+   * 获取新用户引导数据
+   * @param {number} level - 关卡等级
+   * @param {number} step - 步骤
+   * @param {number} eggCount - 蛋数量
+   * @returns {Object} 引导数据
+   */
+    getNewUserGuideData(level = 0, step = 1, eggCount = 4) {
         console.log(`📖 获取新用户引导数据 - 等级: ${level}, 步骤: ${step}`);
 
         const levelKey = `lv${level}`;
@@ -407,21 +419,15 @@ class GameServer {
     }
 
     /**
-     * 获取老用户算法生成数据
+     * 获取算法生成的游戏数据（老用户）
      * @param {number} level - 关卡等级
      * @param {number} step - 步骤
      * @param {Object} userStatus - 用户状态
-     * @returns {Object} 算法生成的游戏数据
+     * @param {number} eggCount - 蛋数量
+     * @returns {Object} 算法数据
      */
-    getAlgorithmData(level, step, userStatus) {
-        console.log(`🎲 获取老用户算法生成数据 - 等级: ${level}, 步骤: ${step}`);
-        console.log('🎉 欢迎回来！');
-
-        // 确保地图系统已初始化
-        if (!this.mapState.isInitialized) {
-            console.warn('⚠️ 地图系统未初始化，等待初始化完成...');
-            throw new Error('地图系统未初始化，无法获取游戏数据');
-        }
+    getAlgorithmData(level = 0, step = 1, userStatus = null, eggCount = 4) {
+        console.log(`🤖 生成算法数据 - 等级: ${level}, 步骤: ${step}, 蛋数量: ${eggCount}`);
 
         // 获取用户已解锁的最高蛋等级
         const maxUnlockedEggType = userStatus.maxUnlockedEggType || 0;
@@ -429,11 +435,11 @@ class GameServer {
 
         // 从真实地图状态获取空位置
         const emptyPositions = this.getEmptyPositionsFromMap();
-        const randomEggSeats = this.selectRandomPositions(emptyPositions, 3);
+        const randomEggSeats = this.selectRandomPositions(emptyPositions, eggCount);
 
         // 根据解锁等级计算可用蛋类型
         const availableEggTypes = this.getAvailableEggTypes(maxUnlockedEggType);
-        const randomEggTypes = this.selectRandomEggTypes(availableEggTypes, 3);
+        const randomEggTypes = this.selectRandomEggTypes(availableEggTypes, eggCount);
 
         // 在地图状态中标记这些位置将被占用
         this.reservePositionsForEggs(randomEggSeats, randomEggTypes);
@@ -444,7 +450,7 @@ class GameServer {
             pointSeat: [] // 老用户不需要引导点
         };
 
-        console.log(`🥚 老用户蛋数据 - 位置: [${randomEggSeats}], 类型: [${randomEggTypes}]`);
+        console.log(`🥚 老用户蛋数据 (${eggCount}个蛋) - 位置: [${randomEggSeats}], 类型: [${randomEggTypes}]`);
         console.log(`📍 地图状态 - 空闲: ${this.mapState.emptyCells.size}, 占用: ${this.mapState.occupiedCells.size}`);
 
         return {
@@ -452,9 +458,10 @@ class GameServer {
             isNewUser: false,
             level: level,
             step: step,
+            eggCount: eggCount,
             data: algorithmData,
             userStatus: userStatus,
-            message: 'Algorithm data generated successfully for returning user'
+            message: `Algorithm data generated successfully for returning user with ${eggCount} eggs`
         };
     }
 
@@ -957,18 +964,17 @@ class GameServer {
     }
 
     /**
- * 查找蛋匹配（用于合成检查）
- * @param {number} cellId - 检查的格子ID（移动到的目标位置）
+ * 查找蛋匹配（用于合成检测）
+ * @param {number} cellId - 检查的格子ID
  * @param {Object} gameState - 游戏状态
  * @returns {Object|null} 匹配结果
  */
     findEggMatches(cellId, gameState) {
-        const cell = gameState.cells[cellId];
-        if (!cell || !cell.hasEgg) {
+        if (!gameState.cells[cellId] || !gameState.cells[cellId].hasEgg) {
             return null;
         }
 
-        const targetEggType = cell.eggType;
+        const targetEggType = gameState.cells[cellId].eggType;
         const matches = [];
         const visited = new Set();
         const queue = [cellId];
@@ -979,21 +985,24 @@ class GameServer {
             const currentCellId = queue.shift();
             matches.push(currentCellId);
 
+            // 获取相邻格子
             const adjacentCells = this.getAdjacentCells(currentCellId);
+
             for (const adjCellId of adjacentCells) {
-                if (!visited.has(adjCellId)) {
-                    const adjCell = gameState.cells[adjCellId];
-                    if (adjCell && adjCell.hasEgg && adjCell.eggType === targetEggType) {
-                        visited.add(adjCellId);
-                        queue.push(adjCellId);
-                    }
+                if (!visited.has(adjCellId) &&
+                    gameState.cells[adjCellId] &&
+                    gameState.cells[adjCellId].hasEgg &&
+                    gameState.cells[adjCellId].eggType === targetEggType) {
+
+                    visited.add(adjCellId);
+                    queue.push(adjCellId);
                 }
             }
         }
 
         if (matches.length >= 3) {
-            const newEggType = Math.min(targetEggType + 1, 6);
-            const score = this.calculateSynthesisScore(matches.length, targetEggType);
+            const newEggType = Math.min(targetEggType + 1, 7);
+            const score = this.calculateSynthesisScore(matches.length, targetEggType, newEggType);
 
             return {
                 matches: matches,
@@ -1009,31 +1018,84 @@ class GameServer {
 
     /**
      * 计算合成分数
-     * @param {number} eggCount - 蛋数量
-     * @param {number} eggType - 蛋类型
-     * @returns {number} 分数
+     * @param {number} eggCount - 参与合成的蛋数量
+     * @param {number} eggType - 原蛋类型
+     * @param {number} newEggType - 合成后的新蛋类型
+     * @returns {Object} 分数详情
      */
-    calculateSynthesisScore(eggCount, eggType) {
+    calculateSynthesisScore(eggCount, eggType, newEggType) {
         const baseScore = 10;
-        const typeMultiplier = (eggType + 1) * 5; // 高级蛋分数更高
+        const typeMultiplier = newEggType * 10; // 新蛋等级越高分数越高
         const countBonus = (eggCount - 3) * 5; // 超过3个的额外奖励
-        return baseScore + typeMultiplier + countBonus;
+        const levelBonus = Math.pow(newEggType, 2) * 5; // 等级平方奖励
+
+        const totalScore = baseScore + typeMultiplier + countBonus + levelBonus;
+
+        return {
+            baseScore: baseScore,
+            typeMultiplier: typeMultiplier,
+            countBonus: countBonus,
+            levelBonus: levelBonus,
+            totalScore: totalScore,
+            eggCount: eggCount,
+            fromType: eggType,
+            toType: newEggType
+        };
+    }
+
+    /**
+ * 更新分数系统
+ * @param {Object} scoreDetail - 分数详情
+ * @returns {Object} 更新后的分数状态
+ */
+    updateScoreSystem(scoreDetail) {
+        this.scoreSystem.currentScore += scoreDetail.totalScore;
+        this.scoreSystem.totalScore += scoreDetail.totalScore;
+        this.scoreSystem.sessionScore += scoreDetail.totalScore;
+
+        // 记录合成历史
+        this.scoreSystem.synthesisHistory.push({
+            timestamp: Date.now(),
+            scoreDetail: scoreDetail,
+            currentTotal: this.scoreSystem.currentScore
+        });
+
+        console.log(`📊 分数更新: +${scoreDetail.totalScore}, 当前总分: ${this.scoreSystem.currentScore}`);
+
+        return {
+            currentScore: this.scoreSystem.currentScore,
+            addedScore: scoreDetail.totalScore,
+            scoreDetail: scoreDetail
+        };
+    }
+
+    /**
+ * 获取当前分数状态
+ * @returns {Object} 分数状态
+ */
+    getScoreStatus() {
+        return {
+            currentScore: this.scoreSystem.currentScore,
+            totalScore: this.scoreSystem.totalScore,
+            sessionScore: this.scoreSystem.sessionScore,
+            synthesisCount: this.scoreSystem.synthesisHistory.length
+        };
     }
 
     /**
      * 获取蛋类型名称
-     * @param {number} eggType - 蛋类型 (0-6)
+     * @param {number} eggType - 蛋类型 (1-7)
      * @returns {string} 蛋类型名称
      */
     getEggTypeName(eggType) {
         const eggNames = {
-            0: '白色', // egg_mc0
-            1: '绿色', // egg_mc1
-            2: '蓝色', // egg_mc2
-            3: '紫色', // egg_mc3
-            4: '红色', // egg_mc4
-            5: '黄色', // egg_mc5
-            6: '橙色'  // egg_mc6
+            1: '白色', // egg_mc1
+            2: '绿色', // egg_mc2
+            3: '蓝色', // egg_mc3
+            4: '紫色', // egg_mc4
+            5: '红色', // egg_mc5
+            6: '黄色', // egg_mc6
+            7: '橙色'  // egg_mc7
         };
         return eggNames[eggType] || '未知';
     }
@@ -1090,13 +1152,13 @@ class GameServer {
     }
 
     /**
- * 获取可用的蛋类型（基于解锁等级）
- * @param {number} maxUnlockedEggType - 最高解锁等级
- * @returns {Array} 可用蛋类型数组
- */
+     * 获取可用的蛋类型（基于解锁等级）
+     * @param {number} maxUnlockedEggType - 最高解锁等级
+     * @returns {Array} 可用蛋类型数组
+     */
     getAvailableEggTypes(maxUnlockedEggType) {
         const availableTypes = [];
-        for (let i = 0; i <= Math.min(maxUnlockedEggType, 6); i++) {
+        for (let i = 1; i <= Math.min(maxUnlockedEggType, 7); i++) {
             availableTypes.push(i);
         }
         console.log(`🎯 可用蛋类型: [${availableTypes.join(', ')}] (解锁到: ${maxUnlockedEggType})`);
@@ -1128,7 +1190,7 @@ class GameServer {
      * @returns {number} 选中的蛋类型
      */
     generateWeightedRandomEggType(availableTypes) {
-        if (availableTypes.length === 0) return 0;
+        if (availableTypes.length === 0) return 1;
         if (availableTypes.length === 1) return availableTypes[0];
 
         // 为每个可用类型分配权重（低级蛋权重更高）
@@ -1164,7 +1226,6 @@ class GameServer {
      * @param {number} newEggType - 新解锁的蛋等级
      */
     updateMaxUnlockedEggType(userId, newEggType) {
-        // 🔥 直接从缓存获取，避免重新创建对象
         const userData = this.userDataCache.get(userId);
 
         if (!userData) {
@@ -1172,20 +1233,16 @@ class GameServer {
             return;
         }
 
-        const currentMax = userData.maxUnlockedEggType || 0;
+        const currentMax = userData.maxUnlockedEggType || 1;
         console.log(`🔍 当前解锁等级检查: ${currentMax} vs 新等级: ${newEggType}`);
 
         if (newEggType > currentMax) {
-            // 直接修改缓存中的数据
             userData.maxUnlockedEggType = newEggType;
-
-            // 保存到localStorage和更新缓存
             this.saveUserData(userId, userData);
 
             console.log(`🎉 用户 ${userId} 解锁了新蛋等级: ${newEggType} (${this.getEggTypeName(newEggType)})`);
             console.log(`📈 解锁进度: ${currentMax} -> ${newEggType}`);
 
-            // 验证更新是否成功
             const verifyData = this.userDataCache.get(userId);
             console.log(`✅ 验证更新结果: maxUnlockedEggType = ${verifyData.maxUnlockedEggType}`);
         } else {
@@ -1586,10 +1643,23 @@ class GameServer {
             console.log(`🥚 目标位置 ${targetCellId} 更新为 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋`);
         }
 
+        // 计算并更新分数
+        const scoreDetail = this.calculateSynthesisScore(
+            synthesisResult.matches.length,
+            synthesisResult.eggType,
+            synthesisResult.newEggType
+        );
+
+        const scoreUpdate = this.updateScoreSystem(scoreDetail);
+
+        // 将分数信息添加到合成结果中
+        synthesisResult.scoreDetail = scoreDetail;
+        synthesisResult.scoreUpdate = scoreUpdate;
+
         // 🔥 关键修复：合成成功后更新解锁等级
         this.onEggSynthesisSuccess('currentUser', synthesisResult.newEggType, synthesisResult.matches.length);
 
-        console.log(`✅ 合成处理完成，生成 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋`);
+        console.log(`✅ 合成处理完成，生成 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋，获得 ${scoreDetail.totalScore} 分`);
     }
 
 

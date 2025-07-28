@@ -48,6 +48,7 @@ class GameScense {
         };
     }
 
+
     /**
      * 初始化游戏场景
      * @param {Object} gameData - 游戏数据对象
@@ -63,6 +64,8 @@ class GameScense {
         this.config = gameData.config;
         this.loadedSounds = gameData.loadedSounds;
         this.loadedImages = gameData.loadedImages;
+
+        this.difficultySelectionEnabled = false;
 
         try {
             // 保存用户数据和游戏配置
@@ -82,6 +85,8 @@ class GameScense {
             // 根据用户类型决定是否生成蛋
             // this.handlePostInitialization();
 
+            this.showFailure();
+
             this.isInitialized = true;
             console.log('✅ GameScense 初始化完成');
 
@@ -100,24 +105,18 @@ class GameScense {
 
         try {
 
-            this.selectDifficulty();
-            // 1. 从 GameServer 获取地图配置
-            // await this.initMapFromServer();
-
-            // 2. 获取游戏场景中的 gamebox 元件
-            // this.getGamebox();
-
-            // 3. 初始化游戏元素
-            // this.initGameElements();
-
-            // 4. 设置事件监听
-            // this.setupEventListeners();
-
-            // 5. 验证接收到的数据
-            // this.verifyGameData();
-
-            // 6. 根据游戏配置初始化棋盘内容
-            // this.initGameBoard();
+            // 检查是否开启难度选择
+            if (this.difficultySelectionEnabled) {
+                console.log('🎮 开启了难度选择，等待用户选择难度');
+                // 默认调用 SelectLine 模块处理难度选择
+                this.initDifficultySelection();
+            } else {
+                console.log('🎮 未开启难度选择，使用默认中等难度');
+                // 直接使用中等难度获取游戏数据
+                this.selectedDifficulty = 'normal';
+                await this.loadGameDataByDifficulty('normal');
+                this.continueInitialization();
+            }
 
             console.log('✅ 异步初始化完成');
 
@@ -128,135 +127,162 @@ class GameScense {
     }
 
 
-    selectDifficulty() {
-        console.log('🎮 选择游戏难度...');
-        this.startMc = utile.findMc(this.exportRoot, 'mc_select');
+    /**
+     * 初始化难度选择模块
+     */
+    initDifficultySelection() {
+        console.log('🎮 初始化难度选择模块...');
 
-        if (this.startMc) {
-            console.log('✅ 找到难度选择界面');
+        // 先隐藏选择难度UI
+        this.hideDifficultyUI();
 
-            // 显示难度选择界面
-            this.startMc.visible = true;
+        const gameData = {
+            engine: this.engine,
+            stage: this.stage,
+            exportRoot: this.exportRoot,
+            loadedSounds: this.loadedSounds
+        };
 
-            // 查找三个难度按钮
-            const btnEasy = utile.findMc(this.startMc, 'btn_e');
-            const btnNormal = utile.findMc(this.startMc, 'btn_n');
-            const btnHard = utile.findMc(this.startMc, 'btn_h');
-
-           this.stage.on('click', (event) => {
-        const target = event.target;
-        console.log('🎯 舞台点击事件，目标:', target);
-        console.log('🎯 目标名称:', target.name);
-        console.log('🎯 目标父级:', target.parent);
-        
-        // 向上查找按钮容器
-        const clickedButton = this.findButtonContainer(target, [btnEasy, btnNormal, btnHard]);
-        
-        if (clickedButton === btnEasy) {
-            console.log('🟢 检测到简单难度按钮点击');
-            this.onDifficultySelected('easy');
-        } else if (clickedButton === btnNormal) {
-            console.log('🟡 检测到普通难度按钮点击');
-            this.onDifficultySelected('normal');
-        } else if (clickedButton === btnHard) {
-            console.log('🔴 检测到困难难度按钮点击');
-            this.onDifficultySelected('hard');
-        } else {
-            console.log('🎯 点击了其他区域，目标路径:', this.getTargetPath(target));
-        }
-    });
-            // 设置按钮样式
-            [btnEasy, btnNormal, btnHard].forEach(btn => {
-                if (btn) {
-                    btn.mouseEnabled = true;
-                    btn.cursor = "pointer";
-                }
+        // 初始化 SelectLine 模块
+        if (window.SelectLine) {
+            window.SelectLine.init(gameData, (difficulty) => {
+                this.onDifficultySelected(difficulty);
             });
         } else {
-            console.warn('⚠️ 未找到难度选择界面，跳过难度选择');
+            console.warn('⚠️ SelectLine 模块未找到，使用默认难度');
             this.onDifficultySelected('normal');
         }
-
-
-    }
-/**
- * 查找按钮容器
- * @param {Object} target - 点击的目标对象
- * @param {Array} buttons - 按钮数组
- * @returns {Object|null} 找到的按钮容器
- */
-findButtonContainer(target, buttons) {
-    let current = target;
-    
-    // 向上遍历父级，最多查找5层
-    for (let i = 0; i < 5 && current; i++) {
-        // 检查当前对象是否是按钮之一
-        for (const button of buttons) {
-            if (current === button) {
-                console.log(`✅ 找到按钮容器: ${button.name} (向上${i}层)`);
-                return button;
-            }
-        }
-        current = current.parent;
-    }
-    
-    return null;
-}
-/**
- * 获取目标对象的路径（用于调试）
- * @param {Object} target - 目标对象
- * @returns {string} 路径字符串
- */
-getTargetPath(target) {
-    const path = [];
-    let current = target;
-    
-    for (let i = 0; i < 5 && current; i++) {
-        const name = current.name || current.constructor.name;
-        path.push(name);
-        current = current.parent;
-    }
-    
-    return path.join(' -> ');
-}
-
-    // 辅助方法：检查target是否是parent的子元素
-    isChildOf(target, parent) {
-        if (!target || !parent) return false;
-        let current = target.parent;
-        while (current) {
-            if (current === parent) return true;
-            current = current.parent;
-        }
-        return false;
     }
 
     /**
- * 处理难度选择
- * @param {string} difficulty - 选择的难度 ('easy', 'normal', 'hard')
- */
-    onDifficultySelected(difficulty) {
-        console.log(`🎯 用户选择难度: ${difficulty}`);
-
-        // 播放点击音效
-        if (this.engine && this.loadedSounds.has('popo')) {
-            this.engine.playSound('popo');
-        }
-
-        // 隐藏难度选择界面
-        if (this.startMc) {
-            this.startMc.visible = false;
-        }
-
-        // 保存选择的难度
+     * 难度选择完成回调
+     */
+    async onDifficultySelected(difficulty) {
+        console.log(`🎯 接收到选择的难度: ${difficulty}`);
         this.selectedDifficulty = difficulty;
 
-        // 根据难度设置游戏参数
-        // this.applyDifficultySettings(difficulty);
+        try {
+            // 根据选择的难度获取游戏数据
+            await this.loadGameDataByDifficulty(difficulty);
 
-        // 继续游戏初始化流程
-        // this.continueInitialization();
+            // 继续游戏初始化流程
+            this.continueInitialization();
+        } catch (error) {
+            console.error('❌ 根据难度获取游戏数据失败:', error);
+            // 使用默认数据继续
+            this.continueInitialization();
+        }
     }
+
+
+    /**
+ * 根据难度获取游戏数据
+ * @param {string} difficulty - 难度等级 ('easy', 'normal', 'hard')
+ */
+    async loadGameDataByDifficulty(difficulty) {
+        console.log(`📊 根据难度 ${difficulty} 获取游戏数据...`);
+
+        // try {
+        //     // 根据难度映射到游戏参数
+        //     const difficultyParams = this.getDifficultyParams(difficulty);
+        //     console.log(`🎯 难度参数:`, difficultyParams);
+
+        //     // 从 GameServer 获取游戏配置数据
+        //     const gameConfigData = window.GameServer.getGameData(
+        //         this.userStatus,
+        //         'currentUser',
+        //         difficultyParams.level,
+        //         difficultyParams.step
+        //     );
+
+        //     if (gameConfigData && gameConfigData.success) {
+        //         this.gameData = gameConfigData;
+        //         console.log('🎯 根据难度获取到游戏配置:', this.gameData);
+        //     } else {
+        //         console.warn('⚠️ 获取游戏数据失败，使用默认配置');
+        //         // 使用默认配置
+        //         this.gameData = this.getDefaultGameData(difficulty);
+        //     }
+
+        // } catch (error) {
+        //     console.error('❌ 获取游戏数据时出错:', error);
+        //     // 使用默认配置
+        //     this.gameData = this.getDefaultGameData(difficulty);
+        // }
+        try {
+            // 从 SelectLine 获取难度对应的参数
+            const difficultyLevel = window.SelectLine ? window.SelectLine.getDifficultyLevel(difficulty) : 4;
+            console.log(`🎯 难度等级: ${difficultyLevel}`);
+
+            // 从 GameServer 获取游戏配置数据，保留完整参数
+            const gameConfigData = window.GameServer.getGameData(
+                this.userStatus,
+                'currentUser',
+                this.userStatus?.currentLevel || 0,
+                this.userStatus?.currentStep || 1,
+                difficultyLevel
+            );
+
+            if (gameConfigData && gameConfigData.success) {
+                this.gameData = gameConfigData;
+                console.log('🎯 根据难度获取到游戏配置:', this.gameData);
+            } else {
+                console.warn('⚠️ 获取游戏数据失败');
+                this.gameData = null;
+            }
+
+        } catch (error) {
+            console.error('❌ 获取游戏数据时出错:', error);
+            this.gameData = null;
+        }
+    }
+
+    /**
+ * 继续初始化流程
+ */
+    continueInitialization() {
+        console.log('🔄 继续游戏初始化...');
+
+        // 验证游戏数据
+        this.verifyGameData();
+
+        // 初始化其他游戏系统
+        this.initGameSystems();
+    }
+
+    /**
+     * 初始化游戏系统
+     */
+    async initGameSystems() {
+        console.log('🎯 初始化游戏系统...');
+
+        try {
+            // 1. 从 GameServer 获取地图配置
+            await this.initMapFromServer();
+
+            // 2. 获取游戏场景中的 gamebox 元件
+            this.getGamebox();
+
+            // 3. 初始化游戏元素
+            this.initGameElements();
+
+            // 4. 设置事件监听
+            this.setupEventListeners();
+
+
+            // 6. 初始化引导系统（如果需要）
+            // this.initGuideSystem();
+
+            // 7. 处理初始化后的逻辑
+            this.handlePostInitialization();
+
+            console.log('✅ 游戏系统初始化完成');
+
+        } catch (error) {
+            console.error('❌ 游戏系统初始化失败:', error);
+        }
+    }
+
     /**
      * 从 GameServer 初始化地图配置
      */
@@ -546,9 +572,7 @@ getTargetPath(target) {
     getEggFromFlygame(type) {
         console.log(`🔍 从 exportRoot 获取类型 ${type} 的蛋元件...`);
 
-        // 确保类型在有效范围内 (0-6)
-        const eggType = Math.max(0, Math.min(6, type));
-        const eggName = `egg_mc${eggType}`;
+        const eggName = `egg_mc${type}`;
 
         try {
             // 使用 utile 工具类查找蛋元件
@@ -635,47 +659,7 @@ getTargetPath(target) {
         console.log(`📍 记录了 ${this.pointSeats.length} 个指示位置:`, this.pointSeats);
     }
 
-    /**
-     * 初始化引导手势
-     */
-    initGuideGesture() {
-        console.log('👆 初始化引导手势...');
 
-        // 检查用户类型，决定是否需要引导
-        const shouldShowGuide = this.shouldShowGuideForUser();
-
-        if (!shouldShowGuide) {
-            console.log('👤 老用户无需引导，跳过引导功能');
-            return;
-        }
-
-        // 查找场景中的引导手势元件
-        this.findGuideGesture();
-
-        // 如果找到引导手势且有指示位置，开始引导流程
-        if (this.guideGesture && this.pointSeats && this.pointSeats.length > 0) {
-            this.startGuideProcess();
-        } else {
-            console.log('📍 没有引导手势或指示位置，跳过引导');
-        }
-    }
-
-    /**
-     * 判断是否需要为当前用户显示引导
-     * @returns {boolean} 是否需要显示引导
-     */
-    shouldShowGuideForUser() {
-        // 从游戏数据中获取用户状态
-        if (this.gameData && this.gameData.isNewUser !== undefined) {
-            const isNewUser = this.gameData.isNewUser;
-            console.log(`🔍 用户类型检查: ${isNewUser ? '新用户' : '老用户'}`);
-            return isNewUser;
-        }
-
-        // 如果没有用户数据，默认显示引导（安全起见）
-        console.log('⚠️ 无法确定用户类型，默认显示引导');
-        return true;
-    }
 
     /**
      * 处理初始化后的逻辑
@@ -719,10 +703,14 @@ getTargetPath(target) {
                 if (eggSeat && eggType && eggSeat.length === eggType.length) {
                     console.log(`📊 使用服务器数据生成蛋: 位置[${eggSeat}], 类型[${eggType}]`);
 
-                    // 根据服务器数据创建蛋
-                    for (let i = 0; i < eggSeat.length; i++) {
-                        await this.createEggAtPosition(eggSeat[i], eggType[i]);
-                    }
+                    this.playLongbossAnimation();
+
+                    // 同时创建所有蛋
+                    const createEggPromises = eggSeat.map((cellId, index) =>
+                        this.createEggAtPosition(cellId, eggType[index])
+                    );
+
+                    await Promise.all(createEggPromises);
 
                     utile.__sdklog(`✅ 成功为老用户生成 ${eggSeat.length} 个蛋`, this.chessboard);
                 } else {
@@ -736,27 +724,6 @@ getTargetPath(target) {
         } catch (error) {
             console.error('❌ 老用户蛋生成失败:', error);
             this.generateNewEggs();
-        }
-    }
-
-    /**
-     * 查找引导手势元件
-     */
-    findGuideGesture() {
-        console.log('🔍 查找引导手势元件 guide_mc...');
-
-        // 使用 utile 工具类查找元件
-        this.guideGesture = utile.findMc(this.exportRoot, 'guide_mc');
-
-        if (this.guideGesture) {
-            console.log('✅ 找到引导手势元件 guide_mc:', this.guideGesture);
-            // 初始时隐藏引导手势
-            this.guideGesture.visible = false;
-        } else {
-            console.warn('⚠️ 未找到引导手势元件 guide_mc');
-            // 打印可用的子元件名称用于调试
-            console.log('📋 打印可用元件列表以便调试:');
-            utile.logAvailableChildren(this.exportRoot);
         }
     }
 
@@ -783,183 +750,6 @@ getTargetPath(target) {
     }
 
 
-
-    /**
-     * 移动引导手势到目标位置
-     */
-    moveGuideGestureToTarget() {
-        if (!this.guideGesture) {
-            console.log('📍 没有引导手势，跳过引导');
-            return;
-        }
-
-        if (!this.pointSeats || this.pointSeats.length === 0) {
-            console.log('📍 没有有效的指示位置，隐藏引导手势');
-            this.guideGesture.visible = false;
-            return;
-        }
-
-        // 移动到当前指示位置
-        this.moveGuideToCurrentPoint();
-    }
-
-    /**
-     * 移动引导手势到当前指示点
-     */
-    moveGuideToCurrentPoint() {
-        if (this.currentPointIndex >= this.pointSeats.length) {
-            console.log('🎉 所有指示点都已完成，隐藏引导手势');
-            this.hideGuideGesture();
-            this.completeGuideProcess();
-            return;
-        }
-
-        const targetCellId = this.pointSeats[this.currentPointIndex];
-        const cellData = this.getCellData(targetCellId);
-
-        if (cellData) {
-            console.log(`👆 移动引导手势到格子 ${targetCellId} (${cellData.centerX}, ${cellData.centerY}) - 第 ${this.currentPointIndex + 1} 个指示点`);
-
-            // 计算引导手势的正确位置
-            const guidePosition = this.calculateGuidePosition(cellData);
-
-            console.log(`📍 引导手势坐标调整: 格子坐标(${cellData.centerX}, ${cellData.centerY}) -> 引导坐标(${guidePosition.x}, ${guidePosition.y})`);
-
-            // 设置引导手势位置
-            this.guideGesture.x = guidePosition.x;
-            this.guideGesture.y = guidePosition.y;
-            this.guideGesture.visible = true;
-
-            // 添加动画效果
-            this.animateGuideGesture();
-
-            // 设置等待点击状态
-            this.waitingForClick = true;
-            this.expectedClickCellId = targetCellId;
-
-            console.log(`⏳ 等待用户点击格子 ${targetCellId}`);
-        } else {
-            console.warn(`⚠️ 格子 ${targetCellId} 数据不存在`);
-        }
-    }
-
-    /**
-     * 计算引导手势的正确位置
-     */
-    calculateGuidePosition(cellData) {
-        if (!this.guideGesture || !this.gamebox) {
-            // 如果没有 gamebox 或引导手势，直接使用格子坐标
-            return { x: cellData.centerX, y: cellData.centerY };
-        }
-
-        // 检查引导手势的父容器
-        const guideParent = this.guideGesture.parent;
-        console.log(`🔍 引导手势父容器:`, guideParent?.constructor?.name || 'unknown');
-        console.log(`🔍 gamebox 容器:`, this.gamebox?.constructor?.name || 'unknown');
-
-        // 如果引导手势在 exportRoot 中，而格子坐标是相对于 gamebox 的
-        if (guideParent === this.exportRoot && this.gamebox !== this.exportRoot) {
-            // 需要将 gamebox 相对坐标转换为 exportRoot 绝对坐标
-            const gameboxX = this.gamebox.x || 0;
-            const gameboxY = this.gamebox.y || 0;
-
-            console.log(`📐 坐标转换: gamebox偏移(${gameboxX}, ${gameboxY})`);
-
-            return {
-                x: cellData.centerX + gameboxX,
-                y: cellData.centerY + gameboxY
-            };
-        }
-
-        // 如果引导手势和格子在同一个坐标系中，直接使用格子坐标
-        return { x: cellData.centerX, y: cellData.centerY };
-    }
-
-    /**
-     * 引导手势动画
-     */
-    animateGuideGesture() {
-        if (!this.guideGesture) return;
-
-        console.log('✨ 启动引导手势动画');
-
-        // 停止之前的动画
-        createjs.Tween.removeTweens(this.guideGesture);
-
-        // 创建点击动画：缩放 + 透明度变化
-        createjs.Tween.get(this.guideGesture, { loop: true })
-            .to({ scaleX: 1.2, scaleY: 1.2, alpha: 0.8 }, 600, createjs.Ease.sineInOut)
-            .to({ scaleX: 1.0, scaleY: 1.0, alpha: 1.0 }, 600, createjs.Ease.sineInOut)
-            .wait(500);
-    }
-
-    /**
-     * 隐藏引导手势
-     */
-    hideGuideGesture() {
-        if (this.guideGesture) {
-            console.log('👆 隐藏引导手势');
-            createjs.Tween.removeTweens(this.guideGesture);
-            this.guideGesture.visible = false;
-        }
-    }
-
-    /**
-     * 显示引导手势
-     */
-    showGuideGesture() {
-        if (this.guideGesture) {
-            console.log('👆 显示引导手势');
-            this.guideGesture.visible = true;
-            this.animateGuideGesture();
-        }
-    }
-
-    /**
-     * 重置引导状态
-     */
-    resetGuideState() {
-        console.log('🔄 重置引导状态');
-        this.currentPointIndex = 0;
-        this.waitingForClick = false;
-        this.expectedClickCellId = null;
-
-        if (this.guideGesture) {
-            createjs.Tween.removeTweens(this.guideGesture);
-            this.guideGesture.visible = false;
-        }
-    }
-
-    /**
-     * 开始引导流程
-     */
-    startGuideProcess() {
-        console.log('🎯 开始引导流程');
-        this.resetGuideState();
-        this.moveGuideToCurrentPoint();
-    }
-
-    /**
-     * 完成引导流程
-     */
-    completeGuideProcess() {
-        console.log('🎊 引导流程完成！');
-
-        // 重置所有引导相关状态
-        this.resetGuideState();
-
-        // 清除选中状态（如果有）
-        this.clearSelection();
-
-        // 引导完成后生成蛋
-        setTimeout(() => {
-            console.log('📖 新用户引导完成，生成蛋');
-            this.generateNewEggs();
-        }, 1000);
-
-        // 现在用户可以自由操作元件了
-        console.log('💡 现在你可以点击蛋选中它，然后点击空格子移动蛋进行合成！');
-    }
 
     /**
      * 更新用户进度（调用 GameServer）
@@ -1097,6 +887,8 @@ getTargetPath(target) {
             // console.log(`  - [${i}] ${child.name || child.constructor.name}:`, child);
         }
 
+        // 3. 初始化游戏元素
+        this.initGoldDisplay();
         // 这里可以获取游戏中的具体元件
         // 例如：
         // this.player = this.gamebox.player;
@@ -1107,26 +899,47 @@ getTargetPath(target) {
     }
 
     /**
+ * 初始化金币显示
+ */
+    initGoldDisplay() {
+        console.log('💰 初始化金币显示...');
+
+        try {
+            // 获取金币显示元件
+            const goldMc = this.exportRoot.mc_gold;
+            if (goldMc && goldMc.text) {
+                // 设置初始金币为0
+                goldMc.text.text = "0";
+                console.log('✅ 金币显示初始化为0');
+            } else {
+                console.warn('⚠️ 未找到 mc_gold 或其 text 属性');
+            }
+        } catch (error) {
+            console.error('❌ 初始化金币显示失败:', error);
+        }
+    }
+
+    /**
      * 设置事件监听
      */
     setupEventListeners() {
         console.log('👂 设置事件监听...');
 
         // 启用舞台交互
-        if (this.stage) {
-            createjs.Touch.enable(this.stage);
-            this.stage.enableMouseOver(10);
-            this.stage.mouseMoveOutside = true;
-        }
+        // if (this.stage) {
+        //     createjs.Touch.enable(this.stage);
+        //     this.stage.enableMouseOver(10);
+        //     this.stage.mouseMoveOutside = true;
+        // }
 
         // 添加点击事件监听
         if (this.gamebox) {
-            this.gamebox.addEventListener('click', this.onGameboxClick.bind(this));
+            this.gamebox.on('click', this.onGameboxClick, this);
         }
 
         // 添加键盘事件监听
-        document.addEventListener('keydown', this.onKeyDown.bind(this));
-        document.addEventListener('keyup', this.onKeyUp.bind(this));
+        // document.addEventListener('keydown', this.onKeyDown.bind(this));
+        // document.addEventListener('keyup', this.onKeyUp.bind(this));
 
         console.log('✅ 事件监听设置完成');
     }
@@ -1144,6 +957,12 @@ getTargetPath(target) {
         const localY = event.localY || event.stageY;
 
         console.log(`📍 点击坐标: (${localX}, ${localY})`);
+
+        // 检查是否点击了蛋元件
+        if (event.currentTarget.name !== this.gamebox.name) {
+            console.log('🥚 点击了蛋元件，忽略gamebox事件');
+            return;
+        }
 
         // 获取被点击的格子ID
         const cellId = this.getCellIdFromPosition(localX, localY);
@@ -1285,9 +1104,12 @@ getTargetPath(target) {
                 // 如果有新蛋数据，创建新蛋
                 if (result.newEggs && result.newEggs.length > 0) {
                     console.log('🥚 创建新蛋');
+                    // 播放龙boss动画
+                    this.playLongbossAnimation();
                     const createEggPromises = result.newEggs.map(eggData =>
                         this.createEggAtPosition(eggData.cellId, eggData.eggType)
                     );
+
                     return Promise.all(createEggPromises);
                 }
                 return Promise.resolve();
@@ -1403,13 +1225,18 @@ getTargetPath(target) {
 
 
     /**
-     * 执行合成动画
-     * @param {Object} synthesisData - 合成数据
-     */
+ * 执行合成动画
+ * @param {Object} synthesisData - 合成数据
+ */
     async executeSynthesisAnimation(synthesisData, positionsToDelete) {
         console.log('🎬 开始执行合成动画...');
 
         const { matches, eggType, newEggType, synthesisPosition, score } = synthesisData;
+
+        // score 就是 scoreDetail
+        const scoreDetail = score;
+
+        console.log('🔍 使用score作为scoreDetail:', scoreDetail);
 
         // 收集所有参与合成的蛋元件（包括目标位置）
         const allEggsToSynthesize = [];
@@ -1429,24 +1256,25 @@ getTargetPath(target) {
 
         utile.__sdklog2(`🔍 总共 ${allEggsToSynthesize.length} 个蛋参与合成`);
 
+        // 执行蛋收集动画
+        await this.playEggCollectionAnimation(allEggsToSynthesize, synthesisPosition);
 
-        return this.playEggCollectionAnimation(allEggsToSynthesize, synthesisPosition)
-            .then(() => {
-                // 延迟后创建合成蛋
-                return new Promise((resolve) => {
-                    setTimeout(() => {
-                        this.createSynthesizedEgg(synthesisPosition, newEggType)
-                            .then(() => {
-                                resolve();
-                            });
-                    }, 0);
-                });
-            })
-            .then(() => {
-                // 更新分数
-                this.updateScore(score);
-                console.log(`✅ 合成完成！${window.GameServer.getEggTypeName(eggType)} -> ${window.GameServer.getEggTypeName(newEggType)}`);
-            });
+        // 延迟后创建合成蛋
+        await this.createSynthesizedEgg(synthesisPosition, newEggType);
+
+        // 更新分数显示并等待完成
+        // utile.__sdklog2('🔍 准备更新分数，scoreDetail:', scoreDetail);
+        // if (scoreDetail && scoreDetail.totalScore) {
+        //     await this.updateScoreDisplay(scoreDetail.totalScore);
+        //     console.log('💰 分数更新动画完成，准备创建新蛋');
+        // } else {
+        //     console.warn('⚠️ scoreDetail 数据缺失:', scoreDetail);
+        // }
+
+        console.log(`✅ 合成完成！${window.GameServer.getEggTypeName(eggType)} -> ${window.GameServer.getEggTypeName(newEggType)}`);
+
+        // 返回完成标识
+        return { completed: true };
     }
 
 
@@ -1596,26 +1424,113 @@ getTargetPath(target) {
      * @param {number} eggType - 蛋类型
      */
     async createEggAtPosition(cellId, eggType) {
-        const egg = this.getEggFromFlygame(eggType);
-        if (egg) {
-            egg.eggType = eggType;
-            egg.cellId = cellId;
 
-            // 添加到 gamebox
-            this.gamebox.addChild(egg);
-            // 维护前端映射
-            this.chessboard.pieces.set(cellId, egg);
-            utile.__sdklog(`📍 添加新蛋到映射: ********************格子${cellId}`);
-            this.chessboard.pieces.forEach((value, key) => {
-                console.log(`${key}: ${value}`);
-            });
-            // 放置到格子中
-            this.moveElementToPosition(egg, cellId);
 
-            // 播放出现动画
-            this.playEggAppearAnimation(egg);
+        console.log(`🥚 创建蛋: 格子${cellId}, 类型${eggType}`);
+
+        // 获取目标位置
+        const targetPosition = this.getCellPosition(cellId);
+        if (!targetPosition) {
+            console.error(`❌ 无法获取格子 ${cellId} 的位置坐标`);
+            return;
+        }
+
+        // 获取源蛋元件的初始位置（egg_mc[n]）
+        const sourceEggName = `egg_mc${eggType}`;
+        const sourceEgg = this.exportRoot[sourceEggName];
+
+        if (!sourceEgg) {
+            console.error(`❌ 找不到源蛋元件: ${sourceEggName}`);
+            return;
+        }
+
+        // 将源蛋位置转换为gamebox坐标系
+        const gameboxX = this.gamebox.x || 0;
+        const gameboxY = this.gamebox.y || 0;
+
+        const sourcePositionInGamebox = {
+            x: sourceEgg.x - gameboxX,
+            y: sourceEgg.y - gameboxY
+        };
+
+        console.log(`📍 源蛋位置: ${sourceEggName} 舞台坐标(${sourceEgg.x}, ${sourceEgg.y})`);
+        console.log(`📍 gamebox偏移: (${gameboxX}, ${gameboxY})`);
+        console.log(`📍 转换后gamebox坐标: (${sourcePositionInGamebox.x}, ${sourcePositionInGamebox.y})`);
+
+        // 创建新蛋元件
+        const newEgg = this.getEggFromFlygame(eggType);
+        if (!newEgg) {
+            console.error(`❌ 无法创建蛋元件: egg_mc${eggType}`);
+            return;
+        }
+
+        // 设置新蛋的初始状态（在gamebox坐标系中）
+        newEgg.eggType = eggType;
+        newEgg.cellId = cellId;
+        newEgg.x = sourcePositionInGamebox.x;
+        newEgg.y = sourcePositionInGamebox.y;
+        // newEgg.scaleX = 0.1;
+        // newEgg.scaleY = 0.1;
+        newEgg.alpha = 1;
+
+        // 添加到 gamebox
+        this.gamebox.addChild(newEgg);
+
+        console.log(`🚀 开始飞行动画: (${sourcePositionInGamebox.x}, ${sourcePositionInGamebox.y}) -> (${targetPosition.centerX}, ${targetPosition.centerY})`);
+
+        // 执行飞行动画
+        return new Promise((resolve) => {
+            createjs.Tween.get(newEgg)
+                // 第一阶段：闪烁出现效果 500ms
+                // .to({ alpha: 0 }, 100, createjs.Ease.quadInOut)
+                // .to({ alpha: 1 }, 100, createjs.Ease.quadInOut)
+                // .to({ alpha: 0 }, 100, createjs.Ease.quadInOut)
+                // .to({ alpha: 1 }, 100, createjs.Ease.quadInOut)
+                // .to({ alpha: 0 }, 50, createjs.Ease.quadInOut)
+                // .to({ alpha: 1 }, 50, createjs.Ease.quadInOut)
+                // 第二阶段：快速飞入到目标位置
+                .to({
+                    x: targetPosition.centerX,
+                    y: targetPosition.centerY,
+                    scaleX: 1.0,
+                    scaleY: 1.0
+                }, 300, createjs.Ease.quadOut)
+                .call(() => {
+                    console.log(`✅ 蛋飞行完成: 格子${cellId}`);
+
+                    // 维护前端映射
+                    this.chessboard.pieces.set(cellId, newEgg);
+
+                    console.log(`📍 添加新蛋到映射: 格子${cellId}`);
+                    resolve();
+                });
+        });
+    }
+
+
+    playLongbossAnimation() {
+        console.log('🐉 播放龙boss动画');
+
+        try {
+            const longboss = this.exportRoot.mc_longboss;
+            if (longboss) {
+                // 重置到第一帧并播放
+                longboss.gotoAndPlay(0);
+                console.log('✅ 龙boss动画开始播放');
+
+                // 监听播放完成
+                utile.addFrameEnd(longboss, function () {
+                    longboss.gotoAndStop(0);
+                    console.log('✅ 龙boss动画播放完成，停止在第0帧');
+                });
+            } else {
+                console.warn('⚠️ 未找到 mc_longboss 元件');
+            }
+        } catch (error) {
+            console.error('❌ 播放龙boss动画失败:', error);
         }
     }
+
     /**
         * 移动元件到指定位置（纯渲染操作）
         */
@@ -1651,32 +1566,6 @@ getTargetPath(target) {
     }
 
 
-    /**
-     * 引导点击成功处理
-     */
-    onGuideClickSuccess(cellId) {
-        console.log(`🎯 引导点击成功: 格子 ${cellId}`);
-
-        // 取消等待状态
-        this.waitingForClick = false;
-        this.expectedClickCellId = null;
-
-        // 检查是否是第一个指示点（选中元件）
-        if (this.currentPointIndex === 0) {
-            this.selectPieceAtCell(cellId);
-        } else {
-            // 后续指示点作为移动目标
-            this.moveSelectedPieceToTarget(cellId);
-        }
-
-        // 移动到下一个指示点
-        this.currentPointIndex++;
-
-        // 延迟一下再移动到下一个位置，让用户看到反馈
-        setTimeout(() => {
-            this.moveGuideToCurrentPoint();
-        }, 500);
-    }
 
     /**
      * 选中指定格子的元件
@@ -1844,23 +1733,78 @@ getTargetPath(target) {
     }
 
     /**
-     * 更新分数
-     * @param {number} eggCount - 合成的蛋数量
-     * @param {number} eggType - 蛋类型
-     */
-    updateScore(score) {
-        // 确保分数是数字
-        const validScore = typeof score === 'number' && !isNaN(score) ? score : 0;
+  * 更新分数显示
+  * @param {number} addedScore - 新增分数
+  */
+    updateScoreDisplay(addedScore) {
+        return new Promise((resolve) => {
+            try {
+                // 获取金币显示元件
+                const goldMc = this.exportRoot.mc_gold;
+                if (goldMc && goldMc.text) {
+                    // 获取当前分数
+                    const currentScore = parseInt(goldMc.text.text) || 0;
+                    const targetScore = currentScore + addedScore;
 
-        if (!this.gameDataState.score) {
-            this.gameDataState.score = 0;
-        }
+                    console.log(`💰 分数动画: ${currentScore} -> ${targetScore} (+${addedScore})`);
 
-        this.gameDataState.score += validScore;
-        console.log(`📊 获得分数: +${validScore}, 总分: ${this.gameDataState.score}`);
+                    // 创建数字递增动画
+                    const animationData = { score: currentScore };
 
-        // 这里可以更新UI显示
-        // this.updateScoreDisplay(this.gameDataState.score);
+                    createjs.Tween.get(animationData)
+                        .to({ score: targetScore }, 500, createjs.Ease.quadOut)
+                        .addEventListener("change", () => {
+                            // 实时更新显示的分数
+                            goldMc.text.text = Math.floor(animationData.score).toString();
+                        })
+                        .call(() => {
+                            // 确保最终分数正确
+                            goldMc.text.text = targetScore.toString();
+                            console.log(`💰 分数动画完成: ${targetScore}`);
+
+                            // 添加分数增加动画效果
+                            this.playScoreAnimation(goldMc, addedScore);
+
+                            resolve();
+                        });
+                } else {
+                    console.warn('⚠️ 未找到 mc_gold 或其 text 属性');
+                    resolve();
+                }
+            } catch (error) {
+                console.error('❌ 更新分数显示失败:', error);
+                resolve();
+            }
+        });
+    }
+
+    /**
+ * 播放分数增加动画
+ * @param {Object} goldMc - 金币元件
+ * @param {number} addedScore - 增加的分数
+ */
+    playScoreAnimation(goldMc, addedScore) {
+        // 创建飞入的分数文本
+        const scoreText = new createjs.Text(`+${addedScore}`, "24px Arial", "#FFD700");
+        scoreText.x = goldMc.x + 50;
+        scoreText.y = goldMc.y - 30;
+        scoreText.alpha = 0;
+
+        this.gamebox.addChild(scoreText);
+
+        // 分数飞入动画
+        createjs.Tween.get(scoreText)
+            .to({ alpha: 1, y: goldMc.y - 50 }, 300, createjs.Ease.backOut)
+            .wait(800)
+            .to({ alpha: 0, y: goldMc.y - 70 }, 300)
+            .call(() => {
+                this.gamebox.removeChild(scoreText);
+            });
+
+        // 金币元件缩放效果
+        createjs.Tween.get(goldMc)
+            .to({ scaleX: 1.1, scaleY: 1.1 }, 200, createjs.Ease.backOut)
+            .to({ scaleX: 1, scaleY: 1 }, 200, createjs.Ease.backIn);
     }
 
 
@@ -1974,7 +1918,127 @@ getTargetPath(target) {
 
         return mappingArray;
     }
+
+    /**
+ * 显示失败界面
+ */
+    showFailure() {
+        console.log('💀 显示失败界面...');
+
+        // 获取失败界面元件
+        const failureMc = utile.findMc(this.exportRoot, 'mc_failure');
+        if (!failureMc) {
+            console.warn('⚠️ 未找到 mc_failure 元件');
+            return;
+        }
+
+        // 显示失败界面
+        failureMc.visible = true;
+        utile.toShow(failureMc);
+
+        // 查找屏蔽层
+        const blockLayer = utile.findMc(failureMc, 'blockLayer');
+        if (blockLayer) {
+            blockLayer.mouseEnabled = true;
+
+            // console.log("////////////////////////////////////",blockLayer.width, blockLayer.height);
+
+            // 定义屏蔽层点击处理函数 - 关键：阻止所有事件传递
+            this.failureBlockClickHandler = (event) => {
+                console.log('🛡️ 失败界面屏蔽层拦截了点击事件');
+                event.stopImmediatePropagation(); // 立即停止事件传播
+                event.stopPropagation(); // 阻止事件冒泡
+                event.preventDefault(); // 阻止默认行为
+                return false; // 阻止事件继续传播
+            };
+
+            // 绑定屏蔽层点击事件
+            blockLayer.on('click', this.failureBlockClickHandler);
+
+            // 确保屏蔽层在最顶层
+            // failureMc.setChildIndex(blockLayer, failureMc.children.length - 1);
+
+            console.log('✅ 失败界面屏蔽层事件已绑定');
+        } else {
+            console.warn('⚠️ 未找到 mc_failure 下的 blockLayer 元件');
+        }
+
+        // 查找重新开始按钮
+        const btnAgain = utile.findMc(failureMc, 'btnagain');
+        if (btnAgain) {
+            // 定义重新开始点击处理函数
+            this.restartClickHandler = (event) => {
+                console.log('🔄 点击重新开始按钮');
+                event.stopPropagation(); // 防止触发屏蔽层事件
+                this.onRestartGame();
+            };
+
+            // 绑定重新开始按钮事件
+            btnAgain.on('click', this.restartClickHandler);
+
+            // 确保按钮在屏蔽层之上
+            if (blockLayer) {
+                failureMc.setChildIndex(btnAgain, failureMc.children.length - 1);
+            }
+
+            console.log('✅ 重新开始按钮事件已绑定');
+        } else {
+            console.warn('⚠️ 未找到 mc_failure 下的 btnagain 元件');
+        }
+
+        console.log('✅ 失败界面显示完成');
+    }
+
+    /**
+     * 隐藏失败界面
+     */
+    hideFailure() {
+        console.log('🗑️ 隐藏失败界面...');
+
+        // 获取失败界面元件
+        const failureMc = utile.findMc(this.exportRoot, 'mc_failure');
+        if (failureMc) {
+            // 移除屏蔽层事件
+            const blockLayer = utile.findMc(failureMc, 'blockLayer');
+            if (blockLayer && this.failureBlockClickHandler) {
+                blockLayer.off('click', this.failureBlockClickHandler);
+                this.failureBlockClickHandler = null;
+                console.log('✅ 屏蔽层点击事件已移除');
+            }
+
+            // 移除重新开始按钮事件
+            const btnAgain = utile.findMc(failureMc, 'btnagain');
+            if (btnAgain && this.restartClickHandler) {
+                btnAgain.off('click', this.restartClickHandler);
+                this.restartClickHandler = null;
+                console.log('✅ 重新开始按钮事件已移除');
+            }
+
+            // 隐藏失败界面
+            failureMc.visible = false;
+        }
+
+        console.log('✅ 失败界面隐藏完成');
+    }
+
+    /**
+     * 重新开始游戏
+     */
+    onRestartGame() {
+        console.log('🔄 重新开始游戏...');
+
+        // 隐藏失败界面（会自动移除事件注册）
+        this.hideFailure();
+
+        // 重置游戏状态
+        this.resetGame();
+
+        console.log('✅ 游戏重新开始');
+    }
 }
+
+
+
 
 // 直接创建全局对象，避免类名冲突
 console.log('🏗️ 创建 GameScense 实例...');
