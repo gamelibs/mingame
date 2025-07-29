@@ -419,6 +419,87 @@ class GameServer {
     }
 
     /**
+ * 重置游戏状态
+ */
+    resetGame() {
+        console.log('🔄 重置 GameServer 游戏状态...');
+
+        try {
+            // 1. 清空地图状态中的所有蛋数据
+            for (const cellId in this.mapState.cells) {
+                const cell = this.mapState.cells[cellId];
+                if (cell) {
+                    cell.isEmpty = true;
+                    cell.hasEgg = false;
+                    cell.eggType = null;
+                    cell.piece = null;
+                    cell.occupied = false;
+                }
+            }
+
+            // 2. 重置集合状态
+            this.mapState.occupiedCells.clear();
+            this.mapState.emptyCells.clear();
+
+            // 重新填充空闲格子集合
+            for (let cellId = 0; cellId < this.mapConfig.totalCells; cellId++) {
+                this.mapState.emptyCells.add(cellId);
+            }
+
+            // 3. 清除选择状态
+            this.clearSelection();
+
+            // 4. 重置分数系统
+            if (this.scoreSystem) {
+                this.scoreSystem.currentScore = 0;
+                this.scoreSystem.totalScore = 0;
+                this.scoreSystem.sessionScore = 0;
+                this.scoreSystem.synthesisHistory = [];
+                console.log('💰 当前游戏分数系统已重置为0');
+            }
+
+            // 5. 重置用户解锁蛋等级为0（从蛋1重新开始解锁）
+            this.resetUserUnlockLevel();
+
+            console.log('✅ GameServer 游戏状态重置完成');
+            console.log(`📊 地图状态 - 空闲: ${this.mapState.emptyCells.size}, 占用: ${this.mapState.occupiedCells.size}`);
+
+            return {
+                success: true,
+                message: 'Game state reset successfully'
+            };
+
+        } catch (error) {
+            console.error('❌ GameServer 游戏状态重置失败:', error);
+            return {
+                success: false,
+                message: error.message
+            };
+        }
+    }
+
+    /**
+ * 重置用户解锁等级
+ */
+    resetUserUnlockLevel() {
+        console.log('🔄 重置用户解锁蛋等级...');
+
+        const userData = this.userDataCache.get('currentUser');
+
+        if (userData) {
+            const oldLevel = userData.maxUnlockedEggType || 0;
+            userData.maxUnlockedEggType = 0;
+
+            // 保存更新后的用户数据
+            this.saveUserData('currentUser', userData);
+
+            console.log(`🎯 用户解锁等级已重置: ${oldLevel} -> 0 (从蛋1重新开始解锁)`);
+        } else {
+            console.warn('⚠️ 未找到用户数据，无法重置解锁等级');
+        }
+    }
+
+    /**
      * 获取算法生成的游戏数据（老用户）
      * @param {number} level - 关卡等级
      * @param {number} step - 步骤
@@ -599,13 +680,13 @@ class GameServer {
 
     /**
      * 初始化游戏地图的寻路网格
-     * @param {number} rows - 行数 (默认 8)
+     * @param {number} rows - 行数 (默认 6)
      * @param {number} cols - 列数 (默认 6)
      * @param {number} cellSize - 格子大小 (默认 150)
      * @param {number} pathType - 寻路类型 (4: 四方向, 8: 八方向)
      * @returns {Promise} 返回初始化的网格数据
      */
-    initPathfindingGrid(rows = 8, cols = 6, cellSize = 150, pathType = 4) {
+    initPathfindingGrid(rows = 6, cols = 6, cellSize = 150, pathType = 4) {
         console.log(`🗺️ 初始化寻路网格: ${rows}x${cols}, 格子大小: ${cellSize}, 寻路类型: ${pathType}方向`);
 
         return new Promise((resolve, reject) => {
@@ -851,86 +932,6 @@ class GameServer {
         return adjacent;
     }
 
-    /**
-     * 处理蛋的选择和移动请求（类似 setMosterSear）
-     * @param {string} action - 操作类型
-     * @param {number} cellId - 格子ID
-     * @param {Object} gameState - 当前游戏状态
-     * @returns {Promise<Object>} 操作结果
-     */
-    // processEggAction(action, cellId, gameState) {
-    //     console.log(`🎮 处理蛋操作: ${action}, 格子: ${cellId}`);
-
-    //     return new Promise((resolve) => {
-    //         // 如果已经选中了蛋
-    //         if (gameState.selectedEgg) {
-    //             // 检查是否点击同一个蛋（取消选择）
-    //             if (gameState.selectedEgg.cellId === cellId && gameState.selectedEgg.isSelected) {
-    //                 resolve({
-    //                     code: 0,
-    //                     step: 3, // 取消选择
-    //                     cellId: cellId,
-    //                     message: "取消选择蛋"
-    //                 });
-    //                 return;
-    //             }
-
-    //             // 检查目标位置是否为空（可以移动）
-    //             if (!gameState.cells[cellId] || !gameState.cells[cellId].hasEgg) {
-    //                 // 生成移动路径
-    //                 const fromPos = this.cellIdToPosition(gameState.selectedEgg.cellId);
-    //                 const toPos = this.cellIdToPosition(cellId);
-    //                 const path = this.findPath(fromPos, toPos);
-
-    //                 if (path.length === 0) {
-    //                     resolve({
-    //                         code: -1,
-    //                         cellId: gameState.selectedEgg.cellId,
-    //                         message: "无法找到移动路径"
-    //                     });
-    //                     return;
-    //                 }
-
-    //                 resolve({
-    //                     code: 0,
-    //                     step: 2, // 移动步骤
-    //                     fromCellId: gameState.selectedEgg.cellId,
-    //                     toCellId: cellId,
-    //                     eggType: gameState.selectedEgg.eggType,
-    //                     path: path,
-    //                     message: "开始移动蛋"
-    //                 });
-    //                 return;
-    //             } else {
-    //                 // 目标位置有蛋，切换选择
-    //                 resolve({
-    //                     code: 0,
-    //                     step: 4, // 切换选择
-    //                     oldCellId: gameState.selectedEgg.cellId,
-    //                     newCellId: cellId,
-    //                     message: "切换选择的蛋"
-    //                 });
-    //                 return;
-    //             }
-    //         } else {
-    //             // 没有选中蛋，检查点击位置是否有蛋
-    //             if (gameState.cells[cellId] && gameState.cells[cellId].hasEgg) {
-    //                 resolve({
-    //                     code: 0,
-    //                     step: 1, // 选择蛋
-    //                     cellId: cellId,
-    //                     eggType: gameState.cells[cellId].eggType,
-    //                     message: "选择蛋"
-    //                 });
-    //             } else {
-    //                 resolve({
-    //                     code: -1,
-    //                     message: "该位置没有蛋"
-    //                 });
-    //             }
-    //         }
-    //     });
-    // }
 
     /**
      * 检查蛋合成条件（类似 getMosterClearList）
@@ -1017,19 +1018,27 @@ class GameServer {
     }
 
     /**
-     * 计算合成分数
-     * @param {number} eggCount - 参与合成的蛋数量
-     * @param {number} eggType - 原蛋类型
-     * @param {number} newEggType - 合成后的新蛋类型
-     * @returns {Object} 分数详情
-     */
+ * 计算合成分数
+ * @param {number} eggCount - 参与合成的蛋数量
+ * @param {number} eggType - 原蛋类型（被合成的蛋等级）
+ * @param {number} newEggType - 合成后的新蛋类型
+ * @returns {Object} 分数详情
+ */
     calculateSynthesisScore(eggCount, eggType, newEggType) {
-        const baseScore = 10;
-        const typeMultiplier = newEggType * 10; // 新蛋等级越高分数越高
-        const countBonus = (eggCount - 3) * 5; // 超过3个的额外奖励
-        const levelBonus = Math.pow(newEggType, 2) * 5; // 等级平方奖励
+        // 🔥 修正：使用原蛋等级（eggType）计算分数，不是新蛋等级
+        const baseScore = Math.min(eggType * 2, 20);
+        const typeMultiplier = eggType * 10;
+        const countBonus = Math.round(Math.pow(eggCount - 3, 1.5) * 10);
+        const levelBonus = Math.pow(eggType, 2) * 5;
 
-        const totalScore = baseScore + typeMultiplier + countBonus + levelBonus;
+        const totalScore = Math.round(baseScore + typeMultiplier + countBonus + levelBonus);
+
+        console.log(`🧮 合成分数计算 - 原等级${eggType}, 数量${eggCount}:`);
+        console.log(`  基础分: min(${eggType} × 2, 20) = ${baseScore}`);
+        console.log(`  类型倍数: ${eggType} × 10 = ${typeMultiplier}`);
+        console.log(`  数量奖励: (${eggCount} - 3)^1.5 × 10 = ${countBonus}`);
+        console.log(`  等级奖励: ${eggType}² × 5 = ${levelBonus}`);
+        console.log(`  总分: ${totalScore}`);
 
         return {
             baseScore: baseScore,
@@ -1643,23 +1652,47 @@ class GameServer {
             console.log(`🥚 目标位置 ${targetCellId} 更新为 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋`);
         }
 
-        // 计算并更新分数
-        const scoreDetail = this.calculateSynthesisScore(
-            synthesisResult.matches.length,
-            synthesisResult.eggType,
-            synthesisResult.newEggType
-        );
-
+        // 🔥 修正：使用已有的分数数据，不要重复计算
+        const scoreDetail = synthesisResult.score;
         const scoreUpdate = this.updateScoreSystem(scoreDetail);
 
         // 将分数信息添加到合成结果中
         synthesisResult.scoreDetail = scoreDetail;
         synthesisResult.scoreUpdate = scoreUpdate;
 
-        // 🔥 关键修复：合成成功后更新解锁等级
+        // 合成成功后更新解锁等级
         this.onEggSynthesisSuccess('currentUser', synthesisResult.newEggType, synthesisResult.matches.length);
 
+        // 异步更新排行榜数据
+        this.updateLeaderboardAsync();
+
         console.log(`✅ 合成处理完成，生成 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋，获得 ${scoreDetail.totalScore} 分`);
+    }
+
+
+    /**
+ * 异步更新排行榜数据
+ */
+    updateLeaderboardAsync() {
+        // 异步执行，不阻塞主流程
+        setTimeout(() => {
+            try {
+                if (window.LeaderBoard) {
+                    console.log('📊 异步更新排行榜数据...');
+                    const updateResult = window.LeaderBoard.updateUserRecord('currentUser');
+
+                    if (updateResult) {
+                        utitle.__sdklog3('排行榜数据更新成功');
+                    } else {
+                        console.log('📊 排行榜数据无变化');
+                    }
+                } else {
+                    console.warn('⚠️ LeaderBoard 模块未找到');
+                }
+            } catch (error) {
+                console.error('❌ 异步更新排行榜失败:', error);
+            }
+        }, 0);
     }
 
 

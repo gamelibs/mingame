@@ -65,7 +65,9 @@ class GameScense {
         this.loadedSounds = gameData.loadedSounds;
         this.loadedImages = gameData.loadedImages;
 
-        this.difficultySelectionEnabled = false;
+        this.difficultySelectionEnabled = false; //难度
+
+        this.maxUnlockedLevel = 1; // 初始只解锁等级1
 
         try {
             // 保存用户数据和游戏配置
@@ -74,6 +76,11 @@ class GameScense {
 
             console.log('👤 接收到用户状态:', this.userStatus);
             console.log('🎯 接收到游戏配置:', this.gameData);
+
+
+            // 初始化解锁动画元件
+            this.initUnlockAnimations();
+
 
             // 异步初始化流程
             await this.initializeAsync();
@@ -183,44 +190,17 @@ class GameScense {
     async loadGameDataByDifficulty(difficulty) {
         console.log(`📊 根据难度 ${difficulty} 获取游戏数据...`);
 
-        // try {
-        //     // 根据难度映射到游戏参数
-        //     const difficultyParams = this.getDifficultyParams(difficulty);
-        //     console.log(`🎯 难度参数:`, difficultyParams);
-
-        //     // 从 GameServer 获取游戏配置数据
-        //     const gameConfigData = window.GameServer.getGameData(
-        //         this.userStatus,
-        //         'currentUser',
-        //         difficultyParams.level,
-        //         difficultyParams.step
-        //     );
-
-        //     if (gameConfigData && gameConfigData.success) {
-        //         this.gameData = gameConfigData;
-        //         console.log('🎯 根据难度获取到游戏配置:', this.gameData);
-        //     } else {
-        //         console.warn('⚠️ 获取游戏数据失败，使用默认配置');
-        //         // 使用默认配置
-        //         this.gameData = this.getDefaultGameData(difficulty);
-        //     }
-
-        // } catch (error) {
-        //     console.error('❌ 获取游戏数据时出错:', error);
-        //     // 使用默认配置
-        //     this.gameData = this.getDefaultGameData(difficulty);
-        // }
         try {
             // 从 SelectLine 获取难度对应的参数
             const difficultyLevel = window.SelectLine ? window.SelectLine.getDifficultyLevel(difficulty) : 4;
             console.log(`🎯 难度等级: ${difficultyLevel}`);
 
-            // 从 GameServer 获取游戏配置数据，保留完整参数
+            // 🔥 修正：不传入旧的userStatus，让后端获取最新状态
             const gameConfigData = window.GameServer.getGameData(
-                this.userStatus,
+                null, // 不传入userStatus，让后端自己获取最新的
                 'currentUser',
-                this.userStatus?.currentLevel || 0,
-                this.userStatus?.currentStep || 1,
+                null, // 使用用户当前等级
+                null, // 使用用户当前步骤
                 difficultyLevel
             );
 
@@ -900,6 +880,18 @@ class GameScense {
     }
 
     /**
+ * 格式化数字显示
+ * @param {number} num - 数字
+ * @returns {string} 格式化后的字符串
+ */
+    formatNumber(num) {
+        if (num < 1000) return num.toString();
+        if (num < 1000000) return (num / 1000).toFixed(num >= 10000 ? 0 : 1) + 'k';
+        if (num < 1000000000) return (num / 1000000).toFixed(1) + 'm';
+        return (num / 1000000000).toFixed(1) + 'b';
+    }
+
+    /**
  * 初始化金币显示
  */
     initGoldDisplay() {
@@ -921,6 +913,7 @@ class GameScense {
     }
 
     /**
+     * 所有按钮在这里进行注册
      * 设置事件监听
      */
     setupEventListeners() {
@@ -936,6 +929,23 @@ class GameScense {
         // 添加点击事件监听
         if (this.gamebox) {
             this.gamebox.on('click', this.onGameboxClick, this);
+        }
+
+        // 查找并绑定重新开始按钮
+        const btnRestart = utile.findMc(this.exportRoot, 'btn_restart');
+        if (btnRestart) {
+            // 定义重新开始点击处理函数
+            this.btnRestartClickHandler = (event) => {
+                console.log('🔄 点击重新开始按钮 (btn_restart)');
+                event.stopPropagation();
+                this.onRestartGame();
+            };
+
+            // 绑定重新开始按钮事件
+            btnRestart.on('click', this.btnRestartClickHandler);
+            console.log('✅ btn_restart 按钮事件已绑定');
+        } else {
+            console.warn('⚠️ 未找到 btn_restart 按钮');
         }
 
         // 添加键盘事件监听
@@ -1260,17 +1270,33 @@ class GameScense {
         // 执行蛋收集动画
         await this.playEggCollectionAnimation(allEggsToSynthesize, synthesisPosition);
 
+
+        // 更新分数显示并等待完成
+        utile.__sdklog2('🔍 准备更新分数，scoreDetail:', scoreDetail);
+        if (scoreDetail && scoreDetail.totalScore) {
+            // 显示浮动分数在合成位置
+            this.showFloatingScore(scoreDetail.totalScore, synthesisPosition);
+            this.updateScoreDisplay(scoreDetail.totalScore);
+            console.log('💰 分数更新动画完成，准备创建新蛋');
+        } else {
+            console.warn('⚠️ scoreDetail 数据缺失:', scoreDetail);
+        }
+
         // 延迟后创建合成蛋
         await this.createSynthesizedEgg(synthesisPosition, newEggType);
 
-        // 更新分数显示并等待完成
-        // utile.__sdklog2('🔍 准备更新分数，scoreDetail:', scoreDetail);
-        // if (scoreDetail && scoreDetail.totalScore) {
-        //     await this.updateScoreDisplay(scoreDetail.totalScore);
-        //     console.log('💰 分数更新动画完成，准备创建新蛋');
-        // } else {
-        //     console.warn('⚠️ scoreDetail 数据缺失:', scoreDetail);
-        // }
+        // 检查是否解锁了新等级（简单检查）
+        if (newEggType > this.maxUnlockedLevel) {
+            console.log(`🎉 解锁新等级: ${this.maxUnlockedLevel} -> ${newEggType}`);
+
+            // 播放解锁动画
+            this.playUnlockAnimation(newEggType);
+
+            // 更新前端记录的最高等级
+            this.maxUnlockedLevel = newEggType;
+
+            console.log(`🎊 恭喜解锁 ${this.getEggTypeName(newEggType)} 蛋！`);
+        }
 
         console.log(`✅ 合成完成！${window.GameServer.getEggTypeName(eggType)} -> ${window.GameServer.getEggTypeName(newEggType)}`);
 
@@ -1398,26 +1424,6 @@ class GameScense {
         }
     }
 
-    /**
-     * 生成新蛋
-     */
-    // async generateNewEggs() {
-    //     console.log('🎲 生成新蛋...');
-
-    //     try {
-    //         // 调用 GameServer 生成随机蛋
-    //         const newEggs = window.GameServer.generateRandomEggs(this.gameDataState, 3);
-
-    //         // 在前端创建这些蛋
-    //         for (const eggData of newEggs) {
-    //             await this.createEggAtPosition(eggData.cellId, eggData.eggType);
-    //         }
-
-    //         console.log(`✅ 成功生成 ${newEggs.length} 个新蛋`, this.chessboard.pieces);
-    //     } catch (error) {
-    //         console.error('❌ 生成新蛋失败:', error);
-    //     }
-    // }
 
     /**
      * 在指定位置创建蛋
@@ -1734,20 +1740,25 @@ class GameScense {
     }
 
     /**
-  * 更新分数显示
-  * @param {number} addedScore - 新增分数
-  */
+    * 更新分数显示（支持格式化数字）
+    * @param {number} addedScore - 新增分数
+    */
     updateScoreDisplay(addedScore) {
         return new Promise((resolve) => {
             try {
+
+                // 显示浮动分数文本
+                // this.showFloatingScore(addedScore);
+
+
                 // 获取金币显示元件
                 const goldMc = this.exportRoot.mc_gold;
                 if (goldMc && goldMc.text) {
-                    // 获取当前分数
-                    const currentScore = parseInt(goldMc.text.text) || 0;
+                    // 解析当前显示的分数（去除k/m/b后缀）
+                    const currentScore = this.parseFormattedNumber(goldMc.text.text);
                     const targetScore = currentScore + addedScore;
 
-                    console.log(`💰 分数动画: ${currentScore} -> ${targetScore} (+${addedScore})`);
+                    console.log(`💰 分数动画: ${this.formatNumber(currentScore)} -> ${this.formatNumber(targetScore)} (+${addedScore})`);
 
                     // 创建数字递增动画
                     const animationData = { score: currentScore };
@@ -1755,16 +1766,14 @@ class GameScense {
                     createjs.Tween.get(animationData)
                         .to({ score: targetScore }, 500, createjs.Ease.quadOut)
                         .addEventListener("change", () => {
-                            // 实时更新显示的分数
-                            goldMc.text.text = Math.floor(animationData.score).toString();
+                            // 实时更新显示的分数（格式化）
+                            goldMc.text.text = this.formatNumber(Math.floor(animationData.score));
                         })
                         .call(() => {
                             // 确保最终分数正确
-                            goldMc.text.text = targetScore.toString();
-                            console.log(`💰 分数动画完成: ${targetScore}`);
+                            goldMc.text.text = this.formatNumber(targetScore);
+                            console.log(`💰 分数动画完成: ${this.formatNumber(targetScore)}`);
 
-                            // 添加分数增加动画效果
-                            this.playScoreAnimation(goldMc, addedScore);
 
                             resolve();
                         });
@@ -1780,32 +1789,106 @@ class GameScense {
     }
 
     /**
- * 播放分数增加动画
- * @param {Object} goldMc - 金币元件
- * @param {number} addedScore - 增加的分数
- */
-    playScoreAnimation(goldMc, addedScore) {
-        // 创建飞入的分数文本
-        const scoreText = new createjs.Text(`+${addedScore}`, "24px Arial", "#FFD700");
-        scoreText.x = goldMc.x + 50;
-        scoreText.y = goldMc.y - 30;
-        scoreText.alpha = 0;
+     * 显示浮动分数文本
+     * @param {number} score - 获得的分数
+     * @param {number} cellId - 合成位置的格子ID（可选）
+     */
+    showFloatingScore(score, cellId = null) {
+        try {
+            console.log(`✨ 显示浮动分数: +${score}`);
 
-        this.gamebox.addChild(scoreText);
+            // 创建文本对象
+            const floatingText = new createjs.Text(`+${score}`, "bold 36px Arial", "#FFD700");
+            floatingText.textAlign = "center";
+            floatingText.textBaseline = "middle";
 
-        // 分数飞入动画
-        createjs.Tween.get(scoreText)
-            .to({ alpha: 1, y: goldMc.y - 50 }, 300, createjs.Ease.backOut)
-            .wait(800)
-            .to({ alpha: 0, y: goldMc.y - 70 }, 300)
-            .call(() => {
-                this.gamebox.removeChild(scoreText);
-            });
+            // 确定显示位置
+            if (cellId !== null) {
+                // 在合成位置显示
+                const position = this.getCellPosition(cellId);
+                if (position) {
+                    floatingText.x = position.centerX;
+                    floatingText.y = position.centerY - 40; // 稍微向上偏移
+                    console.log(`📍 在合成位置显示浮动分数: 格子${cellId} (${floatingText.x}, ${floatingText.y})`);
+                } else {
+                    console.warn(`⚠️ 无法获取格子 ${cellId} 的位置，使用默认位置`);
+                    this.setDefaultFloatingPosition(floatingText);
+                }
+            } else {
+                // 使用默认位置（金币附近）
+                this.setDefaultFloatingPosition(floatingText);
+            }
 
-        // 金币元件缩放效果
-        createjs.Tween.get(goldMc)
-            .to({ scaleX: 1.1, scaleY: 1.1 }, 200, createjs.Ease.backOut)
-            .to({ scaleX: 1, scaleY: 1 }, 200, createjs.Ease.backIn);
+            // 添加到 gamebox（因为合成位置是相对于 gamebox 的）
+            this.gamebox.addChild(floatingText);
+
+            // 创建浮动动画：向上移动并淡出
+            createjs.Tween.get(floatingText)
+                .to({
+                    y: floatingText.y - 80,
+                    alpha: 0.8,
+                    scaleX: 1.2,
+                    scaleY: 1.2
+                }, 300, createjs.Ease.quadOut)
+                .to({
+                    y: floatingText.y - 120,
+                    alpha: 0,
+                    scaleX: 1.0,
+                    scaleY: 1.0
+                }, 500, createjs.Ease.quadIn)
+                .call(() => {
+                    // 动画完成后移除文本
+                    this.gamebox.removeChild(floatingText);
+                    console.log(`✅ 浮动分数文本已移除: +${score}`);
+                });
+
+        } catch (error) {
+            console.error('❌ 显示浮动分数失败:', error);
+        }
+    }
+
+    /**
+     * 设置浮动分数的默认位置
+     * @param {Object} floatingText - 浮动文本对象
+     */
+    setDefaultFloatingPosition(floatingText) {
+        const goldMc = this.exportRoot.mc_gold;
+        if (goldMc) {
+            // 需要将金币位置转换为 gamebox 坐标系
+            const gameboxX = this.gamebox.x || 0;
+            const gameboxY = this.gamebox.y || 0;
+
+            floatingText.x = goldMc.x - gameboxX + 50;
+            floatingText.y = goldMc.y - gameboxY;
+            console.log(`📍 使用金币附近位置: (${floatingText.x}, ${floatingText.y})`);
+        } else {
+            // 完全默认位置
+            floatingText.x = 600;
+            floatingText.y = 100;
+            console.log(`📍 使用完全默认位置: (${floatingText.x}, ${floatingText.y})`);
+        }
+    }
+
+    /**
+     * 解析格式化的数字字符串为实际数值
+     * @param {string} formattedStr - 格式化的字符串（如 "1.2k", "3.5m"）
+     * @returns {number} 实际数值
+     */
+    parseFormattedNumber(formattedStr) {
+        if (!formattedStr || formattedStr === '0') return 0;
+
+        const str = formattedStr.toLowerCase();
+        const num = parseFloat(str);
+
+        if (str.includes('k')) {
+            return Math.floor(num * 1000);
+        } else if (str.includes('m')) {
+            return Math.floor(num * 1000000);
+        } else if (str.includes('b')) {
+            return Math.floor(num * 1000000000);
+        } else {
+            return Math.floor(num);
+        }
     }
 
 
@@ -2035,6 +2118,163 @@ class GameScense {
         this.resetGame();
 
         console.log('✅ 游戏重新开始');
+    }
+
+    /**
+ * 重置游戏
+ */
+    async resetGame() {
+        console.log('🔄 重置游戏状态...');
+
+        try {
+            // 1. 清理前端蛋元件和状态
+            this.clearAllEggs();
+            this.clearSelection();
+
+            // 2. 重置前端游戏状态
+            this.gameRunState = 'init';
+            this.gameDataState = {
+                selectedEgg: null
+            };
+
+            // 3. 重置金币显示为0
+            this.resetGoldDisplay();
+            // 3. 停止所有动画
+            createjs.Tween.removeAllTweens();
+
+            // 4. 重置后端地图数据和游戏状态
+            if (window.GameServer) {
+                const resetResult = window.GameServer.resetGame();
+
+                if (resetResult.success) {
+                    console.log('✅ 后端清理成功，开始重新请求游戏数据');
+
+                    // 5. 重新请求游戏数据
+                    await this.loadGameDataByDifficulty(this.selectedDifficulty || 'normal');
+
+                    // 6. 验证游戏数据
+                    this.verifyGameData();
+
+                    // 7. 执行生成蛋的动作
+                    setTimeout(() => {
+                        this.handlePostInitialization();
+                    }, 500);
+
+                    console.log('✅ 游戏重置完成');
+                } else {
+                    console.error('❌ 后端清理失败:', resetResult.message);
+                }
+            } else {
+                console.error('❌ GameServer 未找到');
+            }
+
+        } catch (error) {
+            console.error('❌ 游戏重置失败:', error);
+        }
+    }
+
+    /**
+ * 重置金币显示
+ */
+    resetGoldDisplay() {
+        console.log('💰 重置金币显示为0...');
+
+        try {
+            // 获取金币显示元件
+            const goldMc = this.exportRoot.mc_gold;
+            if (goldMc && goldMc.text) {
+                // 重置金币显示为0
+                goldMc.text.text = "0";
+                console.log('✅ 金币显示已重置为0');
+            } else {
+                console.warn('⚠️ 未找到 mc_gold 或其 text 属性');
+            }
+        } catch (error) {
+            console.error('❌ 重置金币显示失败:', error);
+        }
+    }
+
+    /**
+ * 清理所有蛋元件
+ */
+    clearAllEggs() {
+        console.log('🧹 清理所有蛋元件...');
+
+        if (this.chessboard && this.chessboard.pieces) {
+            // 移除所有蛋元件
+            this.chessboard.pieces.forEach((piece, cellId) => {
+                if (piece && piece.parent) {
+                    piece.parent.removeChild(piece);
+                }
+            });
+
+            // 清空映射
+            this.chessboard.pieces.clear();
+            console.log('✅ 所有蛋元件已清理');
+        }
+    }
+
+    /**
+     * 初始化解锁动画元件
+     */
+    initUnlockAnimations() {
+        console.log('🎭 初始化解锁动画元件...');
+
+        this.unlockAnimations = new Map();
+
+        // 获取 mc_egg_mask1~6 元件
+        for (let i = 1; i <= 6; i++) {
+            const maskName = `mc_egg_mask${i}`;
+            const maskMc = utile.findMc(this.exportRoot, maskName);
+
+            if (maskMc) {
+                this.unlockAnimations.set(i + 1, maskMc); // 等级2~7对应mask1~6
+                console.log(`✅ 找到解锁动画元件: ${maskName} -> 等级${i + 1}`);
+
+                maskMc.gotoAndStop(0);
+            } else {
+                console.warn(`⚠️ 未找到解锁动画元件: ${maskName}`);
+            }
+        }
+
+        console.log(`📊 解锁动画元件初始化完成，共找到 ${this.unlockAnimations.size} 个`);
+    }
+
+
+    /**
+     * 播放解锁动画
+     * @param {number} unlockedLevel - 解锁的等级 (2~7)
+     */
+    playUnlockAnimation(unlockedLevel) {
+        console.log(`🎉 播放解锁动画: 等级 ${unlockedLevel}`);
+
+        const maskMc = this.unlockAnimations.get(unlockedLevel);
+        if (!maskMc) {
+            console.warn(`⚠️ 未找到等级 ${unlockedLevel} 对应的解锁动画元件`);
+            return;
+        }
+
+        try {
+            // 显示并播放动画
+            maskMc.visible = true;
+            maskMc.gotoAndPlay(0);
+
+            console.log(`✨ 开始播放解锁动画: mc_egg_mask${unlockedLevel - 1} (等级${unlockedLevel})`);
+
+            // 监听播放完成
+            utile.addFrameEnd(maskMc, () => {
+                
+                console.log(`✅ 解锁动画播放完成: 等级${unlockedLevel}`);
+            }, true);
+
+            // 播放解锁音效
+            if (this.engine && this.loadedSounds.has('goodmin')) {
+                this.engine.playSound('goodmin');
+            }
+
+        } catch (error) {
+            console.error(`❌ 播放解锁动画失败: 等级${unlockedLevel}`, error);
+        }
     }
 }
 
