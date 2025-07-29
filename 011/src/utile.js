@@ -12,11 +12,11 @@ utile.findMc = function (mc, name) {
         return null;
     }
 
-    console.log(`🔍 在容器中查找元件: ${name}`);
+    // console.log(`🔍 在容器中查找元件: ${name}`);
 
     // 检查当前元件本身
     if (mc.name === name) {
-        console.log(`✅ 找到目标元件 (自身): ${name}`);
+        // console.log(`✅ 找到目标元件 (自身): ${name}`);
         return mc;
     }
 
@@ -24,7 +24,7 @@ utile.findMc = function (mc, name) {
     if (mc.getChildByName) {
         const found = mc.getChildByName(name);
         if (found) {
-            console.log(`✅ 通过 getChildByName 找到元件: ${name}`);
+            // console.log(`✅ 通过 getChildByName 找到元件: ${name}`);
             return found;
         }
     }
@@ -34,7 +34,7 @@ utile.findMc = function (mc, name) {
         for (let child of mc.children) {
             const childName = child.name || '';
             if (childName === name) {
-                console.log(`✅ 通过遍历找到元件: ${name}`);
+                // console.log(`✅ 通过遍历找到元件: ${name}`);
                 return child;
             }
         }
@@ -46,7 +46,7 @@ utile.findMc = function (mc, name) {
             const constructorName = child.constructor.name || '';
             if (constructorName.toLowerCase().includes(name.toLowerCase()) ||
                 constructorName === name) {
-                console.log(`✅ 通过构造函数名找到元件: ${name} (构造函数: ${constructorName})`);
+                // console.log(`✅ 通过构造函数名找到元件: ${name} (构造函数: ${constructorName})`);
                 return child;
             }
         }
@@ -57,7 +57,7 @@ utile.findMc = function (mc, name) {
         for (let child of mc.children) {
             const found = utile.findMc(child, name);
             if (found) {
-                console.log(`✅ 通过递归查找找到元件: ${name}`);
+                // console.log(`✅ 通过递归查找找到元件: ${name}`);
                 return found;
             }
         }

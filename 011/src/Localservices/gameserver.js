@@ -516,6 +516,7 @@ class GameServer {
 
         // 从真实地图状态获取空位置
         const emptyPositions = this.getEmptyPositionsFromMap();
+
         const randomEggSeats = this.selectRandomPositions(emptyPositions, eggCount);
 
         // 根据解锁等级计算可用蛋类型
@@ -1219,7 +1220,7 @@ class GameServer {
         for (let i = 0; i < availableTypes.length; i++) {
             random -= weights[i];
             if (random <= 0) {
-                console.log(`🎯 权重选择: 类型${availableTypes[i]} (权重${weights[i]}/${totalWeight})`);
+                // console.log(`🎯 权重选择: 类型${availableTypes[i]} (权重${weights[i]}/${totalWeight})`);
                 return availableTypes[i];
             }
         }
@@ -1328,7 +1329,7 @@ class GameServer {
                 this.mapState.emptyCells.delete(cellId);
                 this.mapState.occupiedCells.add(cellId);
 
-                console.log(`📌 预留格子 ${cellId}: 蛋类型 ${eggType}`);
+                // console.log(`📌 预留格子 ${cellId}: 蛋类型 ${eggType}`);
             }
         }
     }
@@ -1434,6 +1435,8 @@ class GameServer {
                     positionsToDelete: moveResult.positionsToDelete, // 添加需要删除的位置
                     synthesis: moveResult.synthesis,  // 添加合成数据
                     newEggs: moveResult.newEggs,      // 添加新蛋数据
+                    isVictory: moveResult.isVictory,
+                    isFailure: moveResult.isFailure,
                     message: "点击空位置，移动蛋"
                 };
             } else {
@@ -1610,9 +1613,59 @@ class GameServer {
             // 如果可以合成，先处理合成逻辑（移除旧蛋，更新地图状态）
             this.processSynthesisResult(synthesisResult, toCellId);
         }
+        // 测试胜利
+        return {
+                code: 0,
+                fromCellId: fromCellId,
+                toCellId: toCellId,
+                path: path,
+                eggType: eggType,
+                positionsToDelete: positionsToDelete,
+                synthesis: synthesisData,
+                newEggs: [],
+                isVictory: true,
+                reason: 'max_egg_level_reached',
+                message: "恭喜！您合成了最高等级的蛋！"
+            };
+        // 6. 检查胜利条件
+        if (synthesisData.canSynthesize && synthesisData.newEggType >= 7) {
+            console.log('🏆 达成胜利条件：合成最高等级蛋！');
+            return {
+                code: 0,
+                fromCellId: fromCellId,
+                toCellId: toCellId,
+                path: path,
+                eggType: eggType,
+                positionsToDelete: positionsToDelete,
+                synthesis: synthesisData,
+                newEggs: [],
+                isVictory: true,
+                reason: 'max_egg_level_reached',
+                message: "恭喜！您合成了最高等级的蛋！"
+            };
+        }
 
-        // 6. 无论是否合成都生成新蛋位置（基于最新地图状态）
-        const newEggs = this.generateRandomEggsFromMapState(3);
+        // 7. 生成新蛋并检查失败条件
+        const newEggsResult = this.generateRandomEggsFromMapState(3);
+
+        // 检查是否生成新蛋失败
+        if (!newEggsResult.success) {
+            console.warn('💀 无法生成新蛋，游戏结束');
+
+            return {
+                code: 0,
+                fromCellId: fromCellId,
+                toCellId: toCellId,
+                path: path,
+                eggType: eggType,
+                positionsToDelete: positionsToDelete,
+                synthesis: synthesisData,
+                newEggs: [],
+                isFailure: true,
+                reason: newEggsResult.reason,
+                message: newEggsResult.message
+            };
+        }
 
         console.log(`✅ 蛋移动处理完成: ${fromCellId} -> ${toCellId}`);
 

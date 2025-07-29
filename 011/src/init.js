@@ -147,6 +147,47 @@ class GameEngine {
         }
     }
 
+    /**
+     * 检测是否为PC设备
+     * @returns {boolean} 是否为PC设备
+     */
+    isPCDevice() {
+        // 方法1：检测用户代理字符串
+        const userAgent = navigator.userAgent.toLowerCase();
+        const mobileKeywords = [
+            'android', 'iphone', 'ipad', 'ipod', 'blackberry',
+            'windows phone', 'mobile', 'tablet', 'webos', 'opera mini'
+        ];
+
+        const isMobileUA = mobileKeywords.some(keyword => userAgent.includes(keyword));
+
+        // 方法2：检测触摸支持（辅助判断）
+        const hasTouchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+        // 方法3：检测屏幕尺寸（辅助判断）
+        const screenWidth = window.screen.width;
+        const screenHeight = window.screen.height;
+        const minScreenSize = Math.min(screenWidth, screenHeight);
+        const maxScreenSize = Math.max(screenWidth, screenHeight);
+
+        // PC端通常屏幕较大，且宽高比不会太极端
+        const isLargeScreen = minScreenSize >= 768 && maxScreenSize >= 1024;
+
+        // 综合判断：不是移动设备UA 且 (屏幕较大 或 无触摸支持)
+        const isPCDevice = !isMobileUA && (isLargeScreen || !hasTouchSupport);
+
+        console.log('🔍 设备检测详情:', {
+            userAgent: userAgent,
+            isMobileUA: isMobileUA,
+            hasTouchSupport: hasTouchSupport,
+            screenSize: `${screenWidth}x${screenHeight}`,
+            isLargeScreen: isLargeScreen,
+            finalResult: isPCDevice ? 'PC' : 'Mobile'
+        });
+
+        return isPCDevice;
+    }
+
     applyConfig() {
 
         this.gameContainer = document.getElementById('game-container');
@@ -180,28 +221,44 @@ class GameEngine {
             const designWidth = this.designWidth;
             const designHeight = this.designHeight;
 
+            // 检测是否为PC端
+            const isPCDevice = this.isPCDevice();
+            console.log(`🖥️ 设备类型检测: ${isPCDevice ? 'PC端' : '移动端'}`);
+
+
             // 判断当前屏幕是否为竖屏
             const isScreenPortrait = stageWidth < stageHeight;
             // 判断设计尺寸是否为竖屏
             const isDesignPortrait = designWidth < designHeight;
 
-            if (isScreenPortrait === isDesignPortrait) {
-                // 屏幕方向与设计方向一致，不需要旋转
+            if (isPCDevice) {
+                // PC端：不执行旋转，直接按比例缩放
+                console.log('🖥️ PC端模式：禁用旋转，使用等比缩放');
                 this.stageScale = Math.min(stageWidth / designWidth, stageHeight / designHeight);
                 this.stageRotation = 0;
-                this.stageX = stageWidth / 2 - designWidth * this.stageScale / 2;
-                this.stageY = stageHeight / 2 - designHeight * this.stageScale / 2;
+                this.stageX = (stageWidth - designWidth * this.stageScale) / 2;
+                this.stageY = (stageHeight - designHeight * this.stageScale) / 2;
             } else {
-                // 屏幕方向与设计方向不一致，需要旋转90度
-                this.stageScale = Math.min(stageWidth / designHeight, stageHeight / designWidth);
-                this.stageRotation = 90;
-                this.stageX = designHeight * this.stageScale + stageWidth / 2 - designHeight * this.stageScale / 2;
-                this.stageY = stageHeight / 2 - designWidth * this.stageScale / 2;
+                // 移动端：保持原有的旋转逻辑
+                if (isScreenPortrait === isDesignPortrait) {
+                    // 屏幕方向与设计方向一致，不需要旋转
+                    this.stageScale = Math.min(stageWidth / designWidth, stageHeight / designHeight);
+                    this.stageRotation = 0;
+                    this.stageX = stageWidth / 2 - designWidth * this.stageScale / 2;
+                    this.stageY = stageHeight / 2 - designHeight * this.stageScale / 2;
+                } else {
+                    // 屏幕方向与设计方向不一致，需要旋转90度
+                    this.stageScale = Math.min(stageWidth / designHeight, stageHeight / designWidth);
+                    this.stageRotation = 90;
+                    this.stageX = designHeight * this.stageScale + stageWidth / 2 - designHeight * this.stageScale / 2;
+                    this.stageY = stageHeight / 2 - designWidth * this.stageScale / 2;
+                }
             }
 
             this.applyStageTransform();
             // console.log(`Stage resized: ${stageWidth}x${stageHeight}, scale: ${this.stageScale}, rotation: ${this.stageRotation}`);
         }
+
 
         // 添加事件监听
         window.addEventListener('resize', this.resizeHandler);
