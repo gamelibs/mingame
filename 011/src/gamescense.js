@@ -68,6 +68,8 @@ class GameScense {
         this.difficultySelectionEnabled = false; //难度
 
         this.maxUnlockedLevel = 1; // 初始只解锁等级1
+        this.isProcessingClick = false; // 防抖标识
+        this.clickDebounceTime = 300; // 防抖时间（毫秒）
 
         try {
             // 保存用户数据和游戏配置
@@ -83,16 +85,16 @@ class GameScense {
             // 初始化解锁动画元件
             this.initUnlockAnimations();
 
+            new CardGame().init(gameData);
 
+            this.cardGame = new CardGame();
+            await this.cardGame.init(gameData);
             // 异步初始化流程
             await this.initializeAsync();
 
+
             // 初始化引导手势
             // this.initGuideGesture();
-
-
-            // 根据用户类型决定是否生成蛋
-            // this.handlePostInitialization();
 
 
 
@@ -102,6 +104,45 @@ class GameScense {
         } catch (error) {
             console.error('❌ GameScense 初始化失败:', error);
         }
+    }
+
+    /**
+     * 锁定游戏交互
+     * @param {string} reason - 锁定原因
+     */
+    lockGameInteraction(reason = '处理中') {
+        this.isGameLocked = true;
+        this.lockReason = reason;
+        console.log(`🔒 游戏交互已锁定: ${reason}`);
+    }
+
+    /**
+     * 解锁游戏交互
+     */
+    unlockGameInteraction() {
+        const previousReason = this.lockReason;
+        this.isGameLocked = false;
+        this.lockReason = '';
+        console.log(`🔓 游戏交互已解锁，之前锁定原因: ${previousReason}`);
+    }
+
+
+    /**
+     * 检查游戏是否可以交互
+     * @returns {boolean} 是否可以交互
+     */
+    canInteract() {
+        if (this.isGameLocked) {
+            console.log(`⛔ 游戏交互被锁定: ${this.lockReason}`);
+            return false;
+        }
+
+        if (this.isProcessingClick) {
+            console.log('⛔ 正在处理点击，请稍候');
+            return false;
+        }
+
+        return true;
     }
 
     // 删除了前端棋盘初始化，统一由后端 GameServer 提供
@@ -650,6 +691,7 @@ class GameScense {
         const isNewUser = this.gameData ? this.gameData.isNewUser : true;
 
         this.startBackgroundMusic();
+        this.playUnlockedAnimations(this.userStatus);
 
         if (isNewUser) {
             // 新用户：等待引导完成后生成蛋
@@ -678,6 +720,8 @@ class GameScense {
         console.log('🥚 为老用户生成蛋...');
 
         try {
+            
+
             // 从游戏数据中获取蛋配置
             if (this.gameData && this.gameData.data) {
                 const { eggSeat, eggType } = this.gameData.data;
@@ -1001,15 +1045,23 @@ class GameScense {
     async handleCellClick(cellId) {
         console.log(`🖱️ 处理格子点击: ${cellId}`);
 
-        // 检查是否在等待引导点击
-        if (this.waitingForClick && this.expectedClickCellId === cellId) {
-            console.log(`✅ 用户正确点击了引导位置 ${cellId}`);
-            this.onGuideClickSuccess(cellId);
-            return;
-        }
+        // 检查是否可以交互
+        // if (!this.canInteract()) {
+        //     return;
+        // }
 
-        // 调用 GameServer 处理点击逻辑
+        // 设置防抖标识
+        this.isProcessingClick = true;
         try {
+            // 检查是否在等待引导点击
+            if (this.waitingForClick && this.expectedClickCellId === cellId) {
+                console.log(`✅ 用户正确点击了引导位置 ${cellId}`);
+                this.onGuideClickSuccess(cellId);
+                return;
+            }
+
+            // 调用 GameServer 处理点击逻辑
+
             const result = window.GameServer.processEggClick(cellId);
             console.log('🎮 点击处理结果:', result);
 
@@ -1024,6 +1076,7 @@ class GameScense {
                         await this.handleStep1(result);
                         break;
                     case 2:
+                        // this.lockGameInteraction('蛋移动中');
                         await this.handleStep2(result);
                         break;
                     case 3:
@@ -1038,6 +1091,12 @@ class GameScense {
             }
         } catch (error) {
             console.error('❌ 处理点击失败:', error);
+        } finally {
+            // 延迟重置防抖标识
+            // setTimeout(() => {
+            //     this.isProcessingClick = false;
+            //     console.log('🔓 防抖解除，可以处理下一次点击');
+            // }, this.clickDebounceTime);
         }
     }
 
@@ -1080,19 +1139,10 @@ class GameScense {
     async handleStep2(result) {
         console.log(`🚶 移动蛋: ${result.fromCellId} -> ${result.toCellId}`);
 
-        // 🔥 检查游戏胜利
+        // 🔥 检查游戏胜利和失败
         const isVictory = result.isVictory || false;
-        if (isVictory) {
-            console.log('🏆 检测到游戏胜利:', result.reason);
+        const isFailure = result.isFailure || false;
 
-            // 延迟显示胜利界面，让用户看到移动动画
-            setTimeout(() => {
-                console.log('🏆 显示胜利界面');
-                this.victoryHandler(true);
-            }, 1500);
-
-            return; // 不继续执行后续逻辑
-        }
         // 直接从前端获取蛋元件，不依赖后端数据
         const piece = this.chessboard.pieces.get(result.fromCellId);
 
@@ -1151,12 +1201,24 @@ class GameScense {
                     console.log('🏆 合成动画完成，显示胜利界面');
                     // setTimeout(() => {
                     this.victoryHandler(true);
+                    // return Promise.resolve();
                     // }, 1500);
                 }
+                if (isFailure) {
+                    console.log('💀 游戏失败，显示失败界面');
+                    this.failureHandler(true);
+                    // return Promise.resolve();
+                }
                 console.log('✅ 所有步骤执行完成');
+                return Promise.resolve();
+
             })
             .catch((error) => {
                 console.error('❌ 执行过程中出现错误:', error);
+                return Promise.resolve();
+            }).finally(() => {
+                // 🔥 重要：无论成功还是失败，都要解锁游戏交互
+                // this.unlockGameInteraction();
             });
 
     }
@@ -1317,17 +1379,6 @@ class GameScense {
             this.maxUnlockedLevel = newEggType;
 
             console.log(`🎊 恭喜解锁 ${this.getEggTypeName(newEggType)} 蛋！`);
-        }
-
-        // 🔥 检查是否合成了7级蛋（胜利条件）
-        if (newEggType >= 7) {
-            console.log('🏆 合成了最高等级蛋，准备显示胜利界面！');
-
-            // 延迟显示胜利界面，让用户看到合成效果
-            setTimeout(() => {
-                console.log('🏆 显示胜利界面');
-                this.victoryHandler(true);
-            }, 2000);
         }
 
         console.log(`✅ 合成完成！${window.GameServer.getEggTypeName(eggType)} -> ${window.GameServer.getEggTypeName(newEggType)}`);
@@ -2052,7 +2103,24 @@ class GameScense {
         if (show) {
             // 显示失败界面
             failureMc.visible = true;
+            failureMc.scaleX = failureMc.scaleY = 0.1;
             utile.toShow(failureMc);
+
+            // 显示失败界面动画
+            createjs.Tween.get(failureMc)
+                // 第一阶段：快速弹出到1.1倍大小
+                .to({
+                    scaleX: 1.1,
+                    scaleY: 1.1
+                }, 200, createjs.Ease.backOut)
+                // 第二阶段：回弹到正常大小
+                .to({
+                    scaleX: 1.0,
+                    scaleY: 1.0
+                }, 100, createjs.Ease.backIn)
+                .call(() => {
+                    console.log('✅ 失败面板伸缩动画完成');
+                });
 
             // 查找屏蔽层
             const blockLayer = utile.findMc(failureMc, 'blockLayer');
@@ -2073,25 +2141,30 @@ class GameScense {
                 console.log('✅ 失败界面屏蔽层事件已绑定');
             }
 
-            // 查找重新开始按钮
-            const btnAgain = utile.findMc(failureMc, 'btnagain');
+            // 查找重新开始按钮 (btnagain)
+            const btnAgain = utile.findMc(failureMc, 'btn_tryagain');
             if (btnAgain) {
                 // 定义重新开始点击处理函数
-                this.restartClickHandler = (event) => {
-                    console.log('🔄 点击重新开始按钮');
+                this.failureRestartClickHandler = (event) => {
+                    console.log('🔄 失败界面点击重新开始按钮');
                     event.stopPropagation();
-                    this.onRestartGame();
+
+                    // 调用插页广告
+                    this.showInterstitialAd(() => {
+                        // 广告关闭后的回调
+                        this.closeFailurePanel();
+                    });
                 };
 
                 // 绑定重新开始按钮事件
-                btnAgain.on('click', this.restartClickHandler);
+                btnAgain.on('click', this.failureRestartClickHandler);
 
                 // 确保按钮在屏蔽层之上
                 if (blockLayer) {
                     failureMc.setChildIndex(btnAgain, failureMc.children.length - 1);
                 }
 
-                console.log('✅ 重新开始按钮事件已绑定');
+                console.log('✅ 失败界面重新开始按钮事件已绑定');
             }
 
             console.log('✅ 失败界面显示完成');
@@ -2102,21 +2175,51 @@ class GameScense {
             if (blockLayer && this.failureBlockClickHandler) {
                 blockLayer.off('click', this.failureBlockClickHandler);
                 this.failureBlockClickHandler = null;
-                console.log('✅ 屏蔽层点击事件已移除');
+                console.log('✅ 失败界面屏蔽层点击事件已移除');
             }
 
             // 移除重新开始按钮事件
-            const btnAgain = utile.findMc(failureMc, 'btnagain');
-            if (btnAgain && this.restartClickHandler) {
-                btnAgain.off('click', this.restartClickHandler);
-                this.restartClickHandler = null;
-                console.log('✅ 重新开始按钮事件已移除');
+            const btnAgain = utile.findMc(failureMc, 'btn_tryagain');
+            if (btnAgain && this.failureRestartClickHandler) {
+                btnAgain.off('click', this.failureRestartClickHandler);
+                this.failureRestartClickHandler = null;
+                console.log('✅ 失败界面重新开始按钮事件已移除');
             }
 
             // 隐藏失败界面
             failureMc.visible = false;
             console.log('✅ 失败界面隐藏完成');
         }
+    }
+
+    /**
+     * 关闭失败面板
+     */
+    closeFailurePanel() {
+        console.log('💀 关闭失败面板...');
+
+        const failureMc = utile.findMc(this.exportRoot, 'mc_failure');
+        if (!failureMc) {
+            console.warn('⚠️ 未找到 mc_failure 元件');
+            return;
+        }
+
+        // 播放关闭动画
+        createjs.Tween.get(failureMc)
+            .to({
+                scaleX: 0.1,
+                scaleY: 0.1,
+                alpha: 0
+            }, 300, createjs.Ease.backIn)
+            .call(() => {
+                // 隐藏失败界面
+                this.failureHandler(false);
+
+                // 重新开始游戏
+                this.onRestartGame();
+
+                console.log('✅ 失败面板关闭完成');
+            });
     }
 
     /**
@@ -2132,17 +2235,82 @@ class GameScense {
             console.warn('⚠️ 未找到 mc_victory 元件');
             return;
         }
-
+        victoryMc.visible = true;
         if (show) {
             // 显示胜利界面
-            victoryMc.visible = true;
+            victoryMc.scaleX = victoryMc.scaleY = 0.1;
             utile.toShow(victoryMc);
+
+            createjs.Tween.get(victoryMc)
+                // 第一阶段：快速弹出到1.2倍大小
+                .to({
+                    scaleX: 1.1,
+                    scaleY: 1.1
+                }, 200, createjs.Ease.backOut)
+                // 第二阶段：回弹到正常大小
+                .to({
+                    scaleX: 1.0,
+                    scaleY: 1.0
+                }, 100, createjs.Ease.backIn)
+                .call(() => {
+                    console.log('✅ 胜利面板伸缩动画完成');
+
+                    // 如果有内部动画，播放胜利动画
+
+                });
+
+
+
+            // 查找重新开始按钮
+            const btnAgain = utile.findMc(victoryMc, 'btn_playagain');
+            if (btnAgain) {
+                this.victoryRestartClickHandler = (event) => {
+                    console.log('🔄 胜利界面点击重新开始按钮');
+                    event.stopPropagation(); // 阻止事件传播到屏蔽层
+                    // 调用插页广告
+                    this.showInterstitialAd(() => {
+                        // 广告关闭后的回调
+                        this.closeVictoryPanel();
+                    });
+                };
+
+                btnAgain.on('click', this.victoryRestartClickHandler);
+
+                console.log('✅ 胜利界面重新开始按钮事件已绑定');
+            }
+
+            // GO按钮也要确保在屏蔽层之上
+            const btnGo = utile.findMc(victoryMc, 'btn_go');
+            if (btnGo) {
+                victoryMc.setChildIndex(btnGo, victoryMc.children.length - 1);
+                // 移除旧的事件监听器
+                btnGo.removeAllEventListeners();
+
+                btnGo.on("click", (event) => {
+                    console.log('🎯 GO按钮被点击');
+                    event.stopPropagation(); // 阻止事件传播到屏蔽层
+
+                    // 检查 cardGame 实例是否存在
+                    if (this.cardGame && typeof this.cardGame.startCardDraw === 'function') {
+                        console.log('🎴 调用 CardGame.startCardDraw()');
+                        this.cardGame.startCardDraw();
+                    } else {
+                        console.error('❌ CardGame 实例不存在或 startCardDraw 方法未找到');
+                        console.log('🔍 this.cardGame:', this.cardGame);
+                    }
+                });
+            }
+
+
+            // 播放胜利音效
+            if (this.engine && this.loadedSounds.has('gamewin')) {
+                this.engine.playSound('gamewin');
+            }
 
             // 查找屏蔽层
             const blockLayer = utile.findMc(victoryMc, 'blockLayer');
             if (blockLayer) {
-                blockLayer.mouseEnabled = true;
-
+                // 屏蔽层只负责拦截，不做任何判断
                 this.victoryBlockClickHandler = (event) => {
                     console.log('🛡️ 胜利界面屏蔽层拦截了点击事件');
                     event.stopImmediatePropagation();
@@ -2153,29 +2321,6 @@ class GameScense {
 
                 blockLayer.on('click', this.victoryBlockClickHandler);
                 console.log('✅ 胜利界面屏蔽层事件已绑定');
-            }
-
-            // 查找重新开始按钮
-            const btnAgain = utile.findMc(victoryMc, 'btn_playagain');
-            if (btnAgain) {
-                this.victoryRestartClickHandler = (event) => {
-                    console.log('🔄 胜利界面点击重新开始按钮');
-                    event.stopPropagation();
-                    this.onRestartGame();
-                };
-
-                btnAgain.on('click', this.victoryRestartClickHandler);
-
-                if (blockLayer) {
-                    victoryMc.setChildIndex(btnAgain, victoryMc.children.length - 1);
-                }
-
-                console.log('✅ 胜利界面重新开始按钮事件已绑定');
-            }
-
-            // 播放胜利音效
-            if (this.engine && this.loadedSounds.has('gamewin')) {
-                this.engine.playSound('gamewin');
             }
 
             console.log('✅ 胜利界面显示完成');
@@ -2198,6 +2343,81 @@ class GameScense {
             victoryMc.visible = false;
             console.log('✅ 胜利界面隐藏完成');
         }
+    }
+
+    /**
+ * 显示插页广告
+ * @param {Function} callback - 广告关闭后的回调函数
+ */
+    showInterstitialAd(callback) {
+        console.log('📺 准备播放插页广告...');
+
+        if (window.showInterstitialAd) {
+            window.showInterstitialAd(() => {
+                console.log('📺 插页广告关闭');
+                if (callback) callback();
+            });
+        } else {
+            console.log('📺 插页广告API不可用，直接执行回调');
+            if (callback) callback();
+        }
+    }
+
+    /**
+     * 检查目标是否是指定元件或其子元件
+     */
+    isTargetOrChild(event, parent) {
+        if (!event || !parent) return false;
+
+        // 优先检查 currentTarget（事件绑定的元件）
+        if (event.currentTarget === parent) {
+            return true;
+        }
+
+        // 检查 currentTarget 的名称
+        if (event.currentTarget && event.currentTarget.name === parent.name) {
+            return true;
+        }
+
+        // 回退到原来的逻辑检查 target
+        let current = event.target;
+        while (current) {
+            if (current === parent) {
+                return true;
+            }
+            current = current.parent;
+        }
+
+        return false;
+    }
+
+    /**
+     * 关闭胜利面板
+     */
+    closeVictoryPanel() {
+        console.log('🏆 关闭胜利面板...');
+
+        const victoryMc = utile.findMc(this.exportRoot, 'mc_victory');
+        if (!victoryMc) {
+            console.warn('⚠️ 未找到 mc_victory 元件');
+            return;
+        }
+
+        // 播放关闭动画
+        createjs.Tween.get(victoryMc)
+            .to({
+                scaleX: 0.1,
+                scaleY: 0.1,
+            }, 300, createjs.Ease.backIn)
+            .call(() => {
+                // 隐藏胜利界面
+                this.victoryHandler(false);
+
+                // 重新开始游戏
+                this.onRestartGame();
+
+                console.log('✅ 胜利面板关闭完成');
+            });
     }
 
     /**
@@ -2369,6 +2589,44 @@ class GameScense {
 
         } catch (error) {
             console.error(`❌ 播放解锁动画失败: 等级${unlockedLevel}`, error);
+        }
+    }
+
+
+    /**
+     * 播放用户已解锁等级的动画
+     */
+    playUnlockedAnimations(userStatus = null) {
+        console.log('🎭 播放用户已解锁等级的动画...');
+
+        // 获取用户当前最高解锁等级
+
+        const maxUnlockedLevel = userStatus ? (userStatus.maxUnlockedEggType || 0) : 0;
+
+        console.log(`🏆 用户最高解锁等级: ${maxUnlockedLevel}`);
+
+        // 播放对应等级的解锁动画 (等级2~7对应mask1~6)
+        for (let level = 2; level <= Math.min(maxUnlockedLevel, 7); level++) {
+            setTimeout(() => {
+                
+                const maskMc = this.unlockAnimations.get(level);
+                if (maskMc) {
+                    console.log(`✨ 播放已解锁动画: 等级${level}`);
+    
+                    // 显示并播放动画
+                    maskMc.visible = true;
+                    maskMc.gotoAndPlay(0);
+    
+                    // 监听播放完成
+                    utile.addFrameEnd(maskMc, () => {
+                        console.log(`✅ 等级${level}解锁动画播放完成`);
+                    }, true);
+                }
+            }, 100*level);
+        }
+
+        if (maxUnlockedLevel <= 1) {
+            console.log('📝 用户尚未解锁高级蛋类型，无需播放解锁动画');
         }
     }
 }

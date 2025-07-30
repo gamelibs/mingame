@@ -26,6 +26,7 @@
             { "id": "GameServer", "src": "src/Localservices/gameserver.js", "type": "script" },
             { "id": "LeaderBoard", "src": "src/modules/leaderboard.js", "type": "script" },
             { "id": "SelectLine", "src": "src/modules/selectline.js", "type": "script" },
+            { "id": "CardGame", "src": "src/modules/cardgame.js", "type": "script" },
             { "id": "flygame", "src": "flygame.js", "type": "script" },
             { "id": "GameScense", "src": "./src/gamescense.js", "type": "script" }
         ],

@@ -19,6 +19,7 @@ class GameServer {
         // 用户数据缓存
         this.userDataCache = new Map();
 
+        this.difficulty = 4; //难度
         // 新用户引导数据
         this.newUserGuideData = {
             lv0: {
@@ -343,6 +344,7 @@ class GameServer {
             const existingUserData = {
                 ...userData,
                 isNewUser: false,
+                difficulty: 'normal', // 默认中等难度
                 lastPlayTime: Date.now()
             };
 
@@ -424,6 +426,8 @@ class GameServer {
     resetGame() {
         console.log('🔄 重置 GameServer 游戏状态...');
 
+        localStorage.removeItem('currentGameState');
+        
         try {
             // 1. 清空地图状态中的所有蛋数据
             for (const cellId in this.mapState.cells) {
@@ -510,30 +514,18 @@ class GameServer {
     getAlgorithmData(level = 0, step = 1, userStatus = null, eggCount = 4) {
         console.log(`🤖 生成算法数据 - 等级: ${level}, 步骤: ${step}, 蛋数量: ${eggCount}`);
 
-        // 获取用户已解锁的最高蛋等级
-        const maxUnlockedEggType = userStatus.maxUnlockedEggType || 0;
-        console.log(`🏆 已解锁最高蛋等级: ${maxUnlockedEggType}`);
+        this.difficulty = eggCount;
 
-        // 从真实地图状态获取空位置
-        const emptyPositions = this.getEmptyPositionsFromMap();
-
-        const randomEggSeats = this.selectRandomPositions(emptyPositions, eggCount);
-
-        // 根据解锁等级计算可用蛋类型
-        const availableEggTypes = this.getAvailableEggTypes(maxUnlockedEggType);
-        const randomEggTypes = this.selectRandomEggTypes(availableEggTypes, eggCount);
-
-        // 在地图状态中标记这些位置将被占用
-        this.reservePositionsForEggs(randomEggSeats, randomEggTypes);
+        const newEggs = this.generateRandomEggsFromMapState(eggCount);
 
         const algorithmData = {
-            eggSeat: randomEggSeats,
-            eggType: randomEggTypes,
+            eggSeat: newEggs.map(egg => egg.cellId),
+            eggType: newEggs.map(egg => egg.eggType),
             pointSeat: [] // 老用户不需要引导点
         };
 
-        console.log(`🥚 老用户蛋数据 (${eggCount}个蛋) - 位置: [${randomEggSeats}], 类型: [${randomEggTypes}]`);
-        console.log(`📍 地图状态 - 空闲: ${this.mapState.emptyCells.size}, 占用: ${this.mapState.occupiedCells.size}`);
+        // console.log(`🥚 老用户蛋数据 (${eggCount}个蛋) - 位置: [${randomEggSeats}], 类型: [${randomEggTypes}]`);
+        // console.log(`📍 地图状态 - 空闲: ${this.mapState.emptyCells.size}, 占用: ${this.mapState.occupiedCells.size}`);
 
         return {
             success: true,
@@ -545,6 +537,35 @@ class GameServer {
             userStatus: userStatus,
             message: `Algorithm data generated successfully for returning user with ${eggCount} eggs`
         };
+
+        // return {
+        //     code: 0,
+        //     fromCellId: fromCellId,
+        //     toCellId: toCellId,
+        //     path: path,
+        //     eggType: eggType,
+        //     positionsToDelete: positionsToDelete, // 返回需要删除的位置列表
+        //     synthesis: synthesisData,
+        //     newEggs: newEggs,
+        //     message: "移动处理完成"
+        // };
+
+        // return {
+
+        //     code: 0,
+        //     step: 2,  // 步骤2：移动蛋
+        //     fromCellId: moveResult.fromCellId,
+        //     toCellId: moveResult.toCellId,
+        //     path: moveResult.path,
+        //     eggType: moveResult.eggType,
+        //     positionsToDelete: moveResult.positionsToDelete, // 添加需要删除的位置
+        //     synthesis: moveResult.synthesis,  // 添加合成数据
+        //     newEggs: moveResult.newEggs,      // 添加新蛋数据
+        //     isVictory: moveResult.isVictory,
+        //     isFailure: moveResult.isFailure,
+        //     message: "点击空位置，移动蛋"
+        // }
+
     }
 
 
@@ -1070,6 +1091,9 @@ class GameServer {
             currentTotal: this.scoreSystem.currentScore
         });
 
+        // 每次分数更新时保存游戏状态
+        this.saveCurrentGameState();
+
         console.log(`📊 分数更新: +${scoreDetail.totalScore}, 当前总分: ${this.scoreSystem.currentScore}`);
 
         return {
@@ -1374,7 +1398,90 @@ class GameServer {
             this.mapState.emptyCells.delete(cellId);
             this.mapState.occupiedCells.add(cellId);
 
+            // 每次创建新蛋时保存游戏状态
+            this.saveCurrentGameState();
+
             console.log(`📍 占用格子 ${cellId}: 蛋类型 ${eggType}`);
+        }
+    }
+
+    /**
+ * 保存当前游戏状态到localStorage
+ */
+    saveCurrentGameState() {
+        try {
+            // 收集当前地图中的蛋信息
+            const currentEggs = [];
+            for (const [cellId, cellData] of Object.entries(this.mapState.cells)) {
+                if (cellData.hasEgg && cellData.eggType !== null) {
+                    currentEggs.push({
+                        cellId: parseInt(cellId),
+                        eggType: cellData.eggType
+                    });
+                }
+            }
+
+            const gameState = {
+                eggs: currentEggs,
+                score: this.scoreSystem ? this.scoreSystem.currentScore : 0,
+                totalScore: this.scoreSystem ? this.scoreSystem.totalScore : 0,
+                saveTime: Date.now()
+            };
+
+            localStorage.setItem('currentGameState', JSON.stringify(gameState));
+            console.log(`💾 游戏状态已保存: ${currentEggs.length}个蛋, 分数${gameState.score}`);
+
+        } catch (error) {
+            console.error('❌ 保存游戏状态失败:', error);
+        }
+    }
+
+    /**
+ * 从localStorage恢复游戏状态
+ */
+    loadSavedGameState() {
+        try {
+            const savedData = localStorage.getItem('currentGameState');
+            if (!savedData) {
+                console.log('📝 没有保存的游戏状态');
+                return null;
+            }
+
+            const gameState = JSON.parse(savedData);
+            console.log(`🔄 恢复游戏状态: ${gameState.eggs.length}个蛋, 分数${gameState.score}`);
+
+            // 恢复地图中的蛋
+            for (const eggData of gameState.eggs) {
+                this.occupyPositionSilently(eggData.cellId, eggData.eggType);
+            }
+
+            // 恢复分数
+            if (this.scoreSystem) {
+                this.scoreSystem.currentScore = gameState.score || 0;
+                this.scoreSystem.totalScore = gameState.totalScore || gameState.score || 0;
+            }
+
+            return gameState;
+
+        } catch (error) {
+            console.error('❌ 恢复游戏状态失败:', error);
+            return null;
+        }
+    }
+
+    /**
+ * 静默占用位置（恢复时使用，不触发保存）
+ */
+    occupyPositionSilently(cellId, eggType) {
+        if (this.mapState.cells[cellId]) {
+            this.mapState.cells[cellId].isEmpty = false;
+            this.mapState.cells[cellId].hasEgg = true;
+            this.mapState.cells[cellId].eggType = eggType;
+            this.mapState.cells[cellId].piece = null;
+            this.mapState.cells[cellId].occupied = true;
+
+            this.mapState.emptyCells.delete(cellId);
+            this.mapState.occupiedCells.add(cellId);
         }
     }
 
@@ -1613,20 +1720,38 @@ class GameServer {
             // 如果可以合成，先处理合成逻辑（移除旧蛋，更新地图状态）
             this.processSynthesisResult(synthesisResult, toCellId);
         }
+
+        const newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
+
         // 测试胜利
-        return {
-                code: 0,
-                fromCellId: fromCellId,
-                toCellId: toCellId,
-                path: path,
-                eggType: eggType,
-                positionsToDelete: positionsToDelete,
-                synthesis: synthesisData,
-                newEggs: [],
-                isVictory: true,
-                reason: 'max_egg_level_reached',
-                message: "恭喜！您合成了最高等级的蛋！"
-            };
+        // return {
+        //         code: 0,
+        //         fromCellId: fromCellId,
+        //         toCellId: toCellId,
+        //         path: path,
+        //         eggType: eggType,
+        //         positionsToDelete: positionsToDelete,
+        //         synthesis: synthesisData,
+        //         newEggs: [],
+        //         isVictory: true,
+        //         reason: 'max_egg_level_reached',
+        //         message: "恭喜！您合成了最高等级的蛋！"
+        //     };
+
+        // 测试失败
+        // return {
+        //         code: 0,
+        //         fromCellId: fromCellId,
+        //         toCellId: toCellId,
+        //         path: path,
+        //         eggType: eggType,
+        //         positionsToDelete: positionsToDelete,
+        //         synthesis: synthesisData,
+        //         newEggs: [],
+        //         isFailure: true,
+        //         reason: 'max_egg_level_reached',
+        //         message: "恭喜！您合成了最高等级的蛋！"
+        //     };
         // 6. 检查胜利条件
         if (synthesisData.canSynthesize && synthesisData.newEggType >= 7) {
             console.log('🏆 达成胜利条件：合成最高等级蛋！');
@@ -1638,19 +1763,18 @@ class GameServer {
                 eggType: eggType,
                 positionsToDelete: positionsToDelete,
                 synthesis: synthesisData,
-                newEggs: [],
+                newEggs: newEggsResult,
                 isVictory: true,
                 reason: 'max_egg_level_reached',
                 message: "恭喜！您合成了最高等级的蛋！"
             };
         }
 
-        // 7. 生成新蛋并检查失败条件
-        const newEggsResult = this.generateRandomEggsFromMapState(3);
 
-        // 检查是否生成新蛋失败
-        if (!newEggsResult.success) {
-            console.warn('💀 无法生成新蛋，游戏结束');
+
+        // 7. 检查地图是否已满（失败条件）
+        if (this.mapState.emptyCells.size === 0) {
+            console.warn('💀 地图已满，游戏结束');
 
             return {
                 code: 0,
@@ -1660,10 +1784,10 @@ class GameServer {
                 eggType: eggType,
                 positionsToDelete: positionsToDelete,
                 synthesis: synthesisData,
-                newEggs: [],
+                newEggs: newEggsResult,
                 isFailure: true,
-                reason: newEggsResult.reason,
-                message: newEggsResult.message
+                reason: 'map_full',
+                message: '地图已满，游戏结束！'
             };
         }
 
@@ -1677,7 +1801,7 @@ class GameServer {
             eggType: eggType,
             positionsToDelete: positionsToDelete, // 返回需要删除的位置列表
             synthesis: synthesisData,
-            newEggs: newEggs,
+            newEggs: newEggsResult,
             message: "移动处理完成"
         };
     }
@@ -1888,7 +2012,7 @@ class GameServer {
  * 打印当前地图状态（调试用）
  */
     printMapState() {
-        console.log('🗺️ 当前后端地图状态:');
+        // console.log('🗺️ 当前后端地图状态:');
 
         const occupiedCells = [];
         for (const [cellId, cellData] of Object.entries(this.mapState.cells)) {
@@ -1899,7 +2023,7 @@ class GameServer {
                     hasEgg: cellData.hasEgg,
                     occupied: cellData.occupied
                 });
-                utile.__sdklog3(`  格子${cellId}: 蛋类型${cellData.eggType} ${this.getEggTypeName(cellData.eggType)}`);
+                // utile.__sdklog3(`  格子${cellId}: 蛋类型${cellData.eggType} ${this.getEggTypeName(cellData.eggType)}`);
             }
         }
 
