@@ -223,7 +223,7 @@ class GameEngine {
 
             // 检测是否为PC端
             const isPCDevice = this.isPCDevice();
-            console.log(`🖥️ 设备类型检测: ${isPCDevice ? 'PC端' : '移动端'}`);
+            // console.log(`🖥️ 设备类型检测: ${isPCDevice ? 'PC端' : '移动端'}`);
 
 
             // 判断当前屏幕是否为竖屏

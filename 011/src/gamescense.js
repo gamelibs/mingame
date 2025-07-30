@@ -693,6 +693,7 @@ class GameScense {
         this.startBackgroundMusic();
         this.playUnlockedAnimations(this.userStatus);
 
+
         if (isNewUser) {
             // 新用户：等待引导完成后生成蛋
             if (this.pointSeats.length === 0) {
@@ -720,7 +721,7 @@ class GameScense {
         console.log('🥚 为老用户生成蛋...');
 
         try {
-            
+
 
             // 从游戏数据中获取蛋配置
             if (this.gameData && this.gameData.data) {
@@ -947,8 +948,10 @@ class GameScense {
             const goldMc = this.exportRoot.mc_gold;
             if (goldMc && goldMc.text) {
                 // 设置初始金币为0
-                goldMc.text.text = "0";
-                console.log('✅ 金币显示初始化为0');
+                const totalScore = this.userStatus.currentGameState.totalScore || 0;
+
+                // 设置金币显示
+                goldMc.text.text = this.formatNumber(totalScore);
             } else {
                 console.warn('⚠️ 未找到 mc_gold 或其 text 属性');
             }
@@ -2469,6 +2472,8 @@ class GameScense {
 
                     // 6. 验证游戏数据
                     // this.verifyGameData();
+                    // 重置所有解锁动画到初始状态
+                    this.resetUnlockAnimations();
 
                     // 7. 执行生成蛋的动作
                     setTimeout(() => {
@@ -2544,7 +2549,7 @@ class GameScense {
 
             if (maskMc) {
                 this.unlockAnimations.set(i + 1, maskMc); // 等级2~7对应mask1~6
-                console.log(`✅ 找到解锁动画元件: ${maskName} -> 等级${i + 1}`);
+                // console.log(`✅ 找到解锁动画元件: ${maskName} -> 等级${i + 1}`);
 
                 maskMc.gotoAndStop(0);
             } else {
@@ -2608,26 +2613,49 @@ class GameScense {
         // 播放对应等级的解锁动画 (等级2~7对应mask1~6)
         for (let level = 2; level <= Math.min(maxUnlockedLevel, 7); level++) {
             setTimeout(() => {
-                
+
                 const maskMc = this.unlockAnimations.get(level);
                 if (maskMc) {
                     console.log(`✨ 播放已解锁动画: 等级${level}`);
-    
+
                     // 显示并播放动画
                     maskMc.visible = true;
                     maskMc.gotoAndPlay(0);
-    
+
                     // 监听播放完成
                     utile.addFrameEnd(maskMc, () => {
                         console.log(`✅ 等级${level}解锁动画播放完成`);
                     }, true);
                 }
-            }, 100*level);
+            }, 100 * level);
         }
 
         if (maxUnlockedLevel <= 1) {
             console.log('📝 用户尚未解锁高级蛋类型，无需播放解锁动画');
         }
+    }
+
+    /**
+ * 重置所有解锁动画到初始状态
+ */
+    resetUnlockAnimations() {
+        console.log('🔄 重置所有解锁动画到初始状态...');
+
+        if (!this.unlockAnimations) {
+            console.warn('⚠️ 解锁动画元件未初始化');
+            return;
+        }
+
+        // 重置所有解锁动画到第0帧
+        this.unlockAnimations.forEach((maskMc, level) => {
+            if (maskMc) {
+                maskMc.gotoAndStop(0);
+                maskMc.visible = true; // 确保可见但停在第0帧
+                console.log(`🔄 重置等级${level}解锁动画到第0帧`);
+            }
+        });
+
+        console.log('✅ 所有解锁动画已重置到初始状态');
     }
 }
 
