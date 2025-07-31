@@ -8,6 +8,14 @@ class GameServer {
         this.isInitialized = false;
         this.serverVersion = '1.0.0';
 
+        // 🔥 登录配置
+        this.loginConfig = {
+            forceLoginType: 'null', // 强制登录类型：'wechat', 'google', 'local', 'guest', null(自动检测)
+            enableMockLogin: false, // 是否启用模拟登录
+            mockLoginDelay: 5000, // 模拟登录延迟时间(毫秒)
+            mockUserType: 'old', // 模拟用户类型：'new', 'old', 'random'
+        };
+
         // 分数系统
         this.scoreSystem = {
             currentScore: 0,
@@ -95,9 +103,9 @@ class GameServer {
         console.log('🖥️ GameServer 初始化完成');
 
         // 延迟初始化地图系统，等待 A* 模块加载
-        setTimeout(() => {
-            this.initializeMapSystem();
-        }, 100);
+
+        this.initializeMapSystem();
+
     }
 
     /**
@@ -275,11 +283,11 @@ class GameServer {
     /**
      * 初始化服务器
      */
-    init() {
+    async init() {
         console.log('🚀 GameServer 启动中...');
 
-        // 加载用户数据缓存
-        this.loadUserDataCache();
+        // 🔥 使用新的用户数据初始化流程
+        this.currentUserStatus = await this.initializeUserData();
 
         this.isInitialized = true;
         console.log('✅ GameServer 启动完成');
@@ -301,9 +309,12 @@ class GameServer {
                 const parsedData = JSON.parse(userData);
                 this.userDataCache.set('currentUser', parsedData);
                 console.log('📂 用户数据缓存加载完成');
+                return parsedData; // 🔥 返回解析后的数据
             }
+            return null; // 🔥 没有数据时返回null
         } catch (error) {
             console.error('❌ 用户数据缓存加载失败:', error);
+            return null; // 🔥 出错时返回null
         }
     }
 
@@ -312,64 +323,69 @@ class GameServer {
      * @param {string} userId - 用户ID（可选，默认为当前用户）
      * @returns {Object} 用户状态信息
      */
-    checkUserStatus(userId = 'currentUser') {
-        console.log('🔍 检查用户状态...');
+    // checkUserStatus(userId = 'currentUser') {
+    //     console.log('🔍 检查用户状态...');
 
-        const userData = this.userDataCache.get(userId);
+    //     const userData = this.userDataCache.get(userId);
 
-        // 测试默认true
-        if (!userData) {//|| 
-            // 新用户
-            const newUserData = {
-                userId: userId,
-                isNewUser: true,
-                currentLevel: 0,
-                currentStep: 1,
-                maxUnlockedEggType: 0, // 新用户只解锁了基础蛋类型0
-                createTime: Date.now(),
-                lastPlayTime: Date.now(),
-                totalPlayTime: 0,
-                completedSteps: []
-            };
+    //     if (!userData) {
+    //         // 🔥 新用户：创建游戏数据
+    //         const newUserData = {
+    //             userId: userId,
+    //             isNewUser: true,
+    //             currentLevel: 0,
+    //             currentStep: 1,
+    //             maxUnlockedEggType: 0,
+    //             createTime: Date.now(),
+    //             lastPlayTime: Date.now(),
+    //             totalPlayTime: 0,
+    //             totalScore: 0,
+    //             completedSteps: []
+    //         };
 
-            // 保存新用户数据
-            this.saveUserData(userId, newUserData);
+    //         this.saveUserData(userId, newUserData);
+    //         console.log('👶 检测到新用户，创建游戏数据:', newUserData);
+    //         return newUserData;
+    //     } else {
+    //         // 🔥 老用户：合并用户身份信息和游戏数据
+    //         const existingUserData = {
+    //             ...userData, // 保留用户身份信息
+    //             isNewUser: false,
+    //             maxUnlockedEggType: userData.maxUnlockedEggType || 1,
+    //             totalScore: userData.totalScore || 0,
+    //             lastPlayTime: Date.now()
+    //         };
 
-            console.log('👶 检测到新用户:', newUserData);
-            return newUserData;
-        } else {
-            // 老用户
-            console.log('🎉 欢迎回来！');
+    //         // 恢复游戏状态
+    //         const savedGameState = this.loadSavedGameState();
+    //         if (savedGameState) {
+    //             existingUserData.currentGameState = savedGameState;
+    //         }
 
-            const existingUserData = {
-                ...userData,
-                isNewUser: false,
-                difficulty: 'normal', // 默认中等难度
-                lastPlayTime: Date.now()
-            };
+    //         this.saveUserData(userId, existingUserData);
+    //         console.log('🎉 老用户数据:', existingUserData);
+    //         return existingUserData;
+    //     }
+    // }
 
-            // 🔥 加载保存的游戏状态数据
-            const savedGameState = this.loadSavedGameState();
-            if (savedGameState) {
-                existingUserData.currentGameState = savedGameState;
-                console.log(`🎮 加载保存的游戏状态: ${savedGameState.eggs.length}个蛋, 分数${savedGameState.score}`);
+    /**
+     * 恢复分数系统（单独方法）
+     */
+    restoreScoreSystem() {
+        try {
+            const savedData = localStorage.getItem('currentGameState');
+            if (!savedData) return;
 
-                // 🔥 确保分数系统正确恢复
-                if (this.scoreSystem && savedGameState.totalScore) {
-                    this.scoreSystem.totalScore = savedGameState.totalScore;
-                    this.scoreSystem.currentScore = savedGameState.score || savedGameState.totalScore;
-                    console.log(`💰 分数系统已恢复: 总分${this.scoreSystem.totalScore}, 当前分${this.scoreSystem.currentScore}`);
-                }
+            const gameState = JSON.parse(savedData);
 
+            if (this.scoreSystem && gameState.totalScore !== undefined) {
+                this.scoreSystem.totalScore = gameState.totalScore;
+                this.scoreSystem.sessionScore = 0; // 本次会话分数重置
+
+                console.log(`💰 分数系统已恢复: 总分${this.scoreSystem.totalScore}`);
             }
-
-            // 更新最后游戏时间
-            this.saveUserData(userId, existingUserData);
-
-            console.log(`👤 老用户登录 - 等级: ${existingUserData.currentLevel}, 步骤: ${existingUserData.currentStep}`);
-            console.log(`🏆 已解锁最高蛋等级: ${existingUserData.maxUnlockedEggType || 0}`);
-
-            return existingUserData;
+        } catch (error) {
+            console.error('❌ 恢复分数系统失败:', error);
         }
     }
 
@@ -384,9 +400,9 @@ class GameServer {
         console.log('📊 获取游戏数据...');
 
         // 如果没有传入用户状态，获取当前用户状态
-        if (!userStatus) {
-            userStatus = this.checkUserStatus('currentUser');
-        }
+        // if (!userStatus) {
+        //     userStatus = this.checkUserStatus('currentUser');
+        // }
 
         // 使用传入的参数或用户当前进度
         const currentLevel = level !== null ? level : userStatus.currentLevel;
@@ -507,8 +523,8 @@ class GameServer {
     }
 
     /**
- * 重置用户解锁等级
- */
+     * 重置用户解锁等级
+     */
     resetUserUnlockLevel() {
         console.log('🔄 重置用户解锁蛋等级...');
 
@@ -557,7 +573,7 @@ class GameServer {
                 eggCount: savedState.eggs.length,
                 data: algorithmData,
                 userStatus: userStatus,
-                totalScore: savedState.totalScore || 0, 
+                totalScore: savedState.totalScore || 0,
                 hasSavedState: true, // 标记这是恢复的数据
                 message: `Restored saved game state with ${savedState.eggs.length} eggs`
             };
@@ -584,6 +600,7 @@ class GameServer {
             eggCount: eggCount,
             data: algorithmData,
             userStatus: userStatus,
+
             message: `Algorithm data generated successfully for returning user with ${eggCount} eggs`
         };
 
@@ -689,7 +706,7 @@ class GameServer {
      * @returns {Object} A* 寻路实例
      */
     getAstar(type = 4) {
-        console.log(`🔍 尝试获取 A* 寻路实例，类型: ${type}`);
+        // console.log(`🔍 尝试获取 A* 寻路实例，类型: ${type}`);
 
         if (type === 4) {
             if (window.OvoAstar4) {
@@ -1129,6 +1146,9 @@ class GameServer {
  * @returns {Object} 更新后的分数状态
  */
     updateScoreSystem(scoreDetail) {
+
+
+
         this.scoreSystem.currentScore += scoreDetail.totalScore;
         this.scoreSystem.totalScore += scoreDetail.totalScore;
         this.scoreSystem.sessionScore += scoreDetail.totalScore;
@@ -1504,25 +1524,15 @@ class GameServer {
             }
 
             const gameState = JSON.parse(savedData);
-            console.log(`🔄 恢复游戏状态: ${gameState.eggs.length}个蛋, 总分数${gameState.totalScore}`);
+            console.log(`🔄 恢复游戏状态: ${gameState.eggs.length}个蛋`);
 
             // 恢复地图中的蛋
             for (const eggData of gameState.eggs) {
                 this.occupyPositionSilently(eggData.cellId, eggData.eggType);
             }
 
-            // 只恢复总分数
-            if (this.scoreSystem && gameState.totalScore) {
-                this.scoreSystem.totalScore = gameState.totalScore;
-                // this.scoreSystem.currentScore = 0; // 当前分数重置为0
-                console.log(`💰 恢复总分数: ${this.scoreSystem.totalScore}`);
-            }
-
-            // 恢复选择状态
-            if (gameState.selectionState) {
-                this.selectionState.isSelected = gameState.selectionState.isSelected || false;
-                this.selectionState.selectedEgg = gameState.selectionState.selectedEgg || null;
-            }
+            // 单独恢复分数系统
+            this.restoreScoreSystem();
 
             return gameState;
 
@@ -1954,8 +1964,7 @@ class GameServer {
         }
 
         // 获取用户解锁状态
-        const userStatus = this.checkUserStatus('currentUser');
-        const maxUnlockedEggType = userStatus ? (userStatus.maxUnlockedEggType || 0) : 0;
+        const maxUnlockedEggType = this.currentUserStatus ? (this.currentUserStatus.maxUnlockedEggType || 0) : 0;
 
         console.log(`🏆 用户当前最高解锁等级: ${maxUnlockedEggType}`);
 
@@ -2073,8 +2082,8 @@ class GameServer {
 
 
     /**
- * 打印当前地图状态（调试用）
- */
+     * 打印当前地图状态（调试用）
+     */
     printMapState() {
         // console.log('🗺️ 当前后端地图状态:');
 
@@ -2093,6 +2102,268 @@ class GameServer {
 
         console.log(`📊 后端地图统计: 总共${occupiedCells.length}个蛋`);
         return occupiedCells;
+    }
+
+    /**
+     * 用户模块
+     */
+
+    /**
+ * 用户数据初始化
+ */
+    async initializeUserData() {
+        console.log('👤 开始用户数据初始化...');
+
+        try {
+            // 1. 检测登录方式
+            const loginType = this.detectLoginType();
+            console.log(`🔍 检测到登录方式: ${loginType}`);
+
+            // 2. 根据登录方式加载用户数据
+            const userData = await this.loadUserDataByLoginType(loginType);
+
+            this.loadUserDataCache(); // 先加载到缓存
+            const localGameData = this.userDataCache.get('currentUser'); // 然后从缓存获取
+
+
+
+            // 3. 判断新老用户并合并数据
+            const isNewUser = !localGameData;
+            const finalUserData = {
+                ...userData,
+                isNewUser: isNewUser
+            };
+
+            // 4. 保存并返回
+            this.saveUserData('currentUser', finalUserData);
+
+            return finalUserData;
+
+        } catch (error) {
+            console.error('❌ 用户数据初始化失败:', error);
+            return this.createGuestUser();
+        }
+    }
+
+    /**
+     * 设置登录配置
+     * @param {Object} config - 登录配置
+     */
+    setLoginConfig(config) {
+        this.loginConfig = { ...this.loginConfig, ...config };
+        console.log('🔧 登录配置已更新:', this.loginConfig);
+    }
+
+    /**
+     * 检测登录方式
+     */
+    detectLoginType() {
+        // 🔥 如果强制指定了登录类型，直接返回
+        if (this.loginConfig.forceLoginType) {
+            console.log(`🎯 强制使用登录方式: ${this.loginConfig.forceLoginType}`);
+            return this.loginConfig.forceLoginType;
+        }
+
+        // 🔥 模拟登录检测
+        if (this.loginConfig.enableMockLogin) {
+            // 检查URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('mock_wechat') === 'true') {
+                console.log('🔍 URL参数强制微信模拟');
+                return 'wechat';
+            }
+
+            // 随机模拟微信环境
+            if (Math.random() < this.loginConfig.mockWechatProbability) {
+                console.log('🔍 随机模拟微信环境');
+                return 'wechat';
+            }
+        }
+
+        // 检查是否有微信环境
+        if (window.wx && window.wx.miniProgram) {
+            return 'wechat';
+        }
+
+        // 检查是否有Google登录
+        if (window.gapi && window.gapi.auth2) {
+            return 'google';
+        }
+
+        // 检查本地是否有用户数据
+        const localData = localStorage.getItem('gameUserData');
+        if (localData) {
+            return 'local';
+        }
+
+        // 默认游客模式
+        return 'guest';
+    }
+
+
+    /**
+     * 根据登录方式加载用户数据
+     */
+    async loadUserDataByLoginType(loginType) {
+        switch (loginType) {
+            case 'wechat':
+                return await this.loadWechatUserData();
+            case 'google':
+                return await this.loadGoogleUserData();
+            case 'local':
+                return this.loadLocalUserData();
+            case 'guest':
+            default:
+                return this.createGuestUser();
+        }
+    }
+
+    /**
+     * 加载微信用户数据
+     */
+    async loadWechatUserData() {
+        console.log('🔐 加载微信用户数据...');
+
+        try {
+            // 🔥 模拟微信登录延迟（10秒）
+            utile.__sdklog3('⏳ 模拟微信登录，等待n秒...');
+            await new Promise(resolve => setTimeout(resolve, 1000 * 3));
+
+            // 模拟微信用户信息
+            const userInfo = {
+                openid: 'mock_openid_' + Date.now(),
+                nickname: '微信用户' + Math.floor(Math.random() * 1000),
+                avatar: 'https://example.com/avatar.jpg',
+                unionid: 'mock_unionid_' + Date.now()
+            };
+
+            // 模拟50%概率是老用户
+            const isExistingUser = Math.random() > 0.5;
+
+            if (isExistingUser) {
+                utile.__sdklog3('☁️ 模拟找到云存档数据（老用户）');
+                return {
+                    userId: userInfo.openid,
+                    loginType: 'wechat',
+                    userInfo: userInfo,
+                    // 🔥 只返回用户身份信息，不包含游戏进度数据
+                    lastLoginTime: Date.now(),
+                    fromCloud: true
+                };
+            } else {
+                console.log('👶 微信新用户，创建初始数据');
+                return this.createNewUser('wechat', userInfo);
+            }
+        } catch (error) {
+            console.error('❌ 微信登录失败，使用游客模式:', error);
+            return this.createGuestUser();
+        }
+    }
+
+    /**
+ * 加载Google用户数据
+ */
+    async loadGoogleUserData() {
+        console.log('🔐 加载Google用户数据...');
+
+        try {
+            // 获取Google用户信息
+            const userInfo = await this.getGoogleUserInfo();
+
+            // 尝试从云存档加载
+            const cloudData = await this.loadFromGoogleCloud(userInfo.id);
+
+            if (cloudData) {
+                console.log('☁️ 从Google云存档恢复数据');
+                return {
+                    ...cloudData,
+                    loginType: 'google',
+                    userInfo: userInfo,
+                    lastLoginTime: Date.now()
+                };
+            } else {
+                console.log('👶 Google新用户，创建初始数据');
+                return this.createNewUser('google', userInfo);
+            }
+        } catch (error) {
+            console.error('❌ Google登录失败，使用游客模式:', error);
+            return this.createGuestUser();
+        }
+    }
+
+    /**
+     * 加载本地用户数据
+     */
+    loadLocalUserData() {
+        console.log('💾 加载本地用户数据...');
+
+        try {
+            const userData = localStorage.getItem('gameUserData');
+            if (userData) {
+                const parsedData = JSON.parse(userData);
+                console.log('📂 本地数据加载成功');
+                return {
+                    ...parsedData,
+                    loginType: parsedData.loginType || 'local',
+                    lastLoginTime: Date.now()
+                };
+            }
+        } catch (error) {
+            console.error('❌ 本地数据解析失败:', error);
+        }
+
+        return this.createGuestUser();
+    }
+
+    /**
+     * 创建游客用户
+     */
+    createGuestUser() {
+        console.log('👤 创建游客用户...');
+
+        const guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+        return this.createNewUser('guest', { id: guestId, name: '游客' });
+    }
+
+    /**
+     * 创建新用户数据
+     */
+    createNewUser(loginType, userInfo) {
+        return {
+            userId: userInfo.id || userInfo.openid || 'guest_' + Date.now(),
+            loginType: loginType,
+            userInfo: userInfo,
+            // 🔥 只包含用户身份信息，不包含游戏数据
+            createTime: Date.now(),
+            lastLoginTime: Date.now(),
+            fromCloud: false
+        };
+    }
+
+    /**
+     * 处理首次进入用户
+     */
+    processFirstTimeUser(userData) {
+        // 检查是否需要显示引导
+        if (userData.isNewUser || userData.needsGuide) {
+            console.log('📖 用户需要引导流程');
+            userData.needsGuide = true;
+        } else {
+            console.log('🎮 老用户直接进入游戏');
+            userData.needsGuide = false;
+        }
+
+        // 恢复游戏状态
+        if (!userData.isNewUser) {
+            const savedGameState = this.loadSavedGameState();
+            if (savedGameState) {
+                userData.currentGameState = savedGameState;
+                console.log('🔄 恢复上次游戏状态');
+            }
+        }
+
+        return userData;
     }
 }
 

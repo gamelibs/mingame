@@ -9,7 +9,7 @@ class GameScense {
         this.stage = null;
         this.exportRoot = null;
         this.canvas = null;
-        this.config = null;
+        // this.config = null;
         this.loadedSounds = null;
         this.loadedImages = null;
 
@@ -46,51 +46,120 @@ class GameScense {
             score: 0,           // 当前分数
             isProcessing: false // 是否正在处理操作
         };
+
+
     }
 
-
     /**
-     * 初始化游戏场景
-     * @param {Object} gameData - 游戏数据对象
+     * 初始化UI元件
      */
-    async init(gameData) {
-        console.log('🎮 GameScense 初始化开始...');
-
-        // 保存游戏数据
-        this.engine = gameData.engine;
-        this.stage = gameData.stage;
-        this.exportRoot = gameData.exportRoot;
-        this.canvas = gameData.canvas;
-        this.config = gameData.config;
-        this.loadedSounds = gameData.loadedSounds;
-        this.loadedImages = gameData.loadedImages;
-
-        this.difficultySelectionEnabled = false; //难度
-
-        this.maxUnlockedLevel = 1; // 初始只解锁等级1
-        this.isProcessingClick = false; // 防抖标识
-        this.clickDebounceTime = 300; // 防抖时间（毫秒）
+    initUIElements() {
+        console.log('🎨 初始化UI元件...');
 
         try {
-            // 保存用户数据和游戏配置
-            this.userStatus = gameData.userStatus;
-            this.gameData = gameData.gameConfig;
+            // 验证 exportRoot
+            if (!this.exportRoot || !this.exportRoot.children) {
+                console.warn('⚠️ exportRoot 仍然无效，跳过UI初始化');
+                return;
+            }
 
-            console.log('👤 接收到用户状态:', this.userStatus);
-            console.log('🎯 接收到游戏配置:', this.gameData);
-
+            // 初始化失败和胜利界面（隐藏状态）
             this.failureHandler(false);
             this.victoryHandler(false);
 
             // 初始化解锁动画元件
             this.initUnlockAnimations();
 
-            new CardGame().init(gameData);
+            console.log('✅ UI元件初始化完成');
+        } catch (error) {
+            console.error('❌ UI元件初始化失败:', error);
+        }
+    }
 
-            this.cardGame = new CardGame();
-            await this.cardGame.init(gameData);
-            // 异步初始化流程
-            await this.initializeAsync();
+    /**
+     * 初始化游戏场景
+     * @param {Object} gameData - 游戏数据对象
+     */
+    async init(gameData) {
+
+        // 初始化UI
+        try {
+
+            console.log('🎮 GameScense 初始化开始...');
+
+            // 保存游戏数据
+            this.engine = gameData.engine;
+            this.stage = gameData.stage;
+            this.exportRoot = gameData.exportRoot;
+            this.canvas = gameData.canvas;
+            this.config = gameData.config;
+            this.loadedSounds = gameData.loadedSounds;
+            this.loadedImages = gameData.loadedImages;
+
+            this.difficultySelectionEnabled = false; //难度
+
+            this.maxUnlockedLevel = 1; // 初始只解锁等级1
+            this.isProcessingClick = false; // 防抖标识
+            this.clickDebounceTime = 300; // 防抖时间（毫秒）
+
+            this.initUIElements();
+
+            // 保存用户数据和游戏配置
+            this.userStatus = gameData.userStatus;
+            // this.gameData = gameData.gameConfig;
+
+            console.log('👤 接收到用户状态:', this.userStatus);
+            // console.log('🎯 接收到游戏配置:', this.gameData);
+
+
+            const isNewUser = this.userStatus?.isNewUser;
+            console.log(`👤 用户类型检查: ${isNewUser ? '新用户' : '老用户'}`);
+
+            // if (isNewUser) {
+            //     // 🔥 新用户：直接使用默认中等难度，不显示选择界面
+            //     console.log('👶 新用户跳过难度选择，使用默认中等难度');
+            //     this.selectedDifficulty = 'normal';
+            //     // await this.loadGameDataByDifficulty('normal');
+            // } else {
+            //     // 🔥 老用户：显示难度选择
+            //     if (this.difficultySelectionEnabled) {
+            //         console.log('🎮 老用户显示难度选择界面');
+            //         // await this.waitForDifficultySelection();
+            //     } else {
+            //         console.log('🎮 难度选择已禁用，使用默认中等难度');
+            //         this.selectedDifficulty = 'normal';
+            //         // await this.loadGameDataByDifficulty('normal');
+            //     }
+            // }
+
+
+            // 检查是否开启难度选择
+            // if (this.difficultySelectionEnabled) {
+            //     console.log('🎮 开启了难度选择，等待用户选择难度');
+            //     // 默认调用 SelectLine 模块处理难度选择
+            //     // this.initDifficultySelection();
+            // } else {
+            //     console.log('🎮 未开启难度选择，使用默认中等难度');
+            //     // 直接使用中等难度获取游戏数据
+            //     this.selectedDifficulty = 'normal';
+            //     await this.loadGameDataByDifficulty('normal');
+            //     this.continueInitialization();
+            // }
+
+
+
+            // const gameConfig = window.GameServer.getGameData(
+            //     userStatus,
+            //     'currentUser',
+            //     userStatus.currentLevel,
+            //     userStatus.currentStep,
+            //     4
+            // );
+            // console.log('🎯 获取到游戏配置:', gameConfig);
+
+            // this.cardGame = new CardGame();
+            // await this.cardGame.init(gameData);
+
 
 
             // 初始化引导手势
@@ -145,36 +214,6 @@ class GameScense {
         return true;
     }
 
-    // 删除了前端棋盘初始化，统一由后端 GameServer 提供
-
-    /**
-     * 异步初始化流程
-     */
-    async initializeAsync() {
-        console.log('🔄 开始异步初始化...');
-
-        try {
-
-            // 检查是否开启难度选择
-            if (this.difficultySelectionEnabled) {
-                console.log('🎮 开启了难度选择，等待用户选择难度');
-                // 默认调用 SelectLine 模块处理难度选择
-                this.initDifficultySelection();
-            } else {
-                console.log('🎮 未开启难度选择，使用默认中等难度');
-                // 直接使用中等难度获取游戏数据
-                this.selectedDifficulty = 'normal';
-                await this.loadGameDataByDifficulty('normal');
-                this.continueInitialization();
-            }
-
-            console.log('✅ 异步初始化完成');
-
-        } catch (error) {
-            console.error('❌ 异步初始化失败:', error);
-            throw error;
-        }
-    }
 
 
     /**
@@ -194,14 +233,14 @@ class GameScense {
         };
 
         // 初始化 SelectLine 模块
-        if (window.SelectLine) {
-            window.SelectLine.init(gameData, (difficulty) => {
-                this.onDifficultySelected(difficulty);
-            });
-        } else {
-            console.warn('⚠️ SelectLine 模块未找到，使用默认难度');
-            this.onDifficultySelected('normal');
-        }
+        // if (window.SelectLine) {
+        //     window.SelectLine.init(gameData, (difficulty) => {
+        //         this.onDifficultySelected(difficulty);
+        //     });
+        // } else {
+        //     console.warn('⚠️ SelectLine 模块未找到，使用默认难度');
+        //     this.onDifficultySelected('normal');
+        // }
     }
 
     /**
@@ -211,17 +250,9 @@ class GameScense {
         console.log(`🎯 接收到选择的难度: ${difficulty}`);
         this.selectedDifficulty = difficulty;
 
-        try {
-            // 根据选择的难度获取游戏数据
-            await this.loadGameDataByDifficulty(difficulty);
+        // 继续游戏初始化流程
+        this.continueInitialization();
 
-            // 继续游戏初始化流程
-            this.continueInitialization();
-        } catch (error) {
-            console.error('❌ 根据难度获取游戏数据失败:', error);
-            // 使用默认数据继续
-            this.continueInitialization();
-        }
     }
 
 
@@ -229,36 +260,36 @@ class GameScense {
  * 根据难度获取游戏数据
  * @param {string} difficulty - 难度等级 ('easy', 'normal', 'hard')
  */
-    async loadGameDataByDifficulty(difficulty) {
-        console.log(`📊 根据难度 ${difficulty} 获取游戏数据...`);
+    // async loadGameDataByDifficulty(difficulty) {
+    //     console.log(`📊 根据难度 ${difficulty} 获取游戏数据...`);
 
-        try {
-            // 从 SelectLine 获取难度对应的参数
-            const difficultyLevel = window.SelectLine ? window.SelectLine.getDifficultyLevel(difficulty) : 4;
-            console.log(`🎯 难度等级: ${difficultyLevel}`);
+    //     try {
+    //         // 从 SelectLine 获取难度对应的参数
+    //         const difficultyLevel = window.SelectLine ? window.SelectLine.getDifficultyLevel(difficulty) : 4;
+    //         console.log(`🎯 难度等级: ${difficultyLevel}`);
 
-            // 🔥 修正：不传入旧的userStatus，让后端获取最新状态
-            const gameConfigData = window.GameServer.getGameData(
-                null, // 不传入userStatus，让后端自己获取最新的
-                'currentUser',
-                null, // 使用用户当前等级
-                null, // 使用用户当前步骤
-                difficultyLevel
-            );
+    //         // 🔥 修正：不传入旧的userStatus，让后端获取最新状态
+    //         const gameConfigData = window.GameServer.getGameData(
+    //             null, // 不传入userStatus，让后端自己获取最新的
+    //             'currentUser',
+    //             null, // 使用用户当前等级
+    //             null, // 使用用户当前步骤
+    //             difficultyLevel
+    //         );
 
-            if (gameConfigData && gameConfigData.success) {
-                this.gameData = gameConfigData;
-                console.log('🎯 根据难度获取到游戏配置:', this.gameData);
-            } else {
-                console.warn('⚠️ 获取游戏数据失败');
-                this.gameData = null;
-            }
+    //         if (gameConfigData && gameConfigData.success) {
+    //             this.gameData = gameConfigData;
+    //             console.log('🎯 根据难度获取到游戏配置:', this.gameData);
+    //         } else {
+    //             console.warn('⚠️ 获取游戏数据失败');
+    //             this.gameData = null;
+    //         }
 
-        } catch (error) {
-            console.error('❌ 获取游戏数据时出错:', error);
-            this.gameData = null;
-        }
-    }
+    //     } catch (error) {
+    //         console.error('❌ 获取游戏数据时出错:', error);
+    //         this.gameData = null;
+    //     }
+    // }
 
     /**
  * 继续初始化流程
@@ -287,7 +318,7 @@ class GameScense {
             this.getGamebox();
 
             // 3. 初始化游戏元素
-            this.initGameElements();
+            this.initGoldDisplay();
 
             // 4. 设置事件监听
             this.setupEventListeners();
@@ -841,7 +872,7 @@ class GameScense {
 
         if (nextLevelData && nextLevelData.success) {
             // 更新用户进度
-            this.updateUserProgress(nextLevelData.level, nextLevelData.step);
+            // this.updateUserProgress(nextLevelData.level, nextLevelData.step);
 
             // 更新游戏数据
             this.gameData = nextLevelData;
@@ -897,39 +928,10 @@ class GameScense {
     }
 
     /**
-     * 初始化游戏元素
+     * 格式化数字显示
+     * @param {number} num - 数字
+     * @returns {string} 格式化后的字符串
      */
-    initGameElements() {
-        console.log('🎯 初始化游戏元素...');
-
-        if (!this.gamebox) {
-            console.error('❌ gamebox 未找到，无法初始化游戏元素');
-            return;
-        }
-
-        // 打印 gamebox 的子元件信息
-        // console.log('📦 gamebox 子元件列表:');
-        // for (let i = 0; i < this.gamebox.children.length; i++) {
-        //     const child = this.gamebox.children[i];
-        // console.log(`  - [${i}] ${child.name || child.constructor.name}:`, child);
-        // }
-
-        // 3. 初始化游戏元素
-        this.initGoldDisplay();
-        // 这里可以获取游戏中的具体元件
-        // 例如：
-        // this.player = this.gamebox.player;
-        // this.enemies = this.gamebox.enemies;
-        // this.ui = this.gamebox.ui;
-
-        console.log('✅ 游戏元素初始化完成');
-    }
-
-    /**
- * 格式化数字显示
- * @param {number} num - 数字
- * @returns {string} 格式化后的字符串
- */
     formatNumber(num) {
         if (num < 1000) return num.toString();
         if (num < 1000000) return (num / 1000).toFixed(num >= 10000 ? 0 : 1) + 'k';
@@ -938,8 +940,8 @@ class GameScense {
     }
 
     /**
- * 初始化金币显示
- */
+     * 初始化金币显示
+     */
     initGoldDisplay() {
         console.log('💰 初始化金币显示...');
 
@@ -948,7 +950,7 @@ class GameScense {
             const goldMc = this.exportRoot.mc_gold;
             if (goldMc && goldMc.text) {
                 // 设置初始金币为0
-                const totalScore = this.userStatus.currentGameState.totalScore || 0;
+                const totalScore = this.userStatus && this.userStatus.currentScore || 0;
 
                 // 设置金币显示
                 goldMc.text.text = this.formatNumber(totalScore);
@@ -2606,7 +2608,8 @@ class GameScense {
 
         // 获取用户当前最高解锁等级
 
-        const maxUnlockedLevel = userStatus ? (userStatus.maxUnlockedEggType || 0) : 0;
+        const currentUserStatus = userStatus || this.userStatus;
+        const maxUnlockedLevel = currentUserStatus ? (currentUserStatus.maxUnlockedEggType || 0) : 0;
 
         console.log(`🏆 用户最高解锁等级: ${maxUnlockedLevel}`);
 

@@ -116,9 +116,6 @@ class GameEngine {
         return "994179DFE830400BA68CFA701D2BB3AB";
     }
 
-    initDOMElements() {
-
-    }
 
     applyStageTransform() {
         if (!this.stage) return;
@@ -176,14 +173,14 @@ class GameEngine {
         // 综合判断：不是移动设备UA 且 (屏幕较大 或 无触摸支持)
         const isPCDevice = !isMobileUA && (isLargeScreen || !hasTouchSupport);
 
-        console.log('🔍 设备检测详情:', {
-            userAgent: userAgent,
-            isMobileUA: isMobileUA,
-            hasTouchSupport: hasTouchSupport,
-            screenSize: `${screenWidth}x${screenHeight}`,
-            isLargeScreen: isLargeScreen,
-            finalResult: isPCDevice ? 'PC' : 'Mobile'
-        });
+        // console.log('🔍 设备检测详情:', {
+        //     userAgent: userAgent,
+        //     isMobileUA: isMobileUA,
+        //     hasTouchSupport: hasTouchSupport,
+        //     screenSize: `${screenWidth}x${screenHeight}`,
+        //     isLargeScreen: isLargeScreen,
+        //     finalResult: isPCDevice ? 'PC' : 'Mobile'
+        // });
 
         return isPCDevice;
     }
@@ -302,7 +299,7 @@ class GameEngine {
             await this.loadScript(script);
             loaded++;
             this.updateProgress((loaded / total) * 100);
-            console.log(`已加载: ${script} (${loaded}/${total})`);
+            // console.log(`已加载: ${script} (${loaded}/${total})`);
         });
 
         // 等待所有脚本加载完成
@@ -437,7 +434,7 @@ class GameEngine {
             }
 
             // 加载脚本文件
-            console.log('📜 阶段1: 加载脚本文件...');
+            // console.log('📜 阶段1: 加载脚本文件...');
             for (const scriptConfig of scripts) {
                 try {
                     await this.loadResource(scriptConfig, loadedResources, totalResources);
@@ -448,7 +445,7 @@ class GameEngine {
             }
 
             // 加载声音文件
-            console.log('🎵 阶段2: 加载声音文件...');
+            // console.log('🎵 阶段2: 加载声音文件...');
             for (const soundConfig of sounds) {
                 try {
                     await this.loadResource(soundConfig, loadedResources, totalResources);
@@ -460,179 +457,175 @@ class GameEngine {
             }
 
 
-            console.log('🎉 所有游戏资源加载完成！');
+            utile.__sdklog2('🎉 所有游戏资源加载完成！');
 
             // 确保显示100%进度
             this.updateLoadingProgress(1.0);
 
-            // 延迟一下让用户看到100%的进度
-            setTimeout(() => {
-                this.switchToGameScene();
-            }, 800);
+            this.loadedHandler();
 
         } catch (error) {
             console.error('游戏资源加载失败:', error);
             // 即使失败也尝试切换场景
-            this.updateLoadingProgress(1.0);
-            setTimeout(() => {
-                this.switchToGameScene();
-            }, 1000);
         }
     }
 
-    async loadResource(resourceConfig, currentIndex, totalResources) {
-        const { id, src, type } = resourceConfig;
+    loadedHandler() {
 
-        console.log(`📦 正在加载 ${type}: ${src}`);
+
+        const bounds = this.gl_mc.getBounds();
+        const centerX = bounds ? bounds.width / 2 : 540; // 默认值基于 loading.js 中的设计尺寸
+        const centerY = bounds ? bounds.height / 2 : 960;
+
+        console.log('📐 Loading元件尺寸:', bounds, '中心点:', centerX, centerY);
+
+        // 创建等待文本
+        this.loadingText = new createjs.Text('正在获取用户数据...', 'bold 32px Arial', '#FFFFFF');
+        this.loadingText.textAlign = 'center';
+        this.loadingText.x = centerX; // 🔥 loading 元件的中心 X
+        this.loadingText.y = centerY - 50; // 🔥 loading 元件中心向上偏移
+
+        // 创建计时器文本
+        this.timerText = new createjs.Text('0s', 'bold 24px Arial', '#FFD700');
+        this.timerText.textAlign = 'center';
+        this.timerText.x = centerX; // 🔥 loading 元件的中心 X
+        this.timerText.y = centerY + 20; // 🔥 loading 元件中心向下偏移
+
+        // 创建加载动画点
+        this.loadingDots = new createjs.Text('', 'bold 32px Arial', '#FFFFFF');
+        this.loadingDots.textAlign = 'center';
+        this.loadingDots.x = centerX; // 🔥 loading 元件的中心 X
+        this.loadingDots.y = centerY + 60; // 🔥 loading 元件中心向下偏移
+
+        // 添加到 loading 元件中
+        this.gl_mc.addChild(this.loadingText);
+        this.gl_mc.addChild(this.timerText);
+        this.gl_mc.addChild(this.loadingDots);
+
+        // 启动计时器
+        this.startUserDataTimer();
+
+        this.startGameLogic();
+    }
+
+    /**
+     * 启动用户数据加载计时器
+     */
+    startUserDataTimer() {
+        this.userDataStartTime = Date.now();
+        this.userDataTimerInterval = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - this.userDataStartTime) / 1000);
+
+            if (this.timerText) {
+                this.timerText.text = `${elapsed}s`;
+
+                // 超过10秒显示警告
+                if (elapsed > 10) {
+                    this.timerText.color = '#FF6B6B';
+                    this.loadingText.text = '网络较慢，请稍候...';
+                }
+
+                // 超过20秒显示错误提示
+                if (elapsed > 20) {
+                    this.timerText.color = '#FF0000';
+                    this.loadingText.text = '加载超时，将使用游客模式';
+                }
+            }
+
+        }, 1000);
+    }
+
+    /**
+     * 登录完成处理
+     */
+    onLoginComplete() {
+        console.log('✅ 用户登录完成');
+
+        // 停止计时器
+        if (this.userDataTimerInterval) {
+            clearInterval(this.userDataTimerInterval);
+            this.userDataTimerInterval = null;
+        }
+
+        // 更新界面显示
+        if (this.loadingText) {
+            this.loadingText.text = '登录成功！';
+            this.loadingText.color = '#00FF00';
+        }
+
+        if (this.timerText) {
+            this.timerText.text = '完成';
+            this.timerText.color = '#00FF00';
+        }
+
+        // 延迟一下让用户看到成功提示，然后切换场景
+        setTimeout(() => {
+            this.switchToGameScene();
+        }, 1000);
+    }
+
+    async startGameLogic() {
+        console.log('🎮 启动游戏逻辑...');
+
+        // 强制使用微信登录
+        window.GameServer.setLoginConfig({
+            forceLoginType: 'wechat',
+            enableMockLogin: true,
+            mockLoginDelay: 5000
+        });
+
+        // // 强制使用游客模式
+        // window.GameServer.setLoginConfig({
+        //     forceLoginType: 'guest'
+        // });
 
         try {
-            switch (type) {
-                case 'script':
-                    // 脚本加载失败会抛出异常，阻止游戏运行
-                    await this.loadScript(src);
-                    console.log(`✅ 脚本加载完成: ${src}`);
-                    break;
-
-                case 'sound':
-                    // 声音加载失败不阻止游戏运行
-                    try {
-                        await this.loadSound(id, src);
-                        console.log(`✅ 声音加载完成: ${src}`);
-                    } catch (soundError) {
-                        console.warn(`⚠️ 声音加载失败，但不影响游戏运行: ${src}`, soundError.message);
-                    }
-                    break;
-
-                case 'image':
-                    // 图片加载失败不阻止游戏运行
-                    try {
-                        await this.loadImage(id, src);
-                        console.log(`✅ 图片加载完成: ${src}`);
-                    } catch (imageError) {
-                        console.warn(`⚠️ 图片加载失败，但不影响游戏运行: ${src}`, imageError.message);
-                    }
-                    break;
-
-                default:
-                    console.warn(`未知的资源类型: ${type}`);
-                    break;
-            }
-
-        } catch (error) {
-            // 只有脚本加载失败才会到这里，这种情况下需要记录严重错误
-            console.error(`❌ 关键资源加载失败: ${src}`, error);
-            throw error; // 重新抛出脚本加载错误
-        }
-
-        // 更新进度条
-        const progress = (currentIndex + 1) / totalResources;
-        this.updateLoadingProgress(progress);
-
-        console.log(`📊 加载进度: ${currentIndex + 1}/${totalResources} (${Math.round(progress * 100)}%)`);
-
-        // 每个资源加载完成后稍微延迟，让进度条动画更平滑
-        await new Promise(resolve => setTimeout(resolve, 150));
-    }
-
-    async loadSound(id, src) {
-        return new Promise((resolve, reject) => {
-            // 初始化 SoundJS（如果还没初始化）
-            if (!this.soundInitialized) {
-                try {
-                    createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashAudioPlugin]);
-                    createjs.Sound.alternateExtensions = ["mp3", "wav", "ogg"];
-                    this.soundInitialized = true;
-                    console.log('🎵 SoundJS 初始化完成');
-                } catch (error) {
-                    console.error('🎵 SoundJS 初始化失败:', error);
-                    reject(new Error(`SoundJS initialization failed: ${error.message}`));
+            // 1. 初始化 GameServer（包含完整的用户数据初始化）
+            if (!window.GameServer?.isInitialized) {
+                console.log('🖥️ 初始化 GameServer...');
+                const serverResult = await window.GameServer.init(); // 🔥 改为 await
+                if (!serverResult.success) {
+                    console.error('❌ GameServer 初始化失败:', serverResult);
                     return;
                 }
+                this.onLoginComplete();
             }
 
-            // 设置超时机制（10秒）
-            const timeout = setTimeout(() => {
-                console.warn(`🎵 声音加载超时: ${id} (${src})`);
-                reject(new Error(`Sound load timeout: ${src}`));
-            }, 10000);
+            // // 2. 获取用户状态
+            // const userStatus = window.GameServer.currentUserStatus;
+            // utile.__sdklog2('📊 用户状态:', userStatus);
 
-            // 成功加载处理
-            const onFileLoad = (event) => {
-                if (event.id === id) {
-                    clearTimeout(timeout);
-                    createjs.Sound.removeEventListener("fileload", onFileLoad);
-                    createjs.Sound.removeEventListener("fileerror", onFileError);
+            // // 3. 🔥 获取游戏配置数据
+            // const gameConfig = window.GameServer.getGameData(
+            //     userStatus,
+            //     'currentUser',
+            //     userStatus.currentLevel,
+            //     userStatus.currentStep,
+            //     4
+            // );
+            // utile.__sdklog2('🎯 获取到游戏配置:', gameConfig);
 
-                    // 存储到已加载声音列表
-                    this.loadedSounds.set(id, src);
-                    console.log(`🎵 声音文件加载成功: ${id}`);
-                    resolve();
-                }
-            };
+            // // 4. 传递完整数据给 GameScense
+            // const gameData = {
+            //     engine: this,
+            //     stage: this.stage,
+            //     exportRoot: this.exportRoot,
+            //     canvas: this.canvas,
+            //     config: this.config,
+            //     loadedSounds: this.loadedSounds,
+            //     loadedImages: this.loadedImages,
+            //     userStatus: userStatus,
+            //     gameConfig: gameConfig // 🔥 传递游戏配置
+            // };
 
-            // 错误处理
-            const onFileError = (event) => {
-                if (event.id === id) {
-                    clearTimeout(timeout);
-                    createjs.Sound.removeEventListener("fileload", onFileLoad);
-                    createjs.Sound.removeEventListener("fileerror", onFileError);
+            // await window.GameScense.init(gameData);
+            console.log('✅ GameScense 初始化成功');
 
-                    console.error(`🎵 声音文件加载失败: ${id}`, event);
-                    reject(new Error(`Sound load failed: ${src} - ${event.message || 'Unknown error'}`));
-                }
-            };
-
-            // 添加事件监听器
-            createjs.Sound.addEventListener("fileload", onFileLoad);
-            createjs.Sound.addEventListener("fileerror", onFileError);
-
-            // 开始加载声音
-            try {
-                createjs.Sound.registerSound(src, id);
-            } catch (error) {
-                clearTimeout(timeout);
-                createjs.Sound.removeEventListener("fileload", onFileLoad);
-                createjs.Sound.removeEventListener("fileerror", onFileError);
-                reject(new Error(`Failed to register sound: ${src} - ${error.message}`));
-            }
-        });
+        } catch (error) {
+            console.error('❌ 游戏逻辑启动失败:', error);
+        }
     }
 
-    async loadImage(id, src) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-
-            // 设置超时机制（15秒）
-            const timeout = setTimeout(() => {
-                console.warn(`🖼️ 图片加载超时: ${id} (${src})`);
-                reject(new Error(`Image load timeout: ${src}`));
-            }, 15000);
-
-            img.onload = () => {
-                clearTimeout(timeout);
-
-                // 将图片存储到实例变量中
-                this.loadedImages.set(id, img);
-
-                // 同时存储到全局对象中供游戏使用（向后兼容）
-                if (!window.gameImages) window.gameImages = {};
-                window.gameImages[id] = img;
-
-                console.log(`🖼️ 图片加载成功: ${id} (${img.width}x${img.height})`);
-                resolve(img);
-            };
-
-            img.onerror = (error) => {
-                clearTimeout(timeout); v
-                console.error(`🖼️ 图片加载失败: ${id}`, error);
-                reject(new Error(`Image load failed: ${src} - ${error.message || 'Unknown error'}`));
-            };
-
-            // 设置跨域属性（如果需要）
-            img.crossOrigin = 'anonymous';
-            img.src = src;
-        });
-    }
 
     updateLoadingProgress(progress) {
         if (!this.gl_loadBar) return;
@@ -652,7 +645,7 @@ class GameEngine {
         }
 
         const percentage = Math.round(progress * 100);
-        console.log(`📊 Loading progress: ${percentage}% (frame: ${targetFrame}/${this.loadBarTotalFrames - 1})`);
+        // console.log(`📊 Loading progress: ${percentage}% (frame: ${targetFrame}/${this.loadBarTotalFrames - 1})`);
 
         // 如果达到100%，显示完成信息
         if (progress >= 1.0) {
@@ -688,8 +681,8 @@ class GameEngine {
     }
 
     /**
- * 预加载GameScene资源
- */
+     * 预加载GameScene资源
+     */
     async preloadGameScene() {
         return new Promise((resolve, reject) => {
             // 动态获取游戏组合ID
@@ -717,7 +710,7 @@ class GameEngine {
                         images[evt.item.id] = evt.result;
                     }
 
-                    console.log(`📦 GameScene资源加载: ${loadedCount}/${totalCount}`);
+                    // console.log(`📦 GameScene资源加载: ${loadedCount}/${totalCount}`);
                 });
 
                 loader.addEventListener("complete", () => {
@@ -836,17 +829,28 @@ class GameEngine {
 
         this.stage.addChild(this.exportRoot);
 
-        // GameScene淡入动画
-        // createjs.Tween.get(this.exportRoot)
-        //     .to({ alpha: 1 }, 500, createjs.Ease.quadIn)
-        //     .call(() => {
-        //         console.log('✅ GameScene淡入完成');
-        //         // 启动游戏逻辑
-        //     });
-        this.startGameLogic();
 
-        // 清理预加载数据
+
+        // 获取用户状态
+        const userStatus = window.GameServer.currentUserStatus;
+        utile.__sdklog2('📊 用户状态:', userStatus);
+
+        const gameData = {
+            engine: this,
+            stage: this.stage,
+            exportRoot: this.exportRoot,
+            canvas: this.canvas,
+            config: this.config,
+            loadedSounds: this.loadedSounds,
+            loadedImages: this.loadedImages,
+            userStatus: userStatus
+        };
+        setTimeout(() => {
+
+            window.GameScense.init(gameData);
+        }, 1000);
         this.preloadedGameScene = null;
+        // 清理预加载数据
     }
 
 
@@ -871,7 +875,7 @@ class GameEngine {
         }
 
         const percentage = Math.round(progress * 100);
-        console.log(`📊 Loading progress: ${percentage}% (frame: ${targetFrame}/${this.loadBarTotalFrames - 1})`);
+        // console.log(`📊 Loading progress: ${percentage}% (frame: ${targetFrame}/${this.loadBarTotalFrames - 1})`);
 
         // 如果达到100%，显示完成信息
         if (progress >= 1.0) {
@@ -879,128 +883,158 @@ class GameEngine {
         }
     }
 
-    async startGameConfigLoading() {
-        try {
-            console.log('🚀 开始加载gameconfig资源...');
-
-            const gameConfig = this.config.gameconfig || {};
-            const scripts = gameConfig.scripts || [];
-            const sounds = gameConfig.sounds || [];
-            const images = gameConfig.images || [];
-
-            const totalResources = scripts.length + sounds.length + images.length;
-
-            if (totalResources === 0) {
-                console.log('没有gameconfig资源需要加载，直接切换场景');
-                this.updateLoadingProgress(1.0);
-                setTimeout(() => {
-                    this.switchToGameScene();
-                }, 300);
-                return;
-            }
-
-            let loadedResources = 0;
-            this.updateLoadingProgress(0);
-
-            // 加载所有资源（进度0-80%）
-            const allResources = [...scripts, ...sounds, ...images];
-            for (const resourceConfig of allResources) {
-                try {
-                    await this.loadResource(resourceConfig, loadedResources, totalResources);
-                } catch (error) {
-                    console.warn(`⚠️ 资源加载失败: ${resourceConfig.src}`, error.message);
-                }
-                loadedResources++;
-
-                // 🔥 gameconfig资源占用0-80%的进度
-                const progress = (loadedResources / totalResources) * 0.8;
-                this.updateLoadingProgress(progress);
-            }
-
-            console.log('🎉 gameconfig资源加载完成，准备切换场景');
-
-            // 🔥 延迟一下再切换，让用户看到进度
-            setTimeout(() => {
-                this.switchToGameScene();
-            }, 500);
-
-        } catch (error) {
-            console.error('gameconfig资源加载失败:', error);
-            setTimeout(() => {
-                this.switchToGameScene();
-            }, 1000);
+    testAudioPlayback(callback) {
+        if (this.pubSound.length === 0) {
+            callback();
+            return;
         }
-    }
 
-    async startGameLogic() {
-        console.log('🎮 启动游戏逻辑...');
+        let loadedNum = 0;
+        const testSound = (id) => {
+            createjs.Sound.play(id);
+            setTimeout(() => {
+                createjs.Sound.stop();
+                loadedNum++;
+                this.goPlayFrameEnd(this.gl_loadBar, 50 + loadedNum);
+                this.pubSound.shift();
 
-        try {
-            // 1. 首先初始化 GameServer
-            console.log('🖥️ 初始化 GameServer...');
-            if (typeof window.GameServer !== 'undefined') {
-                const serverResult = window.GameServer.init();
-                if (serverResult.success) {
-                    console.log('✅ GameServer 初始化成功:', serverResult);
+                if (this.pubSound.length === 0) {
+                    createjs.Sound.muted = false;
+                    callback();
                 } else {
-                    console.error('❌ GameServer 初始化失败:', serverResult);
-                    return;
+                    testSound(this.pubSound[0]);
                 }
-            } else {
-                console.error('❌ GameServer 未找到');
-                return;
-            }
+            }, 100);
+        };
 
-            // 2. 获取用户数据和游戏配置
-            console.log('👤 获取用户数据...');
-            const userStatus = window.GameServer.checkUserStatus();
-            // const gameConfigData = window.GameServer.getGameData(userStatus);
+        testSound(this.pubSound[0]);
+    }
 
-            console.log('📊 用户状态:', userStatus);
-            // console.log('🎯 游戏配置数据:', gameConfigData);
-
-            // 3. 检查 GameScense 是否已加载并且有 init 方法
-            if (typeof window.GameScense !== 'undefined' && typeof window.GameScense.init === 'function') {
-                // 传递游戏引擎实例、场景数据和游戏配置给 GameScense
-                const gameData = {
-                    engine: this,
-                    stage: this.stage,
-                    exportRoot: this.exportRoot,
-                    canvas: this.canvas,
-                    config: this.config,
-                    loadedSounds: this.loadedSounds,
-                    loadedImages: this.loadedImages,
-                    // 添加用户数据和游戏配置
-                    userStatus: userStatus//,
-                    // gameConfig: gameConfigData
-                };
-
-                // console.log('🎯 准备初始化 GameScense，传递数据:', gameData);
-
-                // 初始化游戏场景（异步）
-                try {
-                    await window.GameScense.init(gameData);
-                    console.log('✅ GameScense 初始化成功');
-                } catch (error) {
-                    console.error('❌ GameScense 初始化失败:', error);
-                }
-
-            } else {
-                console.error('❌ GameScense 未找到或 init 方法不存在');
-                console.log('GameScense 类型:', typeof window.GameScense);
-                console.log('GameScense 对象:', window.GameScense);
-                if (window.GameScense) {
-                    console.log('GameScense.init 类型:', typeof window.GameScense.init);
-                }
-            }
-
-        } catch (error) {
-            console.error('❌ 游戏逻辑启动失败:', error);
-            console.error('错误详情:', error.stack);
+    stageUpdateHandler() {
+        if (this.stage) {
+            this.stage.update();
         }
     }
 
+    updateProgress(percent) {
+        this.currentProgress = percent;
+        this.loadingProgress.style.width = percent + '%';
+    }
 
+    goPlayFrameEnd(target, num) {
+        if (target) {
+            target.gotoAndStop(num - 2);
+        }
+    }
+
+    /**
+     * 隐藏基本加载界面
+     */
+    hideBasicLoading() {
+        console.log('🎯 基本资源加载完成，隐藏HTML加载界面');
+        const preloadContainer = document.getElementById('preload_container');
+        if (preloadContainer) {
+            preloadContainer.style.opacity = '0';
+            setTimeout(() => {
+                preloadContainer.style.display = 'none';
+            }, 500);
+        }
+    }
+
+    // 声音管理方法
+    playSound(id, options = {}) {
+        if (!this.soundInitialized) {
+            console.warn(`🎵 SoundJS 未初始化，无法播放声音: ${id}`);
+            return null;
+        }
+
+        // 检查是否允许自动播放
+        if (!this.audioEnabled && !options.userTriggered) {
+            console.warn(`🎵 浏览器阻止自动播放，需要用户交互: ${id}`);
+            return null;
+        }
+
+        if (this.loadedSounds.has(id)) {
+            try {
+                const instance = createjs.Sound.play(id, options);
+                if (instance) {
+                    console.log(`🎵 播放声音: ${id}`);
+                    return instance;
+                } else {
+                    console.warn(`🎵 声音播放失败: ${id}`);
+                    return null;
+                }
+            } catch (error) {
+                console.error(`🎵 声音播放异常: ${id}`, error);
+                return null;
+            }
+        } else {
+            console.warn(`🎵 声音未加载或加载失败: ${id}`);
+            return null;
+        }
+    }
+
+    stopSound(id) {
+        if (!this.soundInitialized) {
+            console.warn(`🎵 SoundJS 未初始化，无法停止声音: ${id}`);
+            return;
+        }
+
+        try {
+            createjs.Sound.stop(id);
+            console.log(`🎵 停止声音: ${id}`);
+        } catch (error) {
+            console.error(`🎵 停止声音异常: ${id}`, error);
+        }
+    }
+
+    setSoundVolume(volume) {
+        if (!this.soundInitialized) {
+            console.warn(`🎵 SoundJS 未初始化，无法设置音量`);
+            return;
+        }
+
+        try {
+            const clampedVolume = Math.max(0, Math.min(1, volume));
+            createjs.Sound.volume = clampedVolume;
+            console.log(`🎵 设置音量: ${clampedVolume}`);
+        } catch (error) {
+            console.error(`🎵 设置音量异常:`, error);
+        }
+    }
+
+    setupAutoplayHandler() {
+        const enableAudio = () => {
+            if (!this.audioEnabled) {
+                console.log('🎵 用户交互检测到，启用音频');
+                this.audioEnabled = true;
+
+                // 尝试播放背景音乐
+                // if (this.loadedSounds && this.loadedSounds.has('bgm')) {
+                //     this.playSound('bgm', { loop: -1, volume: 0.5 });
+                // }
+            }
+
+            // 移除事件监听器
+            // document.removeEventListener('click', enableAudio);
+            // document.removeEventListener('touchstart', enableAudio);
+            // document.removeEventListener('keydown', enableAudio);
+        };
+
+        // 添加多种用户交互事件监听
+        // document.addEventListener('click', enableAudio);
+        // document.addEventListener('touchstart', enableAudio);
+        // document.addEventListener('keydown', enableAudio);
+    }
+    // 图片管理方法
+    getImage(id) {
+        if (this.loadedImages.has(id)) {
+            return this.loadedImages.get(id);
+        } else {
+            console.warn(`🖼️ 图片未找到: ${id}`);
+            return null;
+        }
+    }
 
     async loadCoreGameFiles() {
 
@@ -1108,31 +1142,32 @@ class GameEngine {
         });
     }
 
-    testAudioPlayback(callback) {
-        if (this.pubSound.length === 0) {
-            callback();
-            return;
-        }
+    loadScript(src) {
+        return new Promise((resolve, reject) => {
+            // 检查脚本是否已经加载过
+            if (this.loadedScripts && this.loadedScripts.has(src)) {
+                console.log(`脚本已缓存: ${src}`);
+                resolve();
+                return;
+            }
 
-        let loadedNum = 0;
-        const testSound = (id) => {
-            createjs.Sound.play(id);
-            setTimeout(() => {
-                createjs.Sound.stop();
-                loadedNum++;
-                this.goPlayFrameEnd(this.gl_loadBar, 50 + loadedNum);
-                this.pubSound.shift();
+            const script = document.createElement('script');
+            script.async = false;
+            script.src = src;
+            script.onload = () => {
+                // 标记为已加载
+                if (!this.loadedScripts) this.loadedScripts = new Set();
+                this.loadedScripts.add(src);
 
-                if (this.pubSound.length === 0) {
-                    createjs.Sound.muted = false;
-                    callback();
-                } else {
-                    testSound(this.pubSound[0]);
-                }
-            }, 100);
-        };
-
-        testSound(this.pubSound[0]);
+                script.remove();
+                resolve();
+            };
+            script.onerror = (error) => {
+                console.error(`脚本加载失败: ${src}`, error);
+                reject(error);
+            };
+            document.body.appendChild(script);
+        });
     }
 
     async loadImageResources() {
@@ -1203,231 +1238,158 @@ class GameEngine {
         });
     }
 
+    async loadResource(resourceConfig, currentIndex, totalResources) {
+        const { id, src, type } = resourceConfig;
 
+        // console.log(`📦 正在加载 ${type}: ${src}`);
 
-    stageUpdateHandler() {
-        if (this.stage) {
-            this.stage.update();
-        }
-    }
+        try {
+            switch (type) {
+                case 'script':
+                    // 脚本加载失败会抛出异常，阻止游戏运行
+                    await this.loadScript(src);
+                    // console.log(`✅ 脚本加载完成: ${src}`);
+                    break;
 
-    loadScript(src) {
-        return new Promise((resolve, reject) => {
-            // 检查脚本是否已经加载过
-            if (this.loadedScripts && this.loadedScripts.has(src)) {
-                console.log(`脚本已缓存: ${src}`);
-                resolve();
-                return;
+                case 'sound':
+                    // 声音加载失败不阻止游戏运行
+                    try {
+                        await this.loadSound(id, src);
+                        // console.log(`✅ 声音加载完成: ${src}`);
+                    } catch (soundError) {
+                        console.warn(`⚠️ 声音加载失败，但不影响游戏运行: ${src}`, soundError.message);
+                    }
+                    break;
+
+                case 'image':
+                    // 图片加载失败不阻止游戏运行
+                    try {
+                        await this.loadImage(id, src);
+                        // console.log(`✅ 图片加载完成: ${src}`);
+                    } catch (imageError) {
+                        console.warn(`⚠️ 图片加载失败，但不影响游戏运行: ${src}`, imageError.message);
+                    }
+                    break;
+
+                default:
+                    console.warn(`未知的资源类型: ${type}`);
+                    break;
             }
 
-            const script = document.createElement('script');
-            script.async = false;
-            script.src = src;
-            script.onload = () => {
-                // 标记为已加载
-                if (!this.loadedScripts) this.loadedScripts = new Set();
-                this.loadedScripts.add(src);
+        } catch (error) {
+            // 只有脚本加载失败才会到这里，这种情况下需要记录严重错误
+            console.error(`❌ 关键资源加载失败: ${src}`, error);
+            throw error; // 重新抛出脚本加载错误
+        }
 
-                script.remove();
-                resolve();
+        // 更新进度条
+        const progress = (currentIndex + 1) / totalResources;
+        this.updateLoadingProgress(progress);
+
+        // console.log(`📊 加载进度: ${currentIndex + 1}/${totalResources} (${Math.round(progress * 100)}%)`);
+
+        // 每个资源加载完成后稍微延迟，让进度条动画更平滑
+        await new Promise(resolve => setTimeout(resolve, 150));
+    }
+
+    async loadSound(id, src) {
+        return new Promise((resolve, reject) => {
+            // 初始化 SoundJS（如果还没初始化）
+            if (!this.soundInitialized) {
+                try {
+                    createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashAudioPlugin]);
+                    createjs.Sound.alternateExtensions = ["mp3", "wav", "ogg"];
+                    this.soundInitialized = true;
+                    // console.log('🎵 SoundJS 初始化完成');
+                } catch (error) {
+                    console.error('🎵 SoundJS 初始化失败:', error);
+                    reject(new Error(`SoundJS initialization failed: ${error.message}`));
+                    return;
+                }
+            }
+
+            // 设置超时机制（10秒）
+            const timeout = setTimeout(() => {
+                console.warn(`🎵 声音加载超时: ${id} (${src})`);
+                reject(new Error(`Sound load timeout: ${src}`));
+            }, 10000);
+
+            // 成功加载处理
+            const onFileLoad = (event) => {
+                if (event.id === id) {
+                    clearTimeout(timeout);
+                    createjs.Sound.removeEventListener("fileload", onFileLoad);
+                    createjs.Sound.removeEventListener("fileerror", onFileError);
+
+                    // 存储到已加载声音列表
+                    this.loadedSounds.set(id, src);
+                    // console.log(`🎵 声音文件加载成功: ${id}`);
+                    resolve();
+                }
             };
-            script.onerror = (error) => {
-                console.error(`脚本加载失败: ${src}`, error);
-                reject(error);
+
+            // 错误处理
+            const onFileError = (event) => {
+                if (event.id === id) {
+                    clearTimeout(timeout);
+                    createjs.Sound.removeEventListener("fileload", onFileLoad);
+                    createjs.Sound.removeEventListener("fileerror", onFileError);
+
+                    console.error(`🎵 声音文件加载失败: ${id}`, event);
+                    reject(new Error(`Sound load failed: ${src} - ${event.message || 'Unknown error'}`));
+                }
             };
-            document.body.appendChild(script);
+
+            // 添加事件监听器
+            createjs.Sound.addEventListener("fileload", onFileLoad);
+            createjs.Sound.addEventListener("fileerror", onFileError);
+
+            // 开始加载声音
+            try {
+                createjs.Sound.registerSound(src, id);
+            } catch (error) {
+                clearTimeout(timeout);
+                createjs.Sound.removeEventListener("fileload", onFileLoad);
+                createjs.Sound.removeEventListener("fileerror", onFileError);
+                reject(new Error(`Failed to register sound: ${src} - ${error.message}`));
+            }
         });
     }
 
-    updateProgress(percent) {
-        this.currentProgress = percent;
-        this.loadingProgress.style.width = percent + '%';
-    }
+    async loadImage(id, src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
 
-    goPlayFrameEnd(target, num) {
-        if (target) {
-            target.gotoAndStop(num - 2);
-        }
-    }
+            // 设置超时机制（15秒）
+            const timeout = setTimeout(() => {
+                console.warn(`🖼️ 图片加载超时: ${id} (${src})`);
+                reject(new Error(`Image load timeout: ${src}`));
+            }, 15000);
 
-    /**
-     * 隐藏基本加载界面
-     */
-    hideBasicLoading() {
-        console.log('🎯 基本资源加载完成，隐藏HTML加载界面');
-        const preloadContainer = document.getElementById('preload_container');
-        if (preloadContainer) {
-            preloadContainer.style.opacity = '0';
-            setTimeout(() => {
-                preloadContainer.style.display = 'none';
-            }, 500);
-        }
-    }
+            img.onload = () => {
+                clearTimeout(timeout);
 
-    // initGameMain() {
-    //     console.log("Initializing game main...");
+                // 将图片存储到实例变量中
+                this.loadedImages.set(id, img);
 
-    // 创建游戏根对象
-    // this.publicRoot = new this.pubLib[this.compName]();
-    // this.exportRoot = new this.mainLib[this.mainName]();
+                // 同时存储到全局对象中供游戏使用（向后兼容）
+                if (!window.gameImages) window.gameImages = {};
+                window.gameImages[id] = img;
 
-    // 添加到舞台
-    // this.stage.addChild(this.exportRoot);
-    // this.stage.addChild(this.publicRoot);
+                // console.log(`🖼️ 图片加载成功: ${id} (${img.width}x${img.height})`);
+                resolve(img);
+            };
 
-    // 应用加载器的变换属性
-    // this.exportRoot.rotation = this.publicRoot.rotation = this.gl_mc.rotation;
-    // this.exportRoot.x = this.publicRoot.x = this.gl_mc.x;
-    // this.exportRoot.y = this.publicRoot.y = this.gl_mc.y;
-    // this.exportRoot.scaleX = this.publicRoot.scaleX = this.gl_mc.scaleX;
-    // this.exportRoot.scaleY = this.publicRoot.scaleY = this.gl_mc.scaleY;
+            img.onerror = (error) => {
+                clearTimeout(timeout); v
+                console.error(`🖼️ 图片加载失败: ${id}`, error);
+                reject(new Error(`Image load failed: ${src} - ${error.message || 'Unknown error'}`));
+            };
 
-    // 停止所有子元素动画
-    // for (const k in this.publicRoot.children) {
-    //     if (typeof utile !== 'undefined' && utile.goStop) {
-    //         utile.goStop(this.publicRoot.children[k]);
-    //     }
-    // }
-
-    // for (const k in this.exportRoot.children) {
-    //     if (typeof utile !== 'undefined' && utile.goStop) {
-    //         utile.goStop(this.exportRoot.children[k], true);
-    //     }
-    // }
-
-    //     // 启用触摸和鼠标交互
-    //     createjs.Touch.enable(this.stage);
-    //     this.stage.enableMouseOver(10);
-    //     this.stage.mouseMoveOutside = true;
-
-    //     // 初始化游戏逻辑
-    //     if (typeof game !== 'undefined' && game.init) {
-    //         game.init(this.publicRoot, this.exportRoot);
-    //     } else {
-    //         console.error('Game module not found!');
-    //     }
-    // }
-
-    // startGame() {
-    //     this.hideLoading();
-
-    //     // 初始化游戏主逻辑
-    //     if (typeof main !== 'undefined' && main.init) {
-    //         // 设置全局变量供游戏使用
-    //         window.canvas = this.canvas;
-    //         window.stage = this.stage;
-    //         window.publicRoot = this.publicRoot;
-    //         window.exportRoot = this.exportRoot;
-    //         window.mainComp = this.mainComp;
-    //         window.pubComp = this.pubComp;
-    //         window.mainLib = this.mainLib;
-    //         window.pubLib = this.pubLib;
-    //         window.config = this.config_data;
-    //         window.template = this.template;
-    //         window.mainCode = this.mainCode;
-    //         window.mainName = this.mainName;
-    //         window.compName = this.compName;
-
-    //         // 初始化游戏主逻辑
-    //         this.initGameMain();
-    //     } else {
-    //         console.error('Game main not found!');
-    //     }
-    // }
-
-    // 声音管理方法
-    playSound(id, options = {}) {
-        if (!this.soundInitialized) {
-            console.warn(`🎵 SoundJS 未初始化，无法播放声音: ${id}`);
-            return null;
-        }
-
-        // 检查是否允许自动播放
-        if (!this.audioEnabled && !options.userTriggered) {
-            console.warn(`🎵 浏览器阻止自动播放，需要用户交互: ${id}`);
-            return null;
-        }
-
-        if (this.loadedSounds.has(id)) {
-            try {
-                const instance = createjs.Sound.play(id, options);
-                if (instance) {
-                    console.log(`🎵 播放声音: ${id}`);
-                    return instance;
-                } else {
-                    console.warn(`🎵 声音播放失败: ${id}`);
-                    return null;
-                }
-            } catch (error) {
-                console.error(`🎵 声音播放异常: ${id}`, error);
-                return null;
-            }
-        } else {
-            console.warn(`🎵 声音未加载或加载失败: ${id}`);
-            return null;
-        }
-    }
-
-    stopSound(id) {
-        if (!this.soundInitialized) {
-            console.warn(`🎵 SoundJS 未初始化，无法停止声音: ${id}`);
-            return;
-        }
-
-        try {
-            createjs.Sound.stop(id);
-            console.log(`🎵 停止声音: ${id}`);
-        } catch (error) {
-            console.error(`🎵 停止声音异常: ${id}`, error);
-        }
-    }
-
-    setSoundVolume(volume) {
-        if (!this.soundInitialized) {
-            console.warn(`🎵 SoundJS 未初始化，无法设置音量`);
-            return;
-        }
-
-        try {
-            const clampedVolume = Math.max(0, Math.min(1, volume));
-            createjs.Sound.volume = clampedVolume;
-            console.log(`🎵 设置音量: ${clampedVolume}`);
-        } catch (error) {
-            console.error(`🎵 设置音量异常:`, error);
-        }
-    }
-
-    setupAutoplayHandler() {
-        const enableAudio = () => {
-            if (!this.audioEnabled) {
-                console.log('🎵 用户交互检测到，启用音频');
-                this.audioEnabled = true;
-
-                // 尝试播放背景音乐
-                // if (this.loadedSounds && this.loadedSounds.has('bgm')) {
-                //     this.playSound('bgm', { loop: -1, volume: 0.5 });
-                // }
-            }
-
-            // 移除事件监听器
-            // document.removeEventListener('click', enableAudio);
-            // document.removeEventListener('touchstart', enableAudio);
-            // document.removeEventListener('keydown', enableAudio);
-        };
-
-        // 添加多种用户交互事件监听
-        // document.addEventListener('click', enableAudio);
-        // document.addEventListener('touchstart', enableAudio);
-        // document.addEventListener('keydown', enableAudio);
-    }
-    // 图片管理方法
-    getImage(id) {
-        if (this.loadedImages.has(id)) {
-            return this.loadedImages.get(id);
-        } else {
-            console.warn(`🖼️ 图片未找到: ${id}`);
-            return null;
-        }
+            // 设置跨域属性（如果需要）
+            img.crossOrigin = 'anonymous';
+            img.src = src;
+        });
     }
 }
 
