@@ -177,7 +177,10 @@ class GameScense {
                     const { eggSeat, eggType, pointSeat } = this.gameData.data;
                     if (pointSeat.length > 0) {
                         this.expectedClickCellId = pointSeat[0];
-                        this.moveGuideGestureToCell(pointSeat[0]);
+                        setTimeout(() => {
+
+                            this.moveGuideGestureToCell(pointSeat[0]);
+                        }, 500);
                     }
                     // this.showPointSeats(this.pointSeats);
                     if (eggSeat && eggType && eggSeat.length === eggType.length) {
@@ -740,7 +743,7 @@ class GameScense {
             console.log(`📈 用户进度已更新 - 等级: ${level}, 步骤: ${step}`);
 
             // 更新本地状态
-            this.userStatus = window.GameServer.checkUserStatus();
+            // this.userStatus = window.GameServer.checkUserStatus();
 
             return true;
         } else {
@@ -979,34 +982,84 @@ class GameScense {
     }
 
     /**
+    * 引导点击成功处理
+    */
+    onGuideClickSuccess(cellId) {
+        console.log(`🎯 引导点击成功: 格子 ${cellId}`);
+
+        // 取消当前等待状态
+        this.waitingForClick = false;
+        this.expectedClickCellId = null;
+
+        // 移动到下一个引导位置
+        this.moveToNextGuidePoint();
+    }
+
+    /**
+     * 移动到下一个引导点
+     */
+    moveToNextGuidePoint() {
+        if (!this.gameData?.data?.pointSeat) {
+            console.log('📍 没有引导点数据');
+            return;
+        }
+
+        const { pointSeat } = this.gameData.data;
+        this.currentPointIndex = (this.currentPointIndex || 0) + 1;
+
+        if (this.currentPointIndex >= pointSeat.length) {
+            console.log('🎉 所有引导点都已完成');
+            this.completeGuide();
+            return;
+        }
+
+        const nextCellId = pointSeat[this.currentPointIndex];
+        if (nextCellId >= 0) {
+            console.log(`👉 移动引导手势到下一个位置: ${nextCellId}`);
+            this.expectedClickCellId = nextCellId;
+            this.waitingForClick = true;
+            this.moveGuideGestureToCell(nextCellId);
+        } else {
+            console.log('🎉 引导完成（遇到-1标记）');
+            this.completeGuide();
+        }
+    }
+
+    /**
      * 处理格子点击（蛋选择交互）
      */
     async handleCellClick(cellId) {
         console.log(`🖱️ 处理格子点击: ${cellId}`);
-
-        // 检查是否可以交互
-        if (!this.canInteract()) {
-            return;
-        }
-
-        // 🔥 检查是否在引导阶段，如果是则只允许点击引导位置
-        if (this.isInGuideMode()) {
-            if (!this.isGuideClickAllowed(cellId)) {
-                console.log(`🚫 引导阶段：只能点击引导指示位置，当前点击格子${cellId}被忽略`);
-                return;
-            }
-            console.log(`✅ 引导阶段：允许点击引导位置${cellId}`);
-        }
-
-        // 设置防抖标识
-        this.isProcessingClick = true;
         try {
-            // 检查是否在等待引导点击
-            if (this.waitingForClick && this.expectedClickCellId === cellId) {
-                console.log(`✅ 用户正确点击了引导位置 ${cellId}`);
-                // this.onGuideClickSuccess(cellId);
+            // 检查是否可以交互
+            if (!this.canInteract()) {
                 return;
             }
+
+            if(this.userStatus?.isNewUser){
+
+                // 🔥 检查是否在引导阶段，如果是则只允许点击引导位置
+                if (this.isInGuideMode()) {
+                    if (!this.isGuideClickAllowed(cellId)) {
+                        console.log(`🚫 引导阶段：只能点击引导指示位置，当前点击格子${cellId}被忽略`);
+                        return;
+                    }
+                    console.log(`✅ 引导阶段：允许点击引导位置${cellId}`);
+                }
+    
+                // 检查是否在等待引导点击
+                if (this.waitingForClick && this.expectedClickCellId === cellId) {
+                    console.log(`✅ 用户正确点击了引导位置 ${cellId}`);
+                    this.onGuideClickSuccess(cellId);
+    
+                }
+            }
+
+
+
+            // 设置防抖标识
+            this.isProcessingClick = true;
+
 
             // 调用 GameServer 处理点击逻辑
 
@@ -1109,10 +1162,6 @@ class GameScense {
 
                 // 检查是否有合成
                 if (result.synthesis && result.synthesis.canSynthesize) {
-                    // console.log('🎉 移动后可以合成，开始合成动画');
-                    // console.log('🔍 合成数据详情:', result.synthesis);
-                    // console.log('🔍 matches数组:', result.synthesis.matches);
-                    // console.log('🔍 删除的位置:', result.positionsToDelete);
 
                     utile.__sdklog('合成数据详情:', result.synthesis);
                     return this.executeSynthesisAnimation(result.synthesis, result.positionsToDelete);
@@ -1147,15 +1196,11 @@ class GameScense {
                 this.selectedCellId = null;
                 if (isVictory) {
                     console.log('🏆 合成动画完成，显示胜利界面');
-                    // setTimeout(() => {
                     this.victoryHandler(true);
-                    // return Promise.resolve();
-                    // }, 1500);
                 }
                 if (isFailure) {
                     console.log('💀 游戏失败，显示失败界面');
                     this.failureHandler(true);
-                    // return Promise.resolve();
                 }
                 console.log('✅ 所有步骤执行完成');
                 return Promise.resolve();
@@ -2641,8 +2686,28 @@ class GameScense {
 
         // 使用动画移动
         createjs.Tween.get(this.guideGesture)
-            .to({ x: guidePosition.x, y: guidePosition.y }, 400, createjs.Ease.quadOut);
+            .to({ x: guidePosition.x, y: guidePosition.y }, 600, createjs.Ease.quadOut);
         console.log(`👉 引导手势移动到格子${cellId} (${guidePosition.x}, ${guidePosition.y})`);
+    }
+
+
+    /**
+     * 完成引导
+     */
+    completeGuide() {
+        console.log('🎊 引导流程完成！');
+
+        // 隐藏引导手势
+        if (this.guideGesture) {
+            this.guideGesture.visible = false;
+        }
+
+        // 重置引导状态
+        this.waitingForClick = false;
+        this.expectedClickCellId = null;
+        this.currentPointIndex = 0;
+
+        console.log('💡 现在可以自由点击蛋进行游戏了！');
     }
 
     /**

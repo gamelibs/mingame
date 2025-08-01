@@ -30,43 +30,13 @@ class GameServer {
         this.difficulty = 4; //难度
         // 新用户引导数据
         this.newUserGuideData = {
-            lv0: {
-                1: {
-                    eggSeat: [0, 10, 11],
-                    eggType: [1, 1, 1],
-                    pointSeat: [0, 9],
-                },
-                2: {
-                    eggSeat: [14, 3, 18],
-                    eggType: [0, 0, 1],
-                    pointSeat: [3, 33],
-                },
-                3: {
-                    eggSeat: [3, 32, 17],
-                    eggType: [3, 2, 2],
-                    pointSeat: [32, 23],
-                },
-                4: {
-                    eggSeat: [16, 26, 30],
-                    eggType: [2, 2, 3],
-                    pointSeat: [11, 24],
-                },
-                5: {
-                    eggSeat: [8, 10, 22],
-                    eggType: [2, 2, 3, 1],
-                    pointSeat: [-1],
-                },
-                6: {
-                    eggSeat: [2, 4, 23],
-                    eggType: [4, 2, 3],
-                    pointSeat: [-1],
-                },
-                7: {
-                    eggSeat: [1, 12, 16],
-                    eggType: [4, 3, 1],
-                    pointSeat: [-1],
-                }
-            }
+            lv0: [
+                { eggSeat: [0, 10, 11], eggType: [1, 1, 1], pointSeat: [0, 9] },
+                { eggSeat: [14, 3, 18], eggType: [1, 1, 2], pointSeat: [3, 33] },
+                { eggSeat: [3, 32, 17], eggType: [3, 2, 2], pointSeat: [32, 23] },
+                { eggSeat: [16, 26, 30], eggType: [2, 2, 3], pointSeat: [11, 24] },
+                { eggSeat: [8, 10, 22], eggType: [2, 2, 3, 1], pointSeat: [-1] },
+            ]
         };
 
         // 寻路系统
@@ -398,10 +368,6 @@ class GameServer {
     getGameData(userStatus = null, difficulty = 'normal') {
         console.log('📊 获取游戏数据...');
 
-        // 🔥 如果没有传入用户状态，从缓存获取
-        if (!userStatus) {
-            userStatus = this.checkUserStatus('currentUser');
-        }
 
         const difficultyLevel = this.getDifficultyLevel(difficulty);
         // 使用传入的参数或用户当前进度
@@ -422,29 +388,31 @@ class GameServer {
    * @param {number} eggCount - 蛋数量
    * @returns {Object} 引导数据
    */
-    getNewUserGuideData(level = 0, step = 1) {
+    getNewUserGuideData(level = 0, step = 0) {
         console.log(`📖 获取新用户引导数据 - 等级: ${level}, 步骤: ${step}`);
 
-        const levelKey = `lv${level}`;
-        const stepData = this.newUserGuideData[levelKey]?.[step];
+        const guideData = this.newUserGuideData[`lv${level}`]?.[step];
 
-        if (stepData) {
-            console.log('📚 新用户引导数据:', stepData);
+        if (guideData) {
+            console.log('📚 新用户引导数据:', guideData);
 
-            const { eggSeat, eggType } = stepData;
-            if (eggSeat && eggType && eggSeat.length === eggType.length) {
-                console.log('🗺️ 同步引导数据到后端地图状态...');
+            // 同步引导数据到地图状态
+            guideData.eggSeat.forEach((cellId, index) => {
+                this.occupyPosition(cellId, guideData.eggType[index], null);
+            });
 
-                for (let i = 0; i < eggSeat.length; i++) {
-                    const cellId = eggSeat[i];
-                    const eggTypeValue = eggType[i];
+            // 自动更新步骤
+            const userStatus = this.userDataCache.get('currentUser');
+            if (userStatus) {
+                userStatus.currentStep += 1;
 
-                    // 直接占用位置，piece为null等前端创建后关联
-                    this.occupyPosition(cellId, eggTypeValue, null);
-                    console.log(`📍 占用引导位置: 格子${cellId}, 蛋类型${eggTypeValue}`);
+                // 检查是否达到引导结束条件
+                if (userStatus.currentStep >= this.newUserGuideData[`lv${level}`].length) {
+                    console.log('🎉 新手引导完成，退出引导模式');
+                    userStatus.isNewUser = false;
                 }
 
-                console.log(`✅ 引导数据同步完成，占用了${eggSeat.length}个位置`);
+                this.saveUserData('currentUser', userStatus);
             }
 
             return {
@@ -452,7 +420,7 @@ class GameServer {
                 isNewUser: true,
                 level: level,
                 step: step,
-                data: stepData,
+                data: guideData,
                 message: 'New user guide data retrieved successfully'
             };
         } else {
@@ -575,93 +543,42 @@ class GameServer {
     }
 
     /**
-     * 获取算法生成的游戏数据（老用户）
-     * @param {number} level - 关卡等级
-     * @param {number} step - 步骤
+     * 获取算法生成的游戏数据
      * @param {Object} userStatus - 用户状态
      * @param {number} eggCount - 蛋数量
      * @returns {Object} 算法数据
      */
-    getAlgorithmData(level = 0, step = 1, userStatus = null, eggCount = 4) {
-        console.log(`🤖 生成算法数据 - 等级: ${level}, 步骤: ${step}, 蛋数量: ${eggCount}`);
+    getAlgorithmData(userStatus, eggCount) {
 
-        // 🔥 先检查是否有保存的游戏状态
+        // 检查是否有保存的游戏状态
         if (userStatus && userStatus.currentGameState && userStatus.currentGameState.eggs.length > 0) {
-            console.log('🔄 发现保存的游戏状态，直接返回保存的数据');
-
+            console.log('🔄 恢复保存的游戏状态');
             const savedState = userStatus.currentGameState;
-            const algorithmData = {
-                eggSeat: savedState.eggs.map(egg => egg.cellId),
-                eggType: savedState.eggs.map(egg => egg.eggType),
-                pointSeat: [] // 老用户不需要引导点
-            };
-
             return {
                 success: true,
                 isNewUser: false,
-                level: level,
-                step: step,
-                eggCount: savedState.eggs.length,
-                data: algorithmData,
-                userStatus: userStatus,
-                totalScore: savedState.totalScore || 0,
-                hasSavedState: true, // 标记这是恢复的数据
-                message: `Restored saved game state with ${savedState.eggs.length} eggs`
+                data: {
+                    eggSeat: savedState.eggs.map(egg => egg.cellId),
+                    eggType: savedState.eggs.map(egg => egg.eggType),
+                    pointSeat: [] // 老用户不需要引导点
+                },
+                message: 'Restored saved game state'
             };
         }
 
-        this.difficulty = eggCount;
-
+        // 随机生成数据
         const newEggs = this.generateRandomEggsFromMapState(eggCount);
-
-        const algorithmData = {
-            eggSeat: newEggs.map(egg => egg.cellId),
-            eggType: newEggs.map(egg => egg.eggType),
-            pointSeat: [] // 老用户不需要引导点
-        };
-
-        // console.log(`🥚 老用户蛋数据 (${eggCount}个蛋) - 位置: [${randomEggSeats}], 类型: [${randomEggTypes}]`);
-        // console.log(`📍 地图状态 - 空闲: ${this.mapState.emptyCells.size}, 占用: ${this.mapState.occupiedCells.size}`);
 
         return {
             success: true,
             isNewUser: false,
-            level: level,
-            step: step,
-            eggCount: eggCount,
-            data: algorithmData,
-            userStatus: userStatus,
-
-            message: `Algorithm data generated successfully for returning user with ${eggCount} eggs`
+            data: {
+                eggSeat: newEggs.map(egg => egg.cellId),
+                eggType: newEggs.map(egg => egg.eggType),
+                pointSeat: [] // 老用户不需要引导点
+            },
+            message: 'Algorithm data generated successfully'
         };
-
-        // return {
-        //     code: 0,
-        //     fromCellId: fromCellId,
-        //     toCellId: toCellId,
-        //     path: path,
-        //     eggType: eggType,
-        //     positionsToDelete: positionsToDelete, // 返回需要删除的位置列表
-        //     synthesis: synthesisData,
-        //     newEggs: newEggs,
-        //     message: "移动处理完成"
-        // };
-
-        // return {
-
-        //     code: 0,
-        //     step: 2,  // 步骤2：移动蛋
-        //     fromCellId: moveResult.fromCellId,
-        //     toCellId: moveResult.toCellId,
-        //     path: moveResult.path,
-        //     eggType: moveResult.eggType,
-        //     positionsToDelete: moveResult.positionsToDelete, // 添加需要删除的位置
-        //     synthesis: moveResult.synthesis,  // 添加合成数据
-        //     newEggs: moveResult.newEggs,      // 添加新蛋数据
-        //     isVictory: moveResult.isVictory,
-        //     isFailure: moveResult.isFailure,
-        //     message: "点击空位置，移动蛋"
-        // }
 
     }
 
@@ -688,7 +605,7 @@ class GameServer {
     }
 
     /**
-     * 更新用户进度
+     * 更新用户进度getGameData
      * @param {string} userId - 用户ID
      * @param {number} level - 新等级
      * @param {number} step - 新步骤
@@ -1501,7 +1418,7 @@ class GameServer {
             // 每次创建新蛋时保存游戏状态
             this.saveCurrentGameState();
 
-            console.log(`📍 占用格子 ${cellId}: 蛋类型 ${eggType}`);
+            // console.log(`📍 占用格子 ${cellId}: 蛋类型 ${eggType}`);
         }
     }
 
@@ -1825,7 +1742,25 @@ class GameServer {
             this.processSynthesisResult(synthesisResult, toCellId);
         }
 
-        const newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
+        // const newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
+        // 加入新用户判定
+        let newEggsResult;
+        if (this.currentUserStatus.isNewUser) {
+            console.log('🆕 当前用户是新用户，调用引导数据');
+            const guideData = this.getNewUserGuideData(this.currentUserStatus.currentLevel, this.currentUserStatus.currentStep);
+            if (guideData.success) {
+                newEggsResult = guideData.data.eggSeat.map((cellId, index) => ({
+                    cellId: cellId,
+                    eggType: guideData.data.eggType[index]
+                }));
+            } else {
+                console.warn('⚠️ 未找到引导数据，使用随机生成数据');
+                newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
+            }
+        } else {
+            console.log('🎮 当前用户是老用户，使用随机生成数据');
+            newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
+        }
 
         // 测试胜利
         // return {
