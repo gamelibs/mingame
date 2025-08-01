@@ -826,7 +826,7 @@ class GameEngine {
         for (var k in this.exportRoot.children) {
             utile.goStop(this.exportRoot.children[k], true);
         }
-
+        this.exportRoot.visible = false;
         this.stage.addChild(this.exportRoot);
 
 

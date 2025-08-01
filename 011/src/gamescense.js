@@ -53,7 +53,7 @@ class GameScense {
     /**
      * 初始化UI元件
      */
-    initUIElements() {
+    async initUIElements() {
         console.log('🎨 初始化UI元件...');
 
         try {
@@ -69,6 +69,8 @@ class GameScense {
 
             // 初始化解锁动画元件
             this.initUnlockAnimations();
+
+            this.exportRoot.visible = true;
 
             console.log('✅ UI元件初始化完成');
         } catch (error) {
@@ -102,11 +104,16 @@ class GameScense {
             this.isProcessingClick = false; // 防抖标识
             this.clickDebounceTime = 300; // 防抖时间（毫秒）
 
-            this.initUIElements();
+            // 初始化游戏系统
+            await this.initUIElements();
+            await this.initGameSystems();
+
+            // this.startBackgroundMusic();
+            // this.playUnlockedAnimations(this.userStatus);
 
             // 保存用户数据和游戏配置
             this.userStatus = gameData.userStatus;
-            // this.gameData = gameData.gameConfig;
+
 
             console.log('👤 接收到用户状态:', this.userStatus);
             // console.log('🎯 接收到游戏配置:', this.gameData);
@@ -115,63 +122,84 @@ class GameScense {
             const isNewUser = this.userStatus?.isNewUser;
             console.log(`👤 用户类型检查: ${isNewUser ? '新用户' : '老用户'}`);
 
-            // if (isNewUser) {
-            //     // 🔥 新用户：直接使用默认中等难度，不显示选择界面
-            //     console.log('👶 新用户跳过难度选择，使用默认中等难度');
-            //     this.selectedDifficulty = 'normal';
-            //     // await this.loadGameDataByDifficulty('normal');
-            // } else {
-            //     // 🔥 老用户：显示难度选择
-            //     if (this.difficultySelectionEnabled) {
-            //         console.log('🎮 老用户显示难度选择界面');
-            //         // await this.waitForDifficultySelection();
-            //     } else {
-            //         console.log('🎮 难度选择已禁用，使用默认中等难度');
-            //         this.selectedDifficulty = 'normal';
-            //         // await this.loadGameDataByDifficulty('normal');
-            //     }
-            // }
+            if (isNewUser) {
+                //     // 🔥 新用户：直接使用默认中等难度，不显示选择界面
+                //     console.log('👶 新用户跳过难度选择，使用默认中等难度');
+                this.selectedDifficulty = 'normal';
+                this.waitingForClick = true;
+                // 初始化引导系统
+                this.initGuideGesture();
 
+            }
 
-            // 检查是否开启难度选择
-            // if (this.difficultySelectionEnabled) {
-            //     console.log('🎮 开启了难度选择，等待用户选择难度');
-            //     // 默认调用 SelectLine 模块处理难度选择
-            //     // this.initDifficultySelection();
-            // } else {
-            //     console.log('🎮 未开启难度选择，使用默认中等难度');
-            //     // 直接使用中等难度获取游戏数据
-            //     this.selectedDifficulty = 'normal';
-            //     await this.loadGameDataByDifficulty('normal');
-            //     this.continueInitialization();
-            // }
+            const gameConfig = await window.GameServer.getGameData(
+                this.userStatus,
+                this.selectedDifficulty
+            );
+            this.gameData = gameConfig;
+            console.log('🎯 获取到游戏配置:', gameConfig);
+
+            // 验证游戏数据
+            // this.verifyGameData();
+
+            // 处理初始化后的逻辑
+            setTimeout(() => {
+                this.generateUserEggs();
+            }, 1000);
 
 
 
-            // const gameConfig = window.GameServer.getGameData(
-            //     userStatus,
-            //     'currentUser',
-            //     userStatus.currentLevel,
-            //     userStatus.currentStep,
-            //     4
-            // );
-            // console.log('🎯 获取到游戏配置:', gameConfig);
+
 
             // this.cardGame = new CardGame();
-            // await this.cardGame.init(gameData);
-
-
-
-            // 初始化引导手势
-            // this.initGuideGesture();
-
-
+            // await this.cardGame.init(gameData)
 
             this.isInitialized = true;
             console.log('✅ GameScense 初始化完成');
 
         } catch (error) {
             console.error('❌ GameScense 初始化失败:', error);
+        }
+    }
+
+
+    /**
+     * 为用户生成蛋（使用服务器返回的数据）
+     */
+    async generateUserEggs() {
+        console.log('🥚 生成蛋...');
+
+        try {
+
+            // 从游戏数据中获取蛋配置
+            if (this.gameData && this.gameData.data) {
+                if (this.gameData.isNewUser) {
+                    const { eggSeat, eggType, pointSeat } = this.gameData.data;
+                    if (pointSeat.length > 0) {
+                        this.expectedClickCellId = pointSeat[0];
+                        this.moveGuideGestureToCell(pointSeat[0]);
+                    }
+                    // this.showPointSeats(this.pointSeats);
+                    if (eggSeat && eggType && eggSeat.length === eggType.length) {
+                        console.log(`📊 使用服务器数据生成蛋: 位置[${eggSeat}], 类型[${eggType}]`);
+
+                        this.playLongbossAnimation();
+
+                        // 同时创建所有蛋
+                        const createEggPromises = eggSeat.map((cellId, index) =>
+                            this.createEggAtPosition(cellId, eggType[index])
+                        );
+
+                        await Promise.all(createEggPromises);
+
+                        utile.__sdklog(`✅ 成功为生成 ${eggSeat.length} 个蛋`, this.chessboard);
+                    }
+                }
+
+            }
+        } catch (error) {
+            console.error('❌ 蛋生成失败:', error);
+
         }
     }
 
@@ -223,14 +251,14 @@ class GameScense {
         console.log('🎮 初始化难度选择模块...');
 
         // 先隐藏选择难度UI
-        this.hideDifficultyUI();
+        // this.hideDifficultyUI();
 
-        const gameData = {
-            engine: this.engine,
-            stage: this.stage,
-            exportRoot: this.exportRoot,
-            loadedSounds: this.loadedSounds
-        };
+        // const gameData = {
+        //     engine: this.engine,
+        //     stage: this.stage,
+        //     exportRoot: this.exportRoot,
+        //     loadedSounds: this.loadedSounds
+        // };
 
         // 初始化 SelectLine 模块
         // if (window.SelectLine) {
@@ -246,63 +274,24 @@ class GameScense {
     /**
      * 难度选择完成回调
      */
-    async onDifficultySelected(difficulty) {
-        console.log(`🎯 接收到选择的难度: ${difficulty}`);
-        this.selectedDifficulty = difficulty;
+    // async onDifficultySelected(difficulty) {
+    //     console.log(`🎯 接收到选择的难度: ${difficulty}`);
+    //     this.selectedDifficulty = difficulty;
 
-        // 继续游戏初始化流程
-        this.continueInitialization();
+    //     // 继续游戏初始化流程
+    //     this.continueInitialization();
 
-    }
-
-
-    /**
- * 根据难度获取游戏数据
- * @param {string} difficulty - 难度等级 ('easy', 'normal', 'hard')
- */
-    // async loadGameDataByDifficulty(difficulty) {
-    //     console.log(`📊 根据难度 ${difficulty} 获取游戏数据...`);
-
-    //     try {
-    //         // 从 SelectLine 获取难度对应的参数
-    //         const difficultyLevel = window.SelectLine ? window.SelectLine.getDifficultyLevel(difficulty) : 4;
-    //         console.log(`🎯 难度等级: ${difficultyLevel}`);
-
-    //         // 🔥 修正：不传入旧的userStatus，让后端获取最新状态
-    //         const gameConfigData = window.GameServer.getGameData(
-    //             null, // 不传入userStatus，让后端自己获取最新的
-    //             'currentUser',
-    //             null, // 使用用户当前等级
-    //             null, // 使用用户当前步骤
-    //             difficultyLevel
-    //         );
-
-    //         if (gameConfigData && gameConfigData.success) {
-    //             this.gameData = gameConfigData;
-    //             console.log('🎯 根据难度获取到游戏配置:', this.gameData);
-    //         } else {
-    //             console.warn('⚠️ 获取游戏数据失败');
-    //             this.gameData = null;
-    //         }
-
-    //     } catch (error) {
-    //         console.error('❌ 获取游戏数据时出错:', error);
-    //         this.gameData = null;
-    //     }
     // }
+
 
     /**
  * 继续初始化流程
  */
-    continueInitialization() {
-        console.log('🔄 继续游戏初始化...');
+    // continueInitialization() {
+    //     console.log('🔄 继续游戏初始化...');
 
-        // 验证游戏数据
-        // this.verifyGameData();
 
-        // 初始化其他游戏系统
-        this.initGameSystems();
-    }
+    // }
 
     /**
      * 初始化游戏系统
@@ -324,11 +313,6 @@ class GameScense {
             this.setupEventListeners();
 
 
-            // 6. 初始化引导系统（如果需要）
-            // this.initGuideSystem();
-
-            // 7. 处理初始化后的逻辑
-            this.handlePostInitialization();
 
             console.log('✅ 游戏系统初始化完成');
 
@@ -715,75 +699,7 @@ class GameScense {
 
 
 
-    /**
-     * 处理初始化后的逻辑
-     */
-    handlePostInitialization() {
-        const isNewUser = this.gameData ? this.gameData.isNewUser : true;
 
-        this.startBackgroundMusic();
-        this.playUnlockedAnimations(this.userStatus);
-
-
-        if (isNewUser) {
-            // 新用户：等待引导完成后生成蛋
-            if (this.pointSeats.length === 0) {
-                // 没有引导配置，直接生成蛋
-                console.log('📍 新用户无引导配置，直接生成蛋');
-                setTimeout(() => {
-                    this.generateNewEggs();
-                }, 1000);
-            } else {
-                console.log('📖 新用户等待引导完成后生成蛋');
-            }
-        } else {
-            // 老用户：直接生成蛋，不需要引导
-            console.log('👤 老用户直接生成蛋');
-            setTimeout(() => {
-                this.generateOldUserEggs();
-            }, 1000);
-        }
-    }
-
-    /**
-     * 为老用户生成蛋（使用服务器返回的数据）
-     */
-    async generateOldUserEggs() {
-        console.log('🥚 为老用户生成蛋...');
-
-        try {
-
-
-            // 从游戏数据中获取蛋配置
-            if (this.gameData && this.gameData.data) {
-                const { eggSeat, eggType } = this.gameData.data;
-
-                if (eggSeat && eggType && eggSeat.length === eggType.length) {
-                    console.log(`📊 使用服务器数据生成蛋: 位置[${eggSeat}], 类型[${eggType}]`);
-
-                    this.playLongbossAnimation();
-
-                    // 同时创建所有蛋
-                    const createEggPromises = eggSeat.map((cellId, index) =>
-                        this.createEggAtPosition(cellId, eggType[index])
-                    );
-
-                    await Promise.all(createEggPromises);
-
-                    utile.__sdklog(`✅ 成功为老用户生成 ${eggSeat.length} 个蛋`, this.chessboard);
-                } else {
-                    console.warn('⚠️ 服务器蛋数据格式错误，使用默认生成');
-                    this.generateNewEggs();
-                }
-            } else {
-                console.warn('⚠️ 没有游戏数据，使用默认生成');
-                this.generateNewEggs();
-            }
-        } catch (error) {
-            console.error('❌ 老用户蛋生成失败:', error);
-            this.generateNewEggs();
-        }
-    }
 
     /**
      * 递归查找子元件
@@ -1045,15 +961,42 @@ class GameScense {
     }
 
     /**
+     * 检查是否在引导模式
+     */
+    isInGuideMode() {
+        return this.gameData && this.gameData.isNewUser && this.waitingForClick;
+    }
+
+    /**
+     * 检查引导阶段是否允许点击该位置
+     */
+    isGuideClickAllowed(cellId) {
+        // 如果正在等待引导点击，只允许点击预期位置
+        if (this.waitingForClick && this.expectedClickCellId !== null) {
+            return cellId === this.expectedClickCellId;
+        }
+        return false;
+    }
+
+    /**
      * 处理格子点击（蛋选择交互）
      */
     async handleCellClick(cellId) {
         console.log(`🖱️ 处理格子点击: ${cellId}`);
 
         // 检查是否可以交互
-        // if (!this.canInteract()) {
-        //     return;
-        // }
+        if (!this.canInteract()) {
+            return;
+        }
+
+        // 🔥 检查是否在引导阶段，如果是则只允许点击引导位置
+        if (this.isInGuideMode()) {
+            if (!this.isGuideClickAllowed(cellId)) {
+                console.log(`🚫 引导阶段：只能点击引导指示位置，当前点击格子${cellId}被忽略`);
+                return;
+            }
+            console.log(`✅ 引导阶段：允许点击引导位置${cellId}`);
+        }
 
         // 设置防抖标识
         this.isProcessingClick = true;
@@ -1061,7 +1004,7 @@ class GameScense {
             // 检查是否在等待引导点击
             if (this.waitingForClick && this.expectedClickCellId === cellId) {
                 console.log(`✅ 用户正确点击了引导位置 ${cellId}`);
-                this.onGuideClickSuccess(cellId);
+                // this.onGuideClickSuccess(cellId);
                 return;
             }
 
@@ -1098,10 +1041,10 @@ class GameScense {
             console.error('❌ 处理点击失败:', error);
         } finally {
             // 延迟重置防抖标识
-            // setTimeout(() => {
-            //     this.isProcessingClick = false;
-            //     console.log('🔓 防抖解除，可以处理下一次点击');
-            // }, this.clickDebounceTime);
+            setTimeout(() => {
+                this.isProcessingClick = false;
+                console.log('🔓 防抖解除，可以处理下一次点击');
+            }, this.clickDebounceTime);
         }
     }
 
@@ -2659,6 +2602,70 @@ class GameScense {
         });
 
         console.log('✅ 所有解锁动画已重置到初始状态');
+    }
+
+    /**
+     * 初始化新手引导元件
+     */
+    initGuideGesture() {
+        const guideMc = utile.findMc(this.exportRoot, 'guide_mc');
+        if (!guideMc) {
+            console.warn('⚠️ 未找到 guide_mc 元件');
+            return;
+        }
+        this.guideGesture = guideMc;
+        guideMc.visible = true;
+        guideMc.gotoAndPlay(0);
+        console.log('✅ guide_mc 已赋值给 guideGesture 并开始播放');
+    }
+
+    /**
+     * 移动引导手势到指定格子
+     * @param {number} cellId - 目标格子ID
+     */
+    moveGuideGestureToCell(cellId) {
+        if (!this.guideGesture) {
+            console.warn('⚠️ guideGesture 未初始化');
+            return;
+        }
+
+        // 🔥 使用 getCellData 获取完整的格子数据
+        const cellData = this.getCellData(cellId);
+        if (!cellData) {
+            console.warn(`⚠️ 无法获取格子 ${cellId} 的数据`);
+            return;
+        }
+
+        // 🔥 使用 GuideLine 模块的坐标计算逻辑
+        const guidePosition = this.calculateGuidePosition(cellData);
+
+        // 使用动画移动
+        createjs.Tween.get(this.guideGesture)
+            .to({ x: guidePosition.x, y: guidePosition.y }, 400, createjs.Ease.quadOut);
+        console.log(`👉 引导手势移动到格子${cellId} (${guidePosition.x}, ${guidePosition.y})`);
+    }
+
+    /**
+     * 计算引导手势的正确位置（从 GuideLine 模块复制）
+     */
+    calculateGuidePosition(cellData) {
+        if (!this.guideGesture || !this.gamebox) {
+            return { x: cellData.centerX, y: cellData.centerY };
+        }
+
+        const guideParent = this.guideGesture.parent;
+
+        if (guideParent === this.exportRoot && this.gamebox !== this.exportRoot) {
+            const gameboxX = this.gamebox.x || 0;
+            const gameboxY = this.gamebox.y || 0;
+
+            return {
+                x: cellData.centerX + gameboxX,
+                y: cellData.centerY + gameboxY
+            };
+        }
+
+        return { x: cellData.centerX, y: cellData.centerY };
     }
 }
 

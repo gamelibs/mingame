@@ -32,9 +32,9 @@ class GameServer {
         this.newUserGuideData = {
             lv0: {
                 1: {
-                    eggSeat: [0, 44, 45],
-                    eggType: [0, 0, 0],
-                    pointSeat: [0, 43],
+                    eggSeat: [0, 10, 11],
+                    eggType: [1, 1, 1],
+                    pointSeat: [0, 9],
                 },
                 2: {
                     eggSeat: [14, 3, 18],
@@ -390,28 +390,28 @@ class GameServer {
     }
 
     /**
-     * 获取游戏数据
-     * @param {string} userId - 用户ID
-     * @param {number} level - 关卡等级
-     * @param {number} step - 步骤
-     * @returns {Object} 游戏数据
-     */
-    getGameData(userStatus = null, userId = 'currentUser', level = null, step = null, difficultyLevel = 4) {
+    * 获取游戏数据 - 统一入口
+    * @param {Object} userStatus - 用户状态
+    * @param {string} difficulty - 游戏难度 ('easy', 'normal', 'hard')
+    * @returns {Object} 游戏数据
+    */
+    getGameData(userStatus = null, difficulty = 'normal') {
         console.log('📊 获取游戏数据...');
 
-        // 如果没有传入用户状态，获取当前用户状态
-        // if (!userStatus) {
-        //     userStatus = this.checkUserStatus('currentUser');
-        // }
+        // 🔥 如果没有传入用户状态，从缓存获取
+        if (!userStatus) {
+            userStatus = this.checkUserStatus('currentUser');
+        }
 
+        const difficultyLevel = this.getDifficultyLevel(difficulty);
         // 使用传入的参数或用户当前进度
-        const currentLevel = level !== null ? level : userStatus.currentLevel;
-        const currentStep = step !== null ? step : userStatus.currentStep;
+        const currentLevel = userStatus.currentLevel || 0;
+        const currentStep = userStatus.currentStep || 1;
 
         if (userStatus.isNewUser) {
             return this.getNewUserGuideData(currentLevel, currentStep);
         } else {
-            return this.getAlgorithmData(currentLevel, currentStep, userStatus);
+            return this.getAlgorithmData(userStatus);
         }
     }
 
@@ -422,7 +422,7 @@ class GameServer {
    * @param {number} eggCount - 蛋数量
    * @returns {Object} 引导数据
    */
-    getNewUserGuideData(level = 0, step = 1, eggCount = 4) {
+    getNewUserGuideData(level = 0, step = 1) {
         console.log(`📖 获取新用户引导数据 - 等级: ${level}, 步骤: ${step}`);
 
         const levelKey = `lv${level}`;
@@ -430,6 +430,23 @@ class GameServer {
 
         if (stepData) {
             console.log('📚 新用户引导数据:', stepData);
+
+            const { eggSeat, eggType } = stepData;
+            if (eggSeat && eggType && eggSeat.length === eggType.length) {
+                console.log('🗺️ 同步引导数据到后端地图状态...');
+
+                for (let i = 0; i < eggSeat.length; i++) {
+                    const cellId = eggSeat[i];
+                    const eggTypeValue = eggType[i];
+
+                    // 直接占用位置，piece为null等前端创建后关联
+                    this.occupyPosition(cellId, eggTypeValue, null);
+                    console.log(`📍 占用引导位置: 格子${cellId}, 蛋类型${eggTypeValue}`);
+                }
+
+                console.log(`✅ 引导数据同步完成，占用了${eggSeat.length}个位置`);
+            }
+
             return {
                 success: true,
                 isNewUser: true,
@@ -451,9 +468,23 @@ class GameServer {
         }
     }
 
+
     /**
- * 重置游戏状态
- */
+     * 获取难度对应的蛋数量
+     * @param {string} difficulty - 难度等级
+     * @returns {number} 蛋数量
+     */
+    getDifficultyLevel(difficulty) {
+        const difficultyMap = {
+            'easy': 3,    // 简单：3个蛋
+            'normal': 4,  // 中等：4个蛋
+            'hard': 5     // 困难：5个蛋
+        };
+        return difficultyMap[difficulty] || 4;
+    }
+    /**
+     * 重置游戏状态
+     */
     resetGame() {
         console.log('🔄 重置 GameServer 游戏状态...');
 
@@ -2128,7 +2159,7 @@ class GameServer {
 
 
             // 3. 判断新老用户并合并数据
-            const isNewUser = !localGameData;
+            const isNewUser = true//!localGameData;
             const finalUserData = {
                 ...userData,
                 isNewUser: isNewUser
@@ -2227,7 +2258,7 @@ class GameServer {
         try {
             // 🔥 模拟微信登录延迟（10秒）
             utile.__sdklog3('⏳ 模拟微信登录，等待n秒...');
-            await new Promise(resolve => setTimeout(resolve, 1000 * 3));
+            await new Promise(resolve => setTimeout(resolve, 1000 * 1));
 
             // 模拟微信用户信息
             const userInfo = {
