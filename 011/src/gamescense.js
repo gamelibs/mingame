@@ -26,6 +26,7 @@ class GameScense {
 
         // 引导相关
         this.guideGesture = null;
+        this.guidePoints = []; // 引导点列表
         this.pointSeats = [];
         this.currentPointIndex = 0;
         this.waitingForClick = false;
@@ -578,33 +579,33 @@ class GameScense {
     /**
      * 验证接收到的游戏数据
      */
-    verifyGameData() {
-        console.log('🔍 验证游戏数据...');
-        console.log('📊 完整的 gameData:', JSON.stringify(this.gameData, null, 2));
-        console.log('👤 完整的 userStatus:', JSON.stringify(this.userStatus, null, 2));
+    // verifyGameData() {
+    //     console.log('🔍 验证游戏数据...');
+    //     console.log('📊 完整的 gameData:', JSON.stringify(this.gameData, null, 2));
+    //     console.log('👤 完整的 userStatus:', JSON.stringify(this.userStatus, null, 2));
 
-        if (this.gameData && this.gameData.data) {
-            const { eggSeat, eggType, pointSeat } = this.gameData.data;
-            console.log('🔍 解析出的数据:');
-            console.log('  eggSeat:', eggSeat);
-            console.log('  eggType:', eggType);
-            console.log('  pointSeat:', pointSeat);
+    //     if (this.gameData && this.gameData.data) {
+    //         const { eggSeat, eggType, pointSeat } = this.gameData.data;
+    //         console.log('🔍 解析出的数据:');
+    //         console.log('  eggSeat:', eggSeat);
+    //         console.log('  eggType:', eggType);
+    //         console.log('  pointSeat:', pointSeat);
 
-            // 验证数据类型和长度
-            if (Array.isArray(eggSeat) && Array.isArray(eggType)) {
-                console.log(`✅ 数据验证通过: ${eggSeat.length} 个蛋位置, ${eggType.length} 个蛋类型`);
+    //         // 验证数据类型和长度
+    //         if (Array.isArray(eggSeat) && Array.isArray(eggType)) {
+    //             console.log(`✅ 数据验证通过: ${eggSeat.length} 个蛋位置, ${eggType.length} 个蛋类型`);
 
-                // 检查每个蛋的详细信息
-                for (let i = 0; i < Math.min(eggSeat.length, eggType.length); i++) {
-                    console.log(`  蛋 ${i + 1}: 位置=${eggSeat[i]}, 类型=${eggType[i]}`);
-                }
-            } else {
-                console.error('❌ 数据格式错误: eggSeat 或 eggType 不是数组');
-            }
-        } else {
-            console.error('❌ 没有有效的游戏数据');
-        }
-    }
+    //             // 检查每个蛋的详细信息
+    //             for (let i = 0; i < Math.min(eggSeat.length, eggType.length); i++) {
+    //                 console.log(`  蛋 ${i + 1}: 位置=${eggSeat[i]}, 类型=${eggType[i]}`);
+    //             }
+    //         } else {
+    //             console.error('❌ 数据格式错误: eggSeat 或 eggType 不是数组');
+    //         }
+    //     } else {
+    //         console.error('❌ 没有有效的游戏数据');
+    //     }
+    // }
 
 
     /**
@@ -728,83 +729,6 @@ class GameScense {
 
 
 
-    /**
-     * 更新用户进度（调用 GameServer）
-     */
-    updateUserProgress(level, step) {
-        if (!window.GameServer) {
-            console.error('❌ GameServer 未加载');
-            return false;
-        }
-
-        const result = window.GameServer.updateUserProgress('currentUser', level, step);
-
-        if (result.success) {
-            console.log(`📈 用户进度已更新 - 等级: ${level}, 步骤: ${step}`);
-
-            // 更新本地状态
-            // this.userStatus = window.GameServer.checkUserStatus();
-
-            return true;
-        } else {
-            console.error('❌ 用户进度更新失败:', result.message);
-            return false;
-        }
-    }
-
-    /**
-     * 获取下一关数据
-     */
-    getNextLevelData() {
-        if (!this.gameData || !window.GameServer) {
-            console.error('❌ 无法获取下一关数据');
-            return null;
-        }
-
-        let nextLevel = this.gameData.level;
-        let nextStep = this.gameData.step + 1;
-
-        // 检查是否需要升级
-        if (this.gameData.isNewUser && nextStep > 7) {
-            nextLevel += 1;
-            nextStep = 1;
-        }
-
-        console.log(`🎯 获取下一关数据 - 等级: ${nextLevel}, 步骤: ${nextStep}`);
-
-        return window.GameServer.getGameData('currentUser', nextLevel, nextStep);
-    }
-
-    /**
-     * 完成当前关卡
-     */
-    completeCurrentLevel() {
-        if (!this.gameData) {
-            console.error('❌ 没有当前关卡数据');
-            return false;
-        }
-
-        console.log(`🎉 完成关卡 - 等级: ${this.gameData.level}, 步骤: ${this.gameData.step}`);
-
-        // 获取下一关数据
-        const nextLevelData = this.getNextLevelData();
-
-        if (nextLevelData && nextLevelData.success) {
-            // 更新用户进度
-            // this.updateUserProgress(nextLevelData.level, nextLevelData.step);
-
-            // 更新游戏数据
-            this.gameData = nextLevelData;
-
-            // 重新初始化棋盘
-            this.initGameBoard();
-
-            return true;
-        } else {
-            console.warn('⚠️ 没有更多关卡数据');
-            return false;
-        }
-    }
 
     /**
      * 重新开始当前关卡
@@ -1036,7 +960,7 @@ class GameScense {
                 return;
             }
 
-            if(this.userStatus?.isNewUser){
+            if (this.userStatus?.isNewUser) {
 
                 // 🔥 检查是否在引导阶段，如果是则只允许点击引导位置
                 if (this.isInGuideMode()) {
@@ -1046,12 +970,12 @@ class GameScense {
                     }
                     console.log(`✅ 引导阶段：允许点击引导位置${cellId}`);
                 }
-    
+
                 // 检查是否在等待引导点击
                 if (this.waitingForClick && this.expectedClickCellId === cellId) {
                     console.log(`✅ 用户正确点击了引导位置 ${cellId}`);
                     this.onGuideClickSuccess(cellId);
-    
+
                 }
             }
 
@@ -1173,6 +1097,38 @@ class GameScense {
                 return Promise.resolve();
             })
             .then(() => {
+
+                // 🔥 处理引导数据更新
+                if (result.guideData) {
+                    if (result.guideData.isNewUser && result.guideData.pointSeat) {
+
+                        this.gameData.data.pointSeat = result.guideData.pointSeat;
+                        this.gameData.step = result.guideData.currentStep;
+                        this.gameData.level = result.guideData.currentLevel;
+
+                        // 更新引导指示位置
+                        const { pointSeat } = result.guideData;
+                        if (pointSeat.length > 0 && pointSeat[0] >= 0) {
+                            console.log(`👉 后端返回新的引导位置: ${pointSeat[0]}`);
+                            this.expectedClickCellId = pointSeat[0];
+                            this.waitingForClick = true;
+
+                            // 延迟显示引导手势
+                            setTimeout(() => {
+                                this.moveGuideGestureToCell(pointSeat[0]);
+                            }, 500);
+                        } else {
+                            console.log('🎉 引导完成（遇到-1标记）');
+                            this.waitingForClick = false;
+                            this.expectedClickCellId = null;
+                            this.completeGuide(false);
+                        }
+                    } else if (result.guideData.completed) {
+                        console.log('🎉 引导流程完成');
+                        this.completeGuide(false);
+                    }
+                }
+
                 // 如果有新蛋数据，创建新蛋
                 if (result.newEggs && result.newEggs.length > 0) {
                     console.log('🥚 创建新蛋');
@@ -2659,6 +2615,7 @@ class GameScense {
             return;
         }
         this.guideGesture = guideMc;
+        this.guidePoints = [guideMc.x, guideMc.y]; // 初始化引导点
         guideMc.visible = true;
         guideMc.gotoAndPlay(0);
         console.log('✅ guide_mc 已赋值给 guideGesture 并开始播放');
@@ -2694,11 +2651,17 @@ class GameScense {
     /**
      * 完成引导
      */
-    completeGuide() {
-        console.log('🎊 引导流程完成！');
+    completeGuide(show = true) {
 
+
+        this.guideGesture.visible = true;
+        createjs.Tween.get(this.guideGesture)
+            .to({ x: this.guidePoints[0], y: this.guidePoints[1] }, 400, createjs.Ease.quadOut);
         // 隐藏引导手势
-        if (this.guideGesture) {
+        if (this.guideGesture && !show) {
+            console.log('🎊 引导流程完成！');
+            console.log('💡 现在可以自由点击蛋进行游戏了！');
+            this.guideGesture.gotoAndStop(0);
             this.guideGesture.visible = false;
         }
 
@@ -2707,7 +2670,7 @@ class GameScense {
         this.expectedClickCellId = null;
         this.currentPointIndex = 0;
 
-        console.log('💡 现在可以自由点击蛋进行游戏了！');
+
     }
 
     /**

@@ -6,12 +6,12 @@ class LeaderBoard {
     constructor() {
         // 排行榜数据存储键名
         this.STORAGE_KEY = 'gameLeaderBoard';
-        
+
         // 排行榜数据缓存
         this.leaderboardData = new Map();
-        
+
         console.log('🏆 LeaderBoard 排行榜模块初始化完成');
-        
+
         // 加载排行榜数据
         this.loadLeaderboardData();
     }
@@ -24,12 +24,12 @@ class LeaderBoard {
             const data = localStorage.getItem(this.STORAGE_KEY);
             if (data) {
                 const parsedData = JSON.parse(data);
-                
+
                 // 转换为 Map 格式
                 for (const [userId, userRecord] of Object.entries(parsedData)) {
                     this.leaderboardData.set(userId, userRecord);
                 }
-                
+
                 console.log(`📊 排行榜数据加载完成，共 ${this.leaderboardData.size} 条记录`);
             } else {
                 console.log('📊 首次使用，排行榜数据为空');
@@ -50,7 +50,7 @@ class LeaderBoard {
             for (const [userId, userRecord] of this.leaderboardData.entries()) {
                 dataToSave[userId] = userRecord;
             }
-            
+
             localStorage.setItem(this.STORAGE_KEY, JSON.stringify(dataToSave));
             console.log('💾 排行榜数据保存成功');
             return true;
@@ -62,33 +62,54 @@ class LeaderBoard {
 
     /**
      * 从 GameServer 获取当前用户数据
+     * @param {Object} gameServer - GameServer 实例
+     * @returns {Object|null} 当前用户数据
      */
-    getCurrentUserStats() {
-        if (!window.GameServer) {
+    getCurrentUserStats(gameServer) {
+        if (!gameServer) {
             console.error('❌ GameServer 未找到');
-            return null;
+            return {
+                userId: 'guest',
+                currentCoins: 0,
+                currentEggLevel: 0,
+                userStatus: null,
+                message: 'GameServer 未初始化，返回默认数据'
+            };
         }
 
         try {
             // 获取用户状态
-            const userStatus = window.GameServer.checkUserStatus('currentUser');
+            const userStatus = gameServer.checkUserStatus('currentUser');
             if (!userStatus) {
                 console.error('❌ 用户状态获取失败');
-                return null;
+                return {
+                    userId: 'guest',
+                    currentCoins: 0,
+                    currentEggLevel: 0,
+                    userStatus: null,
+                    message: '用户状态获取失败，返回默认数据'
+                };
             }
 
             // 获取分数系统数据
-            const scoreSystem = window.GameServer.scoreSystem;
-            
+            const scoreSystem = gameServer.scoreSystem || { currentScore: 0 };
+
             return {
-                userId: userStatus.userId || 'currentUser',
-                currentCoins: scoreSystem ? scoreSystem.currentScore : 0,
+                userId: userStatus.userId || 'guest',
+                currentCoins: scoreSystem.currentScore,
                 currentEggLevel: userStatus.maxUnlockedEggType || 0,
-                userStatus: userStatus
+                userStatus: userStatus,
+                message: '用户数据获取成功'
             };
         } catch (error) {
             console.error('❌ 获取用户数据失败:', error);
-            return null;
+            return {
+                userId: 'guest',
+                currentCoins: 0,
+                currentEggLevel: 0,
+                userStatus: null,
+                message: '发生错误，返回默认数据'
+            };
         }
     }
 
@@ -100,10 +121,13 @@ class LeaderBoard {
         console.log('🔄 更新用户排行榜记录...');
 
         // 获取当前用户数据
-        const currentStats = this.getCurrentUserStats();
-        if (!currentStats) {
-            console.error('❌ 无法获取用户数据，更新失败');
-            return false;
+        const gameServer = window.GameServer || null;
+        const userStats = leaderboard.getCurrentUserStats(gameServer);
+
+        if (userStats.userStatus) {
+            console.log(`✅ 用户数据: ID=${userStats.userId}, 金币=${userStats.currentCoins}, 蛋等级=${userStats.currentEggLevel}`);
+        } else {
+            console.warn(`⚠️ 用户数据不可用: ${userStats.message}`);
         }
 
         const targetUserId = userId || currentStats.userId;
@@ -113,7 +137,7 @@ class LeaderBoard {
 
         // 获取历史记录
         const existingRecord = this.leaderboardData.get(targetUserId);
-        
+
         let needUpdate = false;
         let newRecord = {
             userId: targetUserId,
@@ -152,10 +176,10 @@ class LeaderBoard {
             // 更新记录
             this.leaderboardData.set(targetUserId, newRecord);
             this.saveLeaderboardData();
-            
+
             console.log(`✅ 用户 ${targetUserId} 排行榜记录已更新`);
             console.log(`🏆 最高金币: ${newRecord.maxCoins}, 最高蛋等级: ${newRecord.maxEggLevel}`);
-            
+
             return true;
         } else {
             console.log(`📊 用户 ${targetUserId} 无新记录，无需更新`);
@@ -207,10 +231,10 @@ class LeaderBoard {
 
         // 获取完整排行榜
         const fullLeaderboard = this.getLeaderboard(1000); // 获取所有记录
-        
+
         // 查找用户排名
         const userRankInfo = fullLeaderboard.find(record => record.userId === userId);
-        
+
         if (userRankInfo) {
             console.log(`🏆 用户 ${userId} 排名: ${userRankInfo.rank}`);
             return {
@@ -230,10 +254,10 @@ class LeaderBoard {
     getLeaderboardStats() {
         const totalUsers = this.leaderboardData.size;
         const allRecords = Array.from(this.leaderboardData.values());
-        
+
         const maxCoins = Math.max(...allRecords.map(r => r.maxCoins), 0);
         const maxEggLevel = Math.max(...allRecords.map(r => r.maxEggLevel), 0);
-        const avgCoins = totalUsers > 0 ? 
+        const avgCoins = totalUsers > 0 ?
             Math.round(allRecords.reduce((sum, r) => sum + r.maxCoins, 0) / totalUsers) : 0;
 
         return {
@@ -260,11 +284,11 @@ class LeaderBoard {
     printLeaderboard() {
         console.log('🏆 当前排行榜数据:');
         const leaderboard = this.getLeaderboard(10);
-        
+
         leaderboard.forEach(record => {
             console.log(`  ${record.rank}. ${record.userName} - 金币: ${record.maxCoins}, 蛋等级: ${record.maxEggLevel}`);
         });
-        
+
         const stats = this.getLeaderboardStats();
         console.log(`📊 统计: 总用户 ${stats.totalUsers}, 最高金币 ${stats.maxCoins}, 最高蛋等级 ${stats.maxEggLevel}`);
     }
