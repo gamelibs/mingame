@@ -67,6 +67,7 @@ class GameScense {
             // 初始化失败和胜利界面（隐藏状态）
             this.failureHandler(false);
             this.victoryHandler(false);
+            this.settingHandler(false);
 
             // 初始化解锁动画元件
             this.initUnlockAnimations();
@@ -841,6 +842,20 @@ class GameScense {
             console.warn('⚠️ 未找到 btn_restart 按钮');
         }
 
+        const btnSetting = utile.findMc(this.exportRoot, 'btn_setting');
+
+        if (btnSetting) {
+            // 定义设置按钮点击处理函数
+            this.btnSettingClickHandler = (event) => {
+                console.log('⚙️ 点击设置按钮 (btn_setting)');
+                event.stopPropagation();
+                this.onSettingGame();
+            };
+
+            // 绑定设置按钮事件
+            btnSetting.on('click', this.btnSettingClickHandler);
+            console.log('✅ btn_setting 按钮事件已绑定');
+        }
         // 添加键盘事件监听
         // document.addEventListener('keydown', this.onKeyDown.bind(this));
         // document.addEventListener('keyup', this.onKeyUp.bind(this));
@@ -848,7 +863,28 @@ class GameScense {
         console.log('✅ 事件监听设置完成');
     }
 
+    /**
+     * 点击设置按钮处理逻辑
+     */
+    onSettingGame() {
+        console.log('⚙️ 打开设置界面');
 
+        // 检查是否在新手引导模式
+        if (this.userStatus?.isNewUser) {
+            console.log('👶 当前是新手引导模式，默认选择难度为 easy 且不允许切换难度');
+
+            // 默认设置为 easy 难度
+            this.selectedDifficulty = 'easy';
+
+            // 显示设置界面并禁用难度切换
+            this.settingHandler(true);
+            this.disableDifficultySelection();
+        } else {
+            console.log('🎮 当前是普通模式，允许切换难度');
+            this.settingHandler(true);
+            this.enableDifficultySelection();
+        }
+    }
 
     /**
     * gamebox 点击事件处理
@@ -1790,7 +1826,7 @@ class GameScense {
                     const currentScore = this.parseFormattedNumber(goldMc.text.text);
                     const targetScore = currentScore + addedScore;
 
-                    console.log(`💰 分数动画: ${this.formatNumber(currentScore)} -> ${this.formatNumber(targetScore)} (+${addedScore})`);
+                    // console.log(`💰 分数动画: ${this.formatNumber(currentScore)} -> ${this.formatNumber(targetScore)} (+${addedScore})`);
 
                     // 创建数字递增动画
                     const animationData = { score: currentScore };
@@ -1799,13 +1835,12 @@ class GameScense {
                         .to({ score: targetScore }, 500, createjs.Ease.quadOut)
                         .addEventListener("change", () => {
                             // 实时更新显示的分数（格式化）
-                            goldMc.text.text = this.formatNumber(Math.floor(animationData.score));
+                            goldMc.text.text = "" + animationData.score //this.formatNumber(Math.floor(animationData.score));
                         })
                         .call(() => {
                             // 确保最终分数正确
-                            goldMc.text.text = this.formatNumber(targetScore);
-                            console.log(`💰 分数动画完成: ${this.formatNumber(targetScore)}`);
-
+                            goldMc.text.text = "" + targetScore //this.formatNumber(targetScore);
+                            // console.log(`💰 分数动画完成: ${this.formatNumber(targetScore)}`);
 
                             resolve();
                         });
@@ -2004,8 +2039,8 @@ class GameScense {
     }
 
     /**
- * 打印当前前端蛋映射状态
- */
+     * 打印当前前端蛋映射状态
+     */
     printCurrentPiecesMapping() {
         console.log('🗺️ 当前前端蛋映射状态:');
         const mappingArray = [];
@@ -2035,10 +2070,54 @@ class GameScense {
         return mappingArray;
     }
 
+    settingHandler(show) {
+        const settingsMc = utile.findMc(this.exportRoot, 'mc_settings');
+        if (!settingsMc) {
+            console.warn('⚠️ 未找到 mc_settings 元件');
+            return;
+        }
+
+
+        if (show) {
+            console.log('⚙️ 显示设置界面');
+
+            settingsMc.scaleX = failureMc.scaleY = 0.1;
+            settingsMc.visible = show;
+            createjs.Tween.get(settingsMc)
+                // 第一阶段：快速弹出到1.1倍大小
+                .to({
+                    scaleX: 1.1,
+                    scaleY: 1.1
+                }, 200, createjs.Ease.backOut)
+                // 第二阶段：回弹到正常大小
+                .to({
+                    scaleX: 1.0,
+                    scaleY: 1.0
+                }, 100, createjs.Ease.backIn)
+                .call(() => {
+                    console.log('✅ 失败面板伸缩动画完成');
+                });
+        } else {
+            const blockLayer = utile.findMc(settingsMc, 'blockLayer');
+            if (blockLayer && this.failureBlockClickHandler) {
+                blockLayer.off('click', this.failureBlockClickHandler);
+                this.failureBlockClickHandler = null;
+                console.log('✅ 失败界面屏蔽层点击事件已移除');
+            }
+
+
+
+            // 隐藏失败界面
+            settingsMc.visible = false;
+            console.log('✅ 失败界面隐藏完成');
+            console.log('⚙️ 隐藏设置界面');
+        }
+    }
+
     /**
-   * 失败界面控制器
-   * @param {boolean} show - true显示，false隐藏
-   */
+     * 失败界面控制器
+     * @param {boolean} show - true显示，false隐藏
+     */
     failureHandler(show) {
         console.log(`💀 ${show ? '显示' : '隐藏'}失败界面...`);
 
