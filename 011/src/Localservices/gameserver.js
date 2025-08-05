@@ -1825,19 +1825,7 @@ class GameServer {
         //     };
 
         // 测试失败
-        return {
-                code: 0,
-                fromCellId: fromCellId,
-                toCellId: toCellId,
-                path: path,
-                eggType: eggType,
-                positionsToDelete: positionsToDelete,
-                synthesis: synthesisData,
-                newEggs: [],
-                isFailure: true,
-                reason: 'max_egg_level_reached',
-                message: "恭喜！您合成了最高等级的蛋！"
-            };
+
         // 6. 检查胜利条件
         if (synthesisData.canSynthesize && synthesisData.newEggType >= 7) {
             console.log('🏆 达成胜利条件：合成最高等级蛋！');

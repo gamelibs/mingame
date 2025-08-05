@@ -22,6 +22,8 @@ class GameScense {
         this.gameRunState = 'init'; // init, playing, paused, ended
         this.isInitialized = false;
 
+        this.selectedDifficulty = 'easy';
+
         // 游戏数据相关
         this.gameData = null;
         this.userStatus = null;
@@ -71,7 +73,7 @@ class GameScense {
             this.failureHandler(false);
             this.victoryHandler(false);
             this.settingHandler(false);
-
+            this.onSettingGame();
             // 初始化解锁动画元件
             this.initUnlockAnimations();
 
@@ -130,7 +132,7 @@ class GameScense {
             if (isNewUser) {
                 //     // 🔥 新用户：直接使用默认中等难度，不显示选择界面
                 //     console.log('👶 新用户跳过难度选择，使用默认中等难度');
-                this.selectedDifficulty = 'easy';
+                
                 this.waitingForClick = true;
                 // 初始化引导系统
                 this.initGuideGesture();
@@ -823,7 +825,8 @@ class GameScense {
             this.btnSettingClickHandler = (event) => {
                 console.log('⚙️ 点击设置按钮 (btn_setting)');
                 event.stopPropagation();
-                this.onSettingGame();
+                
+                this.settingHandler(true);
             };
 
             // 绑定设置按钮事件
@@ -2084,7 +2087,7 @@ class GameScense {
         console.log('⚙️ 打开设置界面');
 
 
-        this.settingHandler(true);
+        
         const settingsMc = utile.findMc(this.exportRoot, 'mc_settings');
         if (settingsMc) {
 
@@ -2164,7 +2167,7 @@ class GameScense {
         const btn_hard = utile.findMc(settingsMc, 'mc_diff_hard');
 
         let btns = [btn_easy, btn_nolrmal, btn_hard];
-        const difficultyMap = {
+        this.difficultyMap = {
             easy: btn_easy,
             normal: btn_nolrmal,
             hard: btn_hard
@@ -2180,14 +2183,15 @@ class GameScense {
                     this.tips('🚫 新手引导模式下无法切换难度');
                     return;
                 }
-                // 更新按钮状态
-                for (const otherBtn of btns) {
-                    if (otherBtn !== btn) {
-                        otherBtn.gotoAndStop(0); // 停止状态
-                    } else {
-                        otherBtn.gotoAndStop(1); // 播放状态
-                    }
-                }
+                // // 更新按钮状态
+                // for (const otherBtn of btns) {
+                //     if (otherBtn !== btn) {
+                //         otherBtn.gotoAndStop(0); // 停止状态
+                //     } else {
+                //         otherBtn.gotoAndStop(1); // 播放状态
+                //     }
+                // }
+                this.selectDifficulty(this.selectedDifficulty, this.difficultyMap); // 更新按钮状态
                 // 保存选择的难度到本地存储
                 // localStorage.setItem('selectedDifficulty', this.selectedDifficulty);
                 // 同步难度到后端
@@ -2200,18 +2204,18 @@ class GameScense {
             });
         }
 
-        if (this.userStatus.isNewUser) {
-            this.selectedDifficulty = 'easy'; // 新手引导模式下默认选择简单难度
-            btn_easy.gotoAndStop(1); // 播放状态
-        } else {
-            this.selectedDifficulty = this.gameData.difficulty;
-            const selectedButton = difficultyMap[this.selectedDifficulty];
-            if (selectedButton) {
-                selectedButton.gotoAndStop(1); // 播放状态
-            } else {
-                console.warn(`⚠️ 未找到对应难度的按钮: ${this.selectedDifficulty}`);
-            }
-        }
+        // if (this.userStatus.isNewUser) {
+        //     this.selectedDifficulty = 'easy'; // 新手引导模式下默认选择简单难度
+        //     btn_easy.gotoAndStop(1); // 播放状态
+        // } else {
+        //     this.selectedDifficulty = this.gameData.difficulty;
+        //     const selectedButton = difficultyMap[this.selectedDifficulty];
+        //     if (selectedButton) {
+        //         selectedButton.gotoAndStop(1); // 播放状态
+        //     } else {
+        //         console.warn(`⚠️ 未找到对应难度的按钮: ${this.selectedDifficulty}`);
+        //     }
+        // }
 
         this.showFps = localStorage.getItem('fpsNum') === "60" || 60; // 默认60FPS
 
@@ -2239,6 +2243,25 @@ class GameScense {
         }
     }
 
+    /**
+     * 根据难度选择对应的按钮并更新状态
+     * @param {string} difficulty - 难度 ('easy', 'normal', 'hard')
+     * @param {Object} difficultyMap - 难度与按钮的映射关系
+     */
+    selectDifficulty(difficulty, difficultyMap) {
+        const selectedButton = difficultyMap[difficulty];
+        if (selectedButton) {
+            // 更新按钮状态
+            for (const btn in difficultyMap) {
+                const button = difficultyMap[btn];
+                button.gotoAndStop(button === selectedButton ? 1 : 0); // 播放状态或停止状态
+            }
+            console.log(`✅ 难度选择成功: ${difficulty}`);
+        } else {
+            console.warn(`⚠️ 未找到对应难度的按钮: ${difficulty}`);
+        }
+    }
+
 
 
     settingHandler(show) {
@@ -2250,6 +2273,9 @@ class GameScense {
 
 
         if (show) {
+
+            this.selectDifficulty(this.selectedDifficulty, this.difficultyMap);
+
             console.log('⚙️ 显示设置界面');
 
             settingsMc.scaleX = settingsMc.scaleY = 0.1;
@@ -2685,8 +2711,8 @@ class GameScense {
                     // 5. 重新请求游戏数据
                     // await this.loadGameDataByDifficulty(this.selectedDifficulty || 'normal');
                     const gameConfig = await window.GameServer.getGameData(
-                        this.userStatus,
-                        this.selectedDifficulty
+                        this.userStatus//,
+                        // this.selectedDifficulty
                     );
                     this.gameData = gameConfig;
                     // 6. 验证游戏数据
