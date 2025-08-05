@@ -30,25 +30,25 @@ class GameEngine {
         this.soundInitialized = false;
         this.loadedSounds = new Map();
         this.loadedImages = new Map();
+        this.soundStatus = {};
+        // this.isMusicEnabled = true;
+        // this.isSoundEnabled = true;
 
     }
 
     async init() {
         console.log('Game Engine Starting...');
 
-        // 添加用户交互检测
-        // this.setupAutoplayHandler();
-
         // 并行执行：加载配置 + 预加载关键库文件
-        await Promise.all([
-            this.loadConfig(),
-            this.preloadCriticalLibs()
-        ]);
 
+        await this.loadConfig();
         this.applyConfig();
 
         // 开始加载游戏资源
         await this.loadGameResources();
+
+        // 添加用户交互检测
+        this.setupAutoplayHandler();
 
         this.hideBasicLoading();
         // 加载预加载器组件
@@ -60,19 +60,45 @@ class GameEngine {
 
         console.log('Game Engine Ready!');
 
+        // 添加焦点事件监听
+        this.setupFocusBlurHandler();
     }
 
-    async preloadCriticalLibs() {
-        // 预加载关键的CreateJS库文件
-        const criticalLibs = [
-            "libs/modules/easeljs.min.js",
-            "libs/modules/preloadjs.min.js"
-        ];
+    // async preloadCriticalLibs() {
+    //     // 预加载关键的CreateJS库文件
+    //     const criticalLibs = [
+    //         "libs/modules/easeljs.min.js",
+    //         "libs/modules/preloadjs.min.js"
+    //     ];
 
-        console.log('预加载关键库文件...');
-        const preloadPromises = criticalLibs.map(lib => this.loadScript(lib));
-        await Promise.all(preloadPromises);
-        console.log('关键库文件预加载完成');
+    //     console.log('预加载关键库文件...');
+    //     const preloadPromises = criticalLibs.map(lib => this.loadScript(lib));
+    //     await Promise.all(preloadPromises);
+    //     console.log('关键库文件预加载完成');
+    // }
+
+    setupFocusBlurHandler() {
+        const pauseGame = () => {
+            console.log('🛑 页面失去焦点，暂停游戏和音乐');
+            // createjs.Ticker.setPaused(true); // 暂停游戏逻辑
+            // if (this.loadedSounds.has('bgm')) {
+            //     this.stopSound('bgm'); // 停止背景音乐
+            // }
+        };
+
+        const resumeGame = () => {
+            console.log('▶️ 页面获得焦点，恢复游戏和音乐');
+            // createjs.Ticker.setPaused(false); // 恢复游戏逻辑
+            // if (this.loadedSounds.has('bgm')) {
+            //     this.playSound('bgm', { loop: -1, volume: 0.5 }); // 恢复背景音乐
+            // }
+        };
+
+        // 添加事件监听
+        window.addEventListener('blur', pauseGame);
+        window.addEventListener('focus', resumeGame);
+
+        console.log('🎮 焦点事件监听已添加');
     }
 
     getLoadingCompositionId() {
@@ -138,6 +164,15 @@ class GameEngine {
             const response = await fetch('./manifest.json?v=' + Math.random());
             this.config = await response.json();
             console.log('Config loaded:', this.config);
+
+            // 加载 initial 中的资源（顺序加载）
+            if (this.config.initial && Array.isArray(this.config.initial)) {
+                console.log('开始加载 initial 资源:', this.config.initial);
+                for (const resource of this.config.initial) {
+                    await this.loadScript(resource); // 顺序加载 initial 资源
+                }
+                console.log('✅ initial 资源加载完成');
+            }
         } catch (error) {
             console.error('Failed to load config:', error);
             throw error;
@@ -289,19 +324,40 @@ class GameEngine {
 
     async loadGameResources() {
         const scripts = [...this.config.initial, ...this.config.game];
-        const total = scripts.length;
+
+
+
+        const sounds = this.config.gameconfig.sounds || [];
+        const images = this.config.gameconfig.images || [];
+
+        // 将背景音乐资源优先加载
+        const bgmResource = sounds.find(sound => sound.id === 'bgm');
+        const otherSounds = sounds.filter(sound => sound.id !== 'bgm');
+        const prioritizedSounds = bgmResource ? [bgmResource, ...otherSounds] : otherSounds;
+
+        const total = scripts.length + prioritizedSounds.length + images.length;
         let loaded = 0;
 
-        console.log(`开始并行加载 ${total} 个脚本文件...`);
+        console.log(`开始并行加载 ${total} 个资源...`);
 
-        // 并行加载所有脚本
-        const loadPromises = scripts.map(async (script) => {
-            await this.loadScript(script);
-            loaded++;
-            this.updateProgress((loaded / total) * 100);
-            // console.log(`已加载: ${script} (${loaded}/${total})`);
-        });
-
+        // 并行加载所有资源
+        const loadPromises = [
+            ...scripts.map(async (script) => {
+                await this.loadScript(script);
+                loaded++;
+                this.updateLoadingProgress((loaded / total) * 100);
+            }),
+            ...prioritizedSounds.map(async (sound) => {
+                await this.loadSound(sound.id, sound.src);
+                loaded++;
+                this.updateLoadingProgress((loaded / total) * 100);
+            }),
+            ...images.map(async (image) => {
+                await this.loadImage(image.id, image.src);
+                loaded++;
+                this.updateLoadingProgress((loaded / total) * 100);
+            })
+        ];
         // 等待所有脚本加载完成
         await Promise.all(loadPromises);
         console.log('所有脚本加载完成');
@@ -358,7 +414,7 @@ class GameEngine {
 
         // 初始化CreateJS舞台
         this.stage = new createjs.Stage(this.canvas);
-        createjs.Ticker.framerate = this.config.scene?.fps || 30;
+        createjs.Ticker.framerate = this.config.scene?.fps || 60;
         createjs.Ticker.addEventListener("tick", this.stageUpdateHandler.bind(this));
 
 
@@ -949,8 +1005,20 @@ class GameEngine {
         }
 
         // 检查是否允许自动播放
-        if (!this.audioEnabled && !options.userTriggered) {
-            console.warn(`🎵 浏览器阻止自动播放，需要用户交互: ${id}`);
+        // if (!this.audioEnabled && !options.userTriggered) {
+        //     console.warn(`🎵 浏览器阻止自动播放，需要用户交互: ${id}`);
+        //     return null;
+        // }
+        const isMusicEnabled = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true'; // 默认开启音乐
+        const isSoundEnabled = localStorage.getItem('soundEnabled') === null || localStorage.getItem('soundEnabled') === 'true'; // 默认开启音效
+
+        if (id === 'bgm' && !isMusicEnabled) {
+            console.warn(`🎵 背景音乐已被禁用: ${id}`);
+            return null;
+        }
+
+        if (id !== 'bgm' && !isSoundEnabled) {
+            console.warn(`🎵 音效已被禁用: ${id}`);
             return null;
         }
 
@@ -959,6 +1027,7 @@ class GameEngine {
                 const instance = createjs.Sound.play(id, options);
                 if (instance) {
                     console.log(`🎵 播放声音: ${id}`);
+                    this.soundStatus[id] = true
                     return instance;
                 } else {
                     console.warn(`🎵 声音播放失败: ${id}`);
@@ -982,6 +1051,7 @@ class GameEngine {
 
         try {
             createjs.Sound.stop(id);
+            this.soundStatus[id] = false;
             console.log(`🎵 停止声音: ${id}`);
         } catch (error) {
             console.error(`🎵 停止声音异常: ${id}`, error);
@@ -1003,6 +1073,19 @@ class GameEngine {
         }
     }
 
+    /**
+     * 检查指定音效是否正在播放
+     * @param {string} soundName - 音效名称
+     * @returns {boolean} 是否正在播放
+     */
+    isSoundPlaying(soundName) {
+
+        // 检查音效是否正在播放
+        return this.soundStatus[soundName]
+
+
+    }
+
     setupAutoplayHandler() {
         const enableAudio = () => {
             if (!this.audioEnabled) {
@@ -1010,22 +1093,23 @@ class GameEngine {
                 this.audioEnabled = true;
 
                 // 尝试播放背景音乐
-                // if (this.loadedSounds && this.loadedSounds.has('bgm')) {
-                //     this.playSound('bgm', { loop: -1, volume: 0.5 });
-                // }
+                if (this.loadedSounds && this.loadedSounds.has('bgm')) {
+                    this.playSound('bgm', { loop: -1, volume: 0.5 });
+                }
             }
 
             // 移除事件监听器
-            // document.removeEventListener('click', enableAudio);
-            // document.removeEventListener('touchstart', enableAudio);
-            // document.removeEventListener('keydown', enableAudio);
+            document.removeEventListener('click', enableAudio);
+            document.removeEventListener('touchstart', enableAudio);
+            document.removeEventListener('keydown', enableAudio);
         };
 
         // 添加多种用户交互事件监听
-        // document.addEventListener('click', enableAudio);
-        // document.addEventListener('touchstart', enableAudio);
-        // document.addEventListener('keydown', enableAudio);
+        document.addEventListener('click', enableAudio);
+        document.addEventListener('touchstart', enableAudio);
+        document.addEventListener('keydown', enableAudio);
     }
+
     // 图片管理方法
     getImage(id) {
         if (this.loadedImages.has(id)) {
@@ -1115,32 +1199,32 @@ class GameEngine {
         });
     }
 
-    async loadAudioResources() {
-        if (this.soundArr.length === 0) return;
+    // async loadAudioResources() {
+    //     if (this.soundArr.length === 0) return;
 
-        return new Promise((resolve) => {
-            createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashAudioPlugin]);
-            createjs.Sound.alternateExtensions = ["mp3"];
+    //     return new Promise((resolve) => {
+    //         createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashAudioPlugin]);
+    //         createjs.Sound.alternateExtensions = ["mp3"];
 
-            const loader = new createjs.LoadQueue(false);
-            loader.installPlugin(createjs.Sound);
+    //         const loader = new createjs.LoadQueue(false);
+    //         loader.installPlugin(createjs.Sound);
 
-            createjs.Sound.muted = true;
-            this.pubSound = [];
+    //         createjs.Sound.muted = true;
+    //         this.pubSound = [];
 
-            loader.on("fileload", (evt) => {
-                this.pubSound.push(evt.item.id);
-            });
+    //         loader.on("fileload", (evt) => {
+    //             this.pubSound.push(evt.item.id);
+    //         });
 
-            loader.on("complete", () => {
-                this.goPlayFrameEnd(this.gl_loadBar, 40);
-                createjs.Sound.volume = 0.8;
-                this.testAudioPlayback(resolve);
-            });
+    //         loader.on("complete", () => {
+    //             this.goPlayFrameEnd(this.gl_loadBar, 40);
+    //             createjs.Sound.volume = 0.8;
+    //             this.testAudioPlayback(resolve);
+    //         });
 
-            loader.loadManifest(this.soundArr);
-        });
-    }
+    //         loader.loadManifest(this.soundArr);
+    //     });
+    // }
 
     loadScript(src) {
         return new Promise((resolve, reject) => {
@@ -1242,6 +1326,10 @@ class GameEngine {
         const { id, src, type } = resourceConfig;
 
         // console.log(`📦 正在加载 ${type}: ${src}`);
+        if (type === 'sound' && this.loadedSounds.has(id)) {
+            console.log(`🎵 声音已加载，跳过: ${id}`);
+            return;
+        }
 
         try {
             switch (type) {
@@ -1294,13 +1382,12 @@ class GameEngine {
 
     async loadSound(id, src) {
         return new Promise((resolve, reject) => {
-            // 初始化 SoundJS（如果还没初始化）
             if (!this.soundInitialized) {
                 try {
-                    createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashAudioPlugin]);
+                    createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashAudioPlugin]);//
                     createjs.Sound.alternateExtensions = ["mp3", "wav", "ogg"];
+                    createjs.Sound.muted = true; // 初始状态静音
                     this.soundInitialized = true;
-                    // console.log('🎵 SoundJS 初始化完成');
                 } catch (error) {
                     console.error('🎵 SoundJS 初始化失败:', error);
                     reject(new Error(`SoundJS initialization failed: ${error.message}`));
@@ -1308,43 +1395,48 @@ class GameEngine {
                 }
             }
 
-            // 设置超时机制（10秒）
             const timeout = setTimeout(() => {
                 console.warn(`🎵 声音加载超时: ${id} (${src})`);
                 reject(new Error(`Sound load timeout: ${src}`));
             }, 10000);
 
-            // 成功加载处理
             const onFileLoad = (event) => {
                 if (event.id === id) {
                     clearTimeout(timeout);
                     createjs.Sound.removeEventListener("fileload", onFileLoad);
                     createjs.Sound.removeEventListener("fileerror", onFileError);
-
-                    // 存储到已加载声音列表
                     this.loadedSounds.set(id, src);
-                    // console.log(`🎵 声音文件加载成功: ${id}`);
+                    createjs.Sound.play(id);
+                    setTimeout(() => {
+                        createjs.Sound.muted = false; // 确保声音可以播放
+                        createjs.Sound.stop(id); // 确保声音不会持续播放
+                    }, 100); // 确保声音加载后有足够时间处理
+                    // 如果是背景音乐，立即播放
+                    if (id === 'bgm') {
+                        setTimeout(() => {
+                            console.log(`🎵 背景音乐加载完成，开始播放: ${src}`);
+                            // createjs.Sound.play(id);
+                            this.playSound('bgm', { loop: -1, volume: 0.5 })
+                        }, 1000);
+                    }
+
                     resolve();
                 }
             };
 
-            // 错误处理
             const onFileError = (event) => {
                 if (event.id === id) {
                     clearTimeout(timeout);
                     createjs.Sound.removeEventListener("fileload", onFileLoad);
                     createjs.Sound.removeEventListener("fileerror", onFileError);
-
                     console.error(`🎵 声音文件加载失败: ${id}`, event);
                     reject(new Error(`Sound load failed: ${src} - ${event.message || 'Unknown error'}`));
                 }
             };
 
-            // 添加事件监听器
             createjs.Sound.addEventListener("fileload", onFileLoad);
             createjs.Sound.addEventListener("fileerror", onFileError);
 
-            // 开始加载声音
             try {
                 createjs.Sound.registerSound(src, id);
             } catch (error) {
@@ -1355,6 +1447,7 @@ class GameEngine {
             }
         });
     }
+
 
     async loadImage(id, src) {
         return new Promise((resolve, reject) => {

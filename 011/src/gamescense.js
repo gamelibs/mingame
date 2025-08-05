@@ -15,6 +15,8 @@ class GameScense {
 
         // 游戏场景元件
         this.gamebox = null;
+        this.tipsPanel = null; // 提示面板
+        this.showFps = false; // 是否显示FPS
 
         // 游戏运行状态
         this.gameRunState = 'init'; // init, playing, paused, ended
@@ -65,6 +67,7 @@ class GameScense {
             }
 
             // 初始化失败和胜利界面（隐藏状态）
+
             this.failureHandler(false);
             this.victoryHandler(false);
             this.settingHandler(false);
@@ -109,7 +112,7 @@ class GameScense {
             // 初始化游戏系统
             await this.initUIElements();
             await this.initGameSystems();
-
+            this.initTipsPanel();
             // this.startBackgroundMusic();
             // this.playUnlockedAnimations(this.userStatus);
 
@@ -127,7 +130,7 @@ class GameScense {
             if (isNewUser) {
                 //     // 🔥 新用户：直接使用默认中等难度，不显示选择界面
                 //     console.log('👶 新用户跳过难度选择，使用默认中等难度');
-                this.selectedDifficulty = 'normal';
+                this.selectedDifficulty = 'easy';
                 this.waitingForClick = true;
                 // 初始化引导系统
                 this.initGuideGesture();
@@ -175,8 +178,17 @@ class GameScense {
 
             // 从游戏数据中获取蛋配置
             if (this.gameData && this.gameData.data) {
-                if (this.gameData.isNewUser) {
-                    const { eggSeat, eggType, pointSeat } = this.gameData.data;
+                const { eggSeat, eggType, pointSeat } = this.gameData.data;
+
+                // 🔥 处理分数恢复
+                if (this.gameData.scoreData) {
+                    console.log('💰 恢复分数数据:', this.gameData.scoreData);
+                    this.updateScoreDisplayDirectly(this.gameData.scoreData.totalScore);
+                }
+
+                this.playUnlockedAnimations(this.gameData.unlockData)
+
+                if (this.userStatus.isNewUser) {
                     if (pointSeat.length > 0) {
                         this.expectedClickCellId = pointSeat[0];
                         setTimeout(() => {
@@ -184,23 +196,22 @@ class GameScense {
                             this.moveGuideGestureToCell(pointSeat[0]);
                         }, 500);
                     }
-                    // this.showPointSeats(this.pointSeats);
-                    if (eggSeat && eggType && eggSeat.length === eggType.length) {
-                        console.log(`📊 使用服务器数据生成蛋: 位置[${eggSeat}], 类型[${eggType}]`);
 
-                        this.playLongbossAnimation();
-
-                        // 同时创建所有蛋
-                        const createEggPromises = eggSeat.map((cellId, index) =>
-                            this.createEggAtPosition(cellId, eggType[index])
-                        );
-
-                        await Promise.all(createEggPromises);
-
-                        utile.__sdklog(`✅ 成功为生成 ${eggSeat.length} 个蛋`, this.chessboard);
-                    }
                 }
+                if (eggSeat && eggType && eggSeat.length === eggType.length) {
+                    console.log(`📊 使用服务器数据生成蛋: 位置[${eggSeat}], 类型[${eggType}]`);
 
+                    this.playLongbossAnimation();
+
+                    // 同时创建所有蛋
+                    const createEggPromises = eggSeat.map((cellId, index) =>
+                        this.createEggAtPosition(cellId, eggType[index])
+                    );
+
+                    await Promise.all(createEggPromises);
+
+                    utile.__sdklog(`✅ 成功为生成 ${eggSeat.length} 个蛋`, this.chessboard);
+                }
             }
         } catch (error) {
             console.error('❌ 蛋生成失败:', error);
@@ -247,56 +258,6 @@ class GameScense {
         return true;
     }
 
-
-
-    /**
-     * 初始化难度选择模块
-     */
-    initDifficultySelection() {
-        console.log('🎮 初始化难度选择模块...');
-
-        // 先隐藏选择难度UI
-        // this.hideDifficultyUI();
-
-        // const gameData = {
-        //     engine: this.engine,
-        //     stage: this.stage,
-        //     exportRoot: this.exportRoot,
-        //     loadedSounds: this.loadedSounds
-        // };
-
-        // 初始化 SelectLine 模块
-        // if (window.SelectLine) {
-        //     window.SelectLine.init(gameData, (difficulty) => {
-        //         this.onDifficultySelected(difficulty);
-        //     });
-        // } else {
-        //     console.warn('⚠️ SelectLine 模块未找到，使用默认难度');
-        //     this.onDifficultySelected('normal');
-        // }
-    }
-
-    /**
-     * 难度选择完成回调
-     */
-    // async onDifficultySelected(difficulty) {
-    //     console.log(`🎯 接收到选择的难度: ${difficulty}`);
-    //     this.selectedDifficulty = difficulty;
-
-    //     // 继续游戏初始化流程
-    //     this.continueInitialization();
-
-    // }
-
-
-    /**
- * 继续初始化流程
- */
-    // continueInitialization() {
-    //     console.log('🔄 继续游戏初始化...');
-
-
-    // }
 
     /**
      * 初始化游戏系统
@@ -575,7 +536,20 @@ class GameScense {
     }
 
 
-
+    /**
+     * 🔥直接更新分数显示（不带动画）
+     */
+    updateScoreDisplayDirectly(totalScore) {
+        try {
+            const goldMc = this.exportRoot.mc_gold;
+            if (goldMc && goldMc.text) {
+                goldMc.text.text = this.formatNumber(totalScore);
+                console.log(`💰 分数显示已恢复: ${this.formatNumber(totalScore)}`);
+            }
+        } catch (error) {
+            console.error('❌ 更新分数显示失败:', error);
+        }
+    }
 
     /**
      * 验证接收到的游戏数据
@@ -863,28 +837,7 @@ class GameScense {
         console.log('✅ 事件监听设置完成');
     }
 
-    /**
-     * 点击设置按钮处理逻辑
-     */
-    onSettingGame() {
-        console.log('⚙️ 打开设置界面');
 
-        // 检查是否在新手引导模式
-        if (this.userStatus?.isNewUser) {
-            console.log('👶 当前是新手引导模式，默认选择难度为 easy 且不允许切换难度');
-
-            // 默认设置为 easy 难度
-            this.selectedDifficulty = 'easy';
-
-            // 显示设置界面并禁用难度切换
-            this.settingHandler(true);
-            this.disableDifficultySelection();
-        } else {
-            console.log('🎮 当前是普通模式，允许切换难度');
-            this.settingHandler(true);
-            this.enableDifficultySelection();
-        }
-    }
 
     /**
     * gamebox 点击事件处理
@@ -927,7 +880,7 @@ class GameScense {
      * 检查是否在引导模式
      */
     isInGuideMode() {
-        return this.gameData && this.gameData.isNewUser && this.waitingForClick;
+        return this.gameData && this.userStatus.isNewUser && this.waitingForClick;
     }
 
     /**
@@ -1338,6 +1291,8 @@ class GameScense {
         // 执行蛋收集动画
         await this.playEggCollectionAnimation(allEggsToSynthesize, synthesisPosition);
 
+        // 延迟后创建合成蛋
+        await this.createSynthesizedEgg(synthesisPosition, newEggType);
 
         // 更新分数显示并等待完成
         utile.__sdklog2('🔍 准备更新分数，scoreDetail:', scoreDetail);
@@ -1349,10 +1304,6 @@ class GameScense {
         } else {
             console.warn('⚠️ scoreDetail 数据缺失:', scoreDetail);
         }
-
-        // 延迟后创建合成蛋
-        await this.createSynthesizedEgg(synthesisPosition, newEggType);
-
         // 检查是否解锁了新等级（简单检查）
         if (newEggType > this.maxUnlockedLevel) {
             console.log(`🎉 解锁新等级: ${this.maxUnlockedLevel} -> ${newEggType}`);
@@ -1814,11 +1765,6 @@ class GameScense {
     updateScoreDisplay(addedScore) {
         return new Promise((resolve) => {
             try {
-
-                // 显示浮动分数文本
-                // this.showFloatingScore(addedScore);
-
-
                 // 获取金币显示元件
                 const goldMc = this.exportRoot.mc_gold;
                 if (goldMc && goldMc.text) {
@@ -1835,7 +1781,7 @@ class GameScense {
                         .to({ score: targetScore }, 500, createjs.Ease.quadOut)
                         .addEventListener("change", () => {
                             // 实时更新显示的分数（格式化）
-                            goldMc.text.text = "" + animationData.score //this.formatNumber(Math.floor(animationData.score));
+                            goldMc.text.text = "" + Math.floor(animationData.score) //this.formatNumber(Math.floor(animationData.score));
                         })
                         .call(() => {
                             // 确保最终分数正确
@@ -1865,7 +1811,7 @@ class GameScense {
             console.log(`✨ 显示浮动分数: +${score}`);
 
             // 创建文本对象
-            const floatingText = new createjs.Text(`+${score}`, "bold 36px Arial", "#FFD700");
+            const floatingText = new createjs.Text(`+${score}`, "bold 42px Arial", "#FFD700");
             floatingText.textAlign = "center";
             floatingText.textBaseline = "middle";
 
@@ -1887,22 +1833,25 @@ class GameScense {
             }
 
             // 添加到 gamebox（因为合成位置是相对于 gamebox 的）
+
             this.gamebox.addChild(floatingText);
+            this.gamebox.setChildIndex(floatingText, 99)
+            const initialY = floatingText.y;
 
             // 创建浮动动画：向上移动并淡出
             createjs.Tween.get(floatingText)
                 .to({
-                    y: floatingText.y - 80,
+                    y: initialY - 80,
                     alpha: 0.8,
                     scaleX: 1.2,
                     scaleY: 1.2
-                }, 300, createjs.Ease.quadOut)
+                }, 400, createjs.Ease.quadOut)
                 .to({
-                    y: floatingText.y - 120,
+                    y: initialY - 120,
                     alpha: 0,
                     scaleX: 1.0,
                     scaleY: 1.0
-                }, 500, createjs.Ease.quadIn)
+                }, 800, createjs.Ease.quadIn)
                 .call(() => {
                     // 动画完成后移除文本
                     this.gamebox.removeChild(floatingText);
@@ -2070,6 +2019,228 @@ class GameScense {
         return mappingArray;
     }
 
+    /**
+     * 初始化提示文本面板
+     */
+    initTipsPanel() {
+        console.log('🎨 初始化提示文本面板...');
+
+        const tipsMc = utile.findMc(this.exportRoot, 'mc_tips');
+        if (!tipsMc) {
+            console.warn('⚠️ 未找到 mc_tips 元件');
+            return;
+        }
+
+        this.tipsPanel = tipsMc; // 保存引用
+        console.log('✅ 提示文本面板初始化完成');
+    }
+
+    /**
+     * 显示提示文本
+     * @param {string} message - 要显示的提示内容
+     */
+    tips(message) {
+        if (!this.tipsPanel) {
+            console.warn('⚠️ 提示文本面板未初始化');
+            return;
+        }
+
+        console.log(`💬 显示提示文本: ${message}`);
+
+        // 创建文本对象
+        const text = new createjs.Text(message, "bold 28px Arial", "#FFFFFF");
+        text.textAlign = "center";
+        text.textBaseline = "middle";
+        text.lineWidth = 600;
+
+        // 设置文本位置到面板正中
+        text.x = this.config.scene.width / 2;
+        text.y = this.config.scene.height / 2 - 100;
+
+        // 清空面板并添加新文本
+        // this.tipsPanel.removeAllChildren();
+        this.tipsPanel.addChild(text);
+
+        // 显示面板
+        // this.tipsPanel.visible = true;
+
+        // 创建动画：显示2秒后消失
+        createjs.Tween.get(text)
+            .to({ alpha: 1 }, 200) // 渐入效果
+            .wait(2000)            // 显示2秒
+            .to({ alpha: 0 }, 300) // 渐出效果
+            .call(() => {
+                if (text.parent) {
+                    text.parent.removeChild(text); // 从面板中移除文本
+                    console.log('✅ 提示文本已消失');
+                }
+            });
+    }
+
+    /**
+    * 点击设置按钮处理逻辑
+    */
+    onSettingGame() {
+        console.log('⚙️ 打开设置界面');
+
+
+        this.settingHandler(true);
+        const settingsMc = utile.findMc(this.exportRoot, 'mc_settings');
+        if (settingsMc) {
+
+            const isMusicEnabled = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true'; // 默认开启音乐
+            const isSoundEnabled = localStorage.getItem('soundEnabled') === null || localStorage.getItem('soundEnabled') === 'true'; // 默认开启音效
+
+
+
+            const btn_clos_setting = utile.findMc(settingsMc, 'btn_clos_setting');
+
+            btn_clos_setting.on('click', () => {
+                createjs.Tween.get(settingsMc)
+                    .to({
+                        scaleX: 0.1,
+                        scaleY: 0.1,
+                    }, 300, createjs.Ease.backIn)
+                    .call(() => {
+                        this.settingHandler(false);
+                    })
+            });
+
+
+            // 音乐
+            const btn_bg = utile.findMc(settingsMc, 'mc_sound_bg');
+            if (isMusicEnabled) {
+                btn_bg.gotoAndStop(0); // 播放状态
+
+            } else {
+                btn_bg.gotoAndStop(1); // 停止状态
+            }
+            btn_bg.on('click', () => {
+                console.log('🔊 切换音乐状态');
+                if (this.engine && this.loadedSounds.has('bgm')) {
+                    if (this.engine.isSoundPlaying('bgm')) {
+                        this.engine.stopSound('bgm');
+                        btn_bg.gotoAndStop(1); // 停止状态
+                        console.log('🎵 音乐已停止');
+                        localStorage.setItem('musicEnabled', false);
+                    } else {
+                        this.engine.playSound('bgm', { loop: -1, volume: 0.5 });
+                        btn_bg.gotoAndStop(0); // 播放状态
+                        console.log('🎵 音乐已播放');
+                        localStorage.setItem('musicEnabled', true);
+                    }
+                } else {
+                    console.warn('⚠️ 背景音乐未加载或引擎未初始化');
+                }
+            });
+
+            // 音效
+            const btn_eff = utile.findMc(settingsMc, 'mc_sound_eff');
+            if (isSoundEnabled) {
+                btn_eff.gotoAndStop(0); // 播放状态
+            } else {
+                btn_eff.gotoAndStop(1); // 停止状态
+            }
+            btn_eff.on('click', () => {
+                const soundEnabled = localStorage.getItem('soundEnabled') === 'true';
+
+                console.log('🔊 切换音效状态');
+                if (soundEnabled) {
+
+                    localStorage.setItem('soundEnabled', false);
+                    btn_eff.gotoAndStop(1); // 停止状态
+                } else {
+                    localStorage.setItem('soundEnabled', true);
+                    btn_eff.gotoAndStop(0); // 播放状态
+                }
+            });
+
+
+        }
+
+
+        const btn_easy = utile.findMc(settingsMc, 'mc_diff_easy');
+        const btn_nolrmal = utile.findMc(settingsMc, 'mc_diff_normal');
+        const btn_hard = utile.findMc(settingsMc, 'mc_diff_hard');
+
+        let btns = [btn_easy, btn_nolrmal, btn_hard];
+        const difficultyMap = {
+            easy: btn_easy,
+            normal: btn_nolrmal,
+            hard: btn_hard
+        };
+
+        for (let i = 0; i < btns.length; i++) {
+            const btn = btns[i];
+            btn.on('click', () => {
+                console.log(`🔧 切换难度到 ${btn.name}`);
+                this.selectedDifficulty = btn.name.replace('mc_diff_', '');
+
+                if (this.userStatus.isNewUser) {
+                    this.tips('🚫 新手引导模式下无法切换难度');
+                    return;
+                }
+                // 更新按钮状态
+                for (const otherBtn of btns) {
+                    if (otherBtn !== btn) {
+                        otherBtn.gotoAndStop(0); // 停止状态
+                    } else {
+                        otherBtn.gotoAndStop(1); // 播放状态
+                    }
+                }
+                // 保存选择的难度到本地存储
+                // localStorage.setItem('selectedDifficulty', this.selectedDifficulty);
+                // 同步难度到后端
+                if (window.GameServer) {
+                    window.GameServer.updateDifficulty(this.selectedDifficulty);
+                    console.log(`🔄 难度已同步到后端: ${this.selectedDifficulty}`);
+                } else {
+                    console.warn('⚠️ 后端 GameServer 未初始化');
+                }
+            });
+        }
+
+        if (this.userStatus.isNewUser) {
+            this.selectedDifficulty = 'easy'; // 新手引导模式下默认选择简单难度
+            btn_easy.gotoAndStop(1); // 播放状态
+        } else {
+            this.selectedDifficulty = this.gameData.difficulty;
+            const selectedButton = difficultyMap[this.selectedDifficulty];
+            if (selectedButton) {
+                selectedButton.gotoAndStop(1); // 播放状态
+            } else {
+                console.warn(`⚠️ 未找到对应难度的按钮: ${this.selectedDifficulty}`);
+            }
+        }
+
+        this.showFps = localStorage.getItem('fpsNum') === "60" || 60; // 默认60FPS
+
+        const btn_fps = utile.findMc(settingsMc, 'mc_fps');
+        btn_fps.on('click', () => {
+            console.log('🔧 切换FPS显示状态');
+            this.showFps = !this.showFps;
+            btn_fps.gotoAndStop(this.showFps ? 0 : 1); // 播放/停止状态
+            localStorage.setItem('fpsNum', this.showFps ? "60" : "30"); // 保存到本地存储
+        });
+
+        // 查找屏蔽层
+        const blockLayer = utile.findMc(settingsMc, 'blockLayer');
+        if (blockLayer) {
+            // 屏蔽层只负责拦截，不做任何判断
+            this.settingBlockClickHandler = (event) => {
+                console.log('🛡️ 设置界面屏蔽层拦截了点击事件');
+                event.stopImmediatePropagation();
+                event.stopPropagation();
+                event.preventDefault();
+                return false;
+            };
+
+            blockLayer.on('click', this.settingBlockClickHandler);
+        }
+    }
+
+
+
     settingHandler(show) {
         const settingsMc = utile.findMc(this.exportRoot, 'mc_settings');
         if (!settingsMc) {
@@ -2081,34 +2252,47 @@ class GameScense {
         if (show) {
             console.log('⚙️ 显示设置界面');
 
-            settingsMc.scaleX = failureMc.scaleY = 0.1;
+            settingsMc.scaleX = settingsMc.scaleY = 0.1;
             settingsMc.visible = show;
             createjs.Tween.get(settingsMc)
                 // 第一阶段：快速弹出到1.1倍大小
                 .to({
                     scaleX: 1.1,
                     scaleY: 1.1
-                }, 200, createjs.Ease.backOut)
+                }, 300, createjs.Ease.backOut)
                 // 第二阶段：回弹到正常大小
                 .to({
                     scaleX: 1.0,
                     scaleY: 1.0
-                }, 100, createjs.Ease.backIn)
+                }, 200, createjs.Ease.backIn)
                 .call(() => {
                     console.log('✅ 失败面板伸缩动画完成');
                 });
+
+            const blockLayer = utile.findMc(settingsMc, 'blockLayer');
+            if (blockLayer) {
+                // 屏蔽层只负责拦截，不做任何判断
+                this.victoryBlockClickHandler = (event) => {
+
+                    event.stopImmediatePropagation();
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return false;
+                };
+
+                blockLayer.on('click', this.victoryBlockClickHandler);
+            }
         } else {
             const blockLayer = utile.findMc(settingsMc, 'blockLayer');
             if (blockLayer && this.failureBlockClickHandler) {
                 blockLayer.off('click', this.failureBlockClickHandler);
                 this.failureBlockClickHandler = null;
-                console.log('✅ 失败界面屏蔽层点击事件已移除');
             }
 
 
+            settingsMc.visible = show;
 
             // 隐藏失败界面
-            settingsMc.visible = false;
             console.log('✅ 失败界面隐藏完成');
             console.log('⚙️ 隐藏设置界面');
         }
@@ -2132,7 +2316,8 @@ class GameScense {
             // 显示失败界面
             failureMc.visible = true;
             failureMc.scaleX = failureMc.scaleY = 0.1;
-            utile.toShow(failureMc);
+            // utile.toShow(failureMc);
+            this.engine.playSound('wrong', { loop: 1, volume: 0.5 });
 
             // 显示失败界面动画
             createjs.Tween.get(failureMc)
@@ -2237,7 +2422,6 @@ class GameScense {
             .to({
                 scaleX: 0.1,
                 scaleY: 0.1,
-                alpha: 0
             }, 300, createjs.Ease.backIn)
             .call(() => {
                 // 隐藏失败界面
@@ -2267,8 +2451,8 @@ class GameScense {
         if (show) {
             // 显示胜利界面
             victoryMc.scaleX = victoryMc.scaleY = 0.1;
-            utile.toShow(victoryMc);
-
+            // utile.toShow(victoryMc);
+            this.engine.playSound('win', { loop: 1, volume: 0.5 });
             createjs.Tween.get(victoryMc)
                 // 第一阶段：快速弹出到1.2倍大小
                 .to({
@@ -2308,9 +2492,11 @@ class GameScense {
             }
 
             // GO按钮也要确保在屏蔽层之上
-            const btnGo = utile.findMc(victoryMc, 'btn_go');
+            const mc_card_reward = utile.findMc(victoryMc, 'mc_card_reward');
+            const btnGo = utile.findMc(mc_card_reward, 'btn_go');
+
             if (btnGo) {
-                victoryMc.setChildIndex(btnGo, victoryMc.children.length - 1);
+                // victoryMc.setChildIndex(btnGo, victoryMc.children.length - 1);
                 // 移除旧的事件监听器
                 btnGo.removeAllEventListeners();
 
@@ -2374,9 +2560,9 @@ class GameScense {
     }
 
     /**
- * 显示插页广告
- * @param {Function} callback - 广告关闭后的回调函数
- */
+    * 显示插页广告
+    * @param {Function} callback - 广告关闭后的回调函数
+    */
     showInterstitialAd(callback) {
         console.log('📺 准备播放插页广告...');
 
@@ -2456,11 +2642,15 @@ class GameScense {
 
         // 隐藏失败界面（会自动移除事件注册）
         // this.hideFailure();
+        if (!this.userStatus.isNewUser) {
 
-        // 重置游戏状态
-        this.resetGame();
+            // 重置游戏状态
+            this.resetGame();
+            console.log('✅ 游戏重新开始');
+        } else {
+            this.tips('In tutorial mode, the game cannot be restarted. Please complete the current task.');
+        }
 
-        console.log('✅ 游戏重新开始');
     }
 
     /**
@@ -2493,8 +2683,12 @@ class GameScense {
                     console.log('✅ 后端清理成功，开始重新请求游戏数据');
 
                     // 5. 重新请求游戏数据
-                    await this.loadGameDataByDifficulty(this.selectedDifficulty || 'normal');
-
+                    // await this.loadGameDataByDifficulty(this.selectedDifficulty || 'normal');
+                    const gameConfig = await window.GameServer.getGameData(
+                        this.userStatus,
+                        this.selectedDifficulty
+                    );
+                    this.gameData = gameConfig;
                     // 6. 验证游戏数据
                     // this.verifyGameData();
                     // 重置所有解锁动画到初始状态
@@ -2502,7 +2696,7 @@ class GameScense {
 
                     // 7. 执行生成蛋的动作
                     setTimeout(() => {
-                        this.handlePostInitialization();
+                        this.generateUserEggs();
                     }, 500);
 
                     console.log('✅ 游戏重置完成');
@@ -2519,8 +2713,8 @@ class GameScense {
     }
 
     /**
- * 重置金币显示
- */
+    * 重置金币显示
+    */
     resetGoldDisplay() {
         console.log('💰 重置金币显示为0...');
 
@@ -2540,8 +2734,8 @@ class GameScense {
     }
 
     /**
- * 清理所有蛋元件
- */
+    * 清理所有蛋元件
+    */
     clearAllEggs() {
         console.log('🧹 清理所有蛋元件...');
 
@@ -2626,18 +2820,17 @@ class GameScense {
     /**
      * 播放用户已解锁等级的动画
      */
-    playUnlockedAnimations(userStatus = null) {
+    playUnlockedAnimations(gameStatus = null) {
         console.log('🎭 播放用户已解锁等级的动画...');
 
         // 获取用户当前最高解锁等级
 
-        const currentUserStatus = userStatus || this.userStatus;
-        const maxUnlockedLevel = currentUserStatus ? (currentUserStatus.maxUnlockedEggType || 0) : 0;
+        this.maxUnlockedLevel = gameStatus ? (gameStatus.maxUnlockedEggType || 0) : 0;
 
-        console.log(`🏆 用户最高解锁等级: ${maxUnlockedLevel}`);
+        console.log(`🏆 用户最高解锁等级: ${this.maxUnlockedLevel}`);
 
         // 播放对应等级的解锁动画 (等级2~7对应mask1~6)
-        for (let level = 2; level <= Math.min(maxUnlockedLevel, 7); level++) {
+        for (let level = 2; level <= Math.min(this.maxUnlockedLevel, 7); level++) {
             setTimeout(() => {
 
                 const maskMc = this.unlockAnimations.get(level);
@@ -2656,14 +2849,14 @@ class GameScense {
             }, 100 * level);
         }
 
-        if (maxUnlockedLevel <= 1) {
+        if (this.maxUnlockedLevel <= 1) {
             console.log('📝 用户尚未解锁高级蛋类型，无需播放解锁动画');
         }
     }
 
     /**
- * 重置所有解锁动画到初始状态
- */
+     * 重置所有解锁动画到初始状态
+     */
     resetUnlockAnimations() {
         console.log('🔄 重置所有解锁动画到初始状态...');
 
