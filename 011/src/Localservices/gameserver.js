@@ -21,6 +21,7 @@ class GameServer {
             currentScore: 0,
             totalScore: 0,
             sessionScore: 0,
+            bestScore: 0,
             synthesisHistory: [] // 合成历史记录
         };
 
@@ -462,7 +463,7 @@ class GameServer {
         this.currentGameStatus = {
             // 游戏进度数据
             eggs: gameData ? gameData.eggs : [],
-            totalScore: gameData ? gameData.totalScore : 0,
+            scoreSystem: gameData ? gameData.scoreSystem : this.scoreSystem,
             difficulty: gameData ? gameData.difficulty : this.difficulty,
             maxUnlockedEggType: gameData ? gameData.maxUnlockedEggType : 1,
 
@@ -495,10 +496,7 @@ class GameServer {
                 success: true,
                 isNewUser: false,
                 difficulty: this.getDifficultyLevel(gameData.difficulty, true),
-                scoreData: {
-                    totalScore: gameData.totalScore || 0,
-                    currentScore: this.scoreSystem ? this.scoreSystem.currentScore : 0
-                },
+                scoreSystem: gameData.scoreSystem || this.scoreSystem,
                 data: {
                     eggSeat: gameData.eggs.map(egg => egg.cellId),
                     eggType: gameData.eggs.map(egg => egg.eggType),
@@ -518,15 +516,13 @@ class GameServer {
         return {
             success: true,
             isNewUser: false,
+            scoreSystem: gameData.scoreSystem || this.scoreSystem,
             data: {
                 eggSeat: newEggs.map(egg => egg.cellId),
                 eggType: newEggs.map(egg => egg.eggType),
                 pointSeat: [] // 老用户不需要引导点
             },
-            scoreData: {
-                totalScore: 0,
-                currentScore: 0
-            },
+
             unlockData: {
                 maxUnlockedEggType: this.maxUnlockedEggType || 1
             },
@@ -578,10 +574,12 @@ class GameServer {
     resetGame() {
         console.log('🔄 重置 GameServer 游戏状态...');
 
-        localStorage.removeItem('GameData');
-
         try {
-            // 1. 清空地图状态中的所有蛋数据
+            // 1. 获取当前的 gameData
+            const gameData = this.loadGameData();
+            const bestScore = gameData?.scoreSystem?.bestScore || 0; // 保留最高分
+
+            // 2. 清空地图状态中的所有蛋数据
             for (const cellId in this.mapState.cells) {
                 const cell = this.mapState.cells[cellId];
                 if (cell) {
@@ -593,7 +591,7 @@ class GameServer {
                 }
             }
 
-            // 2. 重置集合状态
+            // 3. 重置集合状态
             this.mapState.occupiedCells.clear();
             this.mapState.emptyCells.clear();
 
@@ -602,24 +600,24 @@ class GameServer {
                 this.mapState.emptyCells.add(cellId);
             }
 
-            // 3. 清除选择状态
+            // 4. 清除选择状态
             this.clearSelection();
 
-            // 4. 重置分数系统
+            // 5. 重置分数系统，但保留最高分
             if (this.scoreSystem) {
                 this.scoreSystem.currentScore = 0;
                 this.scoreSystem.totalScore = 0;
                 this.scoreSystem.sessionScore = 0;
                 this.scoreSystem.synthesisHistory = [];
-                console.log('💰 当前游戏分数系统已重置为0');
+                this.scoreSystem.bestScore = bestScore; // 恢复最高分
+                console.log(`💰 当前游戏分数系统已重置为0，但保留最高分: ${bestScore}`);
             }
 
-            // 5. 重置用户解锁蛋等级为0（从蛋1重新开始解锁）
-
+            // 6. 重置用户解锁蛋等级为0（从蛋1重新开始解锁）
             this.maxUnlockedEggType = 1;
             this.difficulty = 4;
 
-            // 6. 🔥 重置全局游戏状态
+            // 7. 重置全局游戏状态
             if (this.currentGameStatus) {
                 this.currentGameStatus.eggs = [];
                 this.currentGameStatus.totalScore = 0;
@@ -629,9 +627,18 @@ class GameServer {
                 this.currentGameStatus.saveTime = null;
             }
 
+            // 8. 保存新的 gameData，保留最高分
+            const newGameData = {
+                eggs: [],
+                scoreSystem: this.scoreSystem,
+                difficulty: this.difficulty,
+                maxUnlockedEggType: this.maxUnlockedEggType,
+                saveTime: null
+            };
+            localStorage.setItem('GameData', JSON.stringify(newGameData));
+
             console.log('✅ GameServer 游戏状态重置完成');
             console.log(`📊 地图状态 - 空闲: ${this.mapState.emptyCells.size}, 占用: ${this.mapState.occupiedCells.size}`);
-
 
             return {
                 success: true,
@@ -1120,6 +1127,12 @@ class GameServer {
         this.scoreSystem.totalScore += scoreDetail.totalScore;
         this.scoreSystem.sessionScore += scoreDetail.totalScore;
 
+        // 更新历史最高分
+        if (this.scoreSystem.totalScore > this.scoreSystem.bestScore) {
+            this.scoreSystem.bestScore = this.scoreSystem.totalScore;
+            console.log(`🏆 新的历史最高分: ${this.scoreSystem.bestScore}`);
+        }
+
         // 记录合成历史
         this.scoreSystem.synthesisHistory.push({
             timestamp: Date.now(),
@@ -1132,11 +1145,12 @@ class GameServer {
         return {
             currentScore: this.scoreSystem.currentScore,
             addedScore: scoreDetail.totalScore,
-            scoreDetail: scoreDetail
+            scoreDetail: scoreDetail,
+            bestScore: this.scoreSystem.bestScore  // 返回历史最高分
         };
     }
 
-    /**
+    /**s
      * 获取当前分数状态
      * @returns {Object} 分数状态
      */
@@ -1145,7 +1159,8 @@ class GameServer {
             currentScore: this.scoreSystem.currentScore,
             totalScore: this.scoreSystem.totalScore,
             sessionScore: this.scoreSystem.sessionScore,
-            synthesisCount: this.scoreSystem.synthesisHistory.length
+            synthesisCount: this.scoreSystem.synthesisHistory.length,
+            bestScore: this.scoreSystem.bestScore // 返回历史最高分
         };
     }
 
@@ -1445,7 +1460,7 @@ class GameServer {
 
             const gameState = {
                 eggs: currentEggs,
-                totalScore: this.scoreSystem ? this.scoreSystem.totalScore : 0, // 只保存总分数
+                scoreSystem: this.scoreSystem, // 只保存总分数
                 difficulty: this.difficulty || 4,
                 maxUnlockedEggType: this.maxUnlockedEggType || 1,
                 saveTime: Date.now()
@@ -1480,9 +1495,8 @@ class GameServer {
             }
 
             // 🔥 恢复分数系统
-            if (this.scoreSystem && gameData.totalScore !== undefined) {
-                this.scoreSystem.totalScore = gameData.totalScore;
-                this.scoreSystem.currentScore = 0; // 当前分数重置为0
+            if (gameData.scoreSystem) {
+                this.scoreSystem = gameData.scoreSystem;
                 console.log(`💰 分数系统已恢复: 总分${this.scoreSystem.totalScore}`);
             }
 
@@ -1825,6 +1839,19 @@ class GameServer {
         //     };
 
         // 测试失败
+        // return {
+        //         code: 0,
+        //         fromCellId: fromCellId,
+        //         toCellId: toCellId,
+        //         path: path,
+        //         eggType: eggType,
+        //         positionsToDelete: positionsToDelete,
+        //         synthesis: synthesisData,
+        //         newEggs: newEggsResult,
+        //         isFailure: true,
+        //         reason: 'map_full',
+        //         message: '地图已满，游戏结束！'
+        //     };
 
         // 6. 检查胜利条件
         if (synthesisData.canSynthesize && synthesisData.newEggType >= 7) {

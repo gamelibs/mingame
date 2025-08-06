@@ -605,12 +605,12 @@ class GameEngine {
 
         // 更新界面显示
         if (this.loadingText) {
-            this.loadingText.text = '登录成功！';
+            this.loadingText.text = 'login...';
             this.loadingText.color = '#00FF00';
         }
 
         if (this.timerText) {
-            this.timerText.text = '完成';
+            this.timerText.text = 'ok';
             this.timerText.color = '#00FF00';
         }
 
@@ -675,7 +675,7 @@ class GameEngine {
             // };
 
             // await window.GameScense.init(gameData);
-            console.log('✅ GameScense 初始化成功');
+            // console.log('✅ GameScense 初始化成功');
 
         } catch (error) {
             console.error('❌ 游戏逻辑启动失败:', error);
@@ -901,10 +901,11 @@ class GameEngine {
             loadedImages: this.loadedImages,
             userStatus: userStatus
         };
-        setTimeout(() => {
 
+        if (window.GameScense) {
             window.GameScense.init(gameData);
-        }, 1000);
+        }
+
         this.preloadedGameScene = null;
         // 清理预加载数据
     }

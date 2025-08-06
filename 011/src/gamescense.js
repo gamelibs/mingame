@@ -1,3 +1,4 @@
+
 /**
  * 游戏场景管理器
  * 负责游戏的主要逻辑和交互
@@ -68,12 +69,176 @@ class GameScense {
                 return;
             }
 
+            this.gamebox = utile.findMc(this.exportRoot, 'gamebox');
+
             // 初始化失败和胜利界面（隐藏状态）
 
-            this.failureHandler(false);
-            this.victoryHandler(false);
+            // this.failureHandler(false);
+            // this.victoryHandler(false);
             this.settingHandler(false);
             this.onSettingGame();
+
+            // 添加点击事件监听
+            if (this.gamebox && !this.gamebox.hasEventListener("click")) {
+                this.gamebox.on('click', this.onGameboxClick, this);
+            }
+
+
+
+            const btnSetting = utile.findMc(this.exportRoot, 'btn_setting');
+
+            if (btnSetting) {
+                // 定义设置按钮点击处理函数
+                this.btnSettingClickHandler = (event) => {
+                    console.log('⚙️ 点击设置按钮 (btn_setting)');
+                    event.stopPropagation();
+
+                    this.settingHandler(true);
+                };
+
+                // 绑定设置按钮事件
+                btnSetting.on('click', this.btnSettingClickHandler);
+                console.log('✅ btn_setting 按钮事件已绑定');
+            }
+
+
+            const mc_start_over = utile.findMc(this.exportRoot, 'mc_start_over');
+            if (mc_start_over) {
+                mc_start_over.visible = false; // 初始隐藏重新开始界面
+                const btn_yes = utile.findMc(mc_start_over, 'btn_yes');
+
+                btn_yes.on('click', (event) => {
+                    console.log('🔄 重新开始界面点击重新开始按钮');
+                    event.stopPropagation();
+
+                    // 调用插页广告
+                    this.showInterstitialAd(() => {
+                        // 广告关闭后的回调
+                        this.showPanel(mc_start_over, false,()=>{
+
+                            this.resetGame(false);
+                        });
+                    });
+                });
+                const btn_no = utile.findMc(mc_start_over, 'btn_no');
+                btn_no.on('click', (event) => {
+                    console.log('🔄 重新开始界面点击不再重新开始按钮');
+                    event.stopPropagation();
+
+                    // 调用插页广告
+                    this.showInterstitialAd(() => {
+
+                        mc_start_over.visible = false; // 隐藏重新开始界面
+                    });
+                });
+            }
+
+            // 查找并绑定重新开始按钮
+            const btnRestart = utile.findMc(this.exportRoot, 'btn_restart');
+            if (btnRestart) {
+
+                btnRestart.on('click', (event) => {
+                    console.log('🔄 点击重新开始按钮 (btn_restart)');
+                    event.stopPropagation();
+                    this.showPanel(mc_start_over, true);
+
+                });
+                console.log('✅ btn_restart 按钮事件已绑定');
+            }
+
+            const failureMc = utile.findMc(this.exportRoot, 'mc_failure');
+            if (failureMc) {
+                failureMc.visible = false; // 初始隐藏失败界面
+                // 查找屏蔽层
+                const blockLayer = utile.findMc(failureMc, 'blockLayer');
+                if (blockLayer) {
+                    blockLayer.mouseEnabled = true;
+
+                    // 绑定屏蔽层点击事件
+                    if (!blockLayer.hasEventListener("click")) {
+                        blockLayer.on('click', function (event) {
+                            console.log('🛡️ 失败界面屏蔽层拦截了点击事件');
+                            event.stopImmediatePropagation();
+                            event.stopPropagation();
+                            event.preventDefault();
+                            return false;
+                        });
+                    }
+                }
+
+                // 查找重新开始按钮 (btnagain)
+                const btnAgain = utile.findMc(failureMc, 'btn_tryagain');
+                if (btnAgain && !btnAgain.hasEventListener("click")) {
+
+                    // 绑定重新开始按钮事件
+                    btnAgain.on('click', (event) => {
+                        console.log('🔄 失败界面点击重新开始按钮');
+                        event.stopPropagation();
+
+                        // 调用插页广告
+                        this.showInterstitialAd(() => {
+                            // 广告关闭后的回调
+                            this.failureHandler(false);
+                        });
+                    });
+
+                    // 确保按钮在屏蔽层之上
+                    if (blockLayer) {
+                        failureMc.setChildIndex(btnAgain, failureMc.children.length - 1);
+                    }
+
+                    console.log('✅ 失败界面重新开始按钮事件已绑定');
+                }
+            }
+
+            const victoryMc = utile.findMc(this.exportRoot, 'mc_victory');
+            if (victoryMc) {
+                victoryMc.visible = false; // 初始隐藏胜利界面
+                // 查找屏蔽层
+                const blockLayer = utile.findMc(victoryMc, 'blockLayer');
+                if (blockLayer) {
+                    blockLayer.mouseEnabled = true;
+
+                    // 绑定屏蔽层点击事件
+                    if (!blockLayer.hasEventListener("click")) {
+                        blockLayer.on('click', function (event) {
+                            console.log('🛡️ 胜利界面屏蔽层拦截了点击事件');
+                            event.stopImmediatePropagation();
+                            event.stopPropagation();
+                            event.preventDefault();
+                            return false;
+                        });
+                    }
+                }
+
+                // 查找重新开始按钮 (btnagain)
+                const btnAgain = utile.findMc(victoryMc, 'btn_playagain');
+                if (btnAgain && !btnAgain.hasEventListener("click")) {
+
+                    // 绑定重新开始按钮事件
+                    btnAgain.on('click', (event) => {
+                        console.log('🔄 胜利界面点击重新开始按钮');
+                        event.stopPropagation();
+
+                        // 调用插页广告
+                        this.showInterstitialAd(() => {
+                            // 广告关闭后的回调
+                            this.victoryHandler(false);
+                        });
+                    });
+
+                    // 确保按钮在屏蔽层之上
+                    if (blockLayer) {
+                        victoryMc.setChildIndex(btnAgain, victoryMc.children.length - 1);
+                    }
+
+                    console.log('✅ 胜利界面重新开始按钮事件已绑定');
+                }
+            }
+
+
+
+
             // 初始化解锁动画元件
             this.initUnlockAnimations();
 
@@ -87,9 +252,9 @@ class GameScense {
 
     /**
      * 初始化游戏场景
-     * @param {Object} gameData - 游戏数据对象
+     * @param {Object} sysData - 系统数据对象
      */
-    async init(gameData) {
+    async init(sysData) {
 
         // 初始化UI
         try {
@@ -97,13 +262,13 @@ class GameScense {
             console.log('🎮 GameScense 初始化开始...');
 
             // 保存游戏数据
-            this.engine = gameData.engine;
-            this.stage = gameData.stage;
-            this.exportRoot = gameData.exportRoot;
-            this.canvas = gameData.canvas;
-            this.config = gameData.config;
-            this.loadedSounds = gameData.loadedSounds;
-            this.loadedImages = gameData.loadedImages;
+            this.engine = sysData.engine;
+            this.stage = sysData.stage;
+            this.exportRoot = sysData.exportRoot;
+            this.canvas = sysData.canvas;
+            this.config = sysData.config;
+            this.loadedSounds = sysData.loadedSounds;
+            this.loadedImages = sysData.loadedImages;
 
             this.difficultySelectionEnabled = false; //难度
 
@@ -119,7 +284,7 @@ class GameScense {
             // this.playUnlockedAnimations(this.userStatus);
 
             // 保存用户数据和游戏配置
-            this.userStatus = gameData.userStatus;
+            this.userStatus = sysData.userStatus;
 
 
             console.log('👤 接收到用户状态:', this.userStatus);
@@ -132,7 +297,7 @@ class GameScense {
             if (isNewUser) {
                 //     // 🔥 新用户：直接使用默认中等难度，不显示选择界面
                 //     console.log('👶 新用户跳过难度选择，使用默认中等难度');
-                
+
                 this.waitingForClick = true;
                 // 初始化引导系统
                 this.initGuideGesture();
@@ -180,12 +345,14 @@ class GameScense {
 
             // 从游戏数据中获取蛋配置
             if (this.gameData && this.gameData.data) {
+
                 const { eggSeat, eggType, pointSeat } = this.gameData.data;
 
                 // 🔥 处理分数恢复
-                if (this.gameData.scoreData) {
-                    console.log('💰 恢复分数数据:', this.gameData.scoreData);
-                    this.updateScoreDisplayDirectly(this.gameData.scoreData.totalScore);
+                if (this.gameData.scoreSystem) {
+                    console.log('💰 恢复分数数据:', this.gameData.scoreSystem);
+                    this.updateScoreDisplayDirectly(this.gameData.scoreSystem);
+
                 }
 
                 this.playUnlockedAnimations(this.gameData.unlockData)
@@ -272,13 +439,13 @@ class GameScense {
             await this.initMapFromServer();
 
             // 2. 获取游戏场景中的 gamebox 元件
-            this.getGamebox();
+            // this.getGamebox();
 
             // 3. 初始化游戏元素
             this.initGoldDisplay();
 
             // 4. 设置事件监听
-            this.setupEventListeners();
+            // this.setupEventListeners();
 
 
 
@@ -541,12 +708,17 @@ class GameScense {
     /**
      * 🔥直接更新分数显示（不带动画）
      */
-    updateScoreDisplayDirectly(totalScore) {
+    updateScoreDisplayDirectly(dataScore) {
         try {
             const goldMc = this.exportRoot.mc_gold;
             if (goldMc && goldMc.text) {
-                goldMc.text.text = this.formatNumber(totalScore);
-                console.log(`💰 分数显示已恢复: ${this.formatNumber(totalScore)}`);
+                goldMc.text.text = "score: " + dataScore.totalScore;
+
+            }
+
+            const high_score = this.exportRoot.mc_high_score;
+            if (high_score && high_score.text) {
+                high_score.text.text = "best: " + dataScore.bestScore;
             }
         } catch (error) {
             console.error('❌ 更新分数显示失败:', error);
@@ -735,7 +907,7 @@ class GameScense {
         }
 
         // 使用 utile.findMc 统一查找元件
-        this.gamebox = utile.findMc(this.exportRoot, 'gamebox');
+        
 
         if (this.gamebox) {
             console.log('✅ 使用 utile.findMc 找到 gamebox:', this.gamebox);
@@ -773,9 +945,21 @@ class GameScense {
                 const totalScore = this.userStatus && this.userStatus.currentScore || 0;
 
                 // 设置金币显示
-                goldMc.text.text = this.formatNumber(totalScore);
+                goldMc.text.text = "score: 0";
             } else {
                 console.warn('⚠️ 未找到 mc_gold 或其 text 属性');
+            }
+
+            const high_score = this.exportRoot.mc_high_score;
+            if (high_score && high_score.text) {
+                // 设置初始最高分为0
+                const bestScore = this.userStatus && this.userStatus.bestScore || 0;
+
+                // 设置最高分显示
+                high_score.text.text = "best: 0";
+            }
+            else {
+                console.warn('⚠️ 未找到 mc_high_score 或其 text 属性');
             }
         } catch (error) {
             console.error('❌ 初始化金币显示失败:', error);
@@ -796,43 +980,7 @@ class GameScense {
         //     this.stage.mouseMoveOutside = true;
         // }
 
-        // 添加点击事件监听
-        if (this.gamebox) {
-            this.gamebox.on('click', this.onGameboxClick, this);
-        }
 
-        // 查找并绑定重新开始按钮
-        const btnRestart = utile.findMc(this.exportRoot, 'btn_restart');
-        if (btnRestart) {
-            // 定义重新开始点击处理函数
-            this.btnRestartClickHandler = (event) => {
-                console.log('🔄 点击重新开始按钮 (btn_restart)');
-                event.stopPropagation();
-                this.onRestartGame();
-            };
-
-            // 绑定重新开始按钮事件
-            btnRestart.on('click', this.btnRestartClickHandler);
-            console.log('✅ btn_restart 按钮事件已绑定');
-        } else {
-            console.warn('⚠️ 未找到 btn_restart 按钮');
-        }
-
-        const btnSetting = utile.findMc(this.exportRoot, 'btn_setting');
-
-        if (btnSetting) {
-            // 定义设置按钮点击处理函数
-            this.btnSettingClickHandler = (event) => {
-                console.log('⚙️ 点击设置按钮 (btn_setting)');
-                event.stopPropagation();
-                
-                this.settingHandler(true);
-            };
-
-            // 绑定设置按钮事件
-            btnSetting.on('click', this.btnSettingClickHandler);
-            console.log('✅ btn_setting 按钮事件已绑定');
-        }
         // 添加键盘事件监听
         // document.addEventListener('keydown', this.onKeyDown.bind(this));
         // document.addEventListener('keyup', this.onKeyUp.bind(this));
@@ -1772,10 +1920,9 @@ class GameScense {
                 const goldMc = this.exportRoot.mc_gold;
                 if (goldMc && goldMc.text) {
                     // 解析当前显示的分数（去除k/m/b后缀）
-                    const currentScore = this.parseFormattedNumber(goldMc.text.text);
+                    const currentScore = this.parseFormattedNumber(goldMc.text.text.replace('score:', '').trim());
                     const targetScore = currentScore + addedScore;
 
-                    // console.log(`💰 分数动画: ${this.formatNumber(currentScore)} -> ${this.formatNumber(targetScore)} (+${addedScore})`);
 
                     // 创建数字递增动画
                     const animationData = { score: currentScore };
@@ -1784,12 +1931,11 @@ class GameScense {
                         .to({ score: targetScore }, 500, createjs.Ease.quadOut)
                         .addEventListener("change", () => {
                             // 实时更新显示的分数（格式化）
-                            goldMc.text.text = "" + Math.floor(animationData.score) //this.formatNumber(Math.floor(animationData.score));
+                            goldMc.text.text = "score: " + Math.floor(animationData.score);
                         })
                         .call(() => {
                             // 确保最终分数正确
-                            goldMc.text.text = "" + targetScore //this.formatNumber(targetScore);
-                            // console.log(`💰 分数动画完成: ${this.formatNumber(targetScore)}`);
+                            goldMc.text.text = "score: " + targetScore;
 
                             resolve();
                         });
@@ -2087,7 +2233,7 @@ class GameScense {
         console.log('⚙️ 打开设置界面');
 
 
-        
+
         const settingsMc = utile.findMc(this.exportRoot, 'mc_settings');
         if (settingsMc) {
 
@@ -2331,133 +2477,89 @@ class GameScense {
     failureHandler(show) {
         console.log(`💀 ${show ? '显示' : '隐藏'}失败界面...`);
 
-        // 获取失败界面元件
-        const failureMc = utile.findMc(this.exportRoot, 'mc_failure');
-        if (!failureMc) {
+        const panelUI = utile.findMc(this.exportRoot, 'mc_failure');
+        if (!panelUI) {
             console.warn('⚠️ 未找到 mc_failure 元件');
             return;
         }
 
         if (show) {
-            // 显示失败界面
-            failureMc.visible = true;
-            failureMc.scaleX = failureMc.scaleY = 0.1;
-            // utile.toShow(failureMc);
-            this.engine.playSound('wrong', { loop: 1, volume: 0.5 });
 
-            // 显示失败界面动画
-            createjs.Tween.get(failureMc)
-                // 第一阶段：快速弹出到1.1倍大小
-                .to({
-                    scaleX: 1.1,
-                    scaleY: 1.1
-                }, 200, createjs.Ease.backOut)
-                // 第二阶段：回弹到正常大小
-                .to({
-                    scaleX: 1.0,
-                    scaleY: 1.0
-                }, 100, createjs.Ease.backIn)
-                .call(() => {
-                    console.log('✅ 失败面板伸缩动画完成');
-                });
+            this.engine.playSound('wrong');
 
-            // 查找屏蔽层
-            const blockLayer = utile.findMc(failureMc, 'blockLayer');
-            if (blockLayer) {
-                blockLayer.mouseEnabled = true;
-
-                // 定义屏蔽层点击处理函数
-                this.failureBlockClickHandler = (event) => {
-                    console.log('🛡️ 失败界面屏蔽层拦截了点击事件');
-                    event.stopImmediatePropagation();
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return false;
-                };
-
-                // 绑定屏蔽层点击事件
-                blockLayer.on('click', this.failureBlockClickHandler);
-                console.log('✅ 失败界面屏蔽层事件已绑定');
-            }
-
-            // 查找重新开始按钮 (btnagain)
-            const btnAgain = utile.findMc(failureMc, 'btn_tryagain');
-            if (btnAgain) {
-                // 定义重新开始点击处理函数
-                this.failureRestartClickHandler = (event) => {
-                    console.log('🔄 失败界面点击重新开始按钮');
-                    event.stopPropagation();
-
-                    // 调用插页广告
-                    this.showInterstitialAd(() => {
-                        // 广告关闭后的回调
-                        this.closeFailurePanel();
-                    });
-                };
-
-                // 绑定重新开始按钮事件
-                btnAgain.on('click', this.failureRestartClickHandler);
-
-                // 确保按钮在屏蔽层之上
-                if (blockLayer) {
-                    failureMc.setChildIndex(btnAgain, failureMc.children.length - 1);
-                }
-
-                console.log('✅ 失败界面重新开始按钮事件已绑定');
-            }
+            this.showPanel(panelUI, true, () => {
+                panelUI.mc_ranking.mc_best.text.text = "" + this.gameData.scoreSystem.bestScore;
+                panelUI.mc_ranking.mc_score.text.text = "" + this.gameData.scoreSystem.currentScore;
+            });
 
             console.log('✅ 失败界面显示完成');
         } else {
-            // 隐藏失败界面
-            // 移除屏蔽层事件
-            const blockLayer = utile.findMc(failureMc, 'blockLayer');
-            if (blockLayer && this.failureBlockClickHandler) {
-                blockLayer.off('click', this.failureBlockClickHandler);
-                this.failureBlockClickHandler = null;
-                console.log('✅ 失败界面屏蔽层点击事件已移除');
-            }
 
-            // 移除重新开始按钮事件
-            const btnAgain = utile.findMc(failureMc, 'btn_tryagain');
-            if (btnAgain && this.failureRestartClickHandler) {
-                btnAgain.off('click', this.failureRestartClickHandler);
-                this.failureRestartClickHandler = null;
-                console.log('✅ 失败界面重新开始按钮事件已移除');
-            }
-
-            // 隐藏失败界面
-            failureMc.visible = false;
-            console.log('✅ 失败界面隐藏完成');
+            this.showPanel(panelUI, false, () => {
+                console.log('✅ 失败界面隐藏动画完成');
+                // 重新开始游戏
+                this.onRestartGame();
+            });
         }
     }
 
     /**
      * 关闭失败面板
      */
-    closeFailurePanel() {
+    showPanel(panelMc, isTF = true, callback) {
         console.log('💀 关闭失败面板...');
 
-        const failureMc = utile.findMc(this.exportRoot, 'mc_failure');
-        if (!failureMc) {
-            console.warn('⚠️ 未找到 mc_failure 元件');
+
+        if (!panelMc) {
+            console.warn('⚠️ 未找到 panelMc 元件');
             return;
         }
 
-        // 播放关闭动画
-        createjs.Tween.get(failureMc)
-            .to({
-                scaleX: 0.1,
-                scaleY: 0.1,
-            }, 300, createjs.Ease.backIn)
-            .call(() => {
-                // 隐藏失败界面
-                this.failureHandler(false);
+        panelMc.visible = true;
+        panelMc.alpha = 1;
+        // panelMc.scaleX = panelMc.scaleY = 0.8;
 
-                // 重新开始游戏
-                this.onRestartGame();
+        if (isTF) {
+            // 显示失败界面动画
+            createjs.Tween.get(panelMc)
+                // 第一阶段：快速弹出到1.1倍大小
+                .to({
+                    scaleX: 1.05,
+                    scaleY: 1.05
+                }, 200, createjs.Ease.backOut)
+                // 第二阶段：回弹到正常大小
+                .to({
+                    scaleX: 1.0,
+                    scaleY: 1.0
+                }, 200, createjs.Ease.backIn)
+                .call(() => {
+                    console.log('✅ 面板伸缩动画完成');
 
-                console.log('✅ 失败面板关闭完成');
-            });
+                    callback && callback();
+                });
+        } else {
+            // 播放关闭动画
+            createjs.Tween.get(panelMc)
+                .to({
+                    scaleX: 1.05,
+                    scaleY: 1.05
+                }, 200, createjs.Ease.backOut)
+                .to({
+                    scaleX: 0.1,
+                    scaleY: 0.1,
+                    alpha: 0
+                }, 200, createjs.Ease.backIn)
+                .call(() => {
+
+                    panelMc.visible = false;
+
+                    callback && callback();
+
+                    console.log('✅ 面板关闭完成');
+                });
+        }
+
+
     }
 
     /**
@@ -2467,121 +2569,33 @@ class GameScense {
     victoryHandler(show) {
         console.log(`🏆 ${show ? '显示' : '隐藏'}胜利界面...`);
 
-        // 获取胜利界面元件
-        const victoryMc = utile.findMc(this.exportRoot, 'mc_victory');
-        if (!victoryMc) {
+        const panelUI = utile.findMc(this.exportRoot, 'mc_victory');
+        if (!panelUI) {
             console.warn('⚠️ 未找到 mc_victory 元件');
             return;
         }
-        victoryMc.visible = true;
+
         if (show) {
-            // 显示胜利界面
-            victoryMc.scaleX = victoryMc.scaleY = 0.1;
-            // utile.toShow(victoryMc);
-            this.engine.playSound('win', { loop: 1, volume: 0.5 });
-            createjs.Tween.get(victoryMc)
-                // 第一阶段：快速弹出到1.2倍大小
-                .to({
-                    scaleX: 1.1,
-                    scaleY: 1.1
-                }, 200, createjs.Ease.backOut)
-                // 第二阶段：回弹到正常大小
-                .to({
-                    scaleX: 1.0,
-                    scaleY: 1.0
-                }, 100, createjs.Ease.backIn)
-                .call(() => {
-                    console.log('✅ 胜利面板伸缩动画完成');
 
-                    // 如果有内部动画，播放胜利动画
+            this.engine.playSound('win');
 
-                });
+            this.showPanel(panelUI, true, () => {
+                panelUI.mc_ranking.mc_best.text.text = "" + this.gameData.scoreSystem.bestScore;
+                panelUI.mc_ranking.mc_score.text.text = "" + this.gameData.scoreSystem.currentScore;
+            })
 
 
 
-            // 查找重新开始按钮
-            const btnAgain = utile.findMc(victoryMc, 'btn_playagain');
-            if (btnAgain) {
-                this.victoryRestartClickHandler = (event) => {
-                    console.log('🔄 胜利界面点击重新开始按钮');
-                    event.stopPropagation(); // 阻止事件传播到屏蔽层
-                    // 调用插页广告
-                    this.showInterstitialAd(() => {
-                        // 广告关闭后的回调
-                        this.closeVictoryPanel();
-                    });
-                };
-
-                btnAgain.on('click', this.victoryRestartClickHandler);
-
-                console.log('✅ 胜利界面重新开始按钮事件已绑定');
-            }
-
-            // GO按钮也要确保在屏蔽层之上
-            const mc_card_reward = utile.findMc(victoryMc, 'mc_card_reward');
-            const btnGo = utile.findMc(mc_card_reward, 'btn_go');
-
-            if (btnGo) {
-                // victoryMc.setChildIndex(btnGo, victoryMc.children.length - 1);
-                // 移除旧的事件监听器
-                btnGo.removeAllEventListeners();
-
-                btnGo.on("click", (event) => {
-                    console.log('🎯 GO按钮被点击');
-                    event.stopPropagation(); // 阻止事件传播到屏蔽层
-
-                    // 检查 cardGame 实例是否存在
-                    if (this.cardGame && typeof this.cardGame.startCardDraw === 'function') {
-                        console.log('🎴 调用 CardGame.startCardDraw()');
-                        this.cardGame.startCardDraw();
-                    } else {
-                        console.error('❌ CardGame 实例不存在或 startCardDraw 方法未找到');
-                        console.log('🔍 this.cardGame:', this.cardGame);
-                    }
-                });
-            }
-
-
-            // 播放胜利音效
-            if (this.engine && this.loadedSounds.has('gamewin')) {
-                this.engine.playSound('gamewin');
-            }
-
-            // 查找屏蔽层
-            const blockLayer = utile.findMc(victoryMc, 'blockLayer');
-            if (blockLayer) {
-                // 屏蔽层只负责拦截，不做任何判断
-                this.victoryBlockClickHandler = (event) => {
-                    console.log('🛡️ 胜利界面屏蔽层拦截了点击事件');
-                    event.stopImmediatePropagation();
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return false;
-                };
-
-                blockLayer.on('click', this.victoryBlockClickHandler);
-                console.log('✅ 胜利界面屏蔽层事件已绑定');
-            }
 
             console.log('✅ 胜利界面显示完成');
         } else {
-            // 隐藏胜利界面
-            const blockLayer = utile.findMc(victoryMc, 'blockLayer');
-            if (blockLayer && this.victoryBlockClickHandler) {
-                blockLayer.off('click', this.victoryBlockClickHandler);
-                this.victoryBlockClickHandler = null;
-                console.log('✅ 胜利界面屏蔽层点击事件已移除');
-            }
 
-            const btnAgain = utile.findMc(victoryMc, 'btn_playagain');
-            if (btnAgain && this.victoryRestartClickHandler) {
-                btnAgain.off('click', this.victoryRestartClickHandler);
-                this.victoryRestartClickHandler = null;
-                console.log('✅ 胜利界面重新开始按钮事件已移除');
-            }
+            this.showPanel(panelUI, false, () => {
+                console.log('✅ 胜利界面隐藏动画完成');
+                // 重新开始游戏
+                this.onRestartGame();
+            })
 
-            victoryMc.visible = false;
-            console.log('✅ 胜利界面隐藏完成');
         }
     }
 
@@ -2697,7 +2711,7 @@ class GameScense {
             };
 
             // 3. 重置金币显示为0
-            this.resetGoldDisplay();
+            this.resetGoldDisplay(false);
             // 3. 停止所有动画
             createjs.Tween.removeAllTweens();
 
@@ -2741,7 +2755,7 @@ class GameScense {
     /**
     * 重置金币显示
     */
-    resetGoldDisplay() {
+    resetGoldDisplay(reBestScore = true) {
         console.log('💰 重置金币显示为0...');
 
         try {
@@ -2749,10 +2763,18 @@ class GameScense {
             const goldMc = this.exportRoot.mc_gold;
             if (goldMc && goldMc.text) {
                 // 重置金币显示为0
-                goldMc.text.text = "0";
+                goldMc.text.text = "score: 0";
                 console.log('✅ 金币显示已重置为0');
             } else {
                 console.warn('⚠️ 未找到 mc_gold 或其 text 属性');
+            }
+
+
+            const high_scoreMc = this.exportRoot.mc_high_score;
+            if (high_scoreMc && high_scoreMc.text && reBestScore) {
+                // 重置最佳显示为0
+                high_scoreMc.text.text = "best: 0";
+                console.log('✅ 最佳显示已重置为0');
             }
         } catch (error) {
             console.error('❌ 重置金币显示失败:', error);
