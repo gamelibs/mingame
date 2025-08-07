@@ -414,7 +414,7 @@ class GameEngine {
 
         // 初始化CreateJS舞台
         this.stage = new createjs.Stage(this.canvas);
-        createjs.Ticker.framerate = this.config.scene?.fps || 60;
+        createjs.Ticker.framerate = this.config.scene?.fps || 30;
         createjs.Ticker.addEventListener("tick", this.stageUpdateHandler.bind(this));
 
 
@@ -512,7 +512,7 @@ class GameEngine {
                 loadedResources++;
             }
 
-
+            createjs.Sound.muted = false; // 关闭状态静音
             utile.__sdklog2('🎉 所有游戏资源加载完成！');
 
             // 确保显示100%进度
@@ -1013,9 +1013,22 @@ class GameEngine {
         const isMusicEnabled = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true'; // 默认开启音乐
         const isSoundEnabled = localStorage.getItem('soundEnabled') === null || localStorage.getItem('soundEnabled') === 'true'; // 默认开启音效
 
-        if (id === 'bgm' && !isMusicEnabled) {
-            console.warn(`🎵 背景音乐已被禁用: ${id}`);
-            return null;
+        if (id === 'bgm') {
+            if (!isMusicEnabled) {
+                this.stopSound("bgm")
+                return
+            }
+            if (this.soundStatus[id]) {
+
+                return
+            } else {
+                setTimeout(() => {
+                    // this.playSound('bgm', { loop: -1 });
+                    if(createjs.Sound.muted)createjs.Sound.muted = false
+                    createjs.Sound.play(id, options);
+                },100)
+            }
+
         }
 
         if (id !== 'bgm' && !isSoundEnabled) {
@@ -1024,16 +1037,26 @@ class GameEngine {
         }
 
         if (this.loadedSounds.has(id)) {
+
             try {
+
                 const instance = createjs.Sound.play(id, options);
                 if (instance) {
-                    console.log(`🎵 播放声音: ${id}`);
-                    this.soundStatus[id] = true
+                   
+                    if (instance.playState === createjs.Sound.PLAY_SUCCEEDED) {
+                        console.log(`🎵 声音正在播放: ${id}`);
+                        this.soundStatus[id] = true;
+                    } else if (instance.playState === createjs.Sound.PLAY_FAILED) {
+                        console.error(`🎵 声音播放失败: ${id}`);
+                        this.soundStatus[id] = false;
+                    }
                     return instance;
                 } else {
+                    this.soundStatus[id] = false;
                     console.warn(`🎵 声音播放失败: ${id}`);
                     return null;
                 }
+
             } catch (error) {
                 console.error(`🎵 声音播放异常: ${id}`, error);
                 return null;
@@ -1094,9 +1117,9 @@ class GameEngine {
                 this.audioEnabled = true;
 
                 // 尝试播放背景音乐
-                if (this.loadedSounds && this.loadedSounds.has('bgm')) {
-                    this.playSound('bgm', { loop: -1, volume: 0.5 });
-                }
+
+                this.playSound('bgm', { loop: -1, volume: 0.5 });
+
             }
 
             // 移除事件监听器
@@ -1199,33 +1222,6 @@ class GameEngine {
             loader.loadManifest(mainJson);
         });
     }
-
-    // async loadAudioResources() {
-    //     if (this.soundArr.length === 0) return;
-
-    //     return new Promise((resolve) => {
-    //         createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashAudioPlugin]);
-    //         createjs.Sound.alternateExtensions = ["mp3"];
-
-    //         const loader = new createjs.LoadQueue(false);
-    //         loader.installPlugin(createjs.Sound);
-
-    //         createjs.Sound.muted = true;
-    //         this.pubSound = [];
-
-    //         loader.on("fileload", (evt) => {
-    //             this.pubSound.push(evt.item.id);
-    //         });
-
-    //         loader.on("complete", () => {
-    //             this.goPlayFrameEnd(this.gl_loadBar, 40);
-    //             createjs.Sound.volume = 0.8;
-    //             this.testAudioPlayback(resolve);
-    //         });
-
-    //         loader.loadManifest(this.soundArr);
-    //     });
-    // }
 
     loadScript(src) {
         return new Promise((resolve, reject) => {
@@ -1407,19 +1403,20 @@ class GameEngine {
                     createjs.Sound.removeEventListener("fileload", onFileLoad);
                     createjs.Sound.removeEventListener("fileerror", onFileError);
                     this.loadedSounds.set(id, src);
-                    createjs.Sound.play(id);
-                    setTimeout(() => {
-                        createjs.Sound.muted = false; // 确保声音可以播放
-                        createjs.Sound.stop(id); // 确保声音不会持续播放
-                    }, 100); // 确保声音加载后有足够时间处理
+                    // createjs.Sound.play(id);
+                    this.playSound(id);
+                    // setTimeout(() => {
+                    //     createjs.Sound.muted = false; // 确保声音可以播放
+                    //     createjs.Sound.stop(id); // 确保声音不会持续播放
+                    // }, 100); // 确保声音加载后有足够时间处理
                     // 如果是背景音乐，立即播放
-                    if (id === 'bgm') {
-                        setTimeout(() => {
-                            console.log(`🎵 背景音乐加载完成，开始播放: ${src}`);
-                            // createjs.Sound.play(id);
-                            this.playSound('bgm', { loop: -1, volume: 0.5 })
-                        }, 1000);
-                    }
+                    // if (id === 'bgm') {
+                    //     setTimeout(() => {
+                    //         console.log(`🎵 背景音乐加载完成，开始播放: ${src}`);
+                    //         // createjs.Sound.play(id);
+                    //         this.playSound('bgm', { loop: -1, volume: 0.5 })
+                    //     }, 1000);
+                    // }
 
                     resolve();
                 }

@@ -966,45 +966,22 @@ class GameScense {
         }
     }
 
-    /**
-     * 所有按钮在这里进行注册
-     * 设置事件监听
-     */
-    setupEventListeners() {
-        console.log('👂 设置事件监听...');
-
-        // 启用舞台交互
-        // if (this.stage) {
-        //     createjs.Touch.enable(this.stage);
-        //     this.stage.enableMouseOver(10);
-        //     this.stage.mouseMoveOutside = true;
-        // }
-
-
-        // 添加键盘事件监听
-        // document.addEventListener('keydown', this.onKeyDown.bind(this));
-        // document.addEventListener('keyup', this.onKeyUp.bind(this));
-
-        console.log('✅ 事件监听设置完成');
-    }
-
-
-
+    
     /**
     * gamebox 点击事件处理
     */
     onGameboxClick(event) {
-        console.log('🖱️ gamebox 被点击:', event);
+        // console.log('🖱️ gamebox 被点击:', event);
 
         // 获取点击位置相对于 gamebox 的坐标
         const localX = event.localX || event.stageX;
         const localY = event.localY || event.stageY;
 
-        console.log(`📍 点击坐标: (${localX}, ${localY})`);
+        // console.log(`📍 点击坐标: (${localX}, ${localY})`);
 
         // 检查是否点击了蛋元件
         if (event.currentTarget.name !== this.gamebox.name) {
-            console.log('🥚 点击了蛋元件，忽略gamebox事件');
+            // console.log('🥚 点击了蛋元件，忽略gamebox事件');
             return;
         }
 
@@ -1013,12 +990,12 @@ class GameScense {
 
         if (cellId >= 0) {
             const { row, col } = this.getRowCol(cellId);
-            console.log(`🎯 点击格子 ${cellId} (行:${row}, 列:${col})`);
+            // console.log(`🎯 点击格子 ${cellId} (行:${row}, 列:${col})`);
 
             // 处理格子点击逻辑
             this.handleCellClick(cellId);
         } else {
-            console.log('🖱️ 点击了棋盘外区域');
+            // console.log('🖱️ 点击了棋盘外区域');
         }
 
         // 播放点击音效
