@@ -459,6 +459,18 @@ class GameServer {
 
         const gameData = this.loadGameData();
 
+        // 检查是否超时
+        if (gameData && gameData.saveTime) {
+            const now = Date.now();
+            const diff = now - gameData.saveTime;
+            if (diff > 1 * 60 * 60 * 1000) { // 超过24小时
+                console.log('⏰ 超过24小时，重置蛋数据');
+                this.resetGame(); // 重置数据
+                // 重新加载重置后的数据
+                return this.getAlgorithmData(userStatus);
+            }
+        }
+
         // 🔥 设置全局游戏状态
         this.currentGameStatus = {
             // 游戏进度数据
@@ -470,7 +482,7 @@ class GameServer {
             // 状态标记
             isInitialized: !!gameData,
             hasGameData: !!gameData,
-            saveTime: gameData ? gameData.saveTime : null,
+            saveTime: gameData ? gameData.saveTime : Date.now(),
 
             // 游戏状态
             isPlaying: false,
@@ -516,7 +528,8 @@ class GameServer {
         return {
             success: true,
             isNewUser: false,
-            scoreSystem: gameData.scoreSystem || this.scoreSystem,
+            scoreSystem: this.scoreSystem,
+            difficulty: this.getDifficultyLevel(gameData.difficulty, true),
             data: {
                 eggSeat: newEggs.map(egg => egg.cellId),
                 eggType: newEggs.map(egg => egg.eggType),
@@ -537,14 +550,25 @@ class GameServer {
      */
     updateDifficulty(difficulty) {
         const difficultyLevel = this.getDifficultyLevel(difficulty);
+
         if (difficultyLevel) {
             this.difficulty = difficultyLevel;
+            const gameData = this.loadGameData() || {};
+            gameData.difficulty = this.difficulty;
+            gameData.scoreSystem = this.scoreSystem;
+            gameData.maxUnlockedEggType = this.maxUnlockedEggType;
+            gameData.eggs = gameData.eggs || [];
+            gameData.saveTime = Date.now();
+            localStorage.setItem('GameData', JSON.stringify(gameData));
             console.log(`🎯 游戏难度已更新: ${difficulty} (${difficultyLevel} 个蛋)`);
         } else {
             console.warn(`⚠️ 无效的难度: ${difficulty}`);
         }
     }
 
+    getDifficulty() {
+        return this.getDifficultyLevel(this.difficulty, true);
+    }
     /**
      * 获取难度对应的蛋数量
      * @param {string} difficulty - 难度等级
@@ -615,7 +639,7 @@ class GameServer {
 
             // 6. 重置用户解锁蛋等级为0（从蛋1重新开始解锁）
             this.maxUnlockedEggType = 1;
-            this.difficulty = 4;
+            this.difficulty = gameData ? gameData.difficulty : 4; // 恢复之前的难度
 
             // 7. 重置全局游戏状态
             if (this.currentGameStatus) {
@@ -633,7 +657,7 @@ class GameServer {
                 scoreSystem: this.scoreSystem,
                 difficulty: this.difficulty,
                 maxUnlockedEggType: this.maxUnlockedEggType,
-                saveTime: null
+                saveTime: Date.now()
             };
             localStorage.setItem('GameData', JSON.stringify(newGameData));
 
@@ -1089,18 +1113,18 @@ class GameServer {
     calculateSynthesisScore(eggCount, eggType, newEggType) {
         // 🔥 修正：使用原蛋等级（eggType）计算分数，不是新蛋等级
         const baseScore = Math.min(eggType * 2, 20);
-        const typeMultiplier = eggType * 10;
-        const countBonus = Math.round(Math.pow(eggCount - 3, 1.5) * 10);
-        const levelBonus = Math.pow(eggType, 2) * 5;
+        const typeMultiplier = eggType;//eggType * 10;
+        const countBonus = Math.round(Math.pow(eggCount - 3, 1.5))//Math.round(Math.pow(eggCount - 3, 1.5) * 10);
+        const levelBonus = Math.pow(eggType, 2)//Math.pow(eggType, 2) * 5;
+        // 新加难度分
+        const totalScore = Math.round(baseScore + typeMultiplier + countBonus + levelBonus) * this.difficulty;
 
-        const totalScore = Math.round(baseScore + typeMultiplier + countBonus + levelBonus);
-
-        console.log(`🧮 合成分数计算 - 原等级${eggType}, 数量${eggCount}:`);
-        console.log(`  基础分: min(${eggType} × 2, 20) = ${baseScore}`);
-        console.log(`  类型倍数: ${eggType} × 10 = ${typeMultiplier}`);
-        console.log(`  数量奖励: (${eggCount} - 3)^1.5 × 10 = ${countBonus}`);
-        console.log(`  等级奖励: ${eggType}² × 5 = ${levelBonus}`);
-        console.log(`  总分: ${totalScore}`);
+        // console.log(`🧮 合成分数计算 - 原等级${eggType}, 数量${eggCount}:`);
+        // console.log(`  基础分: min(${eggType} × 2, 20) = ${baseScore}`);
+        // console.log(`  类型倍数: ${eggType} × 10 = ${typeMultiplier}`);
+        // console.log(`  数量奖励: (${eggCount} - 3)^1.5 × 10 = ${countBonus}`);
+        // console.log(`  等级奖励: ${eggType}² × 5 = ${levelBonus}`);
+        // console.log(`  总分: ${totalScore}`);
 
         return {
             baseScore: baseScore,
@@ -1275,7 +1299,24 @@ class GameServer {
         if (availableTypes.length === 0) return 1;
         if (availableTypes.length === 1) return availableTypes[0];
 
-        // 为每个可用类型分配权重（低级蛋权重更高）
+        // 算法1
+        // 权重分别为：
+
+        // 1号蛋： (5-1+1)×10 = 50
+        // 2号蛋： (5-2+1)×10 = 40
+        // 3号蛋： (5-3+1)×10 = 30
+        // 4号蛋： (5-4+1)×10 = 20
+        // 5号蛋： (5-5+1)×10 = 10
+        // 总权重：50+40+30+20+10 = 150
+
+        // 概率分别为：
+
+        // 1号蛋：50/150 = 33.3%
+        // 2号蛋：40/150 = 26.7%
+        // 3号蛋：30/150 = 20%
+        // 4号蛋：20/150 = 13.3%
+        // 5号蛋：10/150 = 6.7%
+        // // 为每个可用类型分配权重（低级蛋权重更高）
         const weights = [];
         const maxType = Math.max(...availableTypes);
 
@@ -1296,6 +1337,30 @@ class GameServer {
                 return availableTypes[i];
             }
         }
+
+        // 算法2
+        // 以5种蛋为例，权重如下（可根据实际解锁数量调整）
+        // const customWeights = {
+        //     1: 40,
+        //     2: 35,
+        //     3: 25,
+        //     4: 23,
+        //     5: 1,   // 最高级蛋概率约0.8%
+        //     6: 1,   // 如有更高等级蛋，同样极低概率
+        //     7: 1
+        // };
+
+        // const weights = availableTypes.map(type => customWeights[type] || 1);
+
+        // const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+        // let random = Math.random() * totalWeight;
+
+        // for (let i = 0; i < availableTypes.length; i++) {
+        //     random -= weights[i];
+        //     if (random <= 0) {
+        //         return availableTypes[i];
+        //     }
+        // }
 
         // 兜底返回最低级
         return availableTypes[0];
@@ -1696,7 +1761,7 @@ class GameServer {
     }
 
 
-
+    currNum = 0;
     /**
      * 处理蛋移动
      * @param {number} fromCellId - 起始格子ID
@@ -1823,20 +1888,25 @@ class GameServer {
             newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
         }
 
-        // 测试胜利
-        // return {
-        //         code: 0,
-        //         fromCellId: fromCellId,
-        //         toCellId: toCellId,
-        //         path: path,
-        //         eggType: eggType,
-        //         positionsToDelete: positionsToDelete,
-        //         synthesis: synthesisData,
-        //         newEggs: [],
-        //         isVictory: true,
-        //         reason: 'max_egg_level_reached',
-        //         message: "恭喜！您合成了最高等级的蛋！"
-        //     };
+        // this.currNum++;
+        // if(this.currNum > 4){
+        //     // 测试胜利
+        //     console.log(`当前用户的合成次数：${this.currNum}`);
+        //     return {
+        //             code: 0,
+        //             fromCellId: fromCellId,
+        //             toCellId: toCellId,
+        //             path: path,
+        //             eggType: eggType,
+        //             positionsToDelete: positionsToDelete,
+        //             synthesis: synthesisData,
+        //             newEggs: [],
+        //             isVictory: true,
+        //             reason: 'max_egg_level_reached',
+        //             message: "恭喜！您合成了最高等级的蛋！"
+        //         };
+        // }
+
 
         // 测试失败
         // return {
@@ -1854,7 +1924,7 @@ class GameServer {
         //     };
 
         // 6. 检查胜利条件
-        if (synthesisData.canSynthesize && synthesisData.newEggType >= 7) {
+        if (synthesisData.canSynthesize && synthesisData.newEggType > 7) {
             console.log('🏆 达成胜利条件：合成最高等级蛋！');
             return {
                 code: 0,

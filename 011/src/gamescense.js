@@ -44,6 +44,7 @@ class GameScense {
         this.selectedPiece = null;        // 当前选中的元件
         this.selectedCellId = null;       // 选中元件所在的格子ID
         this.isWaitingForTarget = false;  // 是否等待选择目标位置
+        this.selectionIndicator = null; // 选中指示器
 
         // 游戏数据状态
         this.gameDataState = {
@@ -75,8 +76,8 @@ class GameScense {
 
             // this.failureHandler(false);
             // this.victoryHandler(false);
-            this.settingHandler(false);
-            this.onSettingGame();
+            // this.settingHandler(false);
+            // this.onSettingGame();
 
             // 添加点击事件监听
             if (this.gamebox && !this.gamebox.hasEventListener("click")) {
@@ -85,21 +86,7 @@ class GameScense {
 
 
 
-            const btnSetting = utile.findMc(this.exportRoot, 'btn_setting');
 
-            if (btnSetting) {
-                // 定义设置按钮点击处理函数
-                this.btnSettingClickHandler = (event) => {
-                    console.log('⚙️ 点击设置按钮 (btn_setting)');
-                    event.stopPropagation();
-
-                    this.settingHandler(true);
-                };
-
-                // 绑定设置按钮事件
-                btnSetting.on('click', this.btnSettingClickHandler);
-                console.log('✅ btn_setting 按钮事件已绑定');
-            }
 
 
             const mc_start_over = utile.findMc(this.exportRoot, 'mc_start_over');
@@ -114,7 +101,7 @@ class GameScense {
                     // 调用插页广告
                     this.showInterstitialAd(() => {
                         // 广告关闭后的回调
-                        this.showPanel(mc_start_over, false,()=>{
+                        this.showPanel(mc_start_over, false, () => {
 
                             this.resetGame(false);
                         });
@@ -237,7 +224,155 @@ class GameScense {
             }
 
 
+            /**
+             * 设置界面
+             */
 
+            const settingsMc = utile.findMc(this.exportRoot, 'mc_settings');
+            if (settingsMc) {
+                settingsMc.visible = false; // 初始隐藏设置界面
+                const btnSetting = utile.findMc(this.exportRoot, 'btn_setting');
+
+                if (btnSetting) {
+                    // 绑定设置按钮事件
+                    btnSetting.on('click', () => {
+                        event.stopPropagation();
+
+                        this.showPanel(settingsMc, true, () => {
+                            console.log('✅ 设置界面显示完成');
+
+
+                            this.selectedDifficulty = window.GameServer.getDifficulty();
+
+                            this.selectDifficulty(this.selectedDifficulty, this.difficultyMap); // 更新按钮状态
+                        });
+                    });
+                    console.log('✅ btn_setting 按钮事件已绑定');
+                }
+
+                const isMusicEnabled = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true'; // 默认开启音乐
+                const isSoundEnabled = localStorage.getItem('soundEnabled') === null || localStorage.getItem('soundEnabled') === 'true'; // 默认开启音效
+
+                const btn_clos_setting = utile.findMc(settingsMc, 'btn_clos_setting');
+
+                btn_clos_setting.on('click', () => {
+                    this.showPanel(settingsMc, false, () => {
+                        console.log('🔧 设置界面已关闭');
+                    });
+                });
+
+
+                // 音乐
+                const btn_bg = utile.findMc(settingsMc, 'mc_sound_bg');
+                if (isMusicEnabled) {
+                    btn_bg.gotoAndStop(0); // 播放状态
+
+                } else {
+                    btn_bg.gotoAndStop(1); // 停止状态
+                }
+                btn_bg.on('click', () => {
+                    console.log('🔊 切换音乐状态');
+                    if (this.engine && this.loadedSounds.has('bgm')) {
+                        if (this.engine.isSoundPlaying('bgm')) {
+                            this.engine.stopSound('bgm');
+                            btn_bg.gotoAndStop(1); // 停止状态
+                            console.log('🎵 音乐已停止');
+                            localStorage.setItem('musicEnabled', false);
+                        } else {
+                            this.engine.playSound('bgm', { loop: -1, volume: 0.5 });
+                            btn_bg.gotoAndStop(0); // 播放状态
+                            console.log('🎵 音乐已播放');
+                            localStorage.setItem('musicEnabled', true);
+                        }
+                    } else {
+                        console.warn('⚠️ 背景音乐未加载或引擎未初始化');
+                    }
+                });
+
+                // 音效
+                const btn_eff = utile.findMc(settingsMc, 'mc_sound_eff');
+                if (isSoundEnabled) {
+                    btn_eff.gotoAndStop(0); // 播放状态
+                } else {
+                    btn_eff.gotoAndStop(1); // 停止状态
+                }
+                btn_eff.on('click', () => {
+                    const soundEnabled = localStorage.getItem('soundEnabled') === 'true';
+
+                    console.log('🔊 切换音效状态');
+                    if (soundEnabled) {
+
+                        localStorage.setItem('soundEnabled', false);
+                        btn_eff.gotoAndStop(1); // 停止状态
+                    } else {
+                        localStorage.setItem('soundEnabled', true);
+                        btn_eff.gotoAndStop(0); // 播放状态
+                    }
+                });
+
+
+            }
+
+
+            const btn_easy = utile.findMc(settingsMc, 'mc_diff_easy');
+            const btn_nolrmal = utile.findMc(settingsMc, 'mc_diff_normal');
+            const btn_hard = utile.findMc(settingsMc, 'mc_diff_hard');
+
+            let btns = [btn_easy, btn_nolrmal, btn_hard];
+            this.difficultyMap = {
+                easy: btn_easy,
+                normal: btn_nolrmal,
+                hard: btn_hard
+            };
+
+            for (let i = 0; i < btns.length; i++) {
+                const btn = btns[i];
+                btn.on('click', () => {
+                    console.log(`🔧 切换难度到 ${btn.name}`);
+                    this.selectedDifficulty = btn.name.replace('mc_diff_', '');
+
+                    if (this.userStatus.isNewUser) {
+                        this.tips('🚫 新手引导模式下无法切换难度');
+                        return;
+                    }
+
+                    this.selectDifficulty(this.selectedDifficulty, this.difficultyMap); // 更新按钮状态
+
+                    // 同步难度到后端
+                    if (window.GameServer) {
+                        window.GameServer.updateDifficulty(this.selectedDifficulty);
+                        console.log(`🔄 难度已同步到后端: ${this.selectedDifficulty}`);
+                    } else {
+                        console.warn('⚠️ 后端 GameServer 未初始化');
+                    }
+                });
+            }
+
+            this.showFps = localStorage.getItem('fpsNum') === "60" || 60; // 默认60FPS
+
+            const btn_fps = utile.findMc(settingsMc, 'mc_fps');
+            btn_fps.on('click', () => {
+                console.log('🔧 切换FPS显示状态');
+                this.showFps = !this.showFps;
+                btn_fps.gotoAndStop(this.showFps ? 0 : 1); // 播放/停止状态
+                localStorage.setItem('fpsNum', this.showFps ? "60" : "30"); // 保存到本地存储
+            });
+
+            const blockLayer = utile.findMc(settingsMc, 'blockLayer');
+            if (blockLayer) {
+                blockLayer.mouseEnabled = true;
+
+                // 绑定屏蔽层点击事件
+                if (!blockLayer.hasEventListener("click")) {
+                    blockLayer.on('click', function (event) {
+                        console.log('🛡️ 设置界面屏蔽层拦截了点击事件');
+                        event.stopImmediatePropagation();
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return false;
+                    });
+                }
+            }
 
             // 初始化解锁动画元件
             this.initUnlockAnimations();
@@ -356,6 +491,8 @@ class GameScense {
                 }
 
                 this.playUnlockedAnimations(this.gameData.unlockData)
+
+                this.selectedDifficulty = this.gameData.difficulty;
 
                 if (this.userStatus.isNewUser) {
                     if (pointSeat.length > 0) {
@@ -907,7 +1044,7 @@ class GameScense {
         }
 
         // 使用 utile.findMc 统一查找元件
-        
+
 
         if (this.gamebox) {
             console.log('✅ 使用 utile.findMc 找到 gamebox:', this.gamebox);
@@ -1751,7 +1888,20 @@ class GameScense {
     addSelectionEffect(piece) {
         if (!piece) return;
 
-        // 创建选中指示器（发光效果）
+        // 如果已有选中指示器，先移除
+        if (this.selectionIndicator) {
+            this.selectionIndicator.visible = true;
+            this.selectionIndicator.x = piece.x;
+            this.selectionIndicator.y = piece.y;
+            // createjs.Tween.removeTweens(this.selectionIndicator);
+            // if (this.selectionIndicator.parent) {
+            //     this.selectionIndicator.parent.removeChild(this.selectionIndicator);
+            // }
+            // this.selectionIndicator = null;
+            return;
+        }
+
+        // 创建新的选中指示器
         const indicator = new createjs.Shape();
         indicator.graphics.setStrokeStyle(3).beginStroke('#FFD700').drawCircle(0, 0, 80);
         indicator.x = piece.x;
@@ -1766,8 +1916,11 @@ class GameScense {
             .to({ alpha: 0.3 }, 600)
             .to({ alpha: 1 }, 600);
 
-        // 保存指示器引用
-        piece.selectionIndicator = indicator;
+        // 记录全局唯一指示器
+        this.selectionIndicator = indicator;
+
+        // 记录当前选中元件
+        this.selectedPiece = piece;
 
         console.log('✨ 添加了选中效果');
     }
@@ -1775,17 +1928,17 @@ class GameScense {
     /**
      * 移除选中效果
      */
-    removeSelectionEffect(piece) {
-        if (!piece || !piece.selectionIndicator) return;
-
-        // 停止动画
-        createjs.Tween.removeTweens(piece.selectionIndicator);
-
-        // 移除指示器
-        this.gamebox.removeChild(piece.selectionIndicator);
-        piece.selectionIndicator = null;
-
-        console.log('🗑️ 移除了选中效果');
+    removeSelectionEffect() {
+        if (this.selectionIndicator) {
+            this.selectionIndicator.visible = false;
+            // createjs.Tween.removeTweens(this.selectionIndicator);
+            // if (this.selectionIndicator.parent) {
+            //     this.selectionIndicator.parent.removeChild(this.selectionIndicator);
+            // }
+            // this.selectionIndicator = null;
+            // console.log('🗑️ 移除了唯一选中效果');
+        }
+        this.selectedPiece = null;
     }
 
     /**
@@ -2203,168 +2356,6 @@ class GameScense {
             });
     }
 
-    /**
-    * 点击设置按钮处理逻辑
-    */
-    onSettingGame() {
-        console.log('⚙️ 打开设置界面');
-
-
-
-        const settingsMc = utile.findMc(this.exportRoot, 'mc_settings');
-        if (settingsMc) {
-
-            const isMusicEnabled = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true'; // 默认开启音乐
-            const isSoundEnabled = localStorage.getItem('soundEnabled') === null || localStorage.getItem('soundEnabled') === 'true'; // 默认开启音效
-
-
-
-            const btn_clos_setting = utile.findMc(settingsMc, 'btn_clos_setting');
-
-            btn_clos_setting.on('click', () => {
-                createjs.Tween.get(settingsMc)
-                    .to({
-                        scaleX: 0.1,
-                        scaleY: 0.1,
-                    }, 300, createjs.Ease.backIn)
-                    .call(() => {
-                        this.settingHandler(false);
-                    })
-            });
-
-
-            // 音乐
-            const btn_bg = utile.findMc(settingsMc, 'mc_sound_bg');
-            if (isMusicEnabled) {
-                btn_bg.gotoAndStop(0); // 播放状态
-
-            } else {
-                btn_bg.gotoAndStop(1); // 停止状态
-            }
-            btn_bg.on('click', () => {
-                console.log('🔊 切换音乐状态');
-                if (this.engine && this.loadedSounds.has('bgm')) {
-                    if (this.engine.isSoundPlaying('bgm')) {
-                        this.engine.stopSound('bgm');
-                        btn_bg.gotoAndStop(1); // 停止状态
-                        console.log('🎵 音乐已停止');
-                        localStorage.setItem('musicEnabled', false);
-                    } else {
-                        this.engine.playSound('bgm', { loop: -1, volume: 0.5 });
-                        btn_bg.gotoAndStop(0); // 播放状态
-                        console.log('🎵 音乐已播放');
-                        localStorage.setItem('musicEnabled', true);
-                    }
-                } else {
-                    console.warn('⚠️ 背景音乐未加载或引擎未初始化');
-                }
-            });
-
-            // 音效
-            const btn_eff = utile.findMc(settingsMc, 'mc_sound_eff');
-            if (isSoundEnabled) {
-                btn_eff.gotoAndStop(0); // 播放状态
-            } else {
-                btn_eff.gotoAndStop(1); // 停止状态
-            }
-            btn_eff.on('click', () => {
-                const soundEnabled = localStorage.getItem('soundEnabled') === 'true';
-
-                console.log('🔊 切换音效状态');
-                if (soundEnabled) {
-
-                    localStorage.setItem('soundEnabled', false);
-                    btn_eff.gotoAndStop(1); // 停止状态
-                } else {
-                    localStorage.setItem('soundEnabled', true);
-                    btn_eff.gotoAndStop(0); // 播放状态
-                }
-            });
-
-
-        }
-
-
-        const btn_easy = utile.findMc(settingsMc, 'mc_diff_easy');
-        const btn_nolrmal = utile.findMc(settingsMc, 'mc_diff_normal');
-        const btn_hard = utile.findMc(settingsMc, 'mc_diff_hard');
-
-        let btns = [btn_easy, btn_nolrmal, btn_hard];
-        this.difficultyMap = {
-            easy: btn_easy,
-            normal: btn_nolrmal,
-            hard: btn_hard
-        };
-
-        for (let i = 0; i < btns.length; i++) {
-            const btn = btns[i];
-            btn.on('click', () => {
-                console.log(`🔧 切换难度到 ${btn.name}`);
-                this.selectedDifficulty = btn.name.replace('mc_diff_', '');
-
-                if (this.userStatus.isNewUser) {
-                    this.tips('🚫 新手引导模式下无法切换难度');
-                    return;
-                }
-                // // 更新按钮状态
-                // for (const otherBtn of btns) {
-                //     if (otherBtn !== btn) {
-                //         otherBtn.gotoAndStop(0); // 停止状态
-                //     } else {
-                //         otherBtn.gotoAndStop(1); // 播放状态
-                //     }
-                // }
-                this.selectDifficulty(this.selectedDifficulty, this.difficultyMap); // 更新按钮状态
-                // 保存选择的难度到本地存储
-                // localStorage.setItem('selectedDifficulty', this.selectedDifficulty);
-                // 同步难度到后端
-                if (window.GameServer) {
-                    window.GameServer.updateDifficulty(this.selectedDifficulty);
-                    console.log(`🔄 难度已同步到后端: ${this.selectedDifficulty}`);
-                } else {
-                    console.warn('⚠️ 后端 GameServer 未初始化');
-                }
-            });
-        }
-
-        // if (this.userStatus.isNewUser) {
-        //     this.selectedDifficulty = 'easy'; // 新手引导模式下默认选择简单难度
-        //     btn_easy.gotoAndStop(1); // 播放状态
-        // } else {
-        //     this.selectedDifficulty = this.gameData.difficulty;
-        //     const selectedButton = difficultyMap[this.selectedDifficulty];
-        //     if (selectedButton) {
-        //         selectedButton.gotoAndStop(1); // 播放状态
-        //     } else {
-        //         console.warn(`⚠️ 未找到对应难度的按钮: ${this.selectedDifficulty}`);
-        //     }
-        // }
-
-        this.showFps = localStorage.getItem('fpsNum') === "60" || 60; // 默认60FPS
-
-        const btn_fps = utile.findMc(settingsMc, 'mc_fps');
-        btn_fps.on('click', () => {
-            console.log('🔧 切换FPS显示状态');
-            this.showFps = !this.showFps;
-            btn_fps.gotoAndStop(this.showFps ? 0 : 1); // 播放/停止状态
-            localStorage.setItem('fpsNum', this.showFps ? "60" : "30"); // 保存到本地存储
-        });
-
-        // 查找屏蔽层
-        const blockLayer = utile.findMc(settingsMc, 'blockLayer');
-        if (blockLayer) {
-            // 屏蔽层只负责拦截，不做任何判断
-            this.settingBlockClickHandler = (event) => {
-                console.log('🛡️ 设置界面屏蔽层拦截了点击事件');
-                event.stopImmediatePropagation();
-                event.stopPropagation();
-                event.preventDefault();
-                return false;
-            };
-
-            blockLayer.on('click', this.settingBlockClickHandler);
-        }
-    }
 
     /**
      * 根据难度选择对应的按钮并更新状态
@@ -2372,6 +2363,7 @@ class GameScense {
      * @param {Object} difficultyMap - 难度与按钮的映射关系
      */
     selectDifficulty(difficulty, difficultyMap) {
+
         const selectedButton = difficultyMap[difficulty];
         if (selectedButton) {
             // 更新按钮状态
@@ -2385,67 +2377,6 @@ class GameScense {
         }
     }
 
-
-
-    settingHandler(show) {
-        const settingsMc = utile.findMc(this.exportRoot, 'mc_settings');
-        if (!settingsMc) {
-            console.warn('⚠️ 未找到 mc_settings 元件');
-            return;
-        }
-
-
-        if (show) {
-
-            this.selectDifficulty(this.selectedDifficulty, this.difficultyMap);
-
-            console.log('⚙️ 显示设置界面');
-
-            settingsMc.scaleX = settingsMc.scaleY = 0.1;
-            settingsMc.visible = show;
-            createjs.Tween.get(settingsMc)
-                // 第一阶段：快速弹出到1.1倍大小
-                .to({
-                    scaleX: 1.1,
-                    scaleY: 1.1
-                }, 300, createjs.Ease.backOut)
-                // 第二阶段：回弹到正常大小
-                .to({
-                    scaleX: 1.0,
-                    scaleY: 1.0
-                }, 200, createjs.Ease.backIn)
-                .call(() => {
-                    console.log('✅ 失败面板伸缩动画完成');
-                });
-
-            const blockLayer = utile.findMc(settingsMc, 'blockLayer');
-            if (blockLayer) {
-                // 屏蔽层只负责拦截，不做任何判断
-                this.victoryBlockClickHandler = (event) => {
-
-                    event.stopImmediatePropagation();
-                    event.stopPropagation();
-                    event.preventDefault();
-                    return false;
-                };
-
-                blockLayer.on('click', this.victoryBlockClickHandler);
-            }
-        } else {
-            const blockLayer = utile.findMc(settingsMc, 'blockLayer');
-            if (blockLayer && this.failureBlockClickHandler) {
-                blockLayer.off('click', this.failureBlockClickHandler);
-                this.failureBlockClickHandler = null;
-            }
-
-
-            settingsMc.visible = show;
-
-            // 隐藏失败界面
-            console.log('✅ 失败界面隐藏完成');
-            console.log('⚙️ 隐藏设置界面');
-        }
-    }
 
     /**
      * 失败界面控制器
@@ -2464,9 +2395,12 @@ class GameScense {
 
             this.engine.playSound('wrong');
 
-            this.showPanel(panelUI, true, () => {
-                panelUI.mc_ranking.mc_best.text.text = "" + this.gameData.scoreSystem.bestScore;
-                panelUI.mc_ranking.mc_score.text.text = "" + this.gameData.scoreSystem.currentScore;
+            this.showPanel(panelUI, true, async () => {
+                if (this.gameData) {
+                    this.gameData.scoreSystem = await window.GameServer.getScoreStatus();
+                    panelUI.mc_ranking.mc_best.text.text = "" + this.gameData.scoreSystem.bestScore;
+                    panelUI.mc_ranking.mc_score.text.text = "" + this.gameData.scoreSystem.currentScore;
+                }
             });
 
             console.log('✅ 失败界面显示完成');
@@ -2556,14 +2490,13 @@ class GameScense {
 
             this.engine.playSound('win');
 
-            this.showPanel(panelUI, true, () => {
-                panelUI.mc_ranking.mc_best.text.text = "" + this.gameData.scoreSystem.bestScore;
-                panelUI.mc_ranking.mc_score.text.text = "" + this.gameData.scoreSystem.currentScore;
+            this.showPanel(panelUI, true, async () => {
+                if (this.gameData) {
+                    this.gameData.scoreSystem = await window.GameServer.getScoreStatus();
+                    panelUI.mc_ranking.mc_best.text.text = "" + this.gameData.scoreSystem.bestScore;
+                    panelUI.mc_ranking.mc_score.text.text = "" + this.gameData.scoreSystem.currentScore;
+                }
             })
-
-
-
-
             console.log('✅ 胜利界面显示完成');
         } else {
 
