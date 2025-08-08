@@ -510,6 +510,7 @@ utile.shake = function (mc) {
 
 
 utile.__sdklog = function (...args) {
+    if (process.env.NODE_ENV === 'production') return; // 生产环境不输出
     const formatParam = (arg) => {
         if (typeof arg === 'string') return `'${arg}'`;
         if (typeof arg === 'object') return JSON.stringify(arg);
@@ -533,6 +534,7 @@ utile.__sdklog = function (...args) {
 
 
 utile.__sdklog2 = function (...args) {
+    if (process.env.NODE_ENV === 'production') return; // 生产环境不输出
     const formatParam = (arg) => {
         if (typeof arg === 'string') return `'${arg}'`;
         if (typeof arg === 'object') return JSON.stringify(arg);
@@ -555,6 +557,7 @@ utile.__sdklog2 = function (...args) {
 
 
 utile.__sdklog3 = function (...args) {
+    if (process.env.NODE_ENV === 'production') return; // 生产环境不输出
     const formatParam = (arg) => {
         if (typeof arg === 'string') return `'${arg}'`;
         if (typeof arg === 'object') return JSON.stringify(arg);

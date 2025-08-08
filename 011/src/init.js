@@ -1,4 +1,3 @@
-
 // ...existing code...
 import utile from './utile.js';
 // 兼容旧脚本对 window.utile 的依赖
@@ -398,7 +397,13 @@ class GameEngine {
                     resolve();
                 });
 
-                loader.loadManifest(lib.properties.manifest);
+                // 关键：将 images/ 重定向到 resan/images/
+                const remappedManifest = lib.properties.manifest.map(item => ({
+                    ...item,
+                    src: item.src && item.src.startsWith('images/') ? `resan/${item.src}` : item.src,
+                }));
+
+                loader.loadManifest(remappedManifest);
             } else {
 
                 this.createLoadingElement(lib);
@@ -802,7 +807,7 @@ class GameEngine {
 
                 loader.addEventListener("error", (evt) => {
                     console.error('❌ GameScene资源加载失败:', evt);
-                    reject(new Error(`GameScene资源加载失败: ${evt.item.src}`));
+                    reject(new Error(`GameScene资源加载失败: ${evt.item && evt.item.src}`));
                 });
 
                 // 设置超时
@@ -814,7 +819,13 @@ class GameEngine {
                     }
                 }, 10000); // 10秒超时
 
-                loader.loadManifest(lib.properties.manifest);
+                // 关键：将 images/ 重定向到 resan/images/
+                const remappedManifest = lib.properties.manifest.map(item => ({
+                    ...item,
+                    src: item.src && item.src.startsWith('images/') ? `resan/${item.src}` : item.src,
+                }));
+
+                loader.loadManifest(remappedManifest);
             } else {
                 // 没有manifest时直接创建
                 console.log('📦 GameScene无manifest，直接创建');
