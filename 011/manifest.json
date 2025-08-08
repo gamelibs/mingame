@@ -40,8 +40,8 @@
             { "id": "wrong", "src": "assets/sound/wrong.mp3", "type": "sound" }
         ],
         "images": [
-            { "id": "bg", "src": "assets/images/background.jpg", "type": "image" },
-            { "id": "logo", "src": "assets/images/logo.png", "type": "image" }
+            { "id": "bg", "src": "assets/image/background.jpg", "type": "image" },
+            { "id": "logo", "src": "assets/image/logo.png", "type": "image" }
         ]
     }
 }
