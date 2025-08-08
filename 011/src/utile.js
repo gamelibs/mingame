@@ -574,3 +574,5 @@ utile.__sdklog3 = function (...args) {
 
     );
 }
+
+export default utile;

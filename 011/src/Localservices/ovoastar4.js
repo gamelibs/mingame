@@ -257,10 +257,11 @@ class MapCell {
 }
 
 // 导出类和常量
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { OvoAstar4, MapCell, graphType };
-} else {
+if (typeof window !== 'undefined') {
     window.OvoAstar4 = OvoAstar4;
     window.MapCell = MapCell;
     window.graphType = graphType;
+}
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = { OvoAstar4, MapCell, graphType };
 }

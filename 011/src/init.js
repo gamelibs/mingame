@@ -1,3 +1,11 @@
+
+// ...existing code...
+import utile from './utile.js';
+// 兼容旧脚本对 window.utile 的依赖
+if (typeof window !== 'undefined') {
+    window.utile = utile;
+    window.__GAME_ENGINE_STARTED__ = window.__GAME_ENGINE_STARTED__ || false;
+}
 /**
  * 小游戏引擎初始化器
  */
@@ -31,12 +39,18 @@ class GameEngine {
         this.loadedSounds = new Map();
         this.loadedImages = new Map();
         this.soundStatus = {};
-        // this.isMusicEnabled = true;
-        // this.isSoundEnabled = true;
+        this.__resourcesLoading__ = false;
+        this.__sceneSwitching__ = false;
 
     }
 
     async init() {
+
+        if (window.__GAME_ENGINE_STARTED__) {
+            console.warn('⚠️ GameEngine 已启动，跳过重复初始化');
+            return;
+        }
+        window.__GAME_ENGINE_STARTED__ = true;
         console.log('Game Engine Starting...');
 
         // 并行执行：加载配置 + 预加载关键库文件
@@ -45,37 +59,18 @@ class GameEngine {
         this.applyConfig();
 
         // 开始加载游戏资源
-        await this.loadGameResources();
+        // 必须先创建loading舞台与元件
+        await this.loadPreloader();
+        // 这里显式启动并等待游戏资源加载（唯一入口）
+        await this.startGameConfigLoading();
 
         // 添加用户交互检测
         this.setupAutoplayHandler();
-
         this.hideBasicLoading();
-        // 加载预加载器组件
-        await this.loadPreloader();
-
-
-        // // 加载核心游戏文件
-        await this.loadCoreGameFiles();
-
-        console.log('Game Engine Ready!');
-
         // 添加焦点事件监听
         this.setupFocusBlurHandler();
     }
 
-    // async preloadCriticalLibs() {
-    //     // 预加载关键的CreateJS库文件
-    //     const criticalLibs = [
-    //         "libs/modules/easeljs.min.js",
-    //         "libs/modules/preloadjs.min.js"
-    //     ];
-
-    //     console.log('预加载关键库文件...');
-    //     const preloadPromises = criticalLibs.map(lib => this.loadScript(lib));
-    //     await Promise.all(preloadPromises);
-    //     console.log('关键库文件预加载完成');
-    // }
 
     setupFocusBlurHandler() {
         const pauseGame = () => {
@@ -323,8 +318,10 @@ class GameEngine {
     }
 
     async loadGameResources() {
-        const scripts = [...this.config.initial, ...this.config.game];
 
+        const initialScripts = Array.isArray(this.config.initial) ? this.config.initial : [];
+        const gameScripts = Array.isArray(this.config.game) ? this.config.game : [];
+        const scripts = [...initialScripts, ...gameScripts];
 
 
         const sounds = this.config.gameconfig.sounds || [];
@@ -440,12 +437,18 @@ class GameEngine {
 
 
         // 开始加载游戏配置资源
-        this.startGameConfigLoading();
+        // this.startGameConfigLoading();
     }
 
 
 
     async startGameConfigLoading() {
+
+        if (this.__resourcesLoading__) {
+            console.warn('⚠️ 资源加载已在进行或完成，跳过重复调用');
+            return;
+        }
+        this.__resourcesLoading__ = true;
         try {
             console.log('🚀 开始加载游戏资源...');
 
@@ -640,13 +643,13 @@ class GameEngine {
             if (!window.GameServer?.isInitialized) {
                 console.log('🖥️ 初始化 GameServer...');
                 const serverResult = await window.GameServer.init(); // 🔥 改为 await
-                if (!serverResult.success) {
+                if (!serverResult?.success) {
                     console.error('❌ GameServer 初始化失败:', serverResult);
                     return;
                 }
-                this.onLoginComplete();
             }
-
+            // 2) 无论是否已初始化，都进入登录完成流程
+            this.onLoginComplete();
             // // 2. 获取用户状态
             // const userStatus = window.GameServer.currentUserStatus;
             // utile.__sdklog2('📊 用户状态:', userStatus);
@@ -710,8 +713,12 @@ class GameEngine {
     }
 
     async switchToGameScene() {
-        console.log('🎬 准备切换到游戏场景...');
-
+        if (this.__sceneSwitching__) {
+            console.warn('⚠️ 场景切换已在进行，跳过重复调用');
+            return;
+        }
+        this.__sceneSwitching__ = true;
+        console.log('🔄 切换到GameScene...');
         try {
             // 🔥 第一步：先加载GameScene（保持loading界面显示）
             console.log('📦 预加载GameScene资源...');
@@ -1024,9 +1031,9 @@ class GameEngine {
             } else {
                 setTimeout(() => {
                     // this.playSound('bgm', { loop: -1 });
-                    if(createjs.Sound.muted)createjs.Sound.muted = false
+                    if (createjs.Sound.muted) createjs.Sound.muted = false
                     createjs.Sound.play(id, options);
-                },100)
+                }, 100)
             }
 
         }
@@ -1042,7 +1049,7 @@ class GameEngine {
 
                 const instance = createjs.Sound.play(id, options);
                 if (instance) {
-                   
+
                     if (instance.playState === createjs.Sound.PLAY_SUCCEEDED) {
                         console.log(`🎵 声音正在播放: ${id}`);
                         this.soundStatus[id] = true;
@@ -1115,20 +1122,14 @@ class GameEngine {
             if (!this.audioEnabled) {
                 console.log('🎵 用户交互检测到，启用音频');
                 this.audioEnabled = true;
-
-                // 尝试播放背景音乐
-
-                this.playSound('bgm', { loop: -1, volume: 0.5 });
-
+                // 仅此处解锁并播放 BGM
+                createjs.Sound.muted = false;
+                this.playSound('bgm', { loop: -1, volume: 0.5, userTriggered: true });
             }
-
-            // 移除事件监听器
             document.removeEventListener('click', enableAudio);
             document.removeEventListener('touchstart', enableAudio);
             document.removeEventListener('keydown', enableAudio);
         };
-
-        // 添加多种用户交互事件监听
         document.addEventListener('click', enableAudio);
         document.addEventListener('touchstart', enableAudio);
         document.addEventListener('keydown', enableAudio);
@@ -1381,8 +1382,8 @@ class GameEngine {
         return new Promise((resolve, reject) => {
             if (!this.soundInitialized) {
                 try {
-                    createjs.Sound.registerPlugins([createjs.WebAudioPlugin, createjs.FlashAudioPlugin]);//
-                    createjs.Sound.alternateExtensions = ["mp3", "wav", "ogg"];
+                    createjs.Sound.registerPlugins([createjs.WebAudioPlugin]);//
+                    createjs.Sound.alternateExtensions = ["mp3", "ogg"];
                     createjs.Sound.muted = true; // 初始状态静音
                     this.soundInitialized = true;
                 } catch (error) {
@@ -1403,21 +1404,7 @@ class GameEngine {
                     createjs.Sound.removeEventListener("fileload", onFileLoad);
                     createjs.Sound.removeEventListener("fileerror", onFileError);
                     this.loadedSounds.set(id, src);
-                    // createjs.Sound.play(id);
-                    this.playSound(id);
-                    // setTimeout(() => {
-                    //     createjs.Sound.muted = false; // 确保声音可以播放
-                    //     createjs.Sound.stop(id); // 确保声音不会持续播放
-                    // }, 100); // 确保声音加载后有足够时间处理
-                    // 如果是背景音乐，立即播放
-                    // if (id === 'bgm') {
-                    //     setTimeout(() => {
-                    //         console.log(`🎵 背景音乐加载完成，开始播放: ${src}`);
-                    //         // createjs.Sound.play(id);
-                    //         this.playSound('bgm', { loop: -1, volume: 0.5 })
-                    //     }, 1000);
-                    // }
-
+                    // createjs.Sound.play(id, { volume: 0 });
                     resolve();
                 }
             };
@@ -1472,7 +1459,7 @@ class GameEngine {
             };
 
             img.onerror = (error) => {
-                clearTimeout(timeout); v
+                clearTimeout(timeout);
                 console.error(`🖼️ 图片加载失败: ${id}`, error);
                 reject(new Error(`Image load failed: ${src} - ${error.message || 'Unknown error'}`));
             };
@@ -1486,6 +1473,10 @@ class GameEngine {
 
 // 页面加载完成后启动引擎
 document.addEventListener('DOMContentLoaded', () => {
+    if (window.__GAME_ENGINE_INSTANCE__) {
+        console.warn('⚠️ 引擎实例已存在，跳过创建');
+        return;
+    }
     const engine = new GameEngine();
     engine.init().catch(error => {
         console.error('Game engine failed to start:', error);

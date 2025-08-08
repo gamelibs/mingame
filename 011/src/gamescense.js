@@ -1,4 +1,4 @@
-
+import utile from './utile.js';
 /**
  * 游戏场景管理器
  * 负责游戏的主要逻辑和交互
