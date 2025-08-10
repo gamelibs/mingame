@@ -228,13 +228,21 @@ class GameEngine {
         this.resizeHandler = () => {
             if (!this.designWidth || !this.designHeight) return;
 
-            // 获取容器尺寸
+            // 获取容器尺寸（逻辑像素）
             const stageWidth = this.gameContainer.clientWidth;
             const stageHeight = this.gameContainer.clientHeight;
 
-            // 设置 canvas 尺寸为容器尺寸（关键！）
-            this.canvas.width = stageWidth;
-            this.canvas.height = stageHeight;
+            // 高分屏支持
+            this.dpr = window.devicePixelRatio || 1;
+            const enableHiDPI = (localStorage.getItem('hiDPI') || 'true') === 'true';
+            const effectiveDpr = enableHiDPI ? this.dpr : 1;
+
+            // Canvas 视觉尺寸
+            this.canvas.style.width = stageWidth + 'px';
+            this.canvas.style.height = stageHeight + 'px';
+            // Canvas 实际像素尺寸
+            this.canvas.width = Math.round(stageWidth * effectiveDpr);
+            this.canvas.height = Math.round(stageHeight * effectiveDpr);
 
             // 设置 animation_container 尺寸
             this.animationContainer.style.width = stageWidth + 'px';
@@ -258,31 +266,31 @@ class GameEngine {
             const isDesignPortrait = designWidth < designHeight;
 
             if (isPCDevice) {
-                // PC端：不执行旋转，直接按比例缩放
-                console.log('🖥️ PC端模式：禁用旋转，使用等比缩放');
-                this.stageScale = Math.min(stageWidth / designWidth, stageHeight / designHeight);
+                this.baseStageScale = Math.min(stageWidth / designWidth, stageHeight / designHeight);
                 this.stageRotation = 0;
-                this.stageX = (stageWidth - designWidth * this.stageScale) / 2;
-                this.stageY = (stageHeight - designHeight * this.stageScale) / 2;
+                this.stageX = (stageWidth - designWidth * this.baseStageScale) / 2;
+                this.stageY = (stageHeight - designHeight * this.baseStageScale) / 2;
             } else {
-                // 移动端：保持原有的旋转逻辑
                 if (isScreenPortrait === isDesignPortrait) {
-                    // 屏幕方向与设计方向一致，不需要旋转
-                    this.stageScale = Math.min(stageWidth / designWidth, stageHeight / designHeight);
+                    this.baseStageScale = Math.min(stageWidth / designWidth, stageHeight / designHeight);
                     this.stageRotation = 0;
-                    this.stageX = stageWidth / 2 - designWidth * this.stageScale / 2;
-                    this.stageY = stageHeight / 2 - designHeight * this.stageScale / 2;
+                    this.stageX = stageWidth / 2 - designWidth * this.baseStageScale / 2;
+                    this.stageY = stageHeight / 2 - designHeight * this.baseStageScale / 2;
                 } else {
-                    // 屏幕方向与设计方向不一致，需要旋转90度
-                    this.stageScale = Math.min(stageWidth / designHeight, stageHeight / designWidth);
+                    this.baseStageScale = Math.min(stageWidth / designHeight, stageHeight / designWidth);
                     this.stageRotation = 90;
-                    this.stageX = designHeight * this.stageScale + stageWidth / 2 - designHeight * this.stageScale / 2;
-                    this.stageY = stageHeight / 2 - designWidth * this.stageScale / 2;
+                    this.stageX = designHeight * this.baseStageScale + stageWidth / 2 - designHeight * this.baseStageScale / 2;
+                    this.stageY = stageHeight / 2 - designWidth * this.baseStageScale / 2;
                 }
             }
 
+            // 综合 DPR 的真实缩放
+            this.stageScale = this.baseStageScale * effectiveDpr;
+            this.stageX = Math.round(this.stageX * effectiveDpr);
+            this.stageY = Math.round(this.stageY * effectiveDpr);
+
             this.applyStageTransform();
-            // console.log(`Stage resized: ${stageWidth}x${stageHeight}, scale: ${this.stageScale}, rotation: ${this.stageRotation}`);
+            this.updateImageSmoothing();
         }
 
 
@@ -300,8 +308,11 @@ class GameEngine {
         this.animationContainer.style.backgroundColor = backgroundColor;
 
         // 设置canvas初始尺寸
-        this.canvas.width = width;
-        this.canvas.height = height;
+    const initDpr = window.devicePixelRatio || 1;
+    this.canvas.width = width * initDpr;
+    this.canvas.height = height * initDpr;
+    this.canvas.style.width = width + 'px';
+    this.canvas.style.height = height + 'px';
 
         // 应用方向设置
         if (orientation === 'portrait') {
@@ -415,7 +426,8 @@ class GameEngine {
     createLoadingElement(lib) {
 
         // 初始化CreateJS舞台
-        this.stage = new createjs.Stage(this.canvas);
+    this.stage = new createjs.Stage(this.canvas);
+    this.stage.snapToPixelEnabled = true;
         createjs.Ticker.framerate = this.config.scene?.fps || 30;
         createjs.Ticker.addEventListener("tick", this.stageUpdateHandler.bind(this));
 
@@ -443,6 +455,14 @@ class GameEngine {
 
         // 开始加载游戏配置资源
         // this.startGameConfigLoading();
+    }
+
+    updateImageSmoothing() {
+        try {
+            const smooth = (localStorage.getItem('imageSmooth') || 'true') === 'true';
+            const ctx = this.canvas.getContext('2d');
+            if (ctx) ctx.imageSmoothingEnabled = smooth;
+        } catch (e) { }
     }
 
 
@@ -521,6 +541,8 @@ class GameEngine {
             }
 
             createjs.Sound.muted = false; // 关闭状态静音
+            // 资源全部加载后尝试自动播放 BGM（如果允许并且浏览器未拦截）
+            this.tryAutoStartBGM();
             utile.__sdklog2('🎉 所有游戏资源加载完成！');
 
             // 确保显示100%进度
@@ -1031,22 +1053,51 @@ class GameEngine {
         const isMusicEnabled = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true'; // 默认开启音乐
         const isSoundEnabled = localStorage.getItem('soundEnabled') === null || localStorage.getItem('soundEnabled') === 'true'; // 默认开启音效
 
+        // ---- 背景音乐特殊处理（避免重复播放导致叠音） ----
         if (id === 'bgm') {
+            if (!this.__bgmPlayLog__) this.__bgmPlayLog__ = 0;
+            this.__bgmPlayLog__++;
+            console.log(`[BGM_TRACE] 请求播放 BGM (#${this.__bgmPlayLog__}) soundStatus=`, this.soundStatus[id]);
             if (!isMusicEnabled) {
-                this.stopSound("bgm")
-                return
+                // 用户关闭音乐
+                this.stopSound('bgm');
+                return null;
             }
+
+            // 已经在播放则直接返回（去重）
             if (this.soundStatus[id]) {
-
-                return
-            } else {
-                setTimeout(() => {
-                    // this.playSound('bgm', { loop: -1 });
-                    if (createjs.Sound.muted) createjs.Sound.muted = false
-                    createjs.Sound.play(id, options);
-                }, 100)
+                // console.log('🎵 BGM 已在播放，跳过重复调用');
+                return null;
             }
 
+            // 规范化 loop / volume
+            const bgmOptions = {
+                loop: -1,
+                volume: (typeof options.volume === 'number') ? options.volume : 0.5,
+                ...options
+            };
+
+            if (createjs.Sound.muted) {
+                createjs.Sound.muted = false; // 解锁
+            }
+
+            try {
+                const instance = createjs.Sound.play(id, bgmOptions);
+                if (instance && instance.playState === createjs.Sound.PLAY_SUCCEEDED) {
+                    this.soundStatus[id] = true; // 标记已播放，防止二次触发
+                    this.bgmInstance = instance;
+                    // 当音乐自然结束（虽然 loop:-1 理论上不会）或被中止时重置状态
+                    instance.on('complete', () => { this.soundStatus[id] = false; });
+                    instance.on('failed', () => { this.soundStatus[id] = false; });
+                    instance.on('interrupted', () => { this.soundStatus[id] = false; });
+                } else {
+                    console.warn('🎵 BGM 播放未成功，状态：', instance && instance.playState);
+                }
+                return instance;
+            } catch (e) {
+                console.error('🎵 BGM 播放异常:', e);
+                return null;
+            }
         }
 
         if (id !== 'bgm' && !isSoundEnabled) {
@@ -1093,7 +1144,10 @@ class GameEngine {
 
         try {
             createjs.Sound.stop(id);
-            this.soundStatus[id] = false;
+            this.soundStatus[id] = false; // 重置播放状态标记
+            if (id === 'bgm') {
+                this.bgmInstance = null;
+            }
             console.log(`🎵 停止声音: ${id}`);
         } catch (error) {
             console.error(`🎵 停止声音异常: ${id}`, error);
@@ -1121,21 +1175,29 @@ class GameEngine {
      * @returns {boolean} 是否正在播放
      */
     isSoundPlaying(soundName) {
-
-        // 检查音效是否正在播放
-        return this.soundStatus[soundName]
-
+    return !!this.soundStatus[soundName];
 
     }
 
     setupAutoplayHandler() {
+        // 已经有 BGM 在播放则不需要再绑定
+        if (this.isSoundPlaying && this.isSoundPlaying('bgm')) {
+            return;
+        }
+        if (this.__autoPlayBound__) {
+            return; // 避免重复绑定
+        }
+        this.__autoPlayBound__ = true;
         const enableAudio = () => {
             if (!this.audioEnabled) {
                 console.log('🎵 用户交互检测到，启用音频');
                 this.audioEnabled = true;
                 // 仅此处解锁并播放 BGM
                 createjs.Sound.muted = false;
-                this.playSound('bgm', { loop: -1, volume: 0.5, userTriggered: true });
+                // 避免短时间重复点击多次触发
+                if (!this.isSoundPlaying('bgm')) {
+                    this.playSound('bgm', { loop: -1, volume: 0.5, userTriggered: true });
+                }
             }
             document.removeEventListener('click', enableAudio);
             document.removeEventListener('touchstart', enableAudio);
@@ -1144,6 +1206,46 @@ class GameEngine {
         document.addEventListener('click', enableAudio);
         document.addEventListener('touchstart', enableAudio);
         document.addEventListener('keydown', enableAudio);
+    }
+
+    /**
+     * 尝试自动播放背景音乐（无需用户点击）。
+     * 若被浏览器策略阻止，则保留后续点击触发逻辑。
+     */
+    tryAutoStartBGM() {
+        // 已播放或用户关闭音乐则跳过
+        const isMusicEnabled = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true';
+        if (!isMusicEnabled) return;
+        if (this.isSoundPlaying && this.isSoundPlaying('bgm')) return;
+
+        // 有些浏览器需要先创建 AudioContext
+        try {
+            if (createjs.Sound && createjs.Sound.activePlugin && createjs.Sound.activePlugin.context) {
+                const ctx = createjs.Sound.activePlugin.context;
+                // 不能直接 resume（可能被策略限制），但可以检测状态
+            }
+        } catch (e) { }
+
+        const instance = this.playSound('bgm', { loop: -1, volume: 0.5, autoAttempt: true });
+        // 如果成功，并且 WebAudio context 处于 running 状态，则视为无需用户交互
+        let contextRunning = true;
+        try {
+            const ctx = createjs.Sound.activePlugin && createjs.Sound.activePlugin.context;
+            if (ctx && ctx.state !== 'running') contextRunning = false;
+        } catch (e) { }
+
+        if (instance && instance.playState === createjs.Sound.PLAY_SUCCEEDED && contextRunning) {
+            console.log('✅ 自动播放 BGM 成功（无需用户点击）');
+            this.audioEnabled = true;
+            // 如果已经绑定了交互监听可以移除（谨慎：只有我们自己绑定的）
+            if (this.__autoPlayBound__) {
+                document.removeEventListener('click', this.__autoPlayClickHandler__);
+                document.removeEventListener('touchstart', this.__autoPlayClickHandler__);
+                document.removeEventListener('keydown', this.__autoPlayClickHandler__);
+            }
+        } else {
+            console.log('⚠️ 自动播放 BGM 失败或被阻止，等待用户点击');
+        }
     }
 
     // 图片管理方法

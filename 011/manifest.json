@@ -27,7 +27,8 @@
             { "id": "goodmin", "src": "assets/sound/goodmin.mp3", "type": "sound" },
             { "id": "click", "src": "assets/sound/click.mp3", "type": "sound" },
             { "id": "win", "src": "assets/sound/win.mp3", "type": "sound" },
-            { "id": "wrong", "src": "assets/sound/wrong.mp3", "type": "sound" }
+            { "id": "wrong", "src": "assets/sound/wrong.mp3", "type": "sound" },
+            { "id": "open", "src": "assets/sound/open.mp3", "type": "sound" }
         ],
         "images": [
             { "id": "bg", "src": "assets/image/background.jpg", "type": "image" },

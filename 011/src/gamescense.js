@@ -1766,7 +1766,7 @@ class GameScense {
 
         // 添加到 gamebox
         this.gamebox.addChild(newEgg);
-
+        this.engine.playSound("open")
         // console.log(`🚀 开始飞行动画: (${sourcePositionInGamebox.x}, ${sourcePositionInGamebox.y}) -> (${targetPosition.centerX}, ${targetPosition.centerY})`);
 
         // 执行飞行动画
@@ -2765,9 +2765,9 @@ class GameScense {
             }, true);
 
             // 播放解锁音效
-            if (this.engine && this.loadedSounds.has('goodmin')) {
-                this.engine.playSound('goodmin');
-            }
+            // if (this.engine && this.loadedSounds.has('goodmin')) {
+            //     this.engine.playSound('goodmin');
+            // }
 
         } catch (error) {
             console.error(`❌ 播放解锁动画失败: 等级${unlockedLevel}`, error);
