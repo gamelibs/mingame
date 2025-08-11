@@ -40,6 +40,10 @@ class GameScense {
         // 开始选择
         this.startMc = null;
 
+        // 奖励
+        this.cardGame = null;
+        this.cardGameReady = false;
+
         // 元件移动相关
         this.selectedPiece = null;        // 当前选中的元件
         this.selectedCellId = null;       // 选中元件所在的格子ID
@@ -84,11 +88,6 @@ class GameScense {
                 this.gamebox.on('click', this.onGameboxClick, this);
             }
 
-
-
-
-
-
             const mc_start_over = utile.findMc(this.exportRoot, 'mc_start_over');
             if (mc_start_over) {
                 mc_start_over.visible = false; // 初始隐藏重新开始界面
@@ -97,7 +96,7 @@ class GameScense {
                 btn_yes.on('click', (event) => {
                     console.log('🔄 重新开始界面点击重新开始按钮');
                     event.stopPropagation();
-
+                    this.engine.playSound('select_wawa');
                     // 调用插页广告
                     this.showInterstitialAd(() => {
                         // 广告关闭后的回调
@@ -108,10 +107,11 @@ class GameScense {
                     });
                 });
                 const btn_no = utile.findMc(mc_start_over, 'btn_no');
+
                 btn_no.on('click', (event) => {
                     console.log('🔄 重新开始界面点击不再重新开始按钮');
                     event.stopPropagation();
-
+                    this.engine.playSound('select_wawa');
                     // 调用插页广告
                     this.showInterstitialAd(() => {
 
@@ -127,6 +127,7 @@ class GameScense {
                 btnRestart.on('click', (event) => {
                     console.log('🔄 点击重新开始按钮 (btn_restart)');
                     event.stopPropagation();
+                    this.engine.playSound('select_wawa');
                     this.showPanel(mc_start_over, true);
 
                 });
@@ -237,7 +238,7 @@ class GameScense {
                     // 绑定设置按钮事件
                     btnSetting.on('click', () => {
                         event.stopPropagation();
-
+                        this.engine.playSound("select_wawa")
                         this.showPanel(settingsMc, true, () => {
                             console.log('✅ 设置界面显示完成');
 
@@ -250,65 +251,58 @@ class GameScense {
                     console.log('✅ btn_setting 按钮事件已绑定');
                 }
 
-                const isMusicEnabled = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true'; // 默认开启音乐
-                const isSoundEnabled = localStorage.getItem('soundEnabled') === null || localStorage.getItem('soundEnabled') === 'true'; // 默认开启音效
-
                 const btn_clos_setting = utile.findMc(settingsMc, 'btn_clos_setting');
 
                 btn_clos_setting.on('click', () => {
+                    this.engine.playSound("select_wawa")
                     this.showPanel(settingsMc, false, () => {
                         console.log('🔧 设置界面已关闭');
                     });
                 });
 
 
+                const isMusicEnabled = (localStorage.getItem('musicEnabled') === null) ||
+                    localStorage.getItem('musicEnabled') === 'true';
+                const isSoundEnabled = (localStorage.getItem('soundEnabled') === null) ||
+                    localStorage.getItem('soundEnabled') === 'true';
+
+
                 // 音乐
                 const btn_bg = utile.findMc(settingsMc, 'mc_sound_bg');
-                if (isMusicEnabled) {
-                    btn_bg.gotoAndStop(0); // 播放状态
+                if (btn_bg) {
+                    // 约定：帧0 = 开启图标，帧1 = 关闭图标
+                    btn_bg.gotoAndStop(isMusicEnabled ? 0 : 1);
 
-                } else {
-                    btn_bg.gotoAndStop(1); // 停止状态
-                }
-                btn_bg.on('click', () => {
-                    console.log('🔊 切换音乐状态');
-                    if (this.engine && this.loadedSounds.has('bgm')) {
-                        if (this.engine.isSoundPlaying('bgm')) {
-                            this.engine.stopSound('bgm');
-                            btn_bg.gotoAndStop(1); // 停止状态
-                            console.log('🎵 音乐已停止');
-                            localStorage.setItem('musicEnabled', false);
+                    btn_bg.removeAllEventListeners('click');
+                    btn_bg.on('click', () => {
+                        const current = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true';
+                        const next = !current;
+                        btn_bg.gotoAndStop(next ? 0 : 1);
+                        if (this.engine) {
+                            this.engine.setMusicEnabled(next);
                         } else {
-                            this.engine.playSound('bgm', { loop: -1, volume: 0.5 });
-                            btn_bg.gotoAndStop(0); // 播放状态
-                            console.log('🎵 音乐已播放');
-                            localStorage.setItem('musicEnabled', true);
+                            localStorage.setItem('musicEnabled', next ? 'true' : 'false');
                         }
-                    } else {
-                        console.warn('⚠️ 背景音乐未加载或引擎未初始化');
-                    }
-                });
-
-                // 音效
-                const btn_eff = utile.findMc(settingsMc, 'mc_sound_eff');
-                if (isSoundEnabled) {
-                    btn_eff.gotoAndStop(0); // 播放状态
-                } else {
-                    btn_eff.gotoAndStop(1); // 停止状态
+                        console.log(`🎵 音乐状态已切换 -> ${next ? 'ON' : 'OFF'}`);
+                    });
                 }
-                btn_eff.on('click', () => {
-                    const soundEnabled = localStorage.getItem('soundEnabled') === 'true';
 
-                    console.log('🔊 切换音效状态');
-                    if (soundEnabled) {
-
-                        localStorage.setItem('soundEnabled', false);
-                        btn_eff.gotoAndStop(1); // 停止状态
-                    } else {
-                        localStorage.setItem('soundEnabled', true);
-                        btn_eff.gotoAndStop(0); // 播放状态
-                    }
-                });
+                const btn_eff = utile.findMc(settingsMc, 'mc_sound_eff');
+                if (btn_eff) {
+                    btn_eff.gotoAndStop(isSoundEnabled ? 0 : 1);
+                    btn_eff.removeAllEventListeners('click');
+                    btn_eff.on('click', () => {
+                        const current = localStorage.getItem('soundEnabled') === null || localStorage.getItem('soundEnabled') === 'true';
+                        const next = !current;
+                        btn_eff.gotoAndStop(next ? 0 : 1);
+                        if (this.engine) {
+                            this.engine.setSoundEnabled(next);
+                        } else {
+                            localStorage.setItem('soundEnabled', next ? 'true' : 'false');
+                        }
+                        console.log(`🔊 音效状态已切换 -> ${next ? 'ON' : 'OFF'}`);
+                    });
+                }
 
 
             }
@@ -377,6 +371,14 @@ class GameScense {
             // 初始化解锁动画元件
             this.initUnlockAnimations();
 
+            const cardReward = utile.findMc(this.exportRoot, 'mc_card_reward');
+            if (cardReward) {
+                cardReward.visible = false;
+                cardReward.gotoAndStop && cardReward.gotoAndStop(0);
+                console.log('🎴 抽卡面板已默认隐藏');
+            }
+
+
             this.exportRoot.visible = true;
 
             console.log('✅ UI元件初始化完成');
@@ -385,6 +387,63 @@ class GameScense {
         }
     }
 
+    // 惰性初始化抽卡
+    async ensureCardGame() {
+        if (this.cardGameReady) return;
+        if (typeof window.CardGame !== 'function') {
+            console.warn('⚠️ CardGame 类尚未加载');
+            return;
+        }
+        this.cardGame = new window.CardGame();
+        try {
+            await this.cardGame.init({
+                stage: this.stage,
+                exportRoot: this.exportRoot,
+                engine: this.engine,
+                loadedSounds: this.loadedSounds
+            });
+            this.cardGameReady = true;
+            console.log('✅ CardGame 初始化完成');
+        } catch (e) {
+            console.error('❌ CardGame 初始化失败:', e);
+        }
+    }
+
+     // 打开抽卡面板（胜利/失败后调用）
+    async openCardRewardPanel(delay = 800) {
+        await this.ensureCardGame();
+        if (!this.cardGame || !this.cardGame.card_reward_Mc) {
+            console.warn('⚠️ 抽卡面板不可用');
+            return;
+        }
+        setTimeout(() => {
+            this.cardGame.card_reward_Mc.visible = true;
+            this.cardGame.card_reward_Mc.gotoAndStop && this.cardGame.card_reward_Mc.gotoAndStop(0);
+            console.log('🎴 抽卡面板已显示，等待玩家点击 GO');
+        }, delay);
+    }
+
+        // 关闭抽卡面板
+    closeCardRewardPanel() {
+        if (!this.cardGame || !this.cardGame.card_reward_Mc) return;
+        const panel = this.cardGame.card_reward_Mc;
+        if (!panel.visible) return;
+
+        createjs.Tween.removeTweens(panel);
+        createjs.Tween.get(panel)
+            .to({ scaleX: 1.05, scaleY: 1.05 }, 100)
+            .to({ scaleX: 0.2, scaleY: 0.2, alpha: 0 }, 180, createjs.Ease.quadIn)
+            .call(() => {
+                panel.visible = false;
+                panel.alpha = 1;
+                panel.scaleX = panel.scaleY = 1;
+                // 复位 GO 按钮状态
+                if (this.cardGame.goButton) {
+                    this.cardGame.goButton.mouseEnabled = true;
+                }
+                console.log('🎴 抽卡面板已关闭');
+            });
+    }
     /**
      * 初始化游戏场景
      * @param {Object} sysData - 系统数据对象
@@ -452,14 +511,16 @@ class GameScense {
             // 处理初始化后的逻辑
             setTimeout(() => {
                 this.generateUserEggs();
+
+                // 测试奖励
+                // this.openCardRewardPanel(800);
             }, 1000);
 
 
 
 
 
-            // this.cardGame = new CardGame();
-            // await this.cardGame.init(gameData)
+
 
             this.isInitialized = true;
             console.log('✅ GameScense 初始化完成');
@@ -1103,7 +1164,7 @@ class GameScense {
         }
     }
 
-    
+
     /**
     * gamebox 点击事件处理
     */
@@ -1136,9 +1197,9 @@ class GameScense {
         }
 
         // 播放点击音效
-        if (this.engine && this.loadedSounds.has('popo')) {
-            this.engine.playSound('popo');
-        }
+        // if (this.engine && this.loadedSounds.has('open')) {
+        //     this.engine.playSound('open');
+        // }
     }
 
     /**
@@ -1295,6 +1356,7 @@ class GameScense {
     async handleStep1(result) {
         console.log(`🎯 选择蛋: 格子 ${result.cellId}, 类型 ${result.eggType}`);
 
+        this.engine.playSound('select_jiji');
         // 更新游戏状态
         this.gameDataState.selectedEgg = {
             cellId: result.cellId,
@@ -1410,7 +1472,10 @@ class GameScense {
                 }
                 if (isFailure) {
                     console.log('💀 游戏失败，显示失败界面');
-                    this.failureHandler(true);
+
+                    setTimeout(() => {
+                        this.failureHandler(true);
+                    }, 1500);
                 }
                 console.log('✅ 所有步骤执行完成');
                 return Promise.resolve();
@@ -1431,7 +1496,7 @@ class GameScense {
      */
     async handleStep3(result) {
         console.log(`🔄 取消选择: 格子 ${result.cellId}`);
-
+        this.engine.playSound('select_jiji');
         // 移除选中效果
         if (this.selectedPiece) {
             this.removeSelectionEffect(this.selectedPiece);
@@ -1448,7 +1513,7 @@ class GameScense {
      */
     async handleStep4(result) {
         console.log(`🔄 切换选择: ${result.oldCellId} -> ${result.newCellId}`);
-
+        this.engine.playSound('select_jiji');
         // 移除旧选中效果
         if (this.selectedPiece) {
             this.removeSelectionEffect(this.selectedPiece);
@@ -1573,8 +1638,9 @@ class GameScense {
         if (newEggType > this.maxUnlockedLevel) {
             console.log(`🎉 解锁新等级: ${this.maxUnlockedLevel} -> ${newEggType}`);
 
+            this.engine.playSound('hecheng_open');
             // 播放解锁动画
-            this.playUnlockAnimation(newEggType);
+            await this.playUnlockAnimation(newEggType);
 
             // 更新前端记录的最高等级
             this.maxUnlockedLevel = newEggType;
@@ -1766,7 +1832,7 @@ class GameScense {
 
         // 添加到 gamebox
         this.gamebox.addChild(newEgg);
-        this.engine.playSound("open")
+        this.engine.playSound("longhou_min")
         // console.log(`🚀 开始飞行动画: (${sourcePositionInGamebox.x}, ${sourcePositionInGamebox.y}) -> (${targetPosition.centerX}, ${targetPosition.centerY})`);
 
         // 执行飞行动画
@@ -2188,83 +2254,12 @@ class GameScense {
 
 
     /**
-     * 键盘按下事件处理
-     */
-    onKeyDown(event) {
-        console.log('⌨️ 键盘按下:', event.key);
-
-        // 处理键盘输入
-        switch (event.key) {
-            case ' ': // 空格键
-                event.preventDefault();
-                this.pauseGame();
-                break;
-            case 'Escape': // ESC键
-                this.pauseGame();
-                break;
-        }
-    }
-
-    /**
-     * 键盘释放事件处理
-     */
-    onKeyUp() {
-        // 处理键盘释放事件
-        // console.log('⌨️ 键盘释放:', event.key);
-    }
-
-    /**
-     * 暂停/恢复游戏
-     */
-    pauseGame() {
-        if (this.gameState === 'playing') {
-            this.gameState = 'paused';
-            console.log('⏸️ 游戏暂停');
-        } else if (this.gameState === 'paused') {
-            this.gameState = 'playing';
-            console.log('▶️ 游戏恢复');
-            this.gameLoop();
-        }
-    }
-
-    /**
-     * 结束游戏
-     */
-    endGame() {
-        this.gameState = 'ended';
-        console.log('🏁 游戏结束');
-
-        // 停止背景音乐
-        if (this.engine) {
-            this.engine.stopSound('bgm');
-        }
-    }
-
-    /**
-     * 获取游戏状态
-     */
-    getGameState() {
-        return this.gameState;
-    }
-
-    /**
      * 获取 gamebox 元件
      */
     getGameboxElement() {
         return this.gamebox;
     }
 
-    /**
-     * 开始播放背景音乐
-     */
-    startBackgroundMusic() {
-        if (this.engine && this.loadedSounds.has('bgm')) {
-            console.log('🎵 开始播放背景音乐');
-            this.engine.playSound('bgm', { loop: -1, volume: 0.5 });
-        } else {
-            console.warn('⚠️ 背景音乐未加载或引擎未初始化');
-        }
-    }
 
     /**
      * 打印当前前端蛋映射状态
@@ -2393,7 +2388,8 @@ class GameScense {
 
         if (show) {
 
-            this.engine.playSound('wrong');
+            this.engine.playSound('wrong2');
+
 
             this.showPanel(panelUI, true, async () => {
                 if (this.gameData) {
@@ -2401,13 +2397,15 @@ class GameScense {
                     panelUI.mc_ranking.mc_best.text.text = "" + this.gameData.scoreSystem.bestScore;
                     panelUI.mc_ranking.mc_score.text.text = "" + this.gameData.scoreSystem.currentScore;
                 }
+                this.openCardRewardPanel(800);
             });
 
             console.log('✅ 失败界面显示完成');
         } else {
-
+            this.closeCardRewardPanel()
             this.showPanel(panelUI, false, () => {
                 console.log('✅ 失败界面隐藏动画完成');
+
                 // 重新开始游戏
                 this.onRestartGame();
             });
@@ -2496,10 +2494,11 @@ class GameScense {
                     panelUI.mc_ranking.mc_best.text.text = "" + this.gameData.scoreSystem.bestScore;
                     panelUI.mc_ranking.mc_score.text.text = "" + this.gameData.scoreSystem.currentScore;
                 }
+                this.openCardRewardPanel(800);
             })
             console.log('✅ 胜利界面显示完成');
         } else {
-
+            this.closeCardRewardPanel()
             this.showPanel(panelUI, false, () => {
                 console.log('✅ 胜利界面隐藏动画完成');
                 // 重新开始游戏
@@ -2742,36 +2741,38 @@ class GameScense {
      * 播放解锁动画
      * @param {number} unlockedLevel - 解锁的等级 (2~7)
      */
-    playUnlockAnimation(unlockedLevel) {
+    async playUnlockAnimation(unlockedLevel) {
         console.log(`🎉 播放解锁动画: 等级 ${unlockedLevel}`);
+        new Promise((resolve) => {
+            const maskMc = this.unlockAnimations.get(unlockedLevel);
+            if (!maskMc) {
+                console.warn(`⚠️ 未找到等级 ${unlockedLevel} 对应的解锁动画元件`);
+                return;
+            }
 
-        const maskMc = this.unlockAnimations.get(unlockedLevel);
-        if (!maskMc) {
-            console.warn(`⚠️ 未找到等级 ${unlockedLevel} 对应的解锁动画元件`);
-            return;
-        }
+            try {
+                // 显示并播放动画
+                maskMc.visible = true;
+                maskMc.gotoAndPlay(0);
 
-        try {
-            // 显示并播放动画
-            maskMc.visible = true;
-            maskMc.gotoAndPlay(0);
+                console.log(`✨ 开始播放解锁动画: mc_egg_mask${unlockedLevel - 1} (等级${unlockedLevel})`);
 
-            console.log(`✨ 开始播放解锁动画: mc_egg_mask${unlockedLevel - 1} (等级${unlockedLevel})`);
+                // 监听播放完成
+                utile.addFrameEnd(maskMc, () => {
+                    resolve();
+                    console.log(`✅ 解锁动画播放完成: 等级${unlockedLevel}`);
+                }, true);
 
-            // 监听播放完成
-            utile.addFrameEnd(maskMc, () => {
+                // 播放解锁音效
+                // if (this.engine && this.loadedSounds.has('goodmin')) {
+                //     this.engine.playSound('goodmin');
+                // }
 
-                console.log(`✅ 解锁动画播放完成: 等级${unlockedLevel}`);
-            }, true);
-
-            // 播放解锁音效
-            // if (this.engine && this.loadedSounds.has('goodmin')) {
-            //     this.engine.playSound('goodmin');
-            // }
-
-        } catch (error) {
-            console.error(`❌ 播放解锁动画失败: 等级${unlockedLevel}`, error);
-        }
+            } catch (error) {
+                resolve();
+                console.error(`❌ 播放解锁动画失败: 等级${unlockedLevel}`, error);
+            }
+        })
     }
 
 

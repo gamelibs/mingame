@@ -40,6 +40,8 @@ class GameEngine {
         this.soundStatus = {};
         this.__resourcesLoading__ = false;
         this.__sceneSwitching__ = false;
+        this.bgmInstance = null;
+        this.activeSFX = new Set();  // 仅保存需要恢复的短音效实例 id
 
     }
 
@@ -71,27 +73,88 @@ class GameEngine {
     }
 
 
+    pauseAudio() {
+        // 只暂停，不改变 soundEnabled / musicEnabled
+        if (this.bgmInstance && this.bgmInstance.playState === createjs.Sound.PLAY_SUCCEEDED && !this.bgmInstance.paused) {
+            try {
+                if (typeof this.bgmInstance.pause === 'function') {
+                    this.bgmInstance.pause();
+                } else if (typeof this.bgmInstance.setPaused === 'function') {
+                    this.bgmInstance.setPaused(true);
+                } else if ('paused' in this.bgmInstance) {
+                    this.bgmInstance.paused = true;
+                } else {
+                    // 最退化：直接 stop
+                    this.stopSound('bgm');
+                }
+            } catch (e) {
+                console.warn('暂停 BGM 失败, 采用 stop 回退', e);
+                this.stopSound('bgm');
+            }
+        }
+        // 恢复时才需要的记录：把当前在播放且已记录的 sfx 暂停
+        this._pausedSFX = [];
+        this.activeSFX.forEach(id => {
+            const inst = createjs.Sound._instances && createjs.Sound._instances[id]; // 若你未修改 SoundJS 内部，可跳过
+            // 简化：直接用 stop，不做位置恢复；如果想保留位置改 setPaused(true)
+            try {
+                createjs.Sound.stop(id);
+                this._pausedSFX.push(id); // 标记可重启
+            } catch (e) { }
+        });
+    }
+
+    resumeAudio() {
+        // 恢复 BGM（尊重用户是否关闭音乐）
+        const musicOn = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true';
+        if (musicOn) {
+            if (this.bgmInstance) {
+                try {
+                    if (this.bgmInstance.paused) {
+                        if (typeof this.bgmInstance.resume === 'function') {
+                            this.bgmInstance.resume();
+                        } else if (typeof this.bgmInstance.play === 'function' && typeof this.bgmInstance.setPaused !== 'function') {
+                            // 某些实现 pause()/play() 配对
+                            this.bgmInstance.play();
+                        } else if (typeof this.bgmInstance.setPaused === 'function') {
+                            this.bgmInstance.setPaused(false);
+                        } else if ('paused' in this.bgmInstance) {
+                            this.bgmInstance.paused = false;
+                        } else {
+                            // 回退方案：重新播放
+                            this.playSound('bgm', { loop: -1, volume: 0.4 });
+                        }
+                        this.soundStatus['bgm'] = true;
+                    }
+                } catch (e) {
+                    console.warn('恢复 BGM 失败，重新播放回退', e);
+                    this.playSound('bgm', { loop: -1, volume: 0.4 });
+                }
+            } else if (!this.soundStatus['bgm']) {
+                this.playSound('bgm', { loop: -1, volume: 0.4 });
+            }
+        }
+        // 恢复需要的循环短音效
+        const soundOn = localStorage.getItem('soundEnabled') === null || localStorage.getItem('soundEnabled') === 'true';
+        if (soundOn && Array.isArray(this._pausedSFX)) {
+            this._pausedSFX.forEach(id => this.playSound(id, { loop: -1, volume: 1 }));
+        }
+        this._pausedSFX = null;
+    }
+
     setupFocusBlurHandler() {
         const pauseGame = () => {
-            console.log('🛑 页面失去焦点，暂停游戏和音乐');
-            // createjs.Ticker.setPaused(true); // 暂停游戏逻辑
-            // if (this.loadedSounds.has('bgm')) {
-            //     this.stopSound('bgm'); // 停止背景音乐
-            // }
+            console.log('🛑 页面失去焦点，暂停');
+            createjs.Ticker.paused = true;
+            this.pauseAudio();
         };
-
         const resumeGame = () => {
-            console.log('▶️ 页面获得焦点，恢复游戏和音乐');
-            // createjs.Ticker.setPaused(false); // 恢复游戏逻辑
-            // if (this.loadedSounds.has('bgm')) {
-            //     this.playSound('bgm', { loop: -1, volume: 0.5 }); // 恢复背景音乐
-            // }
+            console.log('▶️ 页面获得焦点，恢复');
+            createjs.Ticker.paused = false;
+            this.resumeAudio();
         };
-
-        // 添加事件监听
         window.addEventListener('blur', pauseGame);
         window.addEventListener('focus', resumeGame);
-
         console.log('🎮 焦点事件监听已添加');
     }
 
@@ -308,11 +371,11 @@ class GameEngine {
         this.animationContainer.style.backgroundColor = backgroundColor;
 
         // 设置canvas初始尺寸
-    const initDpr = window.devicePixelRatio || 1;
-    this.canvas.width = width * initDpr;
-    this.canvas.height = height * initDpr;
-    this.canvas.style.width = width + 'px';
-    this.canvas.style.height = height + 'px';
+        const initDpr = window.devicePixelRatio || 1;
+        this.canvas.width = width * initDpr;
+        this.canvas.height = height * initDpr;
+        this.canvas.style.width = width + 'px';
+        this.canvas.style.height = height + 'px';
 
         // 应用方向设置
         if (orientation === 'portrait') {
@@ -426,8 +489,8 @@ class GameEngine {
     createLoadingElement(lib) {
 
         // 初始化CreateJS舞台
-    this.stage = new createjs.Stage(this.canvas);
-    this.stage.snapToPixelEnabled = true;
+        this.stage = new createjs.Stage(this.canvas);
+        this.stage.snapToPixelEnabled = true;
         createjs.Ticker.framerate = this.config.scene?.fps || 30;
         createjs.Ticker.addEventListener("tick", this.stageUpdateHandler.bind(this));
 
@@ -677,34 +740,7 @@ class GameEngine {
             }
             // 2) 无论是否已初始化，都进入登录完成流程
             this.onLoginComplete();
-            // // 2. 获取用户状态
-            // const userStatus = window.GameServer.currentUserStatus;
-            // utile.__sdklog2('📊 用户状态:', userStatus);
-
-            // // 3. 🔥 获取游戏配置数据
-            // const gameConfig = window.GameServer.getGameData(
-            //     userStatus,
-            //     'currentUser',
-            //     userStatus.currentLevel,
-            //     userStatus.currentStep,
-            //     4
-            // );
-            // utile.__sdklog2('🎯 获取到游戏配置:', gameConfig);
-
-            // // 4. 传递完整数据给 GameScense
-            // const gameData = {
-            //     engine: this,
-            //     stage: this.stage,
-            //     exportRoot: this.exportRoot,
-            //     canvas: this.canvas,
-            //     config: this.config,
-            //     loadedSounds: this.loadedSounds,
-            //     loadedImages: this.loadedImages,
-            //     userStatus: userStatus,
-            //     gameConfig: gameConfig // 🔥 传递游戏配置
-            // };
-
-            // await window.GameScense.init(gameData);
+        
             // console.log('✅ GameScense 初始化成功');
 
         } catch (error) {
@@ -1070,10 +1106,10 @@ class GameEngine {
                 return null;
             }
 
-            // 规范化 loop / volume
+            // 规范化 loop / volume 
             const bgmOptions = {
                 loop: -1,
-                volume: (typeof options.volume === 'number') ? options.volume : 0.5,
+                volume: (typeof options.volume === 'number') ? options.volume : 1,
                 ...options
             };
 
@@ -1154,6 +1190,66 @@ class GameEngine {
         }
     }
 
+    /**
+     * 背景音乐是否在播放
+     */
+    isBGMPlaying() {
+        return !!this.soundStatus['bgm'];
+    }
+
+    /**
+     * 播放背景音乐（供外部 UI 调用的语义化封装）
+     * @param {Object} options 例如 {loop:-1, volume:0.4}
+     */
+    playBGM(options = {}) {
+        const musicEnabled = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true';
+        if (!musicEnabled) {
+            console.log('🎵 音乐被关闭，playBGM 忽略');
+            return null;
+        }
+        if (!this.soundInitialized) {
+            console.warn('🎵 SoundJS 尚未初始化，稍后再尝试播放 BGM');
+            return null;
+        }
+        if (this.isBGMPlaying()) {
+            return this.bgmInstance; // 已在播放
+        }
+        const merged = { loop: -1, volume: 0.4, ...options };
+        return this.playSound('bgm', merged);
+    }
+
+    /**
+     * 停止背景音乐（语义化封装）
+     */
+    stopBGM() {
+        this.stopSound('bgm');
+    }
+
+    /**
+     * 设置音乐总开关，并立即生效
+     * @param {boolean} enabled 
+     */
+    setMusicEnabled(enabled) {
+        localStorage.setItem('musicEnabled', enabled ? 'true' : 'false');
+        if (!enabled) {
+            this.stopBGM();
+        } else {
+            this.playBGM({ loop: -1, volume: 0.4 });
+        }
+    }
+
+    /**
+     * 设置音效总开关，仅记录（播放时读取）
+     * @param {boolean} enabled 
+     */
+    setSoundEnabled(enabled) {
+        localStorage.setItem('soundEnabled', enabled ? 'true' : 'false');
+        if (!enabled) {
+            // 立即停止所有非 BGM 音效（可选，这里简单 stop 全部）
+            try { createjs.Sound.stop(); } catch (e) { }
+        }
+    }
+
     setSoundVolume(volume) {
         if (!this.soundInitialized) {
             console.warn(`🎵 SoundJS 未初始化，无法设置音量`);
@@ -1175,7 +1271,7 @@ class GameEngine {
      * @returns {boolean} 是否正在播放
      */
     isSoundPlaying(soundName) {
-    return !!this.soundStatus[soundName];
+        return !!this.soundStatus[soundName];
 
     }
 
@@ -1196,7 +1292,7 @@ class GameEngine {
                 createjs.Sound.muted = false;
                 // 避免短时间重复点击多次触发
                 if (!this.isSoundPlaying('bgm')) {
-                    this.playSound('bgm', { loop: -1, volume: 0.5, userTriggered: true });
+                    this.playSound('bgm', { loop: -1, volume: 1, userTriggered: true });
                 }
             }
             document.removeEventListener('click', enableAudio);
@@ -1226,7 +1322,7 @@ class GameEngine {
             }
         } catch (e) { }
 
-        const instance = this.playSound('bgm', { loop: -1, volume: 0.5, autoAttempt: true });
+        const instance = this.playSound('bgm', { loop: -1, volume: 0.4, autoAttempt: true });
         // 如果成功，并且 WebAudio context 处于 running 状态，则视为无需用户交互
         let contextRunning = true;
         try {

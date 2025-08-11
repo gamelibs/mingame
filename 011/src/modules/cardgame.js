@@ -14,23 +14,23 @@ class CardGame {
         this.drawCost = 100;
 
         // UI元件引用
-        this.victoryMc = null;
         this.goButton = null;
         this.cardContainer = null;
         this.scoreDisplay = null;
+        this.block = null;
 
         console.log('🎴 CardGame 初始化完成');
 
         // 卡牌配置
         this.cardConfig = {
-            0: { name: '锤子', rarity: 'mythic', probability: 90 },
-            1: { name: '灰龙', rarity: 'common', probability: 1 },
-            2: { name: '绿龙', rarity: 'rare', probability: 1 },
-            3: { name: '蓝龙', rarity: 'epic', probability: 1 },
-            4: { name: '黑龙', rarity: 'evildragon', probability: 1 },
-            5: { name: '紫龙', rarity: 'legendary', probability: 1 },
-            6: { name: '红龙', rarity: 'legendary', probability: 1 },
-            7: { name: '黄金龙', rarity: 'legendary', probability: 1 },
+            0: { name: '锤子', rarity: 'hammer', probability: 100 },
+            1: { name: '灰龙', rarity: 'common', probability: 0 },
+            2: { name: '绿龙', rarity: 'rare', probability: 0 },
+            3: { name: '蓝龙', rarity: 'epic', probability: 0 },
+            4: { name: '黑龙', rarity: 'evildragon', probability: 0 },
+            5: { name: '紫龙', rarity: 'legendary', probability: 0 },
+            6: { name: '红龙', rarity: 'legendary', probability: 0 },
+            7: { name: '黄金龙', rarity: 'legendary', probability: 0 },
         };
 
         // UI元件
@@ -56,34 +56,69 @@ class CardGame {
         this.playerScore = this.getPlayerScore();
 
         // 查找 mc_victory 元件
-        this.victoryMc = utile.findMc(this.exportRoot, 'mc_victory');
-        if (!this.victoryMc) {
-            console.error('❌ 未找到 mc_victory 元件');
+        this.card_reward_Mc = utile.findMc(this.exportRoot, 'mc_card_reward');
+        if (!this.card_reward_Mc) {
+            console.error('❌ 未找到 mc_card_reward 元件');
             return;
         }
 
-        // 查找 mc_card_container 元件
-        this.cardContainer = utile.findMc(this.victoryMc, 'mc_card_container');
+        this.block = utile.findMc(this.card_reward_Mc, 'mc_card_container');
+        if (this.block) {
+            this.block.mouseEnabled = true;
+
+            // 绑定屏蔽层点击事件
+            if (!this.block.hasEventListener("click")) {
+                this.block.on('click', function (event) {
+                    console.log('🛡️ 胜利界面屏蔽层拦截了点击事件');
+                    event.stopImmediatePropagation();
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return false;
+                });
+            }
+        }
+
+        // 卡牌容器
+        this.cardContainer = utile.findMc(this.card_reward_Mc, 'mc_card_container');
         if (!this.cardContainer) {
-            console.error('❌ 未找到 mc_card_container 元件');
-            return;
+            console.warn('⚠️ 未找到 mc_card_container，动画逻辑将退化');
         }
 
-        // 查找 btn_go 按钮
-        this.goButton = utile.findMc(this.victoryMc, 'btn_go');
+        // GO 按钮
+        this.goButton = utile.findMc(this.card_reward_Mc, 'btn_go');
         if (!this.goButton) {
-            console.error('❌ 未找到 btn_go 按钮');
+            console.error('❌ 未找到 btn_go');
             return;
         }
 
+        this.goButton.play();
         // 初始化积分显示
-        this.initScoreDisplay();
+        // this.initScoreDisplay();
 
         // 绑定事件
-        // this.bindEvents();
+        this.bindEvents();
 
         console.log('✅ 抽卡游戏初始化完成');
         console.log(`📽️ mc_card_container 总帧数: ${this.cardContainer.totalFrames}`);
+    }
+
+    // 新增：等待音效播放结束
+    playSoundWait(id) {
+        if (!this.engine || !this.loadedSounds || !this.loadedSounds.has(id)) {
+            return Promise.resolve();
+        }
+        return new Promise(resolve => {
+            try {
+                const inst = this.engine.playSound(id);
+                if (!inst || !inst.on) return resolve();
+                const done = () => resolve();
+                inst.on('complete', done);
+                inst.on('failed', done);
+                inst.on('interrupted', done);
+            } catch (e) {
+                resolve();
+            }
+        });
     }
 
     /**
@@ -91,7 +126,7 @@ class CardGame {
      */
     initScoreDisplay() {
         // 查找现有的积分显示元件
-        const scoreContainer = utile.findMc(this.victoryMc, 'mc_score');
+        const scoreContainer = utile.findMc(this.cardContainer, 'mc_score');
         if (scoreContainer) {
             this.scoreDisplay = utile.findMc(scoreContainer, 'text_score');
             if (this.scoreDisplay) {
@@ -108,151 +143,221 @@ class CardGame {
     /**
      * 绑定事件
      */
-    // bindEvents() {
-    //     console.log('🔗 绑定抽卡事件...');
+    bindEvents() {
+        console.log('🔗 绑定抽卡事件...');
 
-    //     // 延迟绑定，确保在屏蔽层事件之后
-    //     setTimeout(() => {
-    //         // 移除可能存在的旧事件
-    //         this.goButton.removeAllEventListeners();
+        // 延迟绑定，确保在屏蔽层事件之后
+        setTimeout(() => {
+            // 移除可能存在的旧事件
+            this.goButton.removeAllEventListeners('click');
 
-    //         // 绑定新的点击事件
-    //         this.goButton.on('click', (event) => {
-    //             console.log('🎯 GO按钮被点击');
-    //             event.stopImmediatePropagation(); // 阻止事件继续传播到屏蔽层
-    //             this.startCardDraw();
-    //         });
+            // 绑定新的点击事件
+            this.goButton.on('click', (event) => {
+                console.log('🎯 GO按钮被点击');
+                event.stopImmediatePropagation(); // 阻止事件继续传播到屏蔽层
+                this.startCardDraw();
+            });
 
-    //         // 设置按钮可点击
-    //         this.goButton.cursor = 'pointer';
-    //         this.goButton.mouseEnabled = true;
+            // 设置按钮可点击
+            this.goButton.cursor = 'pointer';
+            this.goButton.mouseEnabled = true;
 
-    //         console.log('✅ GO按钮事件绑定完成');
-    //     }, 100);
-    // }
+            console.log('✅ GO按钮事件绑定完成');
+        }, 100);
+    }
 
     /**
      * 开始抽卡
      */
     async startCardDraw() {
-        console.log('🎴 开始抽卡...');
-
-        // 检查是否正在抽卡
-        if (this.isDrawing) {
-            console.log('⏳ 正在抽卡中，请稍候...');
-            return;
-        }
-
-
-        // 设置抽卡状态
+        this.goButton.stop();
+        if (!this.cardContainer || this.isDrawing) return;
         this.isDrawing = true;
+        if (this.goButton) this.goButton.mouseEnabled = false;
 
         try {
-            // 播放抽卡音效
-            this.playSound('cardDraw');
-
-            // 执行抽卡动画
-            await this.playCardAnimation();
-
-            console.log('✅ 抽卡完成');
-
-        } catch (error) {
-            console.error('❌ 抽卡失败:', error);
+            const result = this.getCardByProbability();
+            // 随机圈数（可调 5~8 / 6~9）
+            const rotations = 6 + Math.floor(Math.random() * 4); // 6~9
+            await this.spinToResultSimple(result, {
+                rotations,
+                framesPerTick: 1,   // 每 tick 前进帧数(提高=更快)
+                loopSound: true
+            });
+            this.playSound('cardReveal');
+            this.showMessage(`恭喜获得: ${result.name}`);
+            this.showRewardedAd(result);
+        } catch (e) {
+            console.error('❌ 抽卡失败:', e);
         } finally {
             this.isDrawing = false;
+            if (this.goButton) this.goButton.mouseEnabled = true;
         }
+    }
+
+    /**
+   * 简单恒速旋转：按固定帧步长推进；开始播放音效，结束立即停止
+   * @param {Object} cardResult
+   * @param {Object} opts { rotations, framesPerTick, loopSound }
+   */
+    spinToResultSimple(cardResult, opts = {}) {
+        return new Promise(resolve => {
+            const mc = this.cardContainer;
+            if (!mc || !mc.totalFrames) return resolve();
+
+            const totalFrames = mc.totalFrames;
+            const startFrame = mc.currentFrame || 0;
+            const targetFrame = this.getFrameByCardId(cardResult.id);
+
+            const rotations = Math.max(1, opts.rotations || 6);
+            const framesPerTick = Math.max(1, opts.framesPerTick || 6);
+
+            // 计算需要前进的总帧数（保证正向）
+            const forwardDelta = ((targetFrame - startFrame) + totalFrames) % totalFrames;
+            const totalAdvance = rotations * totalFrames + forwardDelta;
+
+            let advanced = 0;
+            let spinSoundInstance = null;
+
+            // 播放旋转音效（持续到结束）
+            if (opts.loopSound && this.engine && this.loadedSounds && this.loadedSounds.has('card')) {
+                try {
+                    spinSoundInstance = this.engine.playSound('card', { loop: -1, volume: 1 });
+                } catch (e) { }
+            }
+
+            mc.gotoAndStop(startFrame);
+
+            let finished = false;
+            const finish = () => {
+                this.goButton.play();
+                if (finished) return;
+                finished = true;
+                try {
+                    mc.gotoAndStop(targetFrame);
+                    if (spinSoundInstance) spinSoundInstance.stop && spinSoundInstance.stop();
+                    
+                } catch (e) { }
+                createjs.Ticker.off('tick', tickHandler);
+                resolve();
+            };
+
+            const tickHandler = () => {
+                if (finished) return;
+                const remain = totalAdvance - advanced;
+                if (remain <= 0) {
+                    finish();
+                    return;
+                }
+                const step = remain < framesPerTick ? remain : framesPerTick;
+                advanced += step;
+                const frame = (startFrame + advanced) % totalFrames;
+                mc.gotoAndStop(frame);
+                if (advanced >= totalAdvance) finish();
+            };
+
+            createjs.Ticker.on('tick', tickHandler);
+            // 兜底（极少数情况下防止意外不结束）
+            setTimeout(() => finish(), 30000);
+        });
     }
 
     /**
   * 播放卡牌动画
   */
-    async playCardAnimation() {
-        console.log('🎬 播放卡牌动画...');
-
-        return new Promise((resolve) => {
+    /**
+       * 播放卡牌动画 + 等待音效(card.mp3)结束后才显示结果
+       * @param {string} soundId
+       */
+    async playCardAnimation(soundId = 'card') {
+        console.log('🎬 播放卡牌动画并等待音效结束...');
+        return new Promise(async (resolve) => {
             if (!this.cardContainer) {
                 console.error('❌ cardContainer 为空');
-                resolve();
-                return;
+                return resolve();
             }
 
-            // 确保动画从第0帧开始
             this.cardContainer.gotoAndStop(0);
 
-            let currentFrame = 0;
             const totalFrames = this.cardContainer.totalFrames;
-            const finalFrame = Math.floor(Math.random() * totalFrames);
+            let currentFrame = 0;
+            let phase = 'slow';
+            let spinning = true;
+            let soundFinished = false;
 
-            console.log(`🎯 开始播放动画，总帧数: ${totalFrames}，目标帧: ${finalFrame}`);
+            // 启动音效并等待
+            this.playSoundWait(soundId).then(() => {
+                soundFinished = true;
+            }).catch(() => { soundFinished = true; });
 
-            // 第一阶段：慢速播放 (2秒)
-            const slowSpeed = 100; // 每帧100ms
-            const slowPhase = () => {
-                if (currentFrame < totalFrames * 0.3) {
+            const slowSpeed = 100; // 前 30% 慢速
+            const fastSpeed = 30;  // 中段快速
+            const extraSpinFastSpeed = 40; // 等待音效时的额外旋转速度
+
+            const tickSpin = () => {
+                if (!spinning) return;
+
+                // 选择当前速度
+                if (phase === 'slow') {
                     this.cardContainer.gotoAndStop(currentFrame % totalFrames);
                     currentFrame++;
-                    setTimeout(slowPhase, slowSpeed);
-                } else {
-                    fastPhase();
+                    if (currentFrame >= totalFrames * 0.3) {
+                        phase = 'fast';
+                    }
+                    setTimeout(tickSpin, slowSpeed);
+                } else if (phase === 'fast') {
+                    this.cardContainer.gotoAndStop(currentFrame % totalFrames);
+                    currentFrame++;
+                    if (currentFrame >= totalFrames * 2) {
+                        phase = 'waitSound';
+                    }
+                    setTimeout(tickSpin, fastSpeed);
+                } else if (phase === 'waitSound') {
+                    // 音效未结束：继续匀速转
+                    if (!soundFinished) {
+                        this.cardContainer.gotoAndStop(currentFrame % totalFrames);
+                        currentFrame++;
+                        setTimeout(tickSpin, extraSpinFastSpeed);
+                    } else {
+                        // 进入最终收敛
+                        phase = 'final';
+                        finalPhase();
+                    }
                 }
             };
 
-            // 第二阶段：快速播放 (2秒)
-            const fastSpeed = 30; // 每帧30ms
-            const fastPhase = () => {
-                if (currentFrame < totalFrames * 2) {
-                    this.cardContainer.gotoAndStop(currentFrame % totalFrames);
-                    currentFrame++;
-                    setTimeout(fastPhase, fastSpeed);
-                } else {
-                    finalPhase();
-                }
-            };
-
-            // 第三阶段：慢速定位到目标帧 (1秒)
             const finalPhase = () => {
                 // 根据概率确定最终卡牌
                 const cardResult = this.getCardByProbability();
-                // 将卡牌ID映射到对应的帧数
-                const finalFrame = this.getFrameByCardId(cardResult.id);
+                const targetFrame = this.getFrameByCardId(cardResult.id);
 
-                const frameDistance = Math.abs(finalFrame - (currentFrame % totalFrames));
+                const currentPos = currentFrame % totalFrames;
+                const frameDistance = Math.abs(targetFrame - currentPos);
                 const steps = Math.min(frameDistance, 10);
-                let stepCount = 0;
+                let step = 0;
 
-                const finalStep = () => {
-                    if (stepCount < steps) {
-                        const progress = stepCount / steps;
-                        const currentPos = (currentFrame % totalFrames);
-                        const targetPos = finalFrame;
-                        const framePos = Math.round(currentPos + (targetPos - currentPos) * progress);
-
+                const easeStep = () => {
+                    if (step < steps) {
+                        const progress = step / steps;
+                        const framePos = Math.round(currentPos + (targetFrame - currentPos) * progress);
                         this.cardContainer.gotoAndStop(framePos % totalFrames);
-                        stepCount++;
-                        setTimeout(finalStep, 100);
+                        step++;
+                        setTimeout(easeStep, 100);
                     } else {
-                        // 最终停在目标帧
-                        this.cardContainer.gotoAndStop(finalFrame);
-                        console.log(`🎲 动画停止在第 ${finalFrame} 帧，抽中: ${cardResult.name}`);
-
-                        // 播放结果音效
+                        this.cardContainer.gotoAndStop(targetFrame);
+                        console.log(`🎲 最终停在帧 ${targetFrame} -> ${cardResult.name}`);
+                        // 结果音效
                         this.playSound('cardReveal');
-
-                        // 显示结果消息并调用激励广告
                         this.showMessage(`恭喜获得: ${cardResult.name}`);
-
-                        // 调用激励广告
                         this.showRewardedAd(cardResult);
-
+                        spinning = false;
                         resolve();
                     }
                 };
+                easeStep();
+            };
 
-                finalStep();
-            }
-
-            // 开始慢速阶段
-            slowPhase();
+            tickSpin();
         });
     }
 
@@ -363,8 +468,8 @@ class CardGame {
 
         const messageText = new createjs.Text(message, 'bold 20px Arial', '#FFD700');
         messageText.textAlign = 'center';
-        messageText.x = this.victoryMc.x || 400;
-        messageText.y = (this.victoryMc.y || 300) - 100;
+        messageText.x = this.cardContainer.x || 400;
+        messageText.y = (this.cardContainer.y || 300) - 100;
         messageText.alpha = 0;
 
         this.stage.addChild(messageText);
@@ -399,8 +504,8 @@ class CardGame {
      * 显示抽卡界面
      */
     show() {
-        if (this.victoryMc) {
-            this.victoryMc.visible = true;
+        if (this.cardContainer) {
+            this.cardContainer.visible = true;
         }
     }
 
@@ -408,8 +513,8 @@ class CardGame {
      * 隐藏抽卡界面
      */
     hide() {
-        if (this.victoryMc) {
-            this.victoryMc.visible = false;
+        if (this.cardContainer) {
+            this.cardContainer.visible = false;
         }
     }
 }

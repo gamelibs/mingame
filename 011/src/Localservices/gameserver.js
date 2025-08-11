@@ -1889,24 +1889,24 @@ class GameServer {
             newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
         }
 
-        this.currNum++;
-        if(this.currNum > 4){
-            // 测试胜利
-            // console.log(`当前用户的合成次数：${this.currNum}`);
-            return {
-                    code: 0,
-                    fromCellId: fromCellId,
-                    toCellId: toCellId,
-                    path: path,
-                    eggType: eggType,
-                    positionsToDelete: positionsToDelete,
-                    synthesis: synthesisData,
-                    newEggs: [],
-                    isVictory: true,
-                    reason: 'max_egg_level_reached',
-                    message: "恭喜！您合成了最高等级的蛋！"
-                };
-        }
+        // this.currNum++;
+        // if(this.currNum > 4){
+        //     // 测试胜利
+        //     // console.log(`当前用户的合成次数：${this.currNum}`);
+        //     return {
+        //             code: 0,
+        //             fromCellId: fromCellId,
+        //             toCellId: toCellId,
+        //             path: path,
+        //             eggType: eggType,
+        //             positionsToDelete: positionsToDelete,
+        //             synthesis: synthesisData,
+        //             newEggs: [],
+        //             isVictory: true,
+        //             reason: 'max_egg_level_reached',
+        //             message: "恭喜！您合成了最高等级的蛋！"
+        //         };
+        // }
 
 
         // 测试失败
