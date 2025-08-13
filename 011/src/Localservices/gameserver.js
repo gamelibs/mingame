@@ -1679,7 +1679,7 @@ class GameServer {
 
         // 情况-1：点击空位置 + 没有选中蛋
         if (cell.isEmpty || !cell.hasEgg) {
-            console.log(`📍 点击了空位置: 格子${cellId}`);
+            // console.log(`📍 点击了空位置: 格子${cellId}`);
             return {
                 code: -1,
                 step: 0,  // 步骤0：错误或无效操作
@@ -1690,7 +1690,7 @@ class GameServer {
 
         // 情况2：选择新蛋（当前没有选中任何蛋）
         if (!this.selectionState.isSelected) {
-            console.log(`🎯 选择新蛋: 格子${cellId}, 类型${cell.eggType}`);
+            // console.log(`🎯 选择新蛋: 格子${cellId}, 类型${cell.eggType}`);
 
             this.selectionState.selectedEgg = {
                 cellId: cellId,
@@ -1709,7 +1709,7 @@ class GameServer {
 
         // 情况3：取消选择（点击当前选中的蛋）
         if (this.selectionState.selectedEgg.cellId === cellId) {
-            console.log(`🔄 取消选择: 格子${cellId}`);
+            // console.log(`🔄 取消选择: 格子${cellId}`);
 
             this.selectionState.selectedEgg = null;
             this.selectionState.isSelected = false;
@@ -1724,7 +1724,7 @@ class GameServer {
 
         // 情况4：切换选择（点击其他蛋）
         const oldCellId = this.selectionState.selectedEgg.cellId;
-        console.log(`🔄 切换选择: ${oldCellId} -> ${cellId}`);
+        // console.log(`🔄 切换选择: ${oldCellId} -> ${cellId}`);
 
         this.selectionState.selectedEgg = {
             cellId: cellId,
@@ -2205,7 +2205,7 @@ class GameServer {
             }
         }
 
-        console.log(`📊 后端地图统计: 总共${occupiedCells.length}个蛋`);
+        // console.log(`📊 后端地图统计: 总共${occupiedCells.length}个蛋`);
         return occupiedCells;
     }
 

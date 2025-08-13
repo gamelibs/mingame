@@ -185,7 +185,7 @@ class CardGame {
                 loopSound: true
             });
             this.playSound('cardReveal');
-            this.showMessage(`恭喜获得: ${result.name}`);
+            // this.showMessage(`恭喜获得: ${result.name}`);
             this.showRewardedAd(result);
         } catch (e) {
             console.error('❌ 抽卡失败:', e);
@@ -348,7 +348,7 @@ class CardGame {
                         console.log(`🎲 最终停在帧 ${targetFrame} -> ${cardResult.name}`);
                         // 结果音效
                         this.playSound('cardReveal');
-                        this.showMessage(`恭喜获得: ${cardResult.name}`);
+                        // this.showMessage(`恭喜获得: ${cardResult.name}`);
                         this.showRewardedAd(cardResult);
                         spinning = false;
                         resolve();

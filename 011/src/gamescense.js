@@ -824,7 +824,7 @@ class GameScense {
      * 根据鼠标位置获取格子ID
      */
     getCellIdFromPosition(x, y) {
-        console.log(`🔍 计算格子位置: 点击坐标(${x}, ${y})`);
+        // console.log(`🔍 计算格子位置: 点击坐标(${x}, ${y})`);
 
         // 获取偏移量（如果没有设置则为0）
         const offsetX = this.chessboard.offsetX || 0;
@@ -1268,7 +1268,7 @@ class GameScense {
      * 处理格子点击（蛋选择交互）
      */
     async handleCellClick(cellId) {
-        console.log(`🖱️ 处理格子点击: ${cellId}`);
+        // console.log(`🖱️ 处理格子点击: ${cellId}`);
         try {
             // 检查是否可以交互
             if (!this.canInteract()) {
@@ -1610,7 +1610,7 @@ class GameScense {
                     piece: piece,
                     isTarget: cellId === synthesisPosition
                 });
-                console.log(`🥚 找到参与合成的蛋: 格子${cellId} ${cellId === synthesisPosition ? '(目标位置)' : ''}, 元件名称: ${piece.name || 'unnamed'}, 元件ID: ${piece.id || 'no-id'}`);
+                // console.log(`🥚 找到参与合成的蛋: 格子${cellId} ${cellId === synthesisPosition ? '(目标位置)' : ''}, 元件名称: ${piece.name || 'unnamed'}, 元件ID: ${piece.id || 'no-id'}`);
             } else {
                 console.warn(`⚠️ 格子 ${cellId} 没有找到对应的蛋元件`);
             }
@@ -1667,7 +1667,7 @@ class GameScense {
             return;
         }
 
-        console.log(`🎯 合成目标位置 ${targetCellId}: (${targetPosition.centerX}, ${targetPosition.centerY})`);
+        // console.log(`🎯 合成目标位置 ${targetCellId}: (${targetPosition.centerX}, ${targetPosition.centerY})`);
         console.log(`🔍 要处理的蛋数量: ${eggs.length}`);
 
         const promises = [];
@@ -1677,24 +1677,24 @@ class GameScense {
         }
         for (const eggData of eggs) {
             if (eggData.piece) {
-                console.log(`🔍 处理格子 ${eggData.cellId} 的蛋，元件名称: ${eggData.piece.name || 'unnamed'}`);
+                // console.log(`🔍 处理格子 ${eggData.cellId} 的蛋，元件名称: ${eggData.piece.name || 'unnamed'}`);
 
                 if (eggData.isTarget) {
                     // 目标位置的蛋：直接删除
-                    console.log(`🎯 目标位置蛋 ${eggData.cellId} 直接删除`);
+                    // console.log(`🎯 目标位置蛋 ${eggData.cellId} 直接删除`);
 
                     // 确保从父容器中移除
                     if (eggData.piece.parent) {
                         eggData.piece.parent.removeChild(eggData.piece);
-                        utile.__sdklog3(`🗑️ 从父容器移除格子 ${eggData.cellId} 的蛋`);
+                        // utile.__sdklog3(`🗑️ 从父容器移除格子 ${eggData.cellId} 的蛋`);
                     }
 
                     // 从映射中删除
                     this.chessboard.pieces.delete(eggData.cellId);
-                    console.log(`🗑️ 删除目标位置蛋映射: 格子${eggData.cellId}`);
+                    // console.log(`🗑️ 删除目标位置蛋映射: 格子${eggData.cellId}`);
                 } else {
                     // 非目标位置的蛋：移动到目标位置后删除
-                    console.log(`🚶 蛋从格子 ${eggData.cellId} 移动到目标位置 ${targetCellId}`);
+                    // console.log(`🚶 蛋从格子 ${eggData.cellId} 移动到目标位置 ${targetCellId}`);
 
                     const promise = new Promise((resolve) => {
                         createjs.Tween.get(eggData.piece)
@@ -1706,7 +1706,7 @@ class GameScense {
                                 alpha: 0.8
                             }, 300, createjs.Ease.quadInOut)
                             .call(() => {
-                                console.log(`🚶 格子 ${eggData.cellId} 的蛋移动完成`);
+                                // console.log(`🚶 格子 ${eggData.cellId} 的蛋移动完成`);
 
                                 // 确保从父容器中移除
                                 if (eggData.piece.parent) {
@@ -1714,7 +1714,7 @@ class GameScense {
                                 }
 
                                 this.chessboard.pieces.delete(eggData.cellId);
-                                utile.__sdklog3(`🗑️ 删除移动后的蛋: 格子${eggData.cellId}`);
+                                // utile.__sdklog3(`🗑️ 删除移动后的蛋: 格子${eggData.cellId}`);
                                 resolve();
                             });
                     });
@@ -2403,6 +2403,7 @@ class GameScense {
             console.log('✅ 失败界面显示完成');
         } else {
             this.closeCardRewardPanel()
+            this.engine.playSound('select_jiji');
             this.showPanel(panelUI, false, () => {
                 console.log('✅ 失败界面隐藏动画完成');
 
