@@ -89,8 +89,17 @@ class GameEngine {
                 } else if ('paused' in this.bgmInstance) {
                     this.bgmInstance.paused = true;
                 } else {
-                    // 最退化：直接 stop
-                    this.stopSound('bgm');
+                    // 无直接 pause 接口时，尽量保持实例存在，不强制 stop（避免永久中断）
+                    try {
+                        if (this.bgmInstance && typeof this.bgmInstance.setPaused === 'function') {
+                            this.bgmInstance.setPaused(true);
+                        } else if (this.bgmInstance && 'paused' in this.bgmInstance) {
+                            this.bgmInstance.paused = true;
+                        }
+                    } catch (e) {
+                        // 如果无法 pause，避免调用 stop 导致实例被置空，改为记录状态仅用于恢复时重新 play
+                        this.soundStatus['bgm'] = false;
+                    }
                 }
             } catch (e) {
                 console.warn('暂停 BGM 失败, 采用 stop 回退', e);
@@ -160,14 +169,14 @@ class GameEngine {
         };
         window.addEventListener('blur', pauseGame);
         window.addEventListener('focus', resumeGame);
-        console.log('🎮 焦点事件监听已添加');
+        // console.log('🎮 焦点事件监听已添加');
     }
 
     getLoadingCompositionId() {
         // 方法1：从配置文件获取loading组合ID（推荐）
         if (this.config && this.config.compositions && this.config.compositions.loading) {
             const loadingId = this.config.compositions.loading.id;
-            console.log('从配置文件获取loading组合ID:', loadingId);
+            // console.log('从配置文件获取loading组合ID:', loadingId);
             return loadingId;
         }
 
@@ -175,7 +184,7 @@ class GameEngine {
         if (typeof AdobeAn !== 'undefined' && AdobeAn.compositions) {
             const compositionIds = Object.keys(AdobeAn.compositions);
             if (compositionIds.length > 0) {
-                console.log('从AdobeAn.compositions获取ID:', compositionIds[0]);
+                // console.log('从AdobeAn.compositions获取ID:', compositionIds[0]);
                 return compositionIds[0];
             }
         }
@@ -187,7 +196,7 @@ class GameEngine {
         }
 
         // 方法4：回退到硬编码ID（兼容性）
-        console.warn('无法动态获取组合ID，使用默认值');
+        // console.warn('无法动态获取组合ID，使用默认值');
         return "12AB51DFDAB942FF88C62B7BF520AB4C";
     }
 
@@ -195,7 +204,7 @@ class GameEngine {
         // 从配置文件获取游戏组合ID
         if (this.config && this.config.compositions && this.config.compositions.game) {
             const gameId = this.config.compositions.game.id;
-            console.log('从配置文件获取game组合ID:', gameId);
+            // console.log('从配置文件获取game组合ID:', gameId);
             return gameId;
         }
 
@@ -1086,60 +1095,11 @@ class GameEngine {
             return null;
         }
 
-        // 检查是否允许自动播放
-        // if (!this.audioEnabled && !options.userTriggered) {
-        //     console.warn(`🎵 浏览器阻止自动播放，需要用户交互: ${id}`);
-        //     return null;
-        // }
+     
         const isMusicEnabled = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true'; // 默认开启音乐
         const isSoundEnabled = localStorage.getItem('soundEnabled') === null || localStorage.getItem('soundEnabled') === 'true'; // 默认开启音效
 
-        // ---- 背景音乐特殊处理（避免重复播放导致叠音） ----
-        // if (id === 'bgm') {
-        //     if (!this.__bgmPlayLog__) this.__bgmPlayLog__ = 0;
-        //     this.__bgmPlayLog__++;
-        //     console.log(`[BGM_TRACE] 请求播放 BGM (#${this.__bgmPlayLog__}) soundStatus=`, this.soundStatus[id]);
-        //     if (!isMusicEnabled) {
-        //         // 用户关闭音乐
-        //         this.stopSound('bgm');
-        //         return null;
-        //     }
-
-        //     // 已经在播放则直接返回（去重）
-        //     if (this.soundStatus[id]) {
-        //         // console.log('🎵 BGM 已在播放，跳过重复调用');
-        //         return null;
-        //     }
-
-        //     // 规范化 loop / volume 
-        //     const bgmOptions = {
-        //         loop: -1,
-        //         volume: (typeof options.volume === 'number') ? options.volume : 1,
-        //         ...options
-        //     };
-
-        //     if (createjs.Sound.muted) {
-        //         createjs.Sound.muted = false; // 解锁
-        //     }
-
-        //     try {
-        //         const instance = createjs.Sound.play(id, bgmOptions);
-        //         if (instance && instance.playState === createjs.Sound.PLAY_SUCCEEDED) {
-        //             this.soundStatus[id] = true; // 标记已播放，防止二次触发
-        //             this.bgmInstance = instance;
-        //             // 当音乐自然结束（虽然 loop:-1 理论上不会）或被中止时重置状态
-        //             instance.on('complete', () => { this.soundStatus[id] = false; });
-        //             instance.on('failed', () => { this.soundStatus[id] = false; });
-        //             instance.on('interrupted', () => { this.soundStatus[id] = false; });
-        //         } else {
-        //             console.warn('🎵 BGM 播放未成功，状态：', instance && instance.playState);
-        //         }
-        //         return instance;
-        //     } catch (e) {
-        //         console.error('🎵 BGM 播放异常:', e);
-        //         return null;
-        //     }
-        // }
+        
 
         if (id === 'bgm') {
             return this.playBGM({ volume: (typeof options.volume === 'number') ? options.volume : 0.4 });
@@ -1158,10 +1118,10 @@ class GameEngine {
                 if (instance) {
 
                     if (instance.playState === createjs.Sound.PLAY_SUCCEEDED) {
-                        console.log(`🎵 声音正在播放: ${id}`);
+                        // console.log(`🎵 声音正在播放: ${id}`);
                         this.soundStatus[id] = true;
                     } else if (instance.playState === createjs.Sound.PLAY_FAILED) {
-                        console.error(`🎵 声音播放失败: ${id}`);
+                        // console.error(`🎵 声音播放失败: ${id}`);
                         this.soundStatus[id] = false;
                     }
                     return instance;
@@ -1206,33 +1166,7 @@ class GameEngine {
         return !!this.soundStatus['bgm'];
     }
 
-    // /**
-    //  * 播放背景音乐（供外部 UI 调用的语义化封装）
-    //  * @param {Object} options 例如 {loop:-1, volume:0.4}
-    //  */
-    // playBGM(options = {}) {
-    //     const musicEnabled = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true';
-    //     if (!musicEnabled) {
-    //         console.log('🎵 音乐被关闭，playBGM 忽略');
-    //         return null;
-    //     }
-    //     if (!this.soundInitialized) {
-    //         console.warn('🎵 SoundJS 尚未初始化，稍后再尝试播放 BGM');
-    //         return null;
-    //     }
-    //     if (this.isBGMPlaying()) {
-    //         return this.bgmInstance; // 已在播放
-    //     }
-    //     const merged = { loop: -1, volume: 0.4, ...options };
-    //     return this.playSound('bgm', merged);
-    // }
-
-    // /**
-    //  * 停止背景音乐（语义化封装）
-    //  */
-    // stopBGM() {
-    //     this.stopSound('bgm');
-    // }
+   
 
     setBGMLoopWindow(startOffsetMs = 0, loopDurationMs = null, crossfadeMs = 80) {
         this._bgmOffsetMs = Math.max(0, startOffsetMs);
@@ -1248,9 +1182,17 @@ class GameEngine {
         // 若已在播，直接返回
         if (this.bgmInstance && this.bgmInstance.playState === createjs.Sound.PLAY_SUCCEEDED) return;
 
-        // 启动第一段
-        this._startBgmSegment(opts.volume != null ? opts.volume : 0.5);
-        this._beginBgmMonitor();
+        // 使用简单无限循环播放（保持旧行为，避免分段切换逻辑导致中断）
+        try {
+            const vol = opts.volume != null ? opts.volume : 0.5;
+            const inst = createjs.Sound.play('bgm', { loop: -1, volume: vol, offset: this._bgmOffsetMs || 0 });
+            if (inst && inst.playState === createjs.Sound.PLAY_SUCCEEDED) {
+                this.bgmInstance = inst;
+                this.soundStatus && (this.soundStatus['bgm'] = true);
+            }
+        } catch (e) {
+            console.warn('⚠️ playBGM fallback failed', e);
+        }
     }
 
     stopBGM() {
@@ -1316,17 +1258,7 @@ class GameEngine {
                             offset: this._bgmOffsetMs || 0,
                             volume: 0
                         });
-                        // 30ms 内淡入到目标音量
-                        const targetVol = cur.volume != null ? cur.volume : 0.5;
-                        const step = targetVol / 3; // 3 帧淡入
-                        let i = 0;
-                        const fadeIn = () => {
-                            if (!this._bgmNext) return;
-                            i++;
-                            this._bgmNext.volume = Math.min(targetVol, (this._bgmNext.volume || 0) + step);
-                            if (i < 3) requestAnimationFrame(fadeIn);
-                        };
-                        requestAnimationFrame(fadeIn);
+                        
                     } catch (e) { }
                 }
 

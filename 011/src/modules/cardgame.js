@@ -23,14 +23,14 @@ class CardGame {
 
         // 卡牌配置
         this.cardConfig = {
-            0: { name: '锤子', rarity: 'hammer', probability: 100 },
-            1: { name: '灰龙', rarity: 'common', probability: 0 },
-            2: { name: '绿龙', rarity: 'rare', probability: 0 },
-            3: { name: '蓝龙', rarity: 'epic', probability: 0 },
-            4: { name: '黑龙', rarity: 'evildragon', probability: 0 },
-            5: { name: '紫龙', rarity: 'legendary', probability: 0 },
-            6: { name: '红龙', rarity: 'legendary', probability: 0 },
-            7: { name: '黄金龙', rarity: 'legendary', probability: 0 },
+            0: { name: '锤子', eggid: 7, rarity: 'hammer', probability: 0 },//+100
+            1: { name: '黄金龙', eggid: 6, rarity: 'legendary', probability: 70 },//+30
+            2: { name: '红龙', eggid: 5, rarity: 'legendary', probability: 80 },//+20
+            3: { name: '紫龙', eggid: 4, rarity: 'legendary', probability: 50 },//+50
+            4: { name: '黑龙', eggid: 0, rarity: 'evildragon', probability: 100 },//+0
+            5: { name: '灰龙', eggid: 1, rarity: 'common', probability: 90 },//+10
+            6: { name: '绿龙', eggid: 2, rarity: 'rare', probability: 40 },//+60
+            7: { name: '蓝龙', eggid: 3, rarity: 'epic', probability: 20 },//80
         };
 
         // UI元件
@@ -177,8 +177,19 @@ class CardGame {
 
         try {
             const result = this.getCardByProbability();
+            // 将抽卡结果写回服务端概率池（记录 boost），默认增量为1
+            try {
+                if (window.GameServer && typeof window.GameServer.applyCardBoost === 'function') {
+                    // 使用 n = (100 - probability) / 100 作为小数增量
+                    const prob = Number(result.probability) || 0;
+                    const n = Math.max(0, Math.min(1, (100 - prob) / 1000));
+                    if(n!==0){
+                        window.GameServer.applyCardBoost(result.eggid, n);
+                    }
+                }
+            } catch (e) { }
             // 随机圈数（可调 5~8 / 6~9）
-            const rotations = 6 + Math.floor(Math.random() * 4); // 6~9
+            const rotations = 9 + Math.floor(Math.random() * 4); // 6~9
             await this.spinToResultSimple(result, {
                 rotations,
                 framesPerTick: 1,   // 每 tick 前进帧数(提高=更快)
@@ -236,7 +247,7 @@ class CardGame {
                 try {
                     mc.gotoAndStop(targetFrame);
                     if (spinSoundInstance) spinSoundInstance.stop && spinSoundInstance.stop();
-                    
+
                 } catch (e) { }
                 createjs.Ticker.off('tick', tickHandler);
                 resolve();
@@ -266,11 +277,11 @@ class CardGame {
   * 播放卡牌动画
   */
     /**
-       * 播放卡牌动画 + 等待音效(card.mp3)结束后才显示结果
+       * 播放卡牌动画缓慢停止 + 等待音效(card.mp3)结束后才显示结果
        * @param {string} soundId
        */
     async playCardAnimation(soundId = 'card') {
-        console.log('🎬 播放卡牌动画并等待音效结束...');
+        // console.log('🎬 播放卡牌动画并等待音效结束...');
         return new Promise(async (resolve) => {
             if (!this.cardContainer) {
                 console.error('❌ cardContainer 为空');
@@ -294,37 +305,37 @@ class CardGame {
             const fastSpeed = 30;  // 中段快速
             const extraSpinFastSpeed = 40; // 等待音效时的额外旋转速度
 
-            const tickSpin = () => {
-                if (!spinning) return;
+            // const tickSpin = () => {
+            //     if (!spinning) return;
 
-                // 选择当前速度
-                if (phase === 'slow') {
-                    this.cardContainer.gotoAndStop(currentFrame % totalFrames);
-                    currentFrame++;
-                    if (currentFrame >= totalFrames * 0.3) {
-                        phase = 'fast';
-                    }
-                    setTimeout(tickSpin, slowSpeed);
-                } else if (phase === 'fast') {
-                    this.cardContainer.gotoAndStop(currentFrame % totalFrames);
-                    currentFrame++;
-                    if (currentFrame >= totalFrames * 2) {
-                        phase = 'waitSound';
-                    }
-                    setTimeout(tickSpin, fastSpeed);
-                } else if (phase === 'waitSound') {
-                    // 音效未结束：继续匀速转
-                    if (!soundFinished) {
-                        this.cardContainer.gotoAndStop(currentFrame % totalFrames);
-                        currentFrame++;
-                        setTimeout(tickSpin, extraSpinFastSpeed);
-                    } else {
-                        // 进入最终收敛
-                        phase = 'final';
-                        finalPhase();
-                    }
-                }
-            };
+            //     // 选择当前速度
+            //     if (phase === 'slow') {
+            //         this.cardContainer.gotoAndStop(currentFrame % totalFrames);
+            //         currentFrame++;
+            //         if (currentFrame >= totalFrames * 0.3) {
+            //             phase = 'fast';
+            //         }
+            //         setTimeout(tickSpin, slowSpeed);
+            //     } else if (phase === 'fast') {
+            //         this.cardContainer.gotoAndStop(currentFrame % totalFrames);
+            //         currentFrame++;
+            //         if (currentFrame >= totalFrames * 2) {
+            //             phase = 'waitSound';
+            //         }
+            //         setTimeout(tickSpin, fastSpeed);
+            //     } else if (phase === 'waitSound') {
+            //         // 音效未结束：继续匀速转
+            //         if (!soundFinished) {
+            //             this.cardContainer.gotoAndStop(currentFrame % totalFrames);
+            //             currentFrame++;
+            //             setTimeout(tickSpin, extraSpinFastSpeed);
+            //         } else {
+            //             // 进入最终收敛
+            //             phase = 'final';
+            //             finalPhase();
+            //         }
+            //     }
+            // };
 
             const finalPhase = () => {
                 // 根据概率确定最终卡牌
@@ -345,7 +356,7 @@ class CardGame {
                         setTimeout(easeStep, 100);
                     } else {
                         this.cardContainer.gotoAndStop(targetFrame);
-                        console.log(`🎲 最终停在帧 ${targetFrame} -> ${cardResult.name}`);
+                        // console.log(`🎲 最终停在帧 ${targetFrame} -> ${cardResult.name}`);
                         // 结果音效
                         this.playSound('cardReveal');
                         // this.showMessage(`恭喜获得: ${cardResult.name}`);
@@ -357,7 +368,7 @@ class CardGame {
                 easeStep();
             };
 
-            tickSpin();
+            // tickSpin();
         });
     }
 
@@ -397,24 +408,49 @@ class CardGame {
  * @returns {Object} 卡牌配置对象（包含id）
  */
     getCardByProbability() {
-        const randomNum = Math.random() * 100;
-        let currentProbability = 0;
+        // 将 cardConfig[].probability 视为权重（weight），更灵活且易于和转盘增量相加
+        const entries = Object.entries(this.cardConfig);
+        const types = entries.map(([id, cfg]) => ({ id, config: cfg }));
 
-        console.log(`🎲 随机数: ${randomNum.toFixed(2)}`);
+        // 构造权重数组，负值或非数视为 0
+        const weights = types.map(t => {
+            const w = Number(t.config.probability);
+            return (isFinite(w) && w > 0) ? w : 0;
+        });
 
-        for (const [cardId, config] of Object.entries(this.cardConfig)) {
-            currentProbability += config.probability;
-            console.log(`🔍 检查卡牌${cardId}(${config.name}): 当前累计概率${currentProbability}%`);
+        const total = weights.reduce((s, x) => s + x, 0);
+        // console.log(`🎲 权重总和: ${total}`);
 
-            if (randomNum <= currentProbability) {
-                console.log(`✅ 抽中: ${config.name} (概率${config.probability}%)`);
-                return { ...config, id: cardId };
+        // 全为 0 的兜底 -> 均匀随机
+        if (total <= 0) {
+            const idx = Math.floor(Math.random() * types.length);
+            // console.log(`⚠️ 所有权重为0，均匀随机选中 ${types[idx].config.name}`);
+            return { ...types[idx].config, id: types[idx].id };
+        }
+
+        // 快速路径：若所有权重相等（例如全 1 或全 100），直接均匀随机
+        const mn = Math.min(...weights);
+        const mx = Math.max(...weights);
+        if (mn === mx) {
+            const idx = Math.floor(Math.random() * types.length);
+            // console.log(`ℹ️ 权重相等，均匀随机选中 ${types[idx].config.name}`);
+            return { ...types[idx].config, id: types[idx].id };
+        }
+
+        // 标准加权随机（累减法）
+        let r = Math.random() * total;
+        for (let i = 0; i < types.length; i++) {
+            r -= weights[i];
+            if (r <= 0) {
+                // console.log(`✅ 按权重抽中: ${types[i].config.name} (weight=${weights[i]}/${total})`);
+                return { ...types[i].config, id: types[i].id };
             }
         }
 
-        // 默认返回第一个卡牌
-        console.log('⚠️ 使用默认卡牌');
-        return { ...this.cardConfig[0], id: '0' };
+        // 浮点误差兜底
+        const last = types[types.length - 1];
+        // console.log(`⚠️ 浮点误差兜底，返回 ${last.config.name}`);
+        return { ...last.config, id: last.id };
     }
 
     /**
@@ -434,7 +470,7 @@ class CardGame {
      * @param {Object} cardResult - 抽中的卡牌结果
      */
     showRewardedAd(cardResult) {
-        console.log(`🎬 准备播放激励广告，奖励: ${cardResult.name} (+${cardResult.score}分)`);
+
 
         // 这里调用激励广告API
         // 假设广告成功后会调用回调函数
@@ -454,7 +490,7 @@ class CardGame {
      * @param {Object} cardResult - 抽中的卡牌结果
      */
     onAdWatchComplete(cardResult) {
-        console.log(`🎉 广告观看完成，获得奖励: ${cardResult.name} (+${cardResult.score}分)`);
+        console.log(`🎉 广告观看完成，获得奖励: ${cardResult.name} (+${100 - cardResult.probability}分)`);
 
 
 

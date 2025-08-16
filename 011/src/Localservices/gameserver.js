@@ -332,6 +332,32 @@ class GameServer {
             this.saveUserData('currentUser', finalUserData);
             console.log(`👤 用户初始化完成: ${isNewUser ? '新用户(需要引导)' : '老用户(恢复数据)'}`);
 
+            // 🔥 初始化 cardBoosts（默认 base 权重），仅当没有持久化数据时使用
+            if (!this.cardBoosts || Object.keys(this.cardBoosts).length === 0) {
+                this.cardBoosts = {
+                    // 1: 0.5, // 灰
+                    // 2: 0.5, // 绿
+                    // 3: 0.5, // 蓝
+                    // 4: 0.2, // 紫
+                    // 5: 0.1, // 黄
+                    // 6: 0 // 橙
+                     1: 1, // 灰
+                    2:1, // 绿
+                    3: 1, // 蓝
+                    4: 1, // 紫
+                    5: 1, // 黄
+                    6: 1 // 橙
+                };
+                // 持久化默认 gameData 中的 cardBoosts（便于后续调整）
+                try {
+                    const gd = this.loadGameData() || {};
+                    gd.cardBoosts = this.cardBoosts;
+                    gd.saveTime = Date.now();
+                    localStorage.setItem('GameData', JSON.stringify(gd));
+                    console.log('🔁 初始化并持久化默认 cardBoosts');
+                } catch (e) { }
+            }
+
             return finalUserData;
 
         } catch (error) {
@@ -1281,14 +1307,42 @@ class GameServer {
     selectRandomEggTypes(availableTypes, count) {
         const selectedTypes = [];
 
-        for (let i = 0; i < count; i++) {
-            // 使用权重分布：低级蛋出现概率更高
-            const eggType = this.generateWeightedRandomEggType(availableTypes);
-            selectedTypes.push(eggType);
-        }
+        // 处理 value===1 的强制包含类型（去重、按类型id升序）。
+        // 如果强制类型数量 >= count，则直接返回前 count 个强制类型。
+        try {
+            this.cardBoosts = this.cardBoosts || (this.loadGameData && this.loadGameData().cardBoosts) || {};
+            const forced = availableTypes.filter(t => Number(this.cardBoosts[t]) === 1).sort((a, b) => a - b);
 
-        console.log(`🎲 随机选择蛋类型: [${selectedTypes.join(', ')}] (可用范围: [${availableTypes.join(', ')}])`);
-        return selectedTypes;
+            if (forced.length >= count) {
+                const result = forced.slice(0, count);
+                console.log(`🎯 强制包含类型满足数量，返回: [${result.join(', ')}]`);
+                return result;
+            }
+
+            // 先把所有强制包含的类型加入结果（不重复）
+            for (const t of forced) {
+                if (selectedTypes.length < count) selectedTypes.push(t);
+            }
+
+            // 剩余槽位使用带权重的随机选择（有放回）
+            const remaining = count - selectedTypes.length;
+            for (let i = 0; i < remaining; i++) {
+                const eggType = this.generateWeightedRandomEggType(availableTypes);
+                selectedTypes.push(eggType);
+            }
+
+            console.log(`🎲 随机选择蛋类型: [${selectedTypes.join(', ')}] (可用范围: [${availableTypes.join(', ')}])`);
+            return selectedTypes;
+        } catch (e) {
+            console.error('❌ selectRandomEggTypes 失败，回退到等概率选择:', e);
+            // 兜底等概率选择
+            const fallback = [];
+            const pool = [...availableTypes];
+            for (let i = 0; i < count; i++) {
+                fallback.push(pool[Math.floor(Math.random() * pool.length)]);
+            }
+            return fallback;
+        }
     }
 
     /**
@@ -1318,36 +1372,36 @@ class GameServer {
         // 4号蛋：20/150 = 13.3%
         // 5号蛋：10/150 = 6.7%
         // // 为每个可用类型分配权重（低级蛋权重更高）
-        const weights = [];
-        const maxType = Math.max(...availableTypes);
+        // const weights = [];
+        // const maxType = Math.max(...availableTypes);
 
-        for (const eggType of availableTypes) {
-            // 权重计算：最高级的权重最低，最低级的权重最高
-            const weight = Math.max(1, (maxType - eggType + 1) * 10);
-            weights.push(weight);
-        }
+        // for (const eggType of availableTypes) {
+        //     // 权重计算：最高级的权重最低，最低级的权重最高
+        //     const weight = Math.max(1, (maxType - eggType + 1) * 10);
+        //     weights.push(weight);
+        // }
 
-        // 根据权重随机选择
-        const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
-        let random = Math.random() * totalWeight;
+        // // 根据权重随机选择
+        // const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+        // let random = Math.random() * totalWeight;
 
-        for (let i = 0; i < availableTypes.length; i++) {
-            random -= weights[i];
-            if (random <= 0) {
-                // console.log(`🎯 权重选择: 类型${availableTypes[i]} (权重${weights[i]}/${totalWeight})`);
-                return availableTypes[i];
-            }
-        }
+        // for (let i = 0; i < availableTypes.length; i++) {
+        //     random -= weights[i];
+        //     if (random <= 0) {
+        //         // console.log(`🎯 权重选择: 类型${availableTypes[i]} (权重${weights[i]}/${totalWeight})`);
+        //         return availableTypes[i];
+        //     }
+        // }
 
         // 算法2
-        // 以5种蛋为例，权重如下（可根据实际解锁数量调整）
+        // 以7种蛋为例，权重如下（可根据实际解锁数量调整）
         // const customWeights = {
         //     1: 40,
         //     2: 35,
         //     3: 25,
         //     4: 23,
-        //     5: 1,   // 最高级蛋概率约0.8%
-        //     6: 1,   // 如有更高等级蛋，同样极低概率
+        //     5: 1,   
+        //     6: 1,
         //     7: 1
         // };
 
@@ -1363,8 +1417,48 @@ class GameServer {
         //     }
         // }
 
-        // 兜底返回最低级
-        return availableTypes[0];
+        // // 兜底返回最低级
+        // return availableTypes[0];
+
+
+        // 算法3：使用 this.cardBoosts 作为基础权重（initializeUserData 时已设置默认值），
+        // 并将 cardBoosts 的值视作 base 权重，抽卡时会在此基础上累加额外 boost。
+        // 使用 this.cardBoosts 的 0..1 数值作为权重（0 = 永不出现，1 = 保证出现）。
+        // 确保 cardBoosts 已初始化（initializeUserData 已会设置默认值）
+        this.cardBoosts = this.cardBoosts || (this.loadGameData && this.loadGameData().cardBoosts) || {};
+
+        // 构建权重数组，跳过权重为 0 的类型
+        const weights = [];
+        const types = [];
+        for (const type of availableTypes) {
+            const w = Number(this.cardBoosts[type]);
+            // 如果未定义或不是有限数值，视为 0（即不出现）
+            if (!isFinite(w) || w <= 0) continue;
+            // 类型权重在 0..1 范围内
+            const ww = Math.max(0, Math.min(1, w));
+            weights.push(ww);
+            types.push(type);
+        }
+
+        // 如果所有权重都为 0，则回退到等概率选择（包含所有 availableTypes）
+        if (weights.length === 0) {
+            // 兜底等概率
+            const idx = Math.floor(Math.random() * availableTypes.length);
+            return availableTypes[idx];
+        }
+
+        const totalWeight = weights.reduce((s, x) => s + x, 0);
+
+        // 如果 totalWeight 为 0（不太可能），兜底返回第一个
+        if (totalWeight <= 0) return types[0] || availableTypes[0];
+
+        let random = Math.random() * totalWeight;
+        for (let i = 0; i < weights.length; i++) {
+            random -= weights[i];
+            if (random <= 0) return types[i];
+        }
+
+        return types[types.length - 1] || availableTypes[0];
     }
 
 
@@ -1529,6 +1623,8 @@ class GameServer {
                 scoreSystem: this.scoreSystem, // 只保存总分数
                 difficulty: this.difficulty || 4,
                 maxUnlockedEggType: this.maxUnlockedEggType || 1,
+                // 保存抽卡带来的权重加成（card boosts），用于影响后续蛋的生成概率
+                cardBoosts: this.cardBoosts || {},
                 saveTime: Date.now()
             };
 
@@ -1538,6 +1634,43 @@ class GameServer {
 
         } catch (error) {
             console.error('❌ 保存游戏状态失败:', error);
+        }
+    }
+
+    /**
+     * 将抽卡结果写入 cardBoosts（并持久化）
+     * @param {number|string} cardType - 卡牌/蛋 类型
+     * @param {number} amount - 增量（默认为 1）
+     */
+    applyCardBoost(cardType, amount = 0) {
+        try {
+            if (cardType === undefined || cardType === null) return;
+            const key = String(cardType);
+            if (!this.cardBoosts) this.cardBoosts = {};
+            const cur = Number(this.cardBoosts[key]) || 0;
+            // amount is expected to be a decimal in 0..1
+            let delta = Number(amount || 0);
+            if (!isFinite(delta)) delta = 0;
+            let next = cur + delta;
+            // 上限为 1
+            const MAX_BOOST = 1;
+            next = Math.max(0, Math.min(MAX_BOOST, next));
+            this.cardBoosts[key] = next;
+            // 立即持久化：优先直接写入 GameData.cardBoosts（避免新手引导期间 saveCurrentGameState 被阻止）
+            try {
+                const gd = this.loadGameData() || {};
+                gd.cardBoosts = this.cardBoosts;
+                gd.saveTime = Date.now();
+                localStorage.setItem('GameData', JSON.stringify(gd));
+            } catch (e) {
+                // 兜底尝试 saveCurrentGameState（老逻辑）
+                try { this.saveCurrentGameState(); } catch (e2) { /* ignore */ }
+            }
+            console.log(`🔔 applyCardBoost: type=${key}, +${delta} -> ${next}`);
+            return this.cardBoosts;
+        } catch (e) {
+            console.error('❌ applyCardBoost 失败:', e);
+            return null;
         }
     }
 
@@ -1577,6 +1710,14 @@ class GameServer {
                 this.maxUnlockedEggType = gameData.maxUnlockedEggType;
                 console.log(`🏆 解锁等级已恢复: ${gameData.maxUnlockedEggType}`);
 
+            }
+
+            // 🔥 恢复 cardBoosts（抽卡带来的概率加成）
+            if (gameData.cardBoosts !== undefined) {
+                this.cardBoosts = gameData.cardBoosts || {};
+                console.log('🔁 cardBoosts 已恢复:', this.cardBoosts);
+            } else {
+                this.cardBoosts = this.cardBoosts || {};
             }
 
             console.log('✅ 游戏状态恢复完成');

@@ -353,7 +353,7 @@ utile.addFrameEnd = function (taget, callback, tf) {
                 }
                 taget.timeline.removeTween();
                 taget.removeAllEventListeners();
-                callback(taget);
+                callback && callback(taget);
             }).wait(1)
     );
 }

@@ -78,11 +78,6 @@ class GameScense {
 
             // 初始化失败和胜利界面（隐藏状态）
 
-            // this.failureHandler(false);
-            // this.victoryHandler(false);
-            // this.settingHandler(false);
-            // this.onSettingGame();
-
             // 添加点击事件监听
             if (this.gamebox && !this.gamebox.hasEventListener("click")) {
                 this.gamebox.on('click', this.onGameboxClick, this);
@@ -137,6 +132,7 @@ class GameScense {
             const failureMc = utile.findMc(this.exportRoot, 'mc_failure');
             if (failureMc) {
                 failureMc.visible = false; // 初始隐藏失败界面
+
                 // 查找屏蔽层
                 const blockLayer = utile.findMc(failureMc, 'blockLayer');
                 if (blockLayer) {
@@ -156,6 +152,9 @@ class GameScense {
 
                 // 查找重新开始按钮 (btnagain)
                 const btnAgain = utile.findMc(failureMc, 'btn_tryagain');
+                // utile.goStop(btnAgain, true)
+                btnAgain.gotoAndStop(0);
+
                 if (btnAgain && !btnAgain.hasEventListener("click")) {
 
                     // 绑定重新开始按钮事件
@@ -409,7 +408,7 @@ class GameScense {
         }
     }
 
-     // 打开抽卡面板（胜利/失败后调用）
+    // 打开抽卡面板（胜利/失败后调用）
     async openCardRewardPanel(delay = 800) {
         await this.ensureCardGame();
         if (!this.cardGame || !this.cardGame.card_reward_Mc) {
@@ -423,7 +422,7 @@ class GameScense {
         }, delay);
     }
 
-        // 关闭抽卡面板
+    // 关闭抽卡面板
     closeCardRewardPanel() {
         if (!this.cardGame || !this.cardGame.card_reward_Mc) return;
         const panel = this.cardGame.card_reward_Mc;
@@ -546,7 +545,7 @@ class GameScense {
 
                 // 🔥 处理分数恢复
                 if (this.gameData.scoreSystem) {
-                    console.log('💰 恢复分数数据:', this.gameData.scoreSystem);
+                    // console.log('💰 恢复分数数据:', this.gameData.scoreSystem);
                     this.updateScoreDisplayDirectly(this.gameData.scoreSystem);
 
                 }
@@ -566,7 +565,7 @@ class GameScense {
 
                 }
                 if (eggSeat && eggType && eggSeat.length === eggType.length) {
-                    console.log(`📊 使用服务器数据生成蛋: 位置[${eggSeat}], 类型[${eggType}]`);
+                    // console.log(`📊 使用服务器数据生成蛋: 位置[${eggSeat}], 类型[${eggType}]`);
 
                     this.playLongbossAnimation();
 
@@ -577,7 +576,7 @@ class GameScense {
 
                     await Promise.all(createEggPromises);
 
-                    utile.__sdklog(`✅ 成功为生成 ${eggSeat.length} 个蛋`, this.chessboard);
+                    // utile.__sdklog(`✅ 成功为生成 ${eggSeat.length} 个蛋`, this.chessboard);
                 }
             }
         } catch (error) {
@@ -769,7 +768,7 @@ class GameScense {
         }
 
         let currentIndex = 0;
-        const moveSpeed = 200; // 每步移动时间(毫秒)
+        const moveSpeed = 100; // 每步移动时间(毫秒)
 
         const moveToNextCell = () => {
             // 播放点击音效
@@ -790,8 +789,18 @@ class GameScense {
                 }
                 // 使用 CreateJS Tween 进行平滑移动
                 createjs.Tween.get(piece)
-                    .to({ x: cellData.centerX, y: cellData.centerY }, moveSpeed, createjs.Ease.quadOut)
+                    .to({
+                        x: cellData.centerX,
+                        y: cellData.centerY,
+                        scaleX: 1.1,
+                        scaleY: 1.1,
+                    }, moveSpeed, createjs.Ease.quadOut)
+                    .to({
+                        scaleX: 1,
+                        scaleY: 1,
+                    }, moveSpeed, createjs.Ease.quadOut)
                     .call(() => {
+
                         currentIndex++;
                         moveToNextCell();
                     });
@@ -1354,7 +1363,7 @@ class GameScense {
      * 处理步骤1：选择蛋
      */
     async handleStep1(result) {
-        console.log(`🎯 选择蛋: 格子 ${result.cellId}, 类型 ${result.eggType}`);
+        // console.log(`🎯 选择蛋: 格子 ${result.cellId}, 类型 ${result.eggType}`);
 
         this.engine.playSound('select_jiji');
         // 更新游戏状态
@@ -1378,7 +1387,7 @@ class GameScense {
      * 处理步骤2：移动蛋
      */
     async handleStep2(result) {
-        console.log(`🚶 移动蛋: ${result.fromCellId} -> ${result.toCellId}`);
+        // console.log(`🚶 移动蛋: ${result.fromCellId} -> ${result.toCellId}`);
 
         // 🔥 检查游戏胜利和失败
         const isVictory = result.isVictory || false;
@@ -1398,17 +1407,17 @@ class GameScense {
         // 执行移动动画
         this.executeEggMovement(piece, result.fromCellId, result.toCellId, result.path, result.synthesis.canSynthesize)
             .then(() => {
-                console.log('✅ 蛋移动完成，开始同步映射关系');
+                // console.log('✅ 蛋移动完成，开始同步映射关系');
 
                 // 检查是否有合成
                 if (result.synthesis && result.synthesis.canSynthesize) {
 
-                    utile.__sdklog('合成数据详情:', result.synthesis);
+                    // utile.__sdklog('合成数据详情:', result.synthesis);
                     return this.executeSynthesisAnimation(result.synthesis, result.positionsToDelete);
                 } else {
                     this.chessboard.pieces.set(result.toCellId, piece);
 
-                    utile.__sdklog(`📍 更新目标位置映射: 格子${result.toCellId}`);
+                    // utile.__sdklog(`📍 更新目标位置映射: 格子${result.toCellId}`);
                 }
                 return Promise.resolve();
             })
@@ -1425,7 +1434,7 @@ class GameScense {
                         // 更新引导指示位置
                         const { pointSeat } = result.guideData;
                         if (pointSeat.length > 0 && pointSeat[0] >= 0) {
-                            console.log(`👉 后端返回新的引导位置: ${pointSeat[0]}`);
+                            // console.log(`👉 后端返回新的引导位置: ${pointSeat[0]}`);
                             this.expectedClickCellId = pointSeat[0];
                             this.waitingForClick = true;
 
@@ -1434,20 +1443,20 @@ class GameScense {
                                 this.moveGuideGestureToCell(pointSeat[0]);
                             }, 500);
                         } else {
-                            console.log('🎉 引导完成（遇到-1标记）');
+                            // console.log('🎉 引导完成（遇到-1标记）');
                             this.waitingForClick = false;
                             this.expectedClickCellId = null;
                             this.completeGuide(false);
                         }
                     } else if (result.guideData.completed) {
-                        console.log('🎉 引导流程完成');
+                        // console.log('🎉 引导流程完成');
                         this.completeGuide(false);
                     }
                 }
 
                 // 如果有新蛋数据，创建新蛋
                 if (result.newEggs && result.newEggs.length > 0) {
-                    console.log('🥚 创建新蛋');
+                    // console.log('🥚 创建新蛋');
                     // 播放龙boss动画
                     this.playLongbossAnimation();
                     const createEggPromises = result.newEggs.map(eggData =>
@@ -1467,17 +1476,17 @@ class GameScense {
                 this.selectedPiece = null;
                 this.selectedCellId = null;
                 if (isVictory) {
-                    console.log('🏆 合成动画完成，显示胜利界面');
+                    // console.log('🏆 合成动画完成，显示胜利界面');
                     this.victoryHandler(true);
                 }
                 if (isFailure) {
-                    console.log('💀 游戏失败，显示失败界面');
+                    // console.log('💀 游戏失败，显示失败界面');
 
                     setTimeout(() => {
                         this.failureHandler(true);
-                    }, 1500);
+                    }, 1000);
                 }
-                console.log('✅ 所有步骤执行完成');
+                // console.log('✅ 所有步骤执行完成');
                 return Promise.resolve();
 
             })
@@ -1495,7 +1504,7 @@ class GameScense {
      * 处理步骤3：取消选择
      */
     async handleStep3(result) {
-        console.log(`🔄 取消选择: 格子 ${result.cellId}`);
+        // console.log(`🔄 取消选择: 格子 ${result.cellId}`);
         this.engine.playSound('select_jiji');
         // 移除选中效果
         if (this.selectedPiece) {
@@ -1512,7 +1521,7 @@ class GameScense {
      * 处理步骤4：切换选择
      */
     async handleStep4(result) {
-        console.log(`🔄 切换选择: ${result.oldCellId} -> ${result.newCellId}`);
+        // console.log(`🔄 切换选择: ${result.oldCellId} -> ${result.newCellId}`);
         this.engine.playSound('select_jiji');
         // 移除旧选中效果
         if (this.selectedPiece) {
@@ -1522,7 +1531,7 @@ class GameScense {
         // 直接从前端映射获取新蛋元件
         const newPiece = this.chessboard.pieces.get(result.newCellId);
         if (newPiece) {
-            console.log(`✅ 找到新选择的蛋: 格子${result.newCellId}, 类型${newPiece.eggType}`);
+            // console.log(`✅ 找到新选择的蛋: 格子${result.newCellId}, 类型${newPiece.eggType}`);
 
             // 添加选中效果
             this.addSelectionEffect(newPiece);
@@ -1537,7 +1546,7 @@ class GameScense {
             };
         } else {
             console.error(`❌ 前端映射中找不到格子${result.newCellId}的蛋元件`);
-            console.log('🔍 当前前端映射状态:');
+            // console.log('🔍 当前前端映射状态:');
             this.printCurrentPiecesMapping();
 
             // 清除选中状态
@@ -1555,12 +1564,12 @@ class GameScense {
      * @param {Array} path - 移动路径
      */
     async executeEggMovement(piece, fromCellId, toCellId, path, isclear) {
-        console.log(`🚶 执行蛋移动动画: ${fromCellId} -> ${toCellId}`);
-        console.log('🔍 原始路径数据:', path);
+        // console.log(`🚶 执行蛋移动动画: ${fromCellId} -> ${toCellId}`);
+        // console.log('🔍 原始路径数据:', path);
 
         // 修正路径转换：A* 返回的是 {x: row, y: col} 格式
         const pathCellIds = path.map(step => this.getCellId(step.x, step.y));
-        console.log('🔍 转换后的路径格子ID:', pathCellIds);
+        // console.log('🔍 转换后的路径格子ID:', pathCellIds);
 
         return new Promise((resolve) => {
             // 只更新映射关系，不移除元件
@@ -1569,17 +1578,17 @@ class GameScense {
             }
             // 执行路径动画
             this.animateAlongPath(piece, pathCellIds, (success) => {
-                console.log('🔍 动画完成，成功:', success);
+                // console.log('🔍 动画完成，成功:', success);
 
 
                 if (!isclear) {
 
                     this.chessboard.pieces.set(toCellId, piece);
                     piece.cellId = toCellId; // 更新元件的cellId属性
-                    console.log(`📍 添加目标位置映射: 格子${toCellId}`);
+                    // console.log(`📍 添加目标位置映射: 格子${toCellId}`);
                 }
 
-                console.log('✅ 蛋移动完成');
+                // console.log('✅ 蛋移动完成');
                 resolve();
             });
         });
@@ -1591,14 +1600,14 @@ class GameScense {
  * @param {Object} synthesisData - 合成数据
  */
     async executeSynthesisAnimation(synthesisData, positionsToDelete) {
-        console.log('🎬 开始执行合成动画...');
+        // console.log('🎬 开始执行合成动画...');
 
         const { matches, eggType, newEggType, synthesisPosition, score } = synthesisData;
 
         // score 就是 scoreDetail
         const scoreDetail = score;
 
-        console.log('🔍 使用score作为scoreDetail:', scoreDetail);
+        // console.log('🔍 使用score作为scoreDetail:', scoreDetail);
 
         // 收集所有参与合成的蛋元件（包括目标位置）
         const allEggsToSynthesize = [];
@@ -1616,7 +1625,7 @@ class GameScense {
             }
         }
 
-        utile.__sdklog2(`🔍 总共 ${allEggsToSynthesize.length} 个蛋参与合成`);
+        // utile.__sdklog2(`🔍 总共 ${allEggsToSynthesize.length} 个蛋参与合成`);
 
         // 执行蛋收集动画
         await this.playEggCollectionAnimation(allEggsToSynthesize, synthesisPosition);
@@ -1625,18 +1634,18 @@ class GameScense {
         await this.createSynthesizedEgg(synthesisPosition, newEggType);
 
         // 更新分数显示并等待完成
-        utile.__sdklog2('🔍 准备更新分数，scoreDetail:', scoreDetail);
+        // utile.__sdklog2('🔍 准备更新分数，scoreDetail:', scoreDetail);
         if (scoreDetail && scoreDetail.totalScore) {
             // 显示浮动分数在合成位置
             this.showFloatingScore(scoreDetail.totalScore, synthesisPosition);
             this.updateScoreDisplay(scoreDetail.totalScore);
-            console.log('💰 分数更新动画完成，准备创建新蛋');
+            // console.log('💰 分数更新动画完成，准备创建新蛋');
         } else {
             console.warn('⚠️ scoreDetail 数据缺失:', scoreDetail);
         }
         // 检查是否解锁了新等级（简单检查）
         if (newEggType > this.maxUnlockedLevel) {
-            console.log(`🎉 解锁新等级: ${this.maxUnlockedLevel} -> ${newEggType}`);
+            // console.log(`🎉 解锁新等级: ${this.maxUnlockedLevel} -> ${newEggType}`);
 
             this.engine.playSound('hecheng_open');
             // 播放解锁动画
@@ -1645,7 +1654,7 @@ class GameScense {
             // 更新前端记录的最高等级
             this.maxUnlockedLevel = newEggType;
 
-            console.log(`🎊 恭喜解锁 ${this.getEggTypeName(newEggType)} 蛋！`);
+            // console.log(`🎊 恭喜解锁 ${this.getEggTypeName(newEggType)} 蛋！`);
         }
 
         console.log(`✅ 合成完成！${window.GameServer.getEggTypeName(eggType)} -> ${window.GameServer.getEggTypeName(newEggType)}`);
@@ -1955,32 +1964,75 @@ class GameScense {
         if (!piece) return;
 
         // 如果已有选中指示器，先移除
+        // 如果已有选中指示器，则复用并移动到新元件所在位置，
+        // 同时确保旧元件的 tween 被移除并为新元件创建 tween
         if (this.selectionIndicator) {
-            this.selectionIndicator.visible = true;
-            this.selectionIndicator.x = piece.x;
-            this.selectionIndicator.y = piece.y;
-            // createjs.Tween.removeTweens(this.selectionIndicator);
-            // if (this.selectionIndicator.parent) {
-            //     this.selectionIndicator.parent.removeChild(this.selectionIndicator);
-            // }
-            // this.selectionIndicator = null;
+            try {
+                // 如果指示器不在同一父容器，移动到目标元件的父容器
+                if (this.selectionIndicator.parent !== piece.parent) {
+                    if (this.selectionIndicator.parent) {
+                        this.selectionIndicator.parent.removeChild(this.selectionIndicator);
+                    }
+                    if (piece.parent) {
+                        piece.parent.addChild(this.selectionIndicator);
+                    } else {
+                        // 兜底到 gamebox
+                        this.gamebox.addChild(this.selectionIndicator);
+                    }
+                }
+
+                this.selectionIndicator.visible = true;
+                this.selectionIndicator.x = piece.x;
+                this.selectionIndicator.y = piece.y;
+
+                // 清理上一个选中元件的动画与状态
+                if (this.selectedPiece && this.selectedPiece !== piece) {
+                    try {
+                        createjs.Tween.removeTweens(this.selectedPiece);
+                        this.selectedPiece.scaleX = this.selectedPiece.scaleY = 1;
+                    } catch (e) {
+                        // ignore
+                    }
+                }
+
+                // 确保新元件没有残留的 tween，然后添加缩放 tween
+                createjs.Tween.removeTweens(piece);
+                createjs.Tween.get(piece, { loop: true })
+                    .to({ scaleX: 1.05, scaleY: 1.05 }, 300)
+                    .to({ scaleX: 1, scaleY: 1 }, 300);
+
+                this.selectedPiece = piece;
+                console.log('✨ 复用选中指示器并为新元件添加选中效果');
+            } catch (err) {
+                console.error('❌ 复用选中指示器失败:', err);
+            }
+
             return;
         }
 
+        // 为元件添加缩放 tween
+        createjs.Tween.get(piece, { loop: true })
+            .to({ scaleX: 1.05, scaleY: 1.05 }, 300)
+            .to({ scaleX: 1.0, scaleY: 1.0 }, 300);
+
         // 创建新的选中指示器
         const indicator = new createjs.Shape();
-        indicator.graphics.setStrokeStyle(3).beginStroke('#FFD700').drawCircle(0, 0, 80);
+        indicator.graphics.setStrokeStyle(6).beginStroke('#ff9900ff').drawCircle(0, 0, 80);
         indicator.x = piece.x;
         indicator.y = piece.y;
         indicator.name = 'selectionIndicator';
 
-        // 添加到 gamebox
-        this.gamebox.addChild(indicator);
+        // 添加到与元件相同的父容器以保证层级和坐标一致
+        if (piece.parent) {
+            piece.parent.addChild(indicator);
+        } else {
+            this.gamebox.addChild(indicator);
+        }
 
         // 添加闪烁动画
         createjs.Tween.get(indicator, { loop: true })
-            .to({ alpha: 0.3 }, 600)
-            .to({ alpha: 1 }, 600);
+            .to({ alpha: 0, scaleX: 1.1, scaleY: 1.1 }, 300)
+            .to({ alpha: 1, scaleX: 0.5, scaleY: 0.5 }, 300);
 
         // 记录全局唯一指示器
         this.selectionIndicator = indicator;
@@ -1994,15 +2046,28 @@ class GameScense {
     /**
      * 移除选中效果
      */
-    removeSelectionEffect() {
+    removeSelectionEffect(piece) {
         if (this.selectionIndicator) {
-            this.selectionIndicator.visible = false;
-            // createjs.Tween.removeTweens(this.selectionIndicator);
-            // if (this.selectionIndicator.parent) {
-            //     this.selectionIndicator.parent.removeChild(this.selectionIndicator);
-            // }
-            // this.selectionIndicator = null;
-            // console.log('🗑️ 移除了唯一选中效果');
+            // 隐藏并移除指示器
+            try {
+                this.selectionIndicator.visible = false;
+                if (this.selectionIndicator.parent) {
+                    this.selectionIndicator.parent.removeChild(this.selectionIndicator);
+                }
+            } catch (e) {
+                // ignore
+            }
+            this.selectionIndicator = null;
+        }
+
+        // 移除元件的 tween 并复位缩放
+        try {
+            if (piece) {
+                createjs.Tween.removeTweens(piece);
+                piece.scaleX = piece.scaleY = 1;
+            }
+        } catch (e) {
+            // ignore
         }
         this.selectedPiece = null;
     }
@@ -2013,6 +2078,7 @@ class GameScense {
     clearSelection() {
         if (this.selectedPiece) {
             this.removeSelectionEffect(this.selectedPiece);
+
         }
 
         this.selectedPiece = null;
@@ -2389,15 +2455,28 @@ class GameScense {
         if (show) {
 
             this.engine.playSound('wrong2');
+            const btnAgain = utile.findMc(panelUI, 'btn_tryagain');
+            // const angin_x = btnAgain.x;
+            const angin_y = btnAgain.y;
 
-
+            btnAgain.y = 100;
             this.showPanel(panelUI, true, async () => {
                 if (this.gameData) {
                     this.gameData.scoreSystem = await window.GameServer.getScoreStatus();
                     panelUI.mc_ranking.mc_best.text.text = "" + this.gameData.scoreSystem.bestScore;
                     panelUI.mc_ranking.mc_score.text.text = "" + this.gameData.scoreSystem.currentScore;
                 }
-                this.openCardRewardPanel(800);
+
+                this.openCardRewardPanel(100);
+
+
+                createjs.Tween.get(btnAgain)
+                    .wait(2000)
+                    .to({
+                        y: angin_y,
+
+                    }, 200, createjs.Ease.backOut)
+
             });
 
             console.log('✅ 失败界面显示完成');
@@ -2495,7 +2574,7 @@ class GameScense {
                     panelUI.mc_ranking.mc_best.text.text = "" + this.gameData.scoreSystem.bestScore;
                     panelUI.mc_ranking.mc_score.text.text = "" + this.gameData.scoreSystem.currentScore;
                 }
-                this.openCardRewardPanel(800);
+                this.openCardRewardPanel();
             })
             console.log('✅ 胜利界面显示完成');
         } else {
@@ -2720,7 +2799,7 @@ class GameScense {
         this.unlockAnimations = new Map();
 
         // 获取 mc_egg_mask1~6 元件
-        for (let i = 1; i <= 6; i++) {
+        for (let i = 1; i <= 7; i++) {
             const maskName = `mc_egg_mask${i}`;
             const maskMc = utile.findMc(this.exportRoot, maskName);
 
@@ -2781,13 +2860,13 @@ class GameScense {
      * 播放用户已解锁等级的动画
      */
     playUnlockedAnimations(gameStatus = null) {
-        console.log('🎭 播放用户已解锁等级的动画...');
+        // console.log('🎭 播放用户已解锁等级的动画...');
 
         // 获取用户当前最高解锁等级
 
         this.maxUnlockedLevel = gameStatus ? (gameStatus.maxUnlockedEggType || 0) : 0;
 
-        console.log(`🏆 用户最高解锁等级: ${this.maxUnlockedLevel}`);
+        // console.log(`🏆 用户最高解锁等级: ${this.maxUnlockedLevel}`);
 
         // 播放对应等级的解锁动画 (等级2~7对应mask1~6)
         for (let level = 2; level <= Math.min(this.maxUnlockedLevel, 7); level++) {
@@ -2795,7 +2874,7 @@ class GameScense {
 
                 const maskMc = this.unlockAnimations.get(level);
                 if (maskMc) {
-                    console.log(`✨ 播放已解锁动画: 等级${level}`);
+                    // console.log(`✨ 播放已解锁动画: 等级${level}`);
 
                     // 显示并播放动画
                     maskMc.visible = true;
@@ -2803,7 +2882,7 @@ class GameScense {
 
                     // 监听播放完成
                     utile.addFrameEnd(maskMc, () => {
-                        console.log(`✅ 等级${level}解锁动画播放完成`);
+                        // console.log(`✅ 等级${level}解锁动画播放完成`);
                     }, true);
                 }
             }, 100 * level);
@@ -2818,7 +2897,7 @@ class GameScense {
      * 重置所有解锁动画到初始状态
      */
     resetUnlockAnimations() {
-        console.log('🔄 重置所有解锁动画到初始状态...');
+        // console.log('🔄 重置所有解锁动画到初始状态...');
 
         if (!this.unlockAnimations) {
             console.warn('⚠️ 解锁动画元件未初始化');
@@ -2830,11 +2909,11 @@ class GameScense {
             if (maskMc) {
                 maskMc.gotoAndStop(0);
                 maskMc.visible = true; // 确保可见但停在第0帧
-                console.log(`🔄 重置等级${level}解锁动画到第0帧`);
+                // console.log(`🔄 重置等级${level}解锁动画到第0帧`);
             }
         });
 
-        console.log('✅ 所有解锁动画已重置到初始状态');
+        // console.log('✅ 所有解锁动画已重置到初始状态');
     }
 
     /**
