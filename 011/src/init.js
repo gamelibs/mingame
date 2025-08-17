@@ -1,5 +1,6 @@
 // ...existing code...
 import utile from './utile.js';
+import config from './config.js';
 // 兼容旧脚本对 window.utile 的依赖
 if (typeof window !== 'undefined') {
     window.utile = utile;
@@ -173,31 +174,9 @@ class GameEngine {
     }
 
     getLoadingCompositionId() {
-        // 方法1：从配置文件获取loading组合ID（推荐）
-        if (this.config && this.config.compositions && this.config.compositions.loading) {
-            const loadingId = this.config.compositions.loading.id;
-            // console.log('从配置文件获取loading组合ID:', loadingId);
-            return loadingId;
-        }
-
-        // 方法2：从 AdobeAn.compositions 获取第一个可用的组合ID
-        if (typeof AdobeAn !== 'undefined' && AdobeAn.compositions) {
-            const compositionIds = Object.keys(AdobeAn.compositions);
-            if (compositionIds.length > 0) {
-                // console.log('从AdobeAn.compositions获取ID:', compositionIds[0]);
-                return compositionIds[0];
-            }
-        }
-
-        // 方法3：尝试从全局 lib 对象获取
-        if (typeof lib !== 'undefined' && lib.properties && lib.properties.id) {
-            console.log('从lib.properties获取ID:', lib.properties.id);
-            return lib.properties.id;
-        }
-
-        // 方法4：回退到硬编码ID（兼容性）
-        // console.warn('无法动态获取组合ID，使用默认值');
-        return "12AB51DFDAB942FF88C62B7BF520AB4C";
+        // 现在使用 HTML 加载条，不再需要 Adobe Animate loading composition
+        console.log('使用 HTML 加载条，不需要 loading composition ID');
+        return null;
     }
 
     getGameCompositionId() {
@@ -232,21 +211,31 @@ class GameEngine {
 
     async loadConfig() {
         try {
-            const response = await fetch('./manifest.json?v=' + Math.random());
-            this.config = await response.json();
-            console.log('Config loaded:', this.config);
+            // 优先从 manifest.json 加载配置
+            const response = await fetch('./manifest.json');
+            if (response.ok) {
+                this.config = await response.json();
+                console.log('Config loaded from manifest.json:', this.config);
+            } else {
+                // 回退到模块化 config
+                this.config = config || {};
+                console.log('Config loaded from config.js (fallback):', this.config);
+            }
 
-            // 加载 initial 中的资源（顺序加载）
-            if (this.config.initial && Array.isArray(this.config.initial)) {
-                console.log('开始加载 initial 资源:', this.config.initial);
-                for (const resource of this.config.initial) {
-                    await this.loadScript(resource); // 顺序加载 initial 资源
+            // 兼容 manifest.json 中的 initial 字段，优先使用 config.initial，其次尝试 config.gameconfig.initial
+            const initialList = this.config.initial || (this.config.gameconfig && this.config.gameconfig.initial) || null;
+            if (initialList && Array.isArray(initialList)) {
+                console.log('开始加载 initial 资源:', initialList);
+                for (const resource of initialList) {
+                    await this.loadScript(resource);
                 }
                 console.log('✅ initial 资源加载完成');
             }
         } catch (error) {
             console.error('Failed to load config:', error);
-            throw error;
+            // 最终回退到模块化 config
+            this.config = config || {};
+            console.log('Using fallback config.js due to error');
         }
     }
 
@@ -450,88 +439,20 @@ class GameEngine {
 
     async loadPreloader() {
         return new Promise((resolve) => {
-            // 动态获取第一个可用的组合ID
-            const compositionId = this.getLoadingCompositionId();
-            console.log('使用组合ID:', compositionId);
+            console.log('使用 HTML 加载条，跳过 Adobe Animate loading composition');
 
-            const comp = AdobeAn.getComposition(compositionId);
-            const lib = comp.getLibrary();
-            const loader = new createjs.LoadQueue(false);
+            // 直接初始化 CreateJS 舞台，不需要加载 loading composition
+            this.stage = new createjs.Stage(this.canvas);
+            this.stage.snapToPixelEnabled = true;
+            createjs.Ticker.framerate = this.config.scene?.fps || 30;
+            createjs.Ticker.addEventListener("tick", this.stageUpdateHandler.bind(this));
 
-            // 检查是否有manifest需要加载
-            if (lib.properties.manifest && lib.properties.manifest.length > 0) {
-                loader.addEventListener("fileload", (evt) => {
-                    const images = comp.getImages();
-                    if (evt && evt.item.type === "image") {
-                        images[evt.item.id] = evt.result;
-                    }
-                });
+            // 应用舞台变换设置
+            this.applyStageTransform();
 
-                loader.addEventListener("complete", () => {
-                    loader.removeAllEventListeners();
-
-                    const ss = comp.getSpriteSheet();
-                    const ssMetadata = lib.ssMetadata;
-
-                    for (let i = 0; i < ssMetadata.length; i++) {
-                        ss[ssMetadata[i].name] = new createjs.SpriteSheet({
-                            "images": [loader.getResult(ssMetadata[i].name)],
-                            "frames": ssMetadata[i].frames
-                        });
-                    }
-
-                    this.createLoadingElement(lib);
-
-                    resolve();
-                });
-
-                // 关键：将 images/ 重定向到 resan/images/
-                const remappedManifest = lib.properties.manifest.map(item => ({
-                    ...item,
-                    src: item.src && item.src.startsWith('images/') ? `resan/${item.src}` : item.src,
-                }));
-
-                loader.loadManifest(remappedManifest);
-            } else {
-
-                this.createLoadingElement(lib);
-                resolve();
-            }
+            // 直接完成，使用 HTML 加载条显示进度
+            resolve();
         });
-    }
-
-    createLoadingElement(lib) {
-
-        // 初始化CreateJS舞台
-        this.stage = new createjs.Stage(this.canvas);
-        this.stage.snapToPixelEnabled = true;
-        createjs.Ticker.framerate = this.config.scene?.fps || 30;
-        createjs.Ticker.addEventListener("tick", this.stageUpdateHandler.bind(this));
-
-
-        // Stage 创建后立即应用变换
-        this.applyStageTransform();
-
-
-        // 创建loading元件
-        this.gl_mc = new lib.loading();
-        this.gl_loadBar = this.gl_mc["loadBar"];
-        this.gl_loadBar.gotoAndStop(0);
-
-        // 🔥 确保loading元件背景透明
-        if (this.gl_mc.graphics) {
-            this.gl_mc.graphics.clear();
-        }
-
-        this.stage.addChild(this.gl_mc);
-
-        // 获取进度条总帧数
-        this.loadBarTotalFrames = this.gl_loadBar.totalFrames || 100;
-        console.log(`Loading bar total frames: ${this.loadBarTotalFrames}`);
-
-
-        // 开始加载游戏配置资源
-        // this.startGameConfigLoading();
     }
 
     updateImageSmoothing() {
@@ -634,40 +555,18 @@ class GameEngine {
     }
 
     loadedHandler() {
+        console.log('🎮 资源加载完成，使用 HTML 加载界面显示状态');
 
+        // 更新 HTML 加载条文本
+        const loadingText = document.querySelector('.loading-text');
+        if (loadingText) {
+            loadingText.textContent = '正在获取用户数据...';
+        }
 
-        const bounds = this.gl_mc.getBounds();
-        const centerX = bounds ? bounds.width / 2 : 540; // 默认值基于 loading.js 中的设计尺寸
-        const centerY = bounds ? bounds.height / 2 : 960;
-
-        console.log('📐 Loading元件尺寸:', bounds, '中心点:', centerX, centerY);
-
-        // 创建等待文本
-        this.loadingText = new createjs.Text('正在获取用户数据...', 'bold 32px Arial', '#FFFFFF');
-        this.loadingText.textAlign = 'center';
-        this.loadingText.x = centerX; // 🔥 loading 元件的中心 X
-        this.loadingText.y = centerY - 50; // 🔥 loading 元件中心向上偏移
-
-        // 创建计时器文本
-        this.timerText = new createjs.Text('0s', 'bold 24px Arial', '#FFD700');
-        this.timerText.textAlign = 'center';
-        this.timerText.x = centerX; // 🔥 loading 元件的中心 X
-        this.timerText.y = centerY + 20; // 🔥 loading 元件中心向下偏移
-
-        // 创建加载动画点
-        this.loadingDots = new createjs.Text('', 'bold 32px Arial', '#FFFFFF');
-        this.loadingDots.textAlign = 'center';
-        this.loadingDots.x = centerX; // 🔥 loading 元件的中心 X
-        this.loadingDots.y = centerY + 60; // 🔥 loading 元件中心向下偏移
-
-        // 添加到 loading 元件中
-        this.gl_mc.addChild(this.loadingText);
-        this.gl_mc.addChild(this.timerText);
-        this.gl_mc.addChild(this.loadingDots);
-
-        // 启动计时器
+        // 启动计时器（可选）
         this.startUserDataTimer();
 
+        // 启动游戏逻辑
         this.startGameLogic();
     }
 
@@ -679,19 +578,21 @@ class GameEngine {
         this.userDataTimerInterval = setInterval(() => {
             const elapsed = Math.floor((Date.now() - this.userDataStartTime) / 1000);
 
-            if (this.timerText) {
-                this.timerText.text = `${elapsed}s`;
-
+            const loadingText = document.querySelector('.loading-text');
+            
+            if (loadingText) {
                 // 超过10秒显示警告
                 if (elapsed > 10) {
-                    this.timerText.color = '#FF6B6B';
-                    this.loadingText.text = '网络较慢，请稍候...';
+                    loadingText.textContent = `网络较慢，请稍候... (${elapsed}s)`;
+                    loadingText.style.color = '#FF6B6B';
                 }
-
                 // 超过20秒显示错误提示
-                if (elapsed > 20) {
-                    this.timerText.color = '#FF0000';
-                    this.loadingText.text = '加载超时，将使用游客模式';
+                else if (elapsed > 20) {
+                    loadingText.textContent = `加载超时，将使用游客模式 (${elapsed}s)`;
+                    loadingText.style.color = '#FF0000';
+                }
+                else {
+                    loadingText.textContent = `正在获取用户数据... (${elapsed}s)`;
                 }
             }
 
@@ -710,15 +611,11 @@ class GameEngine {
             this.userDataTimerInterval = null;
         }
 
-        // 更新界面显示
-        if (this.loadingText) {
-            this.loadingText.text = 'login...';
-            this.loadingText.color = '#00FF00';
-        }
-
-        if (this.timerText) {
-            this.timerText.text = 'ok';
-            this.timerText.color = '#00FF00';
+        // 更新 HTML 界面显示
+        const loadingText = document.querySelector('.loading-text');
+        if (loadingText) {
+            loadingText.textContent = '登录完成';
+            loadingText.style.color = '#00FF00';
         }
 
         // 延迟一下让用户看到成功提示，然后切换场景
@@ -764,28 +661,20 @@ class GameEngine {
 
 
     updateLoadingProgress(progress) {
-        if (!this.gl_loadBar) return;
-
-        // 确保进度在0-1之间
-        progress = Math.max(0, Math.min(1, progress));
-
-        // 将进度转换为帧数（从0开始）
-        const targetFrame = Math.floor(progress * (this.loadBarTotalFrames - 1));
-
-        // 更新进度条
-        this.gl_loadBar.gotoAndStop(targetFrame);
-
-        // 更新舞台显示
-        if (this.stage) {
-            this.stage.update();
-        }
-
-        const percentage = Math.round(progress * 100);
-        // console.log(`📊 Loading progress: ${percentage}% (frame: ${targetFrame}/${this.loadBarTotalFrames - 1})`);
-
-        // 如果达到100%，显示完成信息
-        if (progress >= 1.0) {
-            console.log('🎯 Loading complete!');
+        // 更新 HTML 加载条
+        if (this.loadingProgress) {
+            // 确保进度在0-1之间
+            progress = Math.max(0, Math.min(1, progress));
+            
+            const percentage = Math.round(progress * 100);
+            this.loadingProgress.style.width = `${percentage}%`;
+            
+            console.log(`📊 HTML Loading progress: ${percentage}%`);
+            
+            // 如果达到100%，显示完成信息
+            if (progress >= 1.0) {
+                console.log('🎯 Loading complete!');
+            }
         }
     }
 
@@ -1005,28 +894,20 @@ class GameEngine {
      * 更新loading进度（支持更精细的进度控制）
      */
     updateLoadingProgress(progress) {
-        if (!this.gl_loadBar) return;
-
-        // 确保进度在0-1之间
-        progress = Math.max(0, Math.min(1, progress));
-
-        // 将进度转换为帧数（从0开始）
-        const targetFrame = Math.floor(progress * (this.loadBarTotalFrames - 1));
-
-        // 更新进度条
-        this.gl_loadBar.gotoAndStop(targetFrame);
-
-        // 更新舞台显示
-        if (this.stage) {
-            this.stage.update();
-        }
-
-        const percentage = Math.round(progress * 100);
-        // console.log(`📊 Loading progress: ${percentage}% (frame: ${targetFrame}/${this.loadBarTotalFrames - 1})`);
-
-        // 如果达到100%，显示完成信息
-        if (progress >= 1.0) {
-            console.log('🎯 Loading complete!');
+        // 更新 HTML 加载条
+        if (this.loadingProgress) {
+            // 确保进度在0-1之间
+            progress = Math.max(0, Math.min(1, progress));
+            
+            const percentage = Math.round(progress * 100);
+            this.loadingProgress.style.width = `${percentage}%`;
+            
+            console.log(`📊 HTML Loading progress: ${percentage}%`);
+            
+            // 如果达到100%，显示完成信息
+            if (progress >= 1.0) {
+                console.log('🎯 Loading complete!');
+            }
         }
     }
 

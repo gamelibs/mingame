@@ -1476,8 +1476,88 @@ class GameScense {
                 this.selectedPiece = null;
                 this.selectedCellId = null;
                 if (isVictory) {
-                    // console.log('🏆 合成动画完成，显示胜利界面');
-                    this.victoryHandler(true);
+                    // 优先使用合成后创建的新蛋（位于 synthesis.synthesisPosition），如果不存在则回退到原始 piece
+                    const synthPos = result.synthesis && result.synthesis.synthesisPosition;
+                    let targetPiece = null;
+                    if (typeof synthPos === 'number') {
+                        targetPiece = this.chessboard.pieces.get(synthPos) || null;
+                    }
+                    if (!targetPiece) {
+                        targetPiece = piece; // fallback
+                    }
+
+                    // console.log('🏆 合成动画完成，显示胜利界面，移动目标元件:', targetPiece && (targetPiece.cellId || 'unknown'));
+
+                    const targetContainer = this.gamebox || this.exportRoot;
+
+                    // 如果 targetPiece 不在 targetContainer 下，先把它转换到 targetContainer（保持视觉位置不变）
+                    if (targetPiece && targetPiece.parent !== targetContainer) {
+                        const parent = targetPiece.parent || this.exportRoot;
+                        const globalX = (targetPiece.x || 0) + (parent.x || 0);
+                        const globalY = (targetPiece.y || 0) + (parent.y || 0);
+
+                        // 将 targetPiece 添加到 targetContainer，并把位置调整为相对于 targetContainer
+                        try {
+                            targetContainer.addChild(targetPiece);
+                        } catch (e) {
+                            // 如果添加失败，仍然继续尝试使用当前 parent 坐标
+                        }
+                        targetPiece.x = globalX - (targetContainer.x || 0);
+                        targetPiece.y = globalY - (targetContainer.y || 0);
+                    }
+
+                    // 计算 targetContainer 的中点作为目标位置
+                    const b = (typeof targetContainer.getBounds === 'function') ? targetContainer.getBounds() : null;
+                    const centerX = b && b.width ? b.width / 2 : (this.mapConfig?.width || 900) / 2;
+                    const centerY = b && b.height ? b.height / 2 : (this.mapConfig?.height || 900) / 2;
+
+                    if (targetPiece) {
+                        createjs.Tween.get(targetPiece)
+                            .to({ x: centerX, y: centerY }, 500, createjs.Ease.quadOut)
+                            .call(() => {
+                                try { targetPiece.visible = false; } catch (e) { }
+                                const maskName = `mc_egg_mask${8}`;
+                                const maskMc = utile.findMc(this.exportRoot, maskName);
+                                // 直接使用最终的中心坐标，不做额外偏移计算
+                                if (maskMc) {
+
+                                    // 先把 targetContainer 的中心点转换到全局坐标
+                                    let globalPt = { x: centerX, y: centerY };
+                                    if (targetContainer && typeof targetContainer.localToGlobal === 'function') {
+                                        globalPt = targetContainer.localToGlobal(centerX, centerY);
+                                    }
+
+                                    // 将全局坐标转换为 maskMc 父容器的本地坐标
+                                    const maskParent = maskMc.parent || this.exportRoot;
+                                    let localPt = { x: globalPt.x, y: globalPt.y };
+                                    if (maskParent && typeof maskParent.globalToLocal === 'function') {
+                                        localPt = maskParent.globalToLocal(globalPt.x, globalPt.y);
+                                    } else if (this.stage && typeof this.stage.globalToLocal === 'function') {
+                                        localPt = this.stage.globalToLocal(globalPt.x, globalPt.y);
+                                    } else {
+                                        // 退化方案：减去父容器偏移
+                                        localPt = { x: globalPt.x - (maskParent.x || 0), y: globalPt.y - (maskParent.y || 0) };
+                                    }
+
+                                    maskMc.x = localPt.x;
+                                    maskMc.y = localPt.y;
+                                    maskMc.alpha = 1;
+
+
+                                    maskMc.play();
+                                    utile.addFrameEnd(maskMc, () => {
+                                      
+                                        createjs.Tween.get(maskMc)
+                                            .to({ scaleX: 1.5, scaleY: 1.5, alpha: 0 }, 500)
+                                            .call(() => {
+
+                                                this.victoryHandler(true);
+                                            })
+                                    }, true);
+                                }
+                            });
+                    }
+
                 }
                 if (isFailure) {
                     // console.log('💀 游戏失败，显示失败界面');
@@ -1687,7 +1767,7 @@ class GameScense {
         for (const eggData of eggs) {
             if (eggData.piece) {
                 // console.log(`🔍 处理格子 ${eggData.cellId} 的蛋，元件名称: ${eggData.piece.name || 'unnamed'}`);
-
+                eggData.piece.setChildIndex(100);
                 if (eggData.isTarget) {
                     // 目标位置的蛋：直接删除
                     // console.log(`🎯 目标位置蛋 ${eggData.cellId} 直接删除`);
@@ -2469,7 +2549,6 @@ class GameScense {
 
                 this.openCardRewardPanel(100);
 
-
                 createjs.Tween.get(btnAgain)
                     .wait(2000)
                     .to({
@@ -2574,7 +2653,7 @@ class GameScense {
                     panelUI.mc_ranking.mc_best.text.text = "" + this.gameData.scoreSystem.bestScore;
                     panelUI.mc_ranking.mc_score.text.text = "" + this.gameData.scoreSystem.currentScore;
                 }
-                this.openCardRewardPanel();
+                // this.openCardRewardPanel();
             })
             console.log('✅ 胜利界面显示完成');
         } else {
@@ -2819,7 +2898,7 @@ class GameScense {
 
     /**
      * 播放解锁动画
-     * @param {number} unlockedLevel - 解锁的等级 (2~7)
+     * @param {number} unlockedLevel - 解锁的等级 (2~8)
      */
     async playUnlockAnimation(unlockedLevel) {
         console.log(`🎉 播放解锁动画: 等级 ${unlockedLevel}`);
@@ -2869,7 +2948,7 @@ class GameScense {
         // console.log(`🏆 用户最高解锁等级: ${this.maxUnlockedLevel}`);
 
         // 播放对应等级的解锁动画 (等级2~7对应mask1~6)
-        for (let level = 2; level <= Math.min(this.maxUnlockedLevel, 7); level++) {
+        for (let level = 2; level <= Math.min(this.maxUnlockedLevel, 8); level++) {
             setTimeout(() => {
 
                 const maskMc = this.unlockAnimations.get(level);

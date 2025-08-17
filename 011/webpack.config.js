@@ -98,21 +98,18 @@ module.exports = (env, argv) => {
                 files: {
                     'resan/vendor-animate.js': [
                         path.resolve(__dirname, 'libs/createjs.js'),
-                        path.resolve(__dirname, 'loading.js'),
                         path.resolve(__dirname, 'flygame.js'),
                         path.resolve(__dirname, 'minfly.js'),
                     ],
                 },
-                transform: {
-                    'resan/vendor-animate.js': code => code,
-                },
+                // 不进行任何转换，直接合并文件
             }),
             new CopyWebpackPlugin({
                 patterns: [
                     { from: 'assets', to: 'assets' },
                     { from: 'images', to: 'resan/images' }, // 将 Animate images 移动到 resan/images
                     { from: 'style.css', to: '' },
-                    { from: 'manifest.json', to: '' },
+                    { from: 'manifest.json', to: '' }, // 复制 manifest.json 到 dist 根目录
                     // 不再逐一复制外部脚本，已合并为 resan/vendor-animate.js
                 ],
             }),

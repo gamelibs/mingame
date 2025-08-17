@@ -7,19 +7,19 @@
         "fps": 30
     },
     "compositions": {
-        "loading": {
-            "id": "12AB51DFDAB942FF88C62B7BF520AB4C",
-            "src": "resan/vendor-animate.js",
-            "description": "Loading screen composition"
-        },
         "game": {
             "id": "994179DFE830400BA68CFA701D2BB3AB",
             "src": "resan/vendor-animate.js",
             "description": "Main game composition"
         }
     },
+    "initial": [
+        "resan/vendor-animate.js"
+    ],
+    "game": [
+        "bundle.js"
+    ],
     "gameconfig": {
-        
         "sounds": [
             { "id": "bgm", "src": "assets/sound/bgm.mp3", "type": "sound" },
             { "id": "popo", "src": "assets/sound/popo.mp3", "type": "sound" },

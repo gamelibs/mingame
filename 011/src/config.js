@@ -1,4 +1,4 @@
-{
+const config = {
     "scene": {
         "width": 1080,
         "height": 1920,
@@ -9,35 +9,31 @@
     "compositions": {
         "loading": {
             "id": "12AB51DFDAB942FF88C62B7BF520AB4C",
-            "src": "loading.js",
+            "src": "resan/vendor-animate.js",
             "description": "Loading screen composition"
         },
         "game": {
             "id": "994179DFE830400BA68CFA701D2BB3AB",
-            "src": "flygame.js",
+            "src": "resan/vendor-animate.js",
             "description": "Main game composition"
         }
     },
-    "initial": ["libs/createjs.js"],
-    "game": ["src/utile.js", "loading.js"],
     "gameconfig": {
-        "scripts": [
-            { "id": "OvoAstar4", "src": "src/Localservices/ovoastar4.js", "type": "script" },
-            { "id": "GameServer", "src": "src/Localservices/gameserver.js", "type": "script" },
-            { "id": "LeaderBoard", "src": "src/modules/leaderboard.js", "type": "script" },
-            { "id": "SelectLine", "src": "src/modules/selectline.js", "type": "script" },
-            { "id": "CardGame", "src": "src/modules/cardgame.js", "type": "script" },
-            { "id": "flygame", "src": "flygame.js", "type": "script" },
-            { "id": "GameScense", "src": "./src/gamescense.js", "type": "script" }
-        ],
+
         "sounds": [
             { "id": "bgm", "src": "assets/sound/bgm.mp3", "type": "sound" },
-            { "id": "bgm2", "src": "assets/sound/bgm2.mp3", "type": "sound" },
             { "id": "popo", "src": "assets/sound/popo.mp3", "type": "sound" },
             { "id": "goodmin", "src": "assets/sound/goodmin.mp3", "type": "sound" },
             { "id": "click", "src": "assets/sound/click.mp3", "type": "sound" },
             { "id": "win", "src": "assets/sound/win.mp3", "type": "sound" },
-            { "id": "wrong", "src": "assets/sound/wrong.mp3", "type": "sound" }
+            { "id": "wrong", "src": "assets/sound/wrong.mp3", "type": "sound" },
+            { "id": "open", "src": "assets/sound/open.mp3", "type": "sound" },
+            { "id": "longhou_min", "src": "assets/sound/longhou_min.mp3", "type": "sound" },
+            { "id": "select_wawa", "src": "assets/sound/select_wawa.mp3", "type": "sound" },
+            { "id": "select_jiji", "src": "assets/sound/select_jiji.mp3", "type": "sound" },
+            { "id": "hecheng_open", "src": "assets/sound/hecheng_open.mp3", "type": "sound" },
+            { "id": "wrong2", "src": "assets/sound/wrong2.mp3", "type": "sound" },
+            { "id": "card", "src": "assets/sound/card.mp3", "type": "sound" }
         ],
         "images": [
             { "id": "bg", "src": "assets/image/background.jpg", "type": "image" },
@@ -45,3 +41,5 @@
         ]
     }
 }
+ 
+export default config;

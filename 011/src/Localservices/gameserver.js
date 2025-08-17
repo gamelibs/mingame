@@ -89,8 +89,65 @@ class GameServer {
 
         // 延迟初始化地图系统，等待 A* 模块加载
 
+        // 生成或加载本地随机混淆 key，优先从 sessionStorage 读取以便同一 tab 内重载时可解密
+        try {
+            const storageKeyName = 'GameServer_crypto_key_v1';
+            let existingKey = null;
+            try { existingKey = sessionStorage.getItem(storageKeyName); } catch (e) { existingKey = null; }
+            if (existingKey) {
+                this._localCryptoKey = existingKey;
+            } else {
+                const rand = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(36) + Date.now().toString(36);
+                this._localCryptoKey = rand;
+                try { sessionStorage.setItem(storageKeyName, this._localCryptoKey); } catch (e) { /* ignore */ }
+            }
+        } catch (e) {
+            this._localCryptoKey = 'k_default';
+        }
+
+        // 启动时如果 localStorage 中存在明文敏感字段（cardBoosts/scoreSystem/eggs/maxUnlockedEggType），立即迁移为加密字段并删除明文
+        try {
+            const existing = this.loadGameData();
+            if (existing && (existing.cardBoosts || existing.scoreSystem || existing.eggs || existing.maxUnlockedEggType)) {
+                try { this._persistGameData(existing); } catch (e) {}
+            }
+        } catch (e) {}
+
         this.initializeMapSystem();
 
+    }
+
+    /**
+     * 将游戏数据写入 localStorage，自动对 cardBoosts 做混淆并删除明文字段
+     * @param {Object} obj - 要持久化的 gameData 对象
+     */
+    _persistGameData(obj) {
+        try {
+            if (!obj) return;
+            // 深拷贝以免修改原对象
+            const copy = JSON.parse(JSON.stringify(obj));
+            try {
+                // 需要加密混淆的字段列表
+                // 注意：加密字段会被写为 encryptedXxx 并删除原始明文字段
+                const encryptFields = ['cardBoosts', 'scoreSystem', 'maxUnlockedEggType', 'eggs'];
+                for (const f of encryptFields) {
+                    if (copy[f] !== undefined && utile && typeof utile.xorEncryptObject === 'function') {
+                        const encName = 'encrypted' + f.charAt(0).toUpperCase() + f.slice(1);
+                        try {
+                            copy[encName] = utile.xorEncryptObject(copy[f], this._localCryptoKey);
+                            try { delete copy[f]; } catch (e) {}
+                        } catch (e) {
+                            // ignore field-level encryption errors
+                        }
+                    }
+                }
+            } catch (e) {}
+            // 保证 saveTime
+            if (!copy.saveTime) copy.saveTime = Date.now();
+            localStorage.setItem('GameData', JSON.stringify(copy));
+        } catch (e) {
+            console.error('❌ _persistGameData failed:', e);
+        }
     }
 
     /**
@@ -335,25 +392,28 @@ class GameServer {
             // 🔥 初始化 cardBoosts（默认 base 权重），仅当没有持久化数据时使用
             if (!this.cardBoosts || Object.keys(this.cardBoosts).length === 0) {
                 this.cardBoosts = {
-                    // 1: 0.5, // 灰
-                    // 2: 0.5, // 绿
-                    // 3: 0.5, // 蓝
-                    // 4: 0.2, // 紫
-                    // 5: 0.1, // 黄
-                    // 6: 0 // 橙
-                     1: 1, // 灰
-                    2:1, // 绿
-                    3: 1, // 蓝
-                    4: 1, // 紫
-                    5: 1, // 黄
-                    6: 1 // 橙
+                    1: 0.5, // 灰
+                    2: 0.5, // 绿
+                    3: 0.5, // 蓝
+                    4: 0.3, // 紫
+                    5: 0.2, // 黄
+                    6: 0.1, // 橙
+                    7: 0.0 // 橙列5
+                  
                 };
                 // 持久化默认 gameData 中的 cardBoosts（便于后续调整）
                 try {
                     const gd = this.loadGameData() || {};
                     gd.cardBoosts = this.cardBoosts;
+                    try {
+                        if (utile && typeof utile.xorEncryptObject === 'function') {
+                            gd.encryptedCardBoosts = utile.xorEncryptObject(gd.cardBoosts, this._localCryptoKey);
+                            // 删除明文，避免控制台直接查看
+                            delete gd.cardBoosts;
+                        }
+                    } catch (e) {}
                     gd.saveTime = Date.now();
-                    localStorage.setItem('GameData', JSON.stringify(gd));
+                    this._persistGameData(gd);
                     console.log('🔁 初始化并持久化默认 cardBoosts');
                 } catch (e) { }
             }
@@ -393,6 +453,33 @@ class GameServer {
             const gameData = localStorage.getItem('GameData');
             if (gameData) {
                 const parsedData = JSON.parse(gameData);
+                // 尝试解密一组可能被混淆的字段
+                const decryptFields = ['CardBoosts', 'ScoreSystem', 'MaxUnlockedEggType', 'Eggs'];
+                let _didAnyDecrypt = false;
+                try {
+                    for (const f of decryptFields) {
+                        const encName = 'encrypted' + f;
+                        const plainName = f.charAt(0).toLowerCase() + f.slice(1);
+                        if (parsedData[encName] && utile && typeof utile.xorDecryptToObject === 'function') {
+                            try {
+                                const dec = utile.xorDecryptToObject(parsedData[encName], this._localCryptoKey);
+                                if (dec !== null && dec !== undefined) {
+                                    parsedData[plainName] = dec;
+                                    _didAnyDecrypt = true;
+                                }
+                            } catch (e) {
+                                // ignore field-level decryption errors
+                            }
+                        }
+                    }
+                } catch (e) { /* ignore decryption errors */ }
+
+                // 如果我们解密出了任意字段并且原始数据仍包含明文，立即覆写存储以移除明文
+                try {
+                    if (_didAnyDecrypt) {
+                        this._persistGameData(parsedData);
+                    }
+                } catch (e) { /* ignore */ }
                 console.log('📊 游戏数据加载成功');
                 return parsedData;
             }
@@ -438,12 +525,12 @@ class GameServer {
         }
 
 
-        console.log(`📖 获取新用户引导数据 - 等级: ${this.guidestaute.currentLevel}, 步骤: ${this.guidestaute.currentStep}`);
+        // console.log(`📖 获取新用户引导数据 - 等级: ${this.guidestaute.currentLevel}, 步骤: ${this.guidestaute.currentStep}`);
 
         // 检查是否达到引导结束条件
         const guideSteps = this.newUserGuideData[`lv${this.guidestaute.currentLevel}`];
         if (!guideSteps || this.guidestaute >= guideSteps.length) {
-            console.log('🎉 ////////////////新手引导完成，退出引导模式');
+            // console.log('🎉 ////////////////新手引导完成，退出引导模式');
             userStatus.isNewUser = false;
             this.saveUserData('currentUser', userStatus);
             return {
@@ -456,7 +543,7 @@ class GameServer {
         // 使用 this.guidestaute 获取引导数据
         const guideData = guideSteps[this.guidestaute.currentStep];
         if (guideData) {
-            console.log('📚 新用户引导数据:', guideData);
+            // console.log('📚 新用户引导数据:', guideData);
 
             // 同步引导数据到地图状态
             guideData.eggSeat.forEach((cellId, index) => {
@@ -491,7 +578,7 @@ class GameServer {
             const now = Date.now();
             const diff = now - gameData.saveTime;
             if (diff > 1 * 60 * 60 * 1000) { // 超过24小时
-                console.log('⏰ 超过24小时，重置蛋数据');
+                // console.log('⏰ 超过24小时，重置蛋数据');
                 this.resetGame(); // 重置数据
                 // 重新加载重置后的数据
                 return this.getAlgorithmData(userStatus);
@@ -519,7 +606,7 @@ class GameServer {
 
         // 检查是否有保存的游戏状态
         if (gameData && gameData.eggs && gameData.eggs.length > 0) {
-            console.log('🔄 恢复保存的游戏状态');
+            // console.log('🔄 恢复保存的游戏状态');
 
             // 🔥 恢复游戏状态到地图
             this.loadSavedGameState(gameData);
@@ -586,8 +673,8 @@ class GameServer {
             gameData.maxUnlockedEggType = this.maxUnlockedEggType;
             gameData.eggs = gameData.eggs || [];
             gameData.saveTime = Date.now();
-            localStorage.setItem('GameData', JSON.stringify(gameData));
-            console.log(`🎯 游戏难度已更新: ${difficulty} (${difficultyLevel} 个蛋)`);
+            this._persistGameData(gameData);
+            // console.log(`🎯 游戏难度已更新: ${difficulty} (${difficultyLevel} 个蛋)`);
         } else {
             console.warn(`⚠️ 无效的难度: ${difficulty}`);
         }
@@ -623,7 +710,7 @@ class GameServer {
      * 重置游戏状态
      */
     resetGame() {
-        console.log('🔄 重置 GameServer 游戏状态...');
+        // console.log('🔄 重置 GameServer 游戏状态...');
 
         try {
             // 1. 获取当前的 gameData
@@ -661,7 +748,7 @@ class GameServer {
                 this.scoreSystem.sessionScore = 0;
                 this.scoreSystem.synthesisHistory = [];
                 this.scoreSystem.bestScore = bestScore; // 恢复最高分
-                console.log(`💰 当前游戏分数系统已重置为0，但保留最高分: ${bestScore}`);
+                // console.log(`💰 当前游戏分数系统已重置为0，但保留最高分: ${bestScore}`);
             }
 
             // 6. 重置用户解锁蛋等级为0（从蛋1重新开始解锁）
@@ -686,10 +773,10 @@ class GameServer {
                 maxUnlockedEggType: this.maxUnlockedEggType,
                 saveTime: Date.now()
             };
-            localStorage.setItem('GameData', JSON.stringify(newGameData));
+            this._persistGameData(newGameData);
 
-            console.log('✅ GameServer 游戏状态重置完成');
-            console.log(`📊 地图状态 - 空闲: ${this.mapState.emptyCells.size}, 占用: ${this.mapState.occupiedCells.size}`);
+            // console.log('✅ GameServer 游戏状态重置完成');
+            // console.log(`📊 地图状态 - 空闲: ${this.mapState.emptyCells.size}, 占用: ${this.mapState.occupiedCells.size}`);
 
             return {
                 success: true,
@@ -716,7 +803,7 @@ class GameServer {
             this.userDataCache.set(userId, userData);
 
             localStorage.setItem('UserData', JSON.stringify(userData));
-            console.log('💾 用户身份数据已保存:', userData);
+            // console.log('💾 用户身份数据已保存:', userData);
 
             return { success: true, message: 'User data saved successfully' };
         } catch (error) {
@@ -762,7 +849,7 @@ class GameServer {
      * @returns {Promise<Object>} A* 寻路实例
      */
     async waitForAstarModule(type = 4, maxWaitTime = 5000) {
-        console.log(`⏳ 等待 A* 模块加载，类型: ${type}`);
+        // console.log(`⏳ 等待 A* 模块加载，类型: ${type}`);
 
         return new Promise((resolve, reject) => {
             const startTime = Date.now();
@@ -770,7 +857,7 @@ class GameServer {
             const checkModule = () => {
                 const astar = this.getAstar(type);
                 if (astar) {
-                    console.log(`✅ A* 模块加载完成，耗时: ${Date.now() - startTime}ms`);
+                    // console.log(`✅ A* 模块加载完成，耗时: ${Date.now() - startTime}ms`);
                     resolve(astar);
                     return;
                 }
@@ -800,7 +887,7 @@ class GameServer {
      * @returns {Promise} 返回初始化的网格数据
      */
     initPathfindingGrid(rows = 6, cols = 6, cellSize = 150, pathType = 4) {
-        console.log(`🗺️ 初始化寻路网格: ${rows}x${cols}, 格子大小: ${cellSize}, 寻路类型: ${pathType}方向`);
+        // console.log(`🗺️ 初始化寻路网格: ${rows}x${cols}, 格子大小: ${cellSize}, 寻路类型: ${pathType}方向`);
 
         return new Promise((resolve, reject) => {
             try {
@@ -847,7 +934,7 @@ class GameServer {
                     astar: astar
                 };
 
-                console.log('✅ 寻路网格初始化完成');
+                // console.log('✅ 寻路网格初始化完成');
                 resolve({
                     nodes: nodes,
                     astar: astar,
@@ -886,7 +973,7 @@ class GameServer {
             cell.occupied = occupied;
             cell.type = walkable ? (window.graphType ? window.graphType.open : 0) : (window.graphType ? window.graphType.wall : 1);
 
-            console.log(`🔄 更新网格 (${row}, ${col}): 可通行=${walkable}, 占用=${occupied}`);
+            // console.log(`🔄 更新网格 (${row}, ${col}): 可通行=${walkable}, 占用=${occupied}`);
         }
     }
 
@@ -908,14 +995,14 @@ class GameServer {
         const startPos = start.row !== undefined ? start : this.positionToGrid(start.x, start.y);
         const endPos = end.row !== undefined ? end : this.positionToGrid(end.x, end.y);
 
-        console.log(`🔍 寻路: (${startPos.row}, ${startPos.col}) -> (${endPos.row}, ${endPos.col})`);
+        // console.log(`🔍 寻路: (${startPos.row}, ${startPos.col}) -> (${endPos.row}, ${endPos.col})`);
 
         const path = astar.search(
             { x: startPos.row, y: startPos.col },
             { x: endPos.row, y: endPos.col }
         );
 
-        console.log(`📍 找到路径，长度: ${path.length}`);
+        // console.log(`📍 找到路径，长度: ${path.length}`);
         return path;
     }
 
@@ -1053,7 +1140,7 @@ class GameServer {
      * @returns {Promise<Object>} 合成检查结果
      */
     checkEggSynthesis(cellId, gameState) {
-        console.log(`🔍 检查格子 ${cellId} 的蛋合成条件`);
+        // console.log(`🔍 检查格子 ${cellId} 的蛋合成条件`);
 
         return new Promise((resolve) => {
             const synthesisResult = this.findEggMatches(cellId, gameState);
@@ -1115,7 +1202,7 @@ class GameServer {
         }
 
         if (matches.length >= 3) {
-            const newEggType = Math.min(targetEggType + 1, 7);
+            const newEggType = Math.min(targetEggType + 1, 8);
             const score = this.calculateSynthesisScore(matches.length, targetEggType, newEggType);
 
             return {
@@ -1181,7 +1268,7 @@ class GameServer {
         // 更新历史最高分
         if (this.scoreSystem.totalScore > this.scoreSystem.bestScore) {
             this.scoreSystem.bestScore = this.scoreSystem.totalScore;
-            console.log(`🏆 新的历史最高分: ${this.scoreSystem.bestScore}`);
+            // console.log(`🏆 新的历史最高分: ${this.scoreSystem.bestScore}`);
         }
 
         // 记录合成历史
@@ -1191,7 +1278,7 @@ class GameServer {
             currentTotal: this.scoreSystem.currentScore
         });
 
-        console.log(`📊 分数更新: +${scoreDetail.totalScore}, 当前总分: ${this.scoreSystem.currentScore}`);
+        // console.log(`📊 分数更新: +${scoreDetail.totalScore}, 当前总分: ${this.scoreSystem.currentScore}`);
 
         return {
             currentScore: this.scoreSystem.currentScore,
@@ -1252,13 +1339,13 @@ class GameServer {
                     emptyPositions.push(i);
                 }
             }
-            console.log(`📍 从游戏状态找到 ${emptyPositions.length} 个空位置`);
+            // console.log(`📍 从游戏状态找到 ${emptyPositions.length} 个空位置`);
         } else {
             // 如果没有游戏状态，假设所有位置都是空的
             for (let i = 0; i < totalPositions; i++) {
                 emptyPositions.push(i);
             }
-            console.log(`📍 默认模式：假设所有 ${emptyPositions.length} 个位置都是空的`);
+            // console.log(`📍 默认模式：假设所有 ${emptyPositions.length} 个位置都是空的`);
         }
 
         return emptyPositions;
@@ -1291,7 +1378,7 @@ class GameServer {
      */
     getAvailableEggTypes(maxUnlockedEggType) {
         const availableTypes = [];
-        for (let i = 1; i <= Math.min(maxUnlockedEggType, 7); i++) {
+        for (let i = 1; i <= Math.min(maxUnlockedEggType, 8); i++) {
             availableTypes.push(i);
         }
         console.log(`🎯 可用蛋类型: [${availableTypes.join(', ')}] (解锁到: ${maxUnlockedEggType})`);
@@ -1310,28 +1397,50 @@ class GameServer {
         // 处理 value===1 的强制包含类型（去重、按类型id升序）。
         // 如果强制类型数量 >= count，则直接返回前 count 个强制类型。
         try {
+            // 解释：cardBoosts 的语义为：0 = 不参与，0~1 = 权重比例，1 = 最高权重（参与但不强制占位）
             this.cardBoosts = this.cardBoosts || (this.loadGameData && this.loadGameData().cardBoosts) || {};
-            const forced = availableTypes.filter(t => Number(this.cardBoosts[t]) === 1).sort((a, b) => a - b);
+            const DEFAULT_WEIGHT = 0.5; // 未配置时的中性权重，可调整
 
-            if (forced.length >= count) {
-                const result = forced.slice(0, count);
-                console.log(`🎯 强制包含类型满足数量，返回: [${result.join(', ')}]`);
-                return result;
+            // 构建类型-权重池（跳过权重为0的类型）
+            const pool = [];
+            for (const t of availableTypes) {
+                let v = Number(this.cardBoosts[t]);
+                if (!isFinite(v)) v = DEFAULT_WEIGHT;
+                v = Math.max(0, Math.min(1, v));
+                if (v > 0) pool.push({ type: t, weight: v });
             }
 
-            // 先把所有强制包含的类型加入结果（不重复）
-            for (const t of forced) {
-                if (selectedTypes.length < count) selectedTypes.push(t);
+            // 如果池为空，则退化为等概率选择（包含所有 availableTypes）
+            if (pool.length === 0) {
+                const fallback = [];
+                for (let i = 0; i < count; i++) {
+                    fallback.push(availableTypes[Math.floor(Math.random() * availableTypes.length)]);
+                }
+                console.log('ℹ️ 所有权重为0，回退到等概率选择:', fallback);
+                return fallback;
             }
 
-            // 剩余槽位使用带权重的随机选择（有放回）
-            const remaining = count - selectedTypes.length;
-            for (let i = 0; i < remaining; i++) {
-                const eggType = this.generateWeightedRandomEggType(availableTypes);
-                selectedTypes.push(eggType);
+            // 带权重的不放回抽样（每次选中后移除该类型，避免重复）
+            const take = Math.min(count, pool.length);
+            for (let k = 0; k < take; k++) {
+                const total = pool.reduce((s, p) => s + p.weight, 0);
+                let r = Math.random() * total;
+                let idx = 0;
+                for (; idx < pool.length; idx++) {
+                    r -= pool[idx].weight;
+                    if (r <= 0) break;
+                }
+                if (idx >= pool.length) idx = pool.length - 1;
+                selectedTypes.push(pool[idx].type);
+                pool.splice(idx, 1);
             }
 
-            console.log(`🎲 随机选择蛋类型: [${selectedTypes.join(', ')}] (可用范围: [${availableTypes.join(', ')}])`);
+            // 如果仍不足 count（pool 被耗尽），用可用类型等概率补足
+            while (selectedTypes.length < count) {
+                selectedTypes.push(availableTypes[Math.floor(Math.random() * availableTypes.length)]);
+            }
+
+            console.log(`🎲 带权重选择蛋类型: [${selectedTypes.join(', ')}] (可用范围: [${availableTypes.join(', ')}])`);
             return selectedTypes;
         } catch (e) {
             console.error('❌ selectRandomEggTypes 失败，回退到等概率选择:', e);
@@ -1427,29 +1536,26 @@ class GameServer {
         // 确保 cardBoosts 已初始化（initializeUserData 已会设置默认值）
         this.cardBoosts = this.cardBoosts || (this.loadGameData && this.loadGameData().cardBoosts) || {};
 
-        // 构建权重数组，跳过权重为 0 的类型
+        // 构建权重数组，语义：0 = 不参与，0..1 = 权重，1 = 最大权重（参与但不强制）
+        const DEFAULT_WEIGHT = 0.5;
         const weights = [];
         const types = [];
         for (const type of availableTypes) {
-            const w = Number(this.cardBoosts[type]);
-            // 如果未定义或不是有限数值，视为 0（即不出现）
-            if (!isFinite(w) || w <= 0) continue;
-            // 类型权重在 0..1 范围内
-            const ww = Math.max(0, Math.min(1, w));
-            weights.push(ww);
+            let w = Number(this.cardBoosts[type]);
+            if (!isFinite(w)) w = DEFAULT_WEIGHT;
+            w = Math.max(0, Math.min(1, w));
+            if (w <= 0) continue; // 不参与抽取
+            weights.push(w);
             types.push(type);
         }
 
-        // 如果所有权重都为 0，则回退到等概率选择（包含所有 availableTypes）
+        // 如果没有任何参与类型，则回退到等概率选择包含所有 availableTypes
         if (weights.length === 0) {
-            // 兜底等概率
             const idx = Math.floor(Math.random() * availableTypes.length);
             return availableTypes[idx];
         }
 
         const totalWeight = weights.reduce((s, x) => s + x, 0);
-
-        // 如果 totalWeight 为 0（不太可能），兜底返回第一个
         if (totalWeight <= 0) return types[0] || availableTypes[0];
 
         let random = Math.random() * totalWeight;
@@ -1459,6 +1565,17 @@ class GameServer {
         }
 
         return types[types.length - 1] || availableTypes[0];
+
+        // 算法3测试方法
+        // 在浏览器控制台输出
+        // const gs = window.GameServer;
+        // const pool = gs.getAvailableEggTypes(gs.maxUnlockedEggType);
+        // const counts = {};
+        // for (let i=0;i<5000;i++){
+        // const arr = gs.selectRandomEggTypes(pool, 3); // 取3个
+        // arr.forEach(t => counts[t] = (counts[t]||0)+1);
+        // }
+        // console.log(counts);
     }
 
 
@@ -1628,7 +1745,13 @@ class GameServer {
                 saveTime: Date.now()
             };
 
-            localStorage.setItem('GameData', JSON.stringify(gameState));
+            try {
+                if (utile && typeof utile.xorEncryptObject === 'function' && gameState.cardBoosts) {
+                    gameState.encryptedCardBoosts = utile.xorEncryptObject(gameState.cardBoosts, this._localCryptoKey);
+                    try { delete gameState.cardBoosts; } catch (e) {}
+                }
+            } catch (e) {}
+            this._persistGameData(gameState);
 
             console.log(`💾 游戏状态已保存: ${currentEggs.length}个蛋, 总分数${gameState.totalScore}`);
 
@@ -1655,13 +1778,20 @@ class GameServer {
             // 上限为 1
             const MAX_BOOST = 1;
             next = Math.max(0, Math.min(MAX_BOOST, next));
-            this.cardBoosts[key] = next;
+            // 保留两位小数，避免浮点数尾数过长
+            this.cardBoosts[key] = Number(next.toFixed(2));
             // 立即持久化：优先直接写入 GameData.cardBoosts（避免新手引导期间 saveCurrentGameState 被阻止）
             try {
                 const gd = this.loadGameData() || {};
                 gd.cardBoosts = this.cardBoosts;
+                try {
+                    if (utile && typeof utile.xorEncryptObject === 'function') {
+                        gd.encryptedCardBoosts = utile.xorEncryptObject(gd.cardBoosts, this._localCryptoKey);
+                        try { delete gd.cardBoosts; } catch (e) {}
+                    }
+                } catch (e) {}
                 gd.saveTime = Date.now();
-                localStorage.setItem('GameData', JSON.stringify(gd));
+                this._persistGameData(gd);
             } catch (e) {
                 // 兜底尝试 saveCurrentGameState（老逻辑）
                 try { this.saveCurrentGameState(); } catch (e2) { /* ignore */ }
@@ -1714,8 +1844,17 @@ class GameServer {
 
             // 🔥 恢复 cardBoosts（抽卡带来的概率加成）
             if (gameData.cardBoosts !== undefined) {
+                // 恢复并规范化为两位小数
                 this.cardBoosts = gameData.cardBoosts || {};
-                console.log('🔁 cardBoosts 已恢复:', this.cardBoosts);
+                try {
+                    Object.keys(this.cardBoosts).forEach(k => {
+                        const v = Number(this.cardBoosts[k]) || 0;
+                        this.cardBoosts[k] = Number(v.toFixed(2));
+                    });
+                } catch (e) {
+                    // ignore
+                }
+                console.log('🔁 cardBoosts 已恢复并规范化:', this.cardBoosts);
             } else {
                 this.cardBoosts = this.cardBoosts || {};
             }
@@ -2065,18 +2204,67 @@ class GameServer {
         //         message: '地图已满，游戏结束！'
         //     };
 
+        // 旧的胜利条件
+        // if (synthesisData.canSynthesize && synthesisData.newEggType > 7) {
+        //     console.log('🏆 达成胜利条件：合成最高等级蛋！');
+        //     return {
+        //         code: 0,
+        //         fromCellId: fromCellId,
+        //         toCellId: toCellId,
+        //         path: path,
+        //         eggType: eggType,
+        //         positionsToDelete: positionsToDelete,
+        //         synthesis: synthesisData,
+        //         newEggs: newEggsResult,
+        //         isVictory: true,
+        //         reason: 'max_egg_level_reached',
+        //         message: "恭喜！您合成了最高等级的蛋！"
+        //     };
+        // }
         // 6. 检查胜利条件
         if (synthesisData.canSynthesize && synthesisData.newEggType > 7) {
             console.log('🏆 达成胜利条件：合成最高等级蛋！');
+            // 将返回的参与合成位置改为地图上所有有蛋的位置，便于前端清除/收集所有蛋
+            const allEggPositions = [];
+            try {
+                // 优先使用 mapState.occupiedCells（性能优），兜底遍历 cells
+                if (this.mapState && this.mapState.occupiedCells && this.mapState.occupiedCells.size > 0) {
+                    allEggPositions.push(...Array.from(this.mapState.occupiedCells));
+                } else if (this.mapState && this.mapState.cells) {
+                    for (const [cid, cell] of Object.entries(this.mapState.cells)) {
+                        if (cell && cell.hasEgg) allEggPositions.push(Number(cid));
+                    }
+                }
+            } catch (e) {
+                // ignore errors and fallback to positionsToDelete
+                console.error('⚠️ 获取所有蛋位置失败，使用默认参与位置', e);
+            }
+
+            // 将地图上所有蛋位置追加到原始参与合成的位置后面（去重）
+            const mergedPositions = Array.isArray(positionsToDelete) ? positionsToDelete.slice() : [];
+            try {
+                const seen = new Set(mergedPositions.map(p => Number(p)));
+                for (const p of allEggPositions) {
+                    const n = Number(p);
+                    if (!seen.has(n)) {
+                        mergedPositions.push(n);
+                        seen.add(n);
+                    }
+                }
+            } catch (e) {
+                console.error('⚠️ 合并全图蛋位置失败，使用原参与位置', e);
+            }
+
             return {
                 code: 0,
                 fromCellId: fromCellId,
                 toCellId: toCellId,
                 path: path,
                 eggType: eggType,
-                positionsToDelete: positionsToDelete,
+                // 重要：返回的 positionsToDelete 现在包含原参与合成的位置，随后追加地图上所有蛋的位置
+                positionsToDelete: mergedPositions,
                 synthesis: synthesisData,
-                newEggs: newEggsResult,
+                newEggs: [],//newEggsResult,
                 isVictory: true,
                 reason: 'max_egg_level_reached',
                 message: "恭喜！您合成了最高等级的蛋！"
@@ -2215,7 +2403,7 @@ class GameServer {
         console.log(`🏆 用户当前最高解锁等级: ${maxUnlockedEggType}`);
 
         // 获取可用蛋类型并随机选择
-        const availableTypes = this.getAvailableEggTypes(maxUnlockedEggType);
+        const availableTypes = this.getAvailableEggTypes(maxUnlockedEggType);//
         const selectedTypes = this.selectRandomEggTypes(availableTypes, count);
 
         // 随机选择位置

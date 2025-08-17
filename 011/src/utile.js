@@ -67,6 +67,90 @@ utile.findMc = function (mc, name) {
     return null;
 }
 
+// ========== 简单可逆异或混淆工具（用于本地存储轻量加密 / 非高安全） ==========
+// 注意：此方法只是对明文做轻量混淆，不能替代真实加密；适合防止 casual 查看 localStorage
+utile._strToUint8 = function (str) {
+    try {
+        return new TextEncoder().encode(String(str));
+    } catch (e) {
+        // 兼容性回退
+        const arr = new Uint8Array(str.length);
+        for (let i = 0; i < str.length; i++) arr[i] = str.charCodeAt(i);
+        return arr;
+    }
+};
+
+utile._uint8ToStr = function (u8) {
+    try {
+        return new TextDecoder().decode(u8);
+    } catch (e) {
+        let s = '';
+        for (let i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]);
+        return s;
+    }
+};
+
+utile._base64Encode = function (u8) {
+    let s = '';
+    for (let i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]);
+    return btoa(s);
+};
+
+utile._base64Decode = function (b64) {
+    const s = atob(String(b64));
+    const u8 = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) u8[i] = s.charCodeAt(i);
+    return u8;
+};
+
+utile._xorBytes = function (dataU8, keyStr) {
+    const keyU8 = utile._strToUint8(String(keyStr || 'k'));
+    const out = new Uint8Array(dataU8.length);
+    if (!keyU8 || keyU8.length === 0) return dataU8;
+    for (let i = 0; i < dataU8.length; i++) {
+        out[i] = dataU8[i] ^ keyU8[i % keyU8.length];
+    }
+    return out;
+};
+
+/**
+ * 将对象加密为 base64 字符串（使用简单异或混淆）
+ * @param {Object} obj
+ * @param {string} key
+ * @returns {string|null}
+ */
+utile.xorEncryptObject = function (obj, key) {
+    try {
+        const json = JSON.stringify(obj);
+        const dataU8 = utile._strToUint8(json);
+        const x = utile._xorBytes(dataU8, key);
+        return utile._base64Encode(x);
+    } catch (e) {
+        console.error('❌ xorEncryptObject 失败:', e);
+        return null;
+    }
+};
+
+/**
+ * 从 base64 异或混淆串解密为对象
+ * @param {string} b64
+ * @param {string} key
+ * @returns {Object|null}
+ */
+utile.xorDecryptToObject = function (b64, key) {
+    try {
+        if (!b64) return null;
+        const u8 = utile._base64Decode(b64);
+        const plainU8 = utile._xorBytes(u8, key);
+        const json = utile._uint8ToStr(plainU8);
+        return JSON.parse(json);
+    } catch (e) {
+        console.error('❌ xorDecryptToObject 失败:', e);
+        return null;
+    }
+};
+
+
 /**
  * 打印可用的子元件名称（用于调试）
  * @param {Object} mc - 要检查的容器对象

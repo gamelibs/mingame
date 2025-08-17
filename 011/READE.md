@@ -96,10 +96,46 @@ npx serve -s .
   - 请确认服务器根目录为 dist，且访问路径为 http://localhost:端口/。
   - 不要在项目根目录直接启动服务器，否则路径会错位。
 - **路径问题**
-  - 如需部署到子目录，请将 index.html 及 manifest.json 内所有资源路径改为相对路径（如 `./resan/vendor-animate.js`）。
+  - 如需部署到子目录，请将 index.html 内的资源路径改为相对路径（如 `./resan/vendor-animate.js`）。
 - **新增 Animate 导出**
   - 新增的 js 或图片只需放到指定目录，重跑 `npm run build` 即可自动合并和复制。
 
-## 七、其他
+## 七、配置管理
+
+游戏引擎支持通过 `manifest.json` 配置各种参数：
+
+```json
+{
+    "scene": {
+        "width": 1080,
+        "height": 1920,
+        "orientation": "portrait",
+        "backgroundColor": "#ffffff",
+        "fps": 30
+    },
+    "initial": ["resan/vendor-animate.js"],
+    "game": ["bundle.js"],
+    "compositions": {
+        "loading": {
+            "id": "12AB51DFDAB942FF88C62B7BF520AB4C",
+            "src": "resan/vendor-animate.js"
+        },
+        "game": {
+            "id": "994179DFE830400BA68CFA701D2BB3AB", 
+            "src": "resan/vendor-animate.js"
+        }
+    },
+    "gameconfig": {
+        "sounds": [...],
+        "images": [...]
+    }
+}
+```
+
+配置加载优先级：
+1. 首先尝试从 `./manifest.json` 加载
+2. 如果失败，回退到 `src/config.js` 模块
+
+## 八、其他
 
 如需自定义构建、拆分 vendor、按需加载等高级优化，请参考 webpack.config.js 或联系维护者。
