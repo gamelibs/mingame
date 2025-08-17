@@ -326,13 +326,14 @@ class GameServer {
      * 初始化服务器
      */
     async init() {
-        console.log('🚀 GameServer 启动中...');
-
+    console.log('🚀 GameServer 启动中...');
+    console.log(`🕒 GameServer.init() start @ ${new Date().toISOString()}`);
         // 🔥 使用新的用户数据初始化流程
         this.currentUserStatus = await this.initializeUserData();
 
         this.isInitialized = true;
         console.log('✅ GameServer 启动完成');
+    console.log(`🕒 GameServer.init() end @ ${new Date().toISOString()}`);
 
         return {
             success: true,
@@ -347,9 +348,11 @@ class GameServer {
     async initializeUserData() {
         console.log('👤 开始用户数据初始化...');
 
+        // 把 loginType 提升到外层作用域，以便 catch 中也可访问
+        let loginType = null;
         try {
             // 1. 检测登录方式
-            const loginType = this.detectLoginType();
+            loginType = this.detectLoginType();
             console.log(`🔍 检测到登录方式: ${loginType}`);
 
             let isNewUser = null
@@ -422,7 +425,17 @@ class GameServer {
 
         } catch (error) {
             console.error('❌ 用户数据初始化失败:', error);
-            return this.createGuestUser();
+            // 如果登录方式是 wechat，则将错误向上抛出，由前端决定是否降级为游客登录
+            try {
+                if (loginType === 'wechat') {
+                    console.log('🔁 WeChat 登录失败，向上抛出错误以便前端处理（then/catch）');
+                    throw error;
+                }
+            } catch (e) {
+                // 如果 loginType 不可用或比较出错，继续退回游客
+            }
+            // 非 wechat 模式仍旧回退为游客
+            return await this.createGuestUser();
         }
     }
 
@@ -1367,7 +1380,7 @@ class GameServer {
             selected.push(selectedPosition);
         }
 
-        console.log(`🎲 随机选择位置: [${selected}]`);
+        // console.log(`🎲 随机选择位置: [${selected}]`);
         return selected;
     }
 
@@ -1381,7 +1394,7 @@ class GameServer {
         for (let i = 1; i <= Math.min(maxUnlockedEggType, 8); i++) {
             availableTypes.push(i);
         }
-        console.log(`🎯 可用蛋类型: [${availableTypes.join(', ')}] (解锁到: ${maxUnlockedEggType})`);
+        // console.log(`🎯 可用蛋类型: [${availableTypes.join(', ')}] (解锁到: ${maxUnlockedEggType})`);
         return availableTypes;
     }
 
@@ -1416,7 +1429,7 @@ class GameServer {
                 for (let i = 0; i < count; i++) {
                     fallback.push(availableTypes[Math.floor(Math.random() * availableTypes.length)]);
                 }
-                console.log('ℹ️ 所有权重为0，回退到等概率选择:', fallback);
+                // console.log('ℹ️ 所有权重为0，回退到等概率选择:', fallback);
                 return fallback;
             }
 
@@ -1440,7 +1453,7 @@ class GameServer {
                 selectedTypes.push(availableTypes[Math.floor(Math.random() * availableTypes.length)]);
             }
 
-            console.log(`🎲 带权重选择蛋类型: [${selectedTypes.join(', ')}] (可用范围: [${availableTypes.join(', ')}])`);
+            // console.log(`🎲 带权重选择蛋类型: [${selectedTypes.join(', ')}] (可用范围: [${availableTypes.join(', ')}])`);
             return selectedTypes;
         } catch (e) {
             console.error('❌ selectRandomEggTypes 失败，回退到等概率选择:', e);
@@ -1587,14 +1600,14 @@ class GameServer {
      */
     onEggSynthesisSuccess(userId, synthesizedEggType, eggCount) {
         let newEggType = synthesizedEggType;
-        console.log(`🎊 用户 ${userId} 成功合成了 ${this.getEggTypeName(synthesizedEggType)} 蛋`);
+        // console.log(`🎊 用户 ${userId} 成功合成了 ${this.getEggTypeName(synthesizedEggType)} 蛋`);
 
         // 更新最高解锁等级
         // 🔥 修正：从gameData获取当前解锁等级
         // const gameData = this.loadGameData();
         const currentMax = this.maxUnlockedEggType || 1;
 
-        console.log(`🔍 当前解锁等级检查: ${currentMax} vs 新等级: ${newEggType}`);
+        // console.log(`🔍 当前解锁等级检查: ${currentMax} vs 新等级: ${newEggType}`);
 
         if (newEggType > currentMax) {
             {
@@ -1602,8 +1615,8 @@ class GameServer {
 
             }
 
-            console.log(`🎉 用户 ${userId} 解锁了新蛋等级: ${newEggType} (${this.getEggTypeName(newEggType)})`);
-            console.log(`📈 解锁进度: ${currentMax} -> ${newEggType}`);
+            // console.log(`🎉 用户 ${userId} 解锁了新蛋等级: ${newEggType} (${this.getEggTypeName(newEggType)})`);
+            // console.log(`📈 解锁进度: ${currentMax} -> ${newEggType}`);
         } else {
             console.log(`📊 用户 ${userId} 当前最高解锁等级: ${currentMax}, 合成等级: ${newEggType} (无需更新)`);
         }
@@ -1638,7 +1651,7 @@ class GameServer {
      */
     getEmptyPositionsFromMap() {
         const emptyPositions = Array.from(this.mapState.emptyCells);
-        console.log(`📍 从地图状态获取空位置: ${emptyPositions.length} 个`);
+        // console.log(`📍 从地图状态获取空位置: ${emptyPositions.length} 个`);
         return emptyPositions;
     }
 
@@ -1648,7 +1661,7 @@ class GameServer {
      * @param {Array} eggTypes - 蛋类型数组
      */
     reservePositionsForEggs(positions, eggTypes) {
-        console.log(`📌 预留蛋位置: [${positions}]`);
+        // console.log(`📌 预留蛋位置: [${positions}]`);
 
         for (let i = 0; i < positions.length; i++) {
             const cellId = positions[i];
@@ -1687,7 +1700,7 @@ class GameServer {
             this.mapState.occupiedCells.delete(cellId);
             this.mapState.emptyCells.add(cellId);
 
-            console.log(`🗑️ 释放格子 ${cellId}`);
+            // console.log(`🗑️ 释放格子 ${cellId}`);
         }
     }
 
@@ -1753,7 +1766,7 @@ class GameServer {
             } catch (e) {}
             this._persistGameData(gameState);
 
-            console.log(`💾 游戏状态已保存: ${currentEggs.length}个蛋, 总分数${gameState.totalScore}`);
+            // console.log(`💾 游戏状态已保存: ${currentEggs.length}个蛋, 总分数${gameState.totalScore}`);
 
         } catch (error) {
             console.error('❌ 保存游戏状态失败:', error);
@@ -1796,7 +1809,7 @@ class GameServer {
                 // 兜底尝试 saveCurrentGameState（老逻辑）
                 try { this.saveCurrentGameState(); } catch (e2) { /* ignore */ }
             }
-            console.log(`🔔 applyCardBoost: type=${key}, +${delta} -> ${next}`);
+            // console.log(`🔔 applyCardBoost: type=${key}, +${delta} -> ${next}`);
             return this.cardBoosts;
         } catch (e) {
             console.error('❌ applyCardBoost 失败:', e);
@@ -1816,7 +1829,7 @@ class GameServer {
                 return null;
             }
 
-            console.log(`🔄 恢复游戏状态: ${gameData.eggs.length}个蛋`);
+            // console.log(`🔄 恢复游戏状态: ${gameData.eggs.length}个蛋`);
 
             // 恢复地图中的蛋
             for (const eggData of gameData.eggs) {
@@ -1826,19 +1839,19 @@ class GameServer {
             // 🔥 恢复分数系统
             if (gameData.scoreSystem) {
                 this.scoreSystem = gameData.scoreSystem;
-                console.log(`💰 分数系统已恢复: 总分${this.scoreSystem.totalScore}`);
+                // console.log(`💰 分数系统已恢复: 总分${this.scoreSystem.totalScore}`);
             }
 
             // 🔥 恢复难度设置
             if (gameData.difficulty !== undefined) {
                 this.difficulty = gameData.difficulty;
-                console.log(`🎯 难度已恢复: ${this.difficulty}`);
+                // console.log(`🎯 难度已恢复: ${this.difficulty}`);
             }
 
             // 🔥 恢复用户解锁等级
             if (gameData.maxUnlockedEggType !== undefined) {
                 this.maxUnlockedEggType = gameData.maxUnlockedEggType;
-                console.log(`🏆 解锁等级已恢复: ${gameData.maxUnlockedEggType}`);
+                // console.log(`🏆 解锁等级已恢复: ${gameData.maxUnlockedEggType}`);
 
             }
 
@@ -1854,12 +1867,12 @@ class GameServer {
                 } catch (e) {
                     // ignore
                 }
-                console.log('🔁 cardBoosts 已恢复并规范化:', this.cardBoosts);
+                // console.log('🔁 cardBoosts 已恢复并规范化:', this.cardBoosts);
             } else {
                 this.cardBoosts = this.cardBoosts || {};
             }
 
-            console.log('✅ 游戏状态恢复完成');
+            // console.log('✅ 游戏状态恢复完成');
             return gameData;
 
         } catch (error) {
@@ -1905,7 +1918,7 @@ class GameServer {
      * @returns {Object} 操作结果
      */
     processEggClick(cellId) {
-        console.log(`🖱️ 处理蛋点击: 格子${cellId}`);
+        // console.log(`🖱️ 处理蛋点击: 格子${cellId}`);
 
         this.printMapState();
 
@@ -1922,7 +1935,7 @@ class GameServer {
 
         // 情况0：点击空位置 + 有选中蛋 → 尝试移动
         if ((cell.isEmpty || !cell.hasEgg) && this.selectionState.isSelected) {
-            console.log(`🚶 尝试移动蛋到空位置: ${this.selectionState.selectedEgg.cellId} -> ${cellId}`);
+            // console.log(`🚶 尝试移动蛋到空位置: ${this.selectionState.selectedEgg.cellId} -> ${cellId}`);
 
             // 调用移动处理逻辑
             const moveResult = this.processEggMove(this.selectionState.selectedEgg.cellId, cellId);
@@ -2050,7 +2063,7 @@ class GameServer {
      * @returns {Object} 移动结果
      */
     processEggMove(fromCellId, toCellId) {
-        console.log(`🚶 处理蛋移动: ${fromCellId} -> ${toCellId}`);
+        // console.log(`🚶 处理蛋移动: ${fromCellId} -> ${toCellId}`);
 
         // 1. 验证起始位置
         const fromCell = this.mapState.cells[fromCellId];
@@ -2114,7 +2127,7 @@ class GameServer {
                 positionsToDelete.push(fromCellId);
             }
 
-            console.log(`🗑️ 合成时需要删除的位置: [${positionsToDelete}]`);
+            // console.log(`🗑️ 合成时需要删除的位置: [${positionsToDelete}]`);
 
 
             // 如果可以合成，先处理合成逻辑（移除旧蛋，更新地图状态）
@@ -2125,7 +2138,7 @@ class GameServer {
         // 加入新用户判定
         let newEggsResult;
         if (this.currentUserStatus.isNewUser) {
-            console.log('🆕 当前用户是新用户，调用引导数据');
+            // console.log('🆕 当前用户是新用户，调用引导数据');
 
             this.guidestaute.currentStep += 1;
             const guideData = this.getNewUserGuideData();
@@ -2156,7 +2169,7 @@ class GameServer {
                 };
             } else if (!guideData.isNewUser) {
                 // 引导完成的情况
-                console.log('🎉 引导完成，切换到老用户模式');
+                // console.log('🎉 引导完成，切换到老用户模式');
 
                 newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
 
@@ -2165,7 +2178,7 @@ class GameServer {
                 newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
             }
         } else {
-            console.log('🎮 当前用户是老用户，使用随机生成数据');
+            // console.log('🎮 当前用户是老用户，使用随机生成数据');
             newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
         }
 
@@ -2223,7 +2236,7 @@ class GameServer {
         // }
         // 6. 检查胜利条件
         if (synthesisData.canSynthesize && synthesisData.newEggType > 7) {
-            console.log('🏆 达成胜利条件：合成最高等级蛋！');
+            // console.log('🏆 达成胜利条件：合成最高等级蛋！');
             // 将返回的参与合成位置改为地图上所有有蛋的位置，便于前端清除/收集所有蛋
             const allEggPositions = [];
             try {
@@ -2296,7 +2309,7 @@ class GameServer {
 
         this.saveCurrentGameState();
 
-        console.log(`✅ 蛋移动处理完成: ${fromCellId} -> ${toCellId}`);
+        // console.log(`✅ 蛋移动处理完成: ${fromCellId} -> ${toCellId}`);
 
         return {
             code: 0,
@@ -2317,13 +2330,13 @@ class GameServer {
      * @param {number} targetCellId - 移动的目标位置（合成位置）
      */
     processSynthesisResult(synthesisResult, targetCellId) {
-        console.log('🎬 处理合成结果，更新地图状态...');
+        // console.log('🎬 处理合成结果，更新地图状态...');
 
         // 移除被合成的蛋（除了目标位置）
         for (const cellId of synthesisResult.matches) {
             if (cellId !== targetCellId) {
                 this.releasePosition(cellId);
-                console.log(`🗑️ 移除合成位置: ${cellId}`);
+                // console.log(`🗑️ 移除合成位置: ${cellId}`);
             }
         }
 
@@ -2331,7 +2344,7 @@ class GameServer {
         const targetCell = this.mapState.cells[targetCellId];
         if (targetCell) {
             targetCell.eggType = synthesisResult.newEggType;
-            console.log(`🥚 目标位置 ${targetCellId} 更新为 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋`);
+            // console.log(`🥚 目标位置 ${targetCellId} 更新为 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋`);
         }
 
         // 🔥 修正：使用已有的分数数据，不要重复计算
@@ -2351,7 +2364,7 @@ class GameServer {
             this.updateLeaderboardAsync();
         }
 
-        console.log(`✅ 合成处理完成，生成 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋，获得 ${scoreDetail.totalScore} 分`);
+        // console.log(`✅ 合成处理完成，生成 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋，获得 ${scoreDetail.totalScore} 分`);
     }
 
 
@@ -2387,7 +2400,7 @@ class GameServer {
      * @returns {Array} 生成的蛋数据
      */
     generateRandomEggsFromMapState(count = 3) {
-        console.log(`🎲 从地图状态生成 ${count} 个随机蛋...`);
+        // console.log(`🎲 从地图状态生成 ${count} 个随机蛋...`);
 
         // 从地图状态获取空闲位置
         const emptyCells = Array.from(this.mapState.emptyCells);
@@ -2400,7 +2413,7 @@ class GameServer {
         // 获取用户解锁状态
         const maxUnlockedEggType = this.maxUnlockedEggType;
 
-        console.log(`🏆 用户当前最高解锁等级: ${maxUnlockedEggType}`);
+        // console.log(`🏆 用户当前最高解锁等级: ${maxUnlockedEggType}`);
 
         // 获取可用蛋类型并随机选择
         const availableTypes = this.getAvailableEggTypes(maxUnlockedEggType);//
@@ -2423,7 +2436,7 @@ class GameServer {
             eggType: selectedTypes[index]
         }));
 
-        console.log('🗺️ 当前地图蛋状态:');
+        // console.log('🗺️ 当前地图蛋状态:');
         const existingEggs = [];
         Object.keys(this.mapState.cells).forEach(cellId => {
             const cell = this.mapState.cells[cellId];
@@ -2437,7 +2450,7 @@ class GameServer {
             }
         });
 
-        utile.__sdklog3(`📊 地图统计: 总共${existingEggs.length}个蛋, 空闲格子${this.mapState.emptyCells.size}个, 占用格子${this.mapState.occupiedCells.size}个`);
+        // utile.__sdklog3(`📊 地图统计: 总共${existingEggs.length}个蛋, 空闲格子${this.mapState.emptyCells.size}个, 占用格子${this.mapState.occupiedCells.size}个`);
         return newEggs;
     }
 
@@ -2449,7 +2462,7 @@ class GameServer {
      * @returns {Array} 路径数组
      */
     findMovePath(fromCellId, toCellId) {
-        console.log(`🔍 寻找移动路径: ${fromCellId} -> ${toCellId}`);
+        // console.log(`🔍 寻找移动路径: ${fromCellId} -> ${toCellId}`);
 
         // 更新寻路网格状态（同步当前地图状态）
         this.updatePathfindingGrid();
@@ -2501,7 +2514,7 @@ class GameServer {
             }
         }
 
-        console.log('🔄 寻路网格状态已更新');
+        // console.log('🔄 寻路网格状态已更新');
     }
     /**
      * 根据格子ID获取位置坐标
@@ -2546,7 +2559,7 @@ class GameServer {
      */
     setLoginConfig(config) {
         this.loginConfig = { ...this.loginConfig, ...config };
-        console.log('🔧 登录配置已更新:', this.loginConfig);
+        // console.log('🔧 登录配置已更新:', this.loginConfig);
     }
 
     /**
@@ -2606,10 +2619,10 @@ class GameServer {
             case 'google':
                 return await this.loadGoogleUserData();
             case 'local':
-                return this.loadLocalUserData();
+                return await this.loadLocalUserData();
             case 'guest':
             default:
-                return this.createGuestUser();
+                return await this.createGuestUser();
         }
     }
 
@@ -2617,12 +2630,17 @@ class GameServer {
      * 加载微信用户数据
      */
     async loadWechatUserData() {
-        console.log('🔐 加载微信用户数据...');
+        // console.log('🔐 加载微信用户数据...');
 
         try {
-            // 🔥 模拟微信登录延迟（10秒）
-            utile.__sdklog3('⏳ 模拟微信登录，等待n秒...');
-            await new Promise(resolve => setTimeout(resolve, 1000 * 1));
+            // 🔥 支持配置的模拟登录延迟
+            const delay = this.loginConfig.mockLoginDelay || 1000;
+           
+            await new Promise(resolve => setTimeout(resolve, delay));
+
+            // 测试用：注释掉正常返回，强制模拟登录失败以便前端走 catch -> 游客流程
+            console.warn('⚠️ 强制模拟微信登录失败（测试用），将抛出错误以便前端处理');
+            throw new Error('模拟微信登录失败（测试）');
 
             // 模拟微信用户信息
             const userInfo = {
@@ -2650,8 +2668,9 @@ class GameServer {
                 return this.createNewUser('wechat', userInfo);
             }
         } catch (error) {
-            console.error('❌ 微信登录失败，使用游客模式:', error);
-            return this.createGuestUser();
+            console.error('❌ 微信登录失败:', error);
+            // 不在此处回退为游客，向上抛出错误由调用方决定是否降级到游客登录
+            throw new Error('WeChat login failed: ' + (error && error.message ? error.message : String(error)));
         }
     }
 
@@ -2682,14 +2701,14 @@ class GameServer {
             }
         } catch (error) {
             console.error('❌ Google登录失败，使用游客模式:', error);
-            return this.createGuestUser();
+            return await this.createGuestUser();
         }
     }
 
     /**
      * 加载本地用户数据
      */
-    loadLocalUserData() {
+    async loadLocalUserData() {
         console.log('💾 加载本地用户数据...');
 
         try {
@@ -2707,14 +2726,20 @@ class GameServer {
             console.error('❌ 本地数据解析失败:', error);
         }
 
-        return this.createGuestUser();
+        return await this.createGuestUser();
     }
 
     /**
      * 创建游客用户
      */
-    createGuestUser() {
+    async createGuestUser() {
         console.log('👤 创建游客用户...');
+
+        // 🔥 支持模拟登录延迟
+        if (this.loginConfig.mockLoginDelay && this.loginConfig.mockLoginDelay > 0) {
+            console.log(`⏳ 模拟游客登录延迟 ${this.loginConfig.mockLoginDelay / 1000} 秒...`);
+            await new Promise(resolve => setTimeout(resolve, this.loginConfig.mockLoginDelay));
+        }
 
         const guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 

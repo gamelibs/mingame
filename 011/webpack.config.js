@@ -26,7 +26,8 @@ module.exports = (env, argv) => {
             filename: 'bundle.js',
             path: path.resolve(__dirname, 'dist'),
             clean: true,
-            publicPath: '/',
+            // 生产构建使用相对路径（空字符串），以避免注入的资源以 '/' 开头导致在子路径或 file:// 下无法加载。
+            publicPath: isProd ? '' : '/',
         },
         devtool: isProd ? false : 'source-map',
         devServer: {

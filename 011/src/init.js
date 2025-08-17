@@ -51,6 +51,82 @@ class GameEngine {
 
     }
 
+    // Wait for critical assets to be ready: preloaded images and non-bgm sounds.
+    // Returns when all assets are present or when timeoutMs elapses.
+    ensureAllAssetsReady(timeoutMs = 10000) {
+        const start = Date.now();
+        const checkInterval = 250;
+
+        const hasImage = (id) => {
+            try {
+                if (!this.loadedImages) return false;
+                // support either Map or plain object
+                if (this.loadedImages instanceof Map) {
+                    return !!this.loadedImages.get(id);
+                }
+                return !!this.loadedImages[id];
+            } catch (e) {
+                return false;
+            }
+        };
+
+        const hasSound = (id) => {
+            try {
+                // CreateJS Sound stores registrations in createjs.Sound._masterPlayPropsHash or registry; feature-detect
+                if (!window.createjs || !window.createjs.Sound) return false;
+                // soundJS exposes .registerSound calls but no official query; use internal registry if available
+                const reg = window.createjs.Sound._soundInstances || window.createjs.Sound._idHash || window.createjs.Sound._namedSounds;
+                if (!reg) return true; // can't verify, assume ready
+                return !!reg[id] || !!window.createjs.Sound._idHash && !!window.createjs.Sound._idHash[id];
+            } catch (e) {
+                return true; // be permissive on error
+            }
+        };
+
+        return new Promise((resolve) => {
+            console.log('ensureAllAssetsReady: start, timeoutMs=', timeoutMs, 'sceneManifest=', !!this.sceneManifest);
+            const check = () => {
+                // Determine critical images from the currently selected scene manifest if available
+                let imagesOk = true;
+                if (this.sceneManifest && Array.isArray(this.sceneManifest.images)) {
+                    for (const img of this.sceneManifest.images) {
+                        if (!hasImage(img.id) && !hasImage(img.src)) {
+                            imagesOk = false;
+                            break;
+                        }
+                    }
+                }
+
+                // Determine critical sounds (non-bgm) from manifest
+                let soundsOk = true;
+                if (this.sceneManifest && Array.isArray(this.sceneManifest.sounds)) {
+                    for (const s of this.sceneManifest.sounds) {
+                        if (s.id === 'bgm') continue;
+                        if (!hasSound(s.id) && !hasSound(s.src)) {
+                            soundsOk = false;
+                            break;
+                        }
+                    }
+                }
+
+                const elapsed = Date.now() - start;
+                if (imagesOk && soundsOk) {
+                    console.log('ensureAllAssetsReady: all critical assets ready after', elapsed, 'ms');
+                    return resolve(true);
+                }
+
+                if (elapsed >= timeoutMs) {
+                    console.warn('ensureAllAssetsReady: timeout after', elapsed, 'ms — proceeding anyway');
+                    return resolve(false);
+                }
+
+                setTimeout(check, checkInterval);
+            };
+
+            check();
+        });
+    }
+
     async init() {
 
         if (window.__GAME_ENGINE_STARTED__) {
@@ -58,7 +134,7 @@ class GameEngine {
             return;
         }
         window.__GAME_ENGINE_STARTED__ = true;
-        console.log('Game Engine Starting...');
+        // console.log('Game Engine Starting...');
 
         // 并行执行：加载配置 + 预加载关键库文件
 
@@ -73,7 +149,8 @@ class GameEngine {
 
         // 添加用户交互检测
         this.setupAutoplayHandler();
-        this.hideBasicLoading();
+        // 不在这里隐藏加载界面，等登录完成后再隐藏
+        // this.hideBasicLoading();
         // 添加焦点事件监听
         this.setupFocusBlurHandler();
     }
@@ -175,7 +252,7 @@ class GameEngine {
 
     getLoadingCompositionId() {
         // 现在使用 HTML 加载条，不再需要 Adobe Animate loading composition
-        console.log('使用 HTML 加载条，不需要 loading composition ID');
+        // console.log('使用 HTML 加载条，不需要 loading composition ID');
         return null;
     }
 
@@ -215,27 +292,27 @@ class GameEngine {
             const response = await fetch('./manifest.json');
             if (response.ok) {
                 this.config = await response.json();
-                console.log('Config loaded from manifest.json:', this.config);
+                // console.log('Config loaded from manifest.json:', this.config);
             } else {
                 // 回退到模块化 config
                 this.config = config || {};
-                console.log('Config loaded from config.js (fallback):', this.config);
+                // console.log('Config loaded from config.js (fallback):', this.config);
             }
 
             // 兼容 manifest.json 中的 initial 字段，优先使用 config.initial，其次尝试 config.gameconfig.initial
             const initialList = this.config.initial || (this.config.gameconfig && this.config.gameconfig.initial) || null;
             if (initialList && Array.isArray(initialList)) {
-                console.log('开始加载 initial 资源:', initialList);
+                // console.log('开始加载 initial 资源:', initialList);
                 for (const resource of initialList) {
                     await this.loadScript(resource);
                 }
-                console.log('✅ initial 资源加载完成');
+                // console.log('✅ initial 资源加载完成');
             }
         } catch (error) {
             console.error('Failed to load config:', error);
             // 最终回退到模块化 config
             this.config = config || {};
-            console.log('Using fallback config.js due to error');
+            // console.log('Using fallback config.js due to error');
         }
     }
 
@@ -311,11 +388,11 @@ class GameEngine {
             this.canvas.height = Math.round(stageHeight * effectiveDpr);
 
             // 设置 animation_container 尺寸
-            this.animationContainer.style.width = stageWidth + 'px';
-            this.animationContainer.style.height = stageHeight + 'px';
-            this.animationContainer.style.position = 'absolute';
-            this.animationContainer.style.left = '0px';
-            this.animationContainer.style.top = '0px';
+            // this.animationContainer.style.width = stageWidth + 'px';
+            // this.animationContainer.style.height = stageHeight + 'px';
+            // this.animationContainer.style.position = 'absolute';
+            // this.animationContainer.style.left = '0px';
+            // this.animationContainer.style.top = '0px';
 
             // 根据配置的设计尺寸进行适配
             const designWidth = this.designWidth;
@@ -371,7 +448,7 @@ class GameEngine {
         this.orientation = orientation;
 
         // 应用场景尺寸
-        this.animationContainer.style.backgroundColor = backgroundColor;
+        // this.animationContainer.style.backgroundColor = backgroundColor;
 
         // 设置canvas初始尺寸
         const initDpr = window.devicePixelRatio || 1;
@@ -387,7 +464,7 @@ class GameEngine {
             this.animationContainer.classList.remove('portrait');
         }
 
-        console.log(`Scene configured: ${width}x${height}, ${orientation}`);
+        // console.log(`Scene configured: ${width}x${height}, ${orientation}`);
 
         // 重新调整大小
         this.resizeHandler();
@@ -411,7 +488,7 @@ class GameEngine {
         const total = scripts.length + prioritizedSounds.length + images.length;
         let loaded = 0;
 
-        console.log(`开始并行加载 ${total} 个资源...`);
+        // console.log(`开始并行加载 ${total} 个资源...`);
 
         // 并行加载所有资源
         const loadPromises = [
@@ -433,13 +510,13 @@ class GameEngine {
         ];
         // 等待所有脚本加载完成
         await Promise.all(loadPromises);
-        console.log('所有脚本加载完成');
+        // console.log('所有脚本加载完成');
     }
 
 
     async loadPreloader() {
         return new Promise((resolve) => {
-            console.log('使用 HTML 加载条，跳过 Adobe Animate loading composition');
+            // console.log('使用 HTML 加载条，跳过 Adobe Animate loading composition');
 
             // 直接初始化 CreateJS 舞台，不需要加载 loading composition
             this.stage = new createjs.Stage(this.canvas);
@@ -473,7 +550,7 @@ class GameEngine {
         }
         this.__resourcesLoading__ = true;
         try {
-            console.log('🚀 开始加载游戏资源...');
+            // console.log('🚀 开始加载游戏资源...');
 
             // 获取游戏配置
             const gameConfig = this.config.gameconfig || {};
@@ -485,11 +562,11 @@ class GameEngine {
             const totalResources = scripts.length + sounds.length + images.length;
 
             if (totalResources === 0) {
-                console.log('没有游戏资源需要加载，直接切换场景');
+                // console.log('没有游戏资源需要加载，直接切换场景');
                 this.updateLoadingProgress(1.0);
-                setTimeout(() => {
-                    this.switchToGameScene();
-                }, 300);
+                // setTimeout(() => {
+                // }, 300);
+                this.switchToGameScene();
                 return;
             }
 
@@ -541,7 +618,7 @@ class GameEngine {
             createjs.Sound.muted = false; // 关闭状态静音
             // 资源全部加载后尝试自动播放 BGM（如果允许并且浏览器未拦截）
             this.tryAutoStartBGM();
-            utile.__sdklog2('🎉 所有游戏资源加载完成！');
+            // utile.__sdklog2('🎉 所有游戏资源加载完成！');
 
             // 确保显示100%进度
             this.updateLoadingProgress(1.0);
@@ -555,18 +632,21 @@ class GameEngine {
     }
 
     loadedHandler() {
-        console.log('🎮 资源加载完成，使用 HTML 加载界面显示状态');
+        console.log('🎮 资源加载完成，开始用户登录流程');
 
-        // 更新 HTML 加载条文本
+        // Update HTML loading text but keep it visible
         const loadingText = document.querySelector('.loading-text');
         if (loadingText) {
-            loadingText.textContent = '正在获取用户数据...';
+            loadingText.textContent = 'Fetching user data...';
         }
+
+        // 重置进度条到 90%，为登录流程留出空间
+        this.updateLoadingProgress(0.9);
 
         // 启动计时器（可选）
         this.startUserDataTimer();
 
-        // 启动游戏逻辑
+        // 启动游戏逻辑（包含登录）
         this.startGameLogic();
     }
 
@@ -579,20 +659,20 @@ class GameEngine {
             const elapsed = Math.floor((Date.now() - this.userDataStartTime) / 1000);
 
             const loadingText = document.querySelector('.loading-text');
-            
+
             if (loadingText) {
-                // 超过10秒显示警告
+                // show warning after 10s
                 if (elapsed > 10) {
-                    loadingText.textContent = `网络较慢，请稍候... (${elapsed}s)`;
+                    loadingText.textContent = `Network is slow, please wait... (${elapsed}s)`;
                     loadingText.style.color = '#FF6B6B';
                 }
-                // 超过20秒显示错误提示
+                // show error after 20s
                 else if (elapsed > 20) {
-                    loadingText.textContent = `加载超时，将使用游客模式 (${elapsed}s)`;
+                    loadingText.textContent = `Loading timed out, please try again... (${elapsed}s)`;
                     loadingText.style.color = '#FF0000';
                 }
                 else {
-                    loadingText.textContent = `正在获取用户数据... (${elapsed}s)`;
+                    loadingText.textContent = `Fetching user data... (${elapsed}s)`;
                 }
             }
 
@@ -603,7 +683,7 @@ class GameEngine {
      * 登录完成处理
      */
     onLoginComplete() {
-        console.log('✅ 用户登录完成');
+    // console.log('✅ User login complete');
 
         // 停止计时器
         if (this.userDataTimerInterval) {
@@ -611,52 +691,86 @@ class GameEngine {
             this.userDataTimerInterval = null;
         }
 
+        // 更新进度条到 100%
+        this.updateLoadingProgress(1.0);
+
         // 更新 HTML 界面显示
         const loadingText = document.querySelector('.loading-text');
         if (loadingText) {
-            loadingText.textContent = '登录完成';
+            loadingText.textContent = 'Login complete';
             loadingText.style.color = '#00FF00';
         }
 
-        // 延迟一下让用户看到成功提示，然后切换场景
-        setTimeout(() => {
-            this.switchToGameScene();
-        }, 1000);
+        // Remove the centered logo now that we're entering the game
+        const logoEl = document.getElementById('site-logo');
+        if (logoEl && logoEl.parentNode) {
+            logoEl.parentNode.removeChild(logoEl);
+        }
+
+        // Keep the loading UI visible until scene resources finish loading.
+        // The actual hiding will be performed inside switchToGameScene() after preload completes.
+        this.switchToGameScene();
     }
 
     async startGameLogic() {
-        console.log('🎮 启动游戏逻辑...');
+        // console.log('🎮 启动游戏逻辑...');
 
         // 强制使用微信登录
-        window.GameServer.setLoginConfig({
-            forceLoginType: 'wechat',
-            enableMockLogin: true,
-            mockLoginDelay: 5000
-        });
-
-        // // 强制使用游客模式
-        // window.GameServer.setLoginConfig({
-        //     forceLoginType: 'guest'
+        //  window.GameServer.setLoginConfig({
+        //     forceLoginType: 'wechat',
+        //     enableMockLogin: true,
+        //     mockLoginDelay: 5000
         // });
 
+        // // 强制使用游客模式
+        window.GameServer.setLoginConfig({
+            forceLoginType: 'guest',
+            mockLoginDelay: 1000
+        })
+        // 为了避免长时间卡住，设置一个 10s 的前端超时作为兜底
+        const FRONTEND_TIMEOUT_MS = 10000;
+
+        let completed = false;
+
+        const initPromise = (async () => {
+            // console.log(`🕒 calling GameServer.init() @ ${new Date().toISOString()}`);
+            const res = await window.GameServer.init();
+            // console.log(`🕒 GameServer.init() returned @ ${new Date().toISOString()}`);
+            return res;
+        })();
+
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('FRONTEND_TIMEOUT')),
+                FRONTEND_TIMEOUT_MS);
+        });
+
         try {
-            // 1. 初始化 GameServer（包含完整的用户数据初始化）
-            if (!window.GameServer?.isInitialized) {
-                console.log('🖥️ 初始化 GameServer...');
-                const serverResult = await window.GameServer.init(); // 🔥 改为 await
-                if (!serverResult?.success) {
-                    console.error('❌ GameServer 初始化失败:', serverResult);
-                    return;
-                }
+            // 等待要么 init 成功，要么超时/失败
+            const serverResult = await Promise.race([initPromise, timeoutPromise]);
+
+            // 如果成功，进入登录完成流程
+            if (serverResult?.success) {
+                completed = true;
+                this.onLoginComplete();
+                return;
             }
-            // 2) 无论是否已初始化，都进入登录完成流程
-            this.onLoginComplete();
-
-            // console.log('✅ GameScense 初始化成功');
-
-        } catch (error) {
-            console.error('❌ 游戏逻辑启动失败:', error);
+        } catch (err) {
+            console.warn('🟠 GameServer.init() failed or timed out:', err && err.message ? err.message : err);
         }
+
+        // 到这里表示后端 init() 要么 reject（例如 wechat 抛出），要么前端超时
+        // 作为兜底，立刻调用游客登录逻辑，并继续进入游戏
+        try {
+            console.log('➡️ 触发游客登录回退流程');
+            const guest = await window.GameServer.createGuestUser();
+            // 保存为当前用户并继续
+            window.GameServer.saveUserData('currentUser', guest);
+            window.GameServer.currentUserStatus = guest;
+            this.onLoginComplete();
+        } catch (e) {
+            console.error('❌ 游客登录回退失败:', e);
+        }
+
     }
 
 
@@ -665,12 +779,12 @@ class GameEngine {
         if (this.loadingProgress) {
             // 确保进度在0-1之间
             progress = Math.max(0, Math.min(1, progress));
-            
+
             const percentage = Math.round(progress * 100);
             this.loadingProgress.style.width = `${percentage}%`;
-            
-            console.log(`📊 HTML Loading progress: ${percentage}%`);
-            
+
+            // console.log(`📊 HTML Loading progress: ${percentage}%`);
+
             // 如果达到100%，显示完成信息
             if (progress >= 1.0) {
                 console.log('🎯 Loading complete!');
@@ -687,11 +801,16 @@ class GameEngine {
         console.log('🔄 切换到GameScene...');
         try {
             // 🔥 第一步：先加载GameScene（保持loading界面显示）
-            console.log('📦 预加载GameScene资源...');
+            // console.log('📦 预加载GameScene资源...');
             await this.preloadGameScene();
 
+            // Ensure critical assets (scene images and non-bgm sounds) are ready before hiding loading
+            await this.ensureAllAssetsReady(10000);
+            // Hide the HTML loading overlay now that scene resources are preloaded
+            this.hideBasicLoading();
+
             // 🔥 第二步：GameScene准备完成后，开始切换动画
-            console.log('✅ GameScene准备完成，开始切换动画');
+            // console.log('✅ GameScene准备完成，开始切换动画');
             await this.performSceneTransition();
 
             // 🔥 第三步：清理loading场景
@@ -700,7 +819,7 @@ class GameEngine {
             // 🔥 第四步：激活GameScene
             await this.activateGameScene();
 
-            console.log('🎉 场景切换完成！');
+            // console.log('🎉 场景切换完成！');
 
         } catch (error) {
             console.error('❌ 场景切换失败:', error);
@@ -716,12 +835,15 @@ class GameEngine {
         return new Promise((resolve, reject) => {
             // 动态获取游戏组合ID
             const gameCompositionId = this.getGameCompositionId();
-            console.log('🎮 预加载游戏组合ID:', gameCompositionId);
+            // console.log('🎮 预加载游戏组合ID:', gameCompositionId);
 
             const comp = AdobeAn.getComposition(gameCompositionId);
             const lib = comp.getLibrary();
 
             // 检查是否有manifest需要加载
+            // keep the manifest so other helpers (ensureAllAssetsReady) can inspect critical assets
+            this.sceneManifest = lib.properties.manifest || [];
+
             if (lib.properties.manifest && lib.properties.manifest.length > 0) {
                 const loader = new createjs.LoadQueue(false);
                 let loadedCount = 0;
@@ -737,6 +859,20 @@ class GameEngine {
                     const images = comp.getImages();
                     if (evt && evt.item.type === "image") {
                         images[evt.item.id] = evt.result;
+                        // also record into engine-level loadedImages map for readiness checks
+                        try {
+                            if (!this.loadedImages) this.loadedImages = new Map();
+                            if (this.loadedImages instanceof Map) {
+                                this.loadedImages.set(evt.item.id, evt.result);
+                                // also try to set by src key for flexibility
+                                if (evt.item && evt.item.src) this.loadedImages.set(evt.item.src, evt.result);
+                            } else {
+                                this.loadedImages[evt.item.id] = evt.result;
+                                if (evt.item && evt.item.src) this.loadedImages[evt.item.src] = evt.result;
+                            }
+                        } catch (e) {
+                            // non-fatal
+                        }
                     }
 
                     // console.log(`📦 GameScene资源加载: ${loadedCount}/${totalCount}`);
@@ -748,22 +884,44 @@ class GameEngine {
                     const ss = comp.getSpriteSheet();
                     const ssMetadata = lib.ssMetadata;
 
-                    for (let i = 0; i < ssMetadata.length; i++) {
-                        ss[ssMetadata[i].name] = new createjs.SpriteSheet({
-                            "images": [loader.getResult(ssMetadata[i].name)],
-                            "frames": ssMetadata[i].frames
-                        });
+                    try {
+                        for (let i = 0; i < ssMetadata.length; i++) {
+                            const name = ssMetadata[i].name;
+                            const img = loader.getResult(name);
+                            if (!img) {
+                                console.warn('⚠️ SpriteSheet image missing for', name, '— loader result is null');
+                            }
+                            ss[name] = new createjs.SpriteSheet({
+                                "images": [img],
+                                "frames": ssMetadata[i].frames
+                            });
+                        }
+
+                        // create exportRoot inside try/catch — missing images can throw inside Animate lib
+                        let exportRoot = null;
+                        try {
+                            exportRoot = new lib.flygame();
+                        } catch (e) {
+                            console.error('❌ exportRoot creation failed:', e);
+                            // still set preloadedGameScene so caller can inspect, but do not reject to avoid hard failure
+                            this.preloadedGameScene = { comp: comp, lib: lib, exportRoot: null };
+                            return resolve();
+                        }
+
+                        // 🔥 预创建GameScene对象（但不添加到舞台）
+                        this.preloadedGameScene = {
+                            comp: comp,
+                            lib: lib,
+                            exportRoot: exportRoot
+                        };
+
+                        console.log('✅ GameScene资源预加载完成');
+                        resolve();
+                    } catch (ex) {
+                        console.error('❌ Error during GameScene sprite setup:', ex);
+                        this.preloadedGameScene = { comp: comp, lib: lib, exportRoot: null };
+                        resolve();
                     }
-
-                    // 🔥 预创建GameScene对象（但不添加到舞台）
-                    this.preloadedGameScene = {
-                        comp: comp,
-                        lib: lib,
-                        exportRoot: new lib.flygame()
-                    };
-
-                    console.log('✅ GameScene资源预加载完成');
-                    resolve();
                 });
 
                 loader.addEventListener("error", (evt) => {
@@ -780,16 +938,37 @@ class GameEngine {
                     }
                 }, 10000); // 10秒超时
 
-                // 关键：将 images/ 重定向到 resan/images/
-                const remappedManifest = lib.properties.manifest.map(item => ({
-                    ...item,
-                    src: item.src && item.src.startsWith('images/') ? `resan/${item.src}` : item.src,
-                }));
+                    // 关键：将 images/ 重定向到 resan/images/
+                    const remappedManifest = lib.properties.manifest.map(item => ({
+                        ...item,
+                        src: item.src && item.src.startsWith('images/') ? `resan/${item.src}` : item.src,
+                    }));
 
-                loader.loadManifest(remappedManifest);
+                    // 保存 manifest 供 ensureAllAssetsReady 检查
+                    this.sceneManifest = remappedManifest;
+
+                    // 当 CreateJS loader 加载图片时，也把图片放入 this.loadedImages 和 window.gameImages
+                    // 这样全局的就绪检查可以检测到由 CreateJS 直接加载的图片
+                    loader.addEventListener("fileload", (evt) => {
+                        try {
+                            if (evt && evt.item && evt.item.type === 'image') {
+                                const id = evt.item.id;
+                                // 保持向后兼容的全局缓存
+                                if (!this.loadedImages) this.loadedImages = new Map();
+                                this.loadedImages.set(id, evt.result);
+                                if (!window.gameImages) window.gameImages = {};
+                                window.gameImages[id] = evt.result;
+                            }
+                        } catch (e) {
+                            console.warn('预加载场景时缓存图片失败', e);
+                        }
+                    });
+
+                    console.log('📦 preloadGameScene: loading manifest items=', remappedManifest.length);
+                    loader.loadManifest(remappedManifest);
             } else {
                 // 没有manifest时直接创建
-                console.log('📦 GameScene无manifest，直接创建');
+                // console.log('📦 GameScene无manifest，直接创建');
                 const lib = comp.getLibrary();
                 this.preloadedGameScene = {
                     comp: comp,
@@ -811,13 +990,13 @@ class GameEngine {
                 return;
             }
 
-            console.log('🎭 执行loading淡出动画');
+            // console.log('🎭 执行loading淡出动画');
 
             // loading场景淡出动画
             createjs.Tween.get(this.gl_mc)
                 .to({ alpha: 0 }, 500, createjs.Ease.quadOut)
                 .call(() => {
-                    console.log('✅ Loading淡出完成');
+                    // console.log('✅ Loading淡出完成');
                     resolve();
                 });
         });
@@ -827,7 +1006,7 @@ class GameEngine {
      * 清理loading场景
      */
     cleanupLoadingScene() {
-        console.log('🧹 清理loading场景');
+        // console.log('🧹 清理loading场景');
 
         // 删除 loading 场景
         if (this.gl_mc) {
@@ -844,7 +1023,7 @@ class GameEngine {
      * 激活GameScene
      */
     async activateGameScene() {
-        console.log('🚀 激活GameScene');
+        // console.log('🚀 激活GameScene');
 
         if (!this.preloadedGameScene) {
             console.error('❌ 预加载的GameScene不存在');
@@ -856,6 +1035,11 @@ class GameEngine {
         // this.stopAllMovieClips(this.exportRoot);
 
         // 🔥 添加预加载的GameScene到舞台
+        if (!this.preloadedGameScene.exportRoot) {
+            console.error('❌ activateGameScene: exportRoot is null — preload likely failed or timed out. Aborting activation.');
+            return;
+        }
+
         this.exportRoot = this.preloadedGameScene.exportRoot;
 
         for (var k in this.exportRoot.children) {
@@ -868,7 +1052,7 @@ class GameEngine {
 
         // 获取用户状态
         const userStatus = window.GameServer.currentUserStatus;
-        utile.__sdklog2('📊 用户状态:', userStatus);
+        // utile.__sdklog2('📊 用户状态:', userStatus);
 
         const gameData = {
             engine: this,
@@ -898,12 +1082,12 @@ class GameEngine {
         if (this.loadingProgress) {
             // 确保进度在0-1之间
             progress = Math.max(0, Math.min(1, progress));
-            
+
             const percentage = Math.round(progress * 100);
             this.loadingProgress.style.width = `${percentage}%`;
-            
-            console.log(`📊 HTML Loading progress: ${percentage}%`);
-            
+
+            // console.log(`📊 HTML Loading progress: ${percentage}%`);
+
             // 如果达到100%，显示完成信息
             if (progress >= 1.0) {
                 console.log('🎯 Loading complete!');
@@ -959,7 +1143,7 @@ class GameEngine {
      * 隐藏基本加载界面
      */
     hideBasicLoading() {
-        console.log('🎯 基本资源加载完成，隐藏HTML加载界面');
+        // console.log('🎯 基本资源加载完成，隐藏HTML加载界面');
         const preloadContainer = document.getElementById('preload_container');
         if (preloadContainer) {
             preloadContainer.style.opacity = '0';
@@ -976,11 +1160,11 @@ class GameEngine {
             return null;
         }
 
-     
+
         const isMusicEnabled = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true'; // 默认开启音乐
         const isSoundEnabled = localStorage.getItem('soundEnabled') === null || localStorage.getItem('soundEnabled') === 'true'; // 默认开启音效
 
-        
+
 
         if (id === 'bgm') {
             return this.playBGM({ volume: (typeof options.volume === 'number') ? options.volume : 0.4 });
@@ -1047,7 +1231,7 @@ class GameEngine {
         return !!this.soundStatus['bgm'];
     }
 
-   
+
 
     setBGMLoopWindow(startOffsetMs = 0, loopDurationMs = null, crossfadeMs = 80) {
         this._bgmOffsetMs = Math.max(0, startOffsetMs);
@@ -1139,7 +1323,7 @@ class GameEngine {
                             offset: this._bgmOffsetMs || 0,
                             volume: 0
                         });
-                        
+
                     } catch (e) { }
                 }
 
@@ -1189,7 +1373,7 @@ class GameEngine {
         try {
             const clampedVolume = Math.max(0, Math.min(1, volume));
             createjs.Sound.volume = clampedVolume;
-            console.log(`🎵 设置音量: ${clampedVolume}`);
+            // console.log(`🎵 设置音量: ${clampedVolume}`);
         } catch (error) {
             console.error(`🎵 设置音量异常:`, error);
         }
@@ -1282,7 +1466,7 @@ class GameEngine {
         } catch (e) { }
 
         if (instance && instance.playState === createjs.Sound.PLAY_SUCCEEDED && contextRunning) {
-            console.log('✅ 自动播放 BGM 成功（无需用户点击）');
+            // console.log('✅ 自动播放 BGM 成功（无需用户点击）');
             this.audioEnabled = true;
             // 如果已经绑定了交互监听可以移除（谨慎：只有我们自己绑定的）
             if (this.__autoPlayBound__) {
@@ -1323,7 +1507,7 @@ class GameEngine {
             mainJson.push(...gameConfig.images);
         }
 
-        console.log('📦 准备加载的资源清单:', mainJson);
+        // console.log('📦 准备加载的资源清单:', mainJson);
 
         if (mainJson.length === 0) {
             console.log('⚠️ 没有资源需要加载，直接完成');
@@ -1388,7 +1572,7 @@ class GameEngine {
         return new Promise((resolve, reject) => {
             // 检查脚本是否已经加载过
             if (this.loadedScripts && this.loadedScripts.has(src)) {
-                console.log(`脚本已缓存: ${src}`);
+                // console.log(`脚本已缓存: ${src}`);
                 resolve();
                 return;
             }
@@ -1485,7 +1669,7 @@ class GameEngine {
 
         // console.log(`📦 正在加载 ${type}: ${src}`);
         if (type === 'sound' && this.loadedSounds.has(id)) {
-            console.log(`🎵 声音已加载，跳过: ${id}`);
+            // console.log(`🎵 声音已加载，跳过: ${id}`);
             return;
         }
 
@@ -1498,12 +1682,23 @@ class GameEngine {
                     break;
 
                 case 'sound':
-                    // 声音加载失败不阻止游戏运行
+                    // For background music (bgm) we don't want to block the entire
+                    // preload process on its load. Start bgm loading in background
+                    // (fire-and-forget) so the progress bar and other resources
+                    // continue. Other sounds remain blocking to ensure critical
+                    // SFX are ready.
                     try {
-                        await this.loadSound(id, src);
-                        // console.log(`✅ 声音加载完成: ${src}`);
+                        if (id === 'bgm') {
+                            // start loading but don't await
+                            this.loadSound(id, src).catch(err => {
+                                console.warn(`⚠️ bgm background load failed: ${src}`, err && err.message ? err.message : err);
+                            });
+                        } else {
+                            await this.loadSound(id, src);
+                        }
+                        // console.log(`✅ 声音加载完成 (or started): ${src}`);
                     } catch (soundError) {
-                        console.warn(`⚠️ 声音加载失败，但不影响游戏运行: ${src}`, soundError.message);
+                        console.warn(`⚠️ 声音加载失败，但不影响游戏运行: ${src}`, soundError && soundError.message ? soundError.message : soundError);
                     }
                     break;
 

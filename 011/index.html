@@ -7,12 +7,15 @@
         <meta name="mobile-web-app-capable" content="yes" />
 
         <title>Game Engine</title>
-        <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="style.css" />
         <!-- 替换为合并后的外部库脚本 -->
         <script src="./resan/vendor-animate.js"></script>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14'>🎮</text></svg>">
     </head>
     <body>
+    <!-- Background and logo injected from assets/image -->
+    <div id="site-background" aria-hidden="true"></div>
+    <img id="site-logo" src="assets/image/logo.png" alt="Game Logo" />
         <div id="game-container">
             <div id="animation_container">
                 <canvas id="canvas"></canvas>
@@ -26,6 +29,6 @@
                 </div>
             </div>
         </div>
-        <script src="./bundle.js"></script>
+    <!-- bundle.js is injected by HtmlWebpackPlugin; do not include it here to avoid double-loading -->
     </body>
 </html>

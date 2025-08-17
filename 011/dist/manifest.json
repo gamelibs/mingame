@@ -36,8 +36,7 @@
             { "id": "card", "src": "assets/sound/card.mp3", "type": "sound" }
         ],
         "images": [
-            { "id": "bg", "src": "assets/image/background.jpg", "type": "image" },
-            { "id": "logo", "src": "assets/image/logo.png", "type": "image" }
+          
         ]
     }
 }
