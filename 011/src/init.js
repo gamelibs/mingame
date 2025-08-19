@@ -702,10 +702,10 @@ class GameEngine {
         }
 
         // Remove the centered logo now that we're entering the game
-        const logoEl = document.getElementById('site-logo');
-        if (logoEl && logoEl.parentNode) {
-            logoEl.parentNode.removeChild(logoEl);
-        }
+        // const logoEl = document.getElementById('site-logo');
+        // if (logoEl && logoEl.parentNode) {
+        //     logoEl.parentNode.removeChild(logoEl);
+        // }
 
         // Keep the loading UI visible until scene resources finish loading.
         // The actual hiding will be performed inside switchToGameScene() after preload completes.
