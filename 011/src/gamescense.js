@@ -1546,7 +1546,7 @@ class GameScense {
 
                                     maskMc.play();
                                     utile.addFrameEnd(maskMc, () => {
-                                      
+
                                         createjs.Tween.get(maskMc)
                                             .to({ scaleX: 1.5, scaleY: 1.5, alpha: 0 }, 500)
                                             .call(() => {
@@ -2302,52 +2302,36 @@ class GameScense {
             console.log(`✨ 显示浮动分数: +${score}`);
 
             // 创建文本对象
-            const floatingText = new createjs.Text(`+${score}`, "bold 42px Arial", "#FFD700");
-            floatingText.textAlign = "center";
-            floatingText.textBaseline = "middle";
+            // const floatingText = new createjs.Text(`+${score}`, "bold 42px Arial", "#FFD700");
+            // floatingText.textAlign = "center";
+            // floatingText.textBaseline = "middle";
 
             // 确定显示位置
             if (cellId !== null) {
                 // 在合成位置显示
                 const position = this.getCellPosition(cellId);
                 if (position) {
-                    floatingText.x = position.centerX;
-                    floatingText.y = position.centerY - 40; // 稍微向上偏移
+                    // floatingText.x = position.centerX;
+                    // floatingText.y = position.centerY - 40; // 稍微向上偏移
                     // console.log(`📍 在合成位置显示浮动分数: 格子${cellId} (${floatingText.x}, ${floatingText.y})`);
+                    this.tips(`+${score}`, { x: position.centerX, y: position.centerY }, "bold 42px Arial", "#FFD700", 1)
                 } else {
                     console.warn(`⚠️ 无法获取格子 ${cellId} 的位置，使用默认位置`);
-                    this.setDefaultFloatingPosition(floatingText);
+                    // this.setDefaultFloatingPosition(floatingText);
                 }
             } else {
                 // 使用默认位置（金币附近）
-                this.setDefaultFloatingPosition(floatingText);
+                // this.setDefaultFloatingPosition(floatingText);
             }
 
             // 添加到 gamebox（因为合成位置是相对于 gamebox 的）
 
-            this.gamebox.addChild(floatingText);
-            this.gamebox.setChildIndex(floatingText, 99)
-            const initialY = floatingText.y;
+            // this.gamebox.addChild(floatingText);
+            // this.gamebox.setChildIndex(floatingText, 99)
+
 
             // 创建浮动动画：向上移动并淡出
-            createjs.Tween.get(floatingText)
-                .to({
-                    y: initialY - 80,
-                    alpha: 0.8,
-                    scaleX: 1.2,
-                    scaleY: 1.2
-                }, 400, createjs.Ease.quadOut)
-                .to({
-                    y: initialY - 120,
-                    alpha: 0,
-                    scaleX: 1.0,
-                    scaleY: 1.0
-                }, 800, createjs.Ease.quadIn)
-                .call(() => {
-                    // 动画完成后移除文本
-                    this.gamebox.removeChild(floatingText);
-                    // console.log(`✅ 浮动分数文本已移除: +${score}`);
-                });
+
 
         } catch (error) {
             console.error('❌ 显示浮动分数失败:', error);
@@ -2459,23 +2443,49 @@ class GameScense {
      * 显示提示文本
      * @param {string} message - 要显示的提示内容
      */
-    tips(message) {
+    tips(message, pos = null, _textStyle = "bold 28px Arial", _color = "#FFFFFF", acting = null) {
         if (!this.tipsPanel) {
             console.warn('⚠️ 提示文本面板未初始化');
             return;
         }
 
         // console.log(`💬 显示提示文本: ${message}`);
-
+        let style = _textStyle;
+        let color = _color;
         // 创建文本对象
-        const text = new createjs.Text(message, "bold 28px Arial", "#FFFFFF");
+        const text = new createjs.Text(message, style, color);
         text.textAlign = "center";
         text.textBaseline = "middle";
         text.lineWidth = 600;
 
         // 设置文本位置到面板正中
-        text.x = this.config.scene.width / 2;
-        text.y = this.config.scene.height / 2 - 100;
+        if (pos) {
+            try {
+                // pos is specified in gamebox local coordinates. Convert to global then to tipsPanel local.
+                if (this.gamebox && typeof this.gamebox.localToGlobal === 'function' && this.tipsPanel && typeof this.tipsPanel.globalToLocal === 'function') {
+                    const globalPt = this.gamebox.localToGlobal(pos.x, pos.y);
+                    const localPt = this.tipsPanel.globalToLocal(globalPt.x, globalPt.y);
+                    text.x = localPt.x;
+                    text.y = localPt.y;
+                } else if (this.tipsPanel && typeof this.tipsPanel.globalToLocal === 'function') {
+                    // If gamebox not available, assume pos is already global
+                    const localPt = this.tipsPanel.globalToLocal(pos.x, pos.y);
+                    text.x = localPt.x;
+                    text.y = localPt.y;
+                } else {
+                    // Fallback: place relative to scene
+                    text.x = pos.x || (this.config.scene.width / 2);
+                    text.y = pos.y || (this.config.scene.height / 2 - 100);
+                }
+            } catch (e) {
+                console.warn('tips: position conversion failed, using fallback', e);
+                text.x = this.config.scene.width / 2;
+                text.y = this.config.scene.height / 2 - 100;
+            }
+        } else {
+            text.x = this.config.scene.width / 2;
+            text.y = this.config.scene.height / 2 - 100;
+        }
 
         // 清空面板并添加新文本
         // this.tipsPanel.removeAllChildren();
@@ -2483,18 +2493,40 @@ class GameScense {
 
         // 显示面板
         // this.tipsPanel.visible = true;
+        if (acting == 1) {
+            const initialY = text.y;
+            createjs.Tween.get(text)
+                .to({
+                    y: initialY - 80,
+                    alpha: 0.8,
+                    scaleX: 1.2,
+                    scaleY: 1.2
+                }, 400, createjs.Ease.quadOut)
+                .to({
+                    y: initialY - 120,
+                    alpha: 0,
+                    scaleX: 1.0,
+                    scaleY: 1.0
+                }, 800, createjs.Ease.quadIn)
+                .call(() => {
+                    // 动画完成后移除文本
+                    this.gamebox.removeChild(text);
+                    // console.log(`✅ 浮动分数文本已移除: +${score}`);
+                });
+        } else {
 
-        // 创建动画：显示2秒后消失
-        createjs.Tween.get(text)
-            .to({ alpha: 1 }, 200) // 渐入效果
-            .wait(2000)            // 显示2秒
-            .to({ alpha: 0 }, 300) // 渐出效果
-            .call(() => {
-                if (text.parent) {
-                    text.parent.removeChild(text); // 从面板中移除文本
-                    // console.log('✅ 提示文本已消失');
-                }
-            });
+            // 创建动画：显示2秒后消失
+            createjs.Tween.get(text)
+                .to({ alpha: 1 }, 200) // 渐入效果
+                .wait(2000)            // 显示2秒
+                .to({ alpha: 0 }, 300) // 渐出效果
+                .call(() => {
+                    if (text.parent) {
+                        text.parent.removeChild(text); // 从面板中移除文本
+                        // console.log('✅ 提示文本已消失');
+                    }
+                });
+        }
     }
 
 
