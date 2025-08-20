@@ -370,12 +370,12 @@ class GameScense {
             // 初始化解锁动画元件
             this.initUnlockAnimations();
 
-            const cardReward = utile.findMc(this.exportRoot, 'mc_card_reward');
-            if (cardReward) {
-                cardReward.visible = false;
-                cardReward.gotoAndStop && cardReward.gotoAndStop(0);
-                // console.log('🎴 抽卡面板已默认隐藏');
-            }
+            // const cardReward = utile.findMc(failureMc, 'mc_card_reward');
+            // if (cardReward) {
+            //     cardReward.visible = false;
+            //     cardReward.gotoAndStop && cardReward.gotoAndStop(0);
+            //     // console.log('🎴 抽卡面板已默认隐藏');
+            // }
 
 
             this.exportRoot.visible = true;
@@ -514,12 +514,6 @@ class GameScense {
                 // 测试奖励
                 // this.openCardRewardPanel(800);
             }, 1000);
-
-
-
-
-
-
 
             this.isInitialized = true;
             // console.log('✅ GameScense 初始化完成');
@@ -2413,7 +2407,7 @@ class GameScense {
         // 对比后端状态
         if (window.GameServer) {
             const backendInfo = window.GameServer.getMapStateInfo();
-            // console.log(`🔍 后端vs前端对比: 后端${backendInfo.occupiedCells}个蛋 vs 前端${mappingArray.length}个元件`);
+            console.log(`🔍 后端vs前端对比: 后端${backendInfo.occupiedCells}个蛋 vs 前端${mappingArray.length}个元件`);
 
             if (backendInfo.occupiedCells !== mappingArray.length) {
                 console.warn('⚠️ 后端蛋数量与前端元件数量不匹配！');
@@ -2568,10 +2562,11 @@ class GameScense {
 
             this.engine.playSound('wrong2');
             const btnAgain = utile.findMc(panelUI, 'btn_tryagain');
+            btnAgain.alpha = 0;
             // const angin_x = btnAgain.x;
             const angin_y = btnAgain.y;
 
-            btnAgain.y = 100;
+            btnAgain.y = angin_y + 300;
             this.showPanel(panelUI, true, async () => {
                 if (this.gameData) {
                     this.gameData.scoreSystem = await window.GameServer.getScoreStatus();
@@ -2582,11 +2577,11 @@ class GameScense {
                 this.openCardRewardPanel(100);
 
                 createjs.Tween.get(btnAgain)
-                    .wait(2000)
+                    .wait(3000)
                     .to({
                         y: angin_y,
-
-                    }, 200, createjs.Ease.backOut)
+                        alpha: 1
+                    }, 300, createjs.Ease.backOut)
 
             });
 
@@ -2794,8 +2789,8 @@ class GameScense {
     }
 
     /**
- * 重置游戏
- */
+     * 重置游戏
+     */
     async resetGame() {
         console.log('🔄 重置游戏状态...');
 
@@ -2918,7 +2913,7 @@ class GameScense {
                 this.unlockAnimations.set(i + 1, maskMc); // 等级2~7对应mask1~6
                 // console.log(`✅ 找到解锁动画元件: ${maskName} -> 等级${i + 1}`);
 
-                maskMc.gotoAndStop(0);
+
             } else {
                 console.warn(`⚠️ 未找到解锁动画元件: ${maskName}`);
             }
@@ -2934,11 +2929,12 @@ class GameScense {
      */
     async playUnlockAnimation(unlockedLevel) {
         console.log(`🎉 播放解锁动画: 等级 ${unlockedLevel}`);
-        new Promise((resolve) => {
+        return new Promise((resolve) => {
             const maskMc = this.unlockAnimations.get(unlockedLevel);
             if (!maskMc) {
                 console.warn(`⚠️ 未找到等级 ${unlockedLevel} 对应的解锁动画元件`);
-                return;
+                // resolve immediately so callers don't hang
+                return resolve();
             }
 
             try {
@@ -2948,22 +2944,24 @@ class GameScense {
 
                 console.log(`✨ 开始播放解锁动画: mc_egg_mask${unlockedLevel - 1} (等级${unlockedLevel})`);
 
-                // 监听播放完成
+
                 utile.addFrameEnd(maskMc, () => {
+                    // finish();
+                    if( unlockedLevel === 7) {
+                        const maskMc8 = this.unlockAnimations.get(8);
+                        utile.addFrameEnd(maskMc8, null,true);
+                        maskMc8.play();
+
+                    }
                     resolve();
-                    console.log(`✅ 解锁动画播放完成: 等级${unlockedLevel}`);
                 }, true);
 
-                // 播放解锁音效
-                // if (this.engine && this.loadedSounds.has('goodmin')) {
-                //     this.engine.playSound('goodmin');
-                // }
 
             } catch (error) {
-                resolve();
                 console.error(`❌ 播放解锁动画失败: 等级${unlockedLevel}`, error);
+                resolve();
             }
-        })
+        });
     }
 
 

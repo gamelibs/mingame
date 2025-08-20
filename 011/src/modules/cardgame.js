@@ -56,7 +56,8 @@ class CardGame {
         this.playerScore = this.getPlayerScore();
 
         // 查找 mc_victory 元件
-        this.card_reward_Mc = utile.findMc(this.exportRoot, 'mc_card_reward');
+        const failureMc = utile.findMc(this.exportRoot, 'mc_failure');
+        this.card_reward_Mc = utile.findMc(failureMc, 'mc_card_reward');
         if (!this.card_reward_Mc) {
             console.error('❌ 未找到 mc_card_reward 元件');
             return;

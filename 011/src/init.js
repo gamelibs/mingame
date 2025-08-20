@@ -387,12 +387,7 @@ class GameEngine {
             this.canvas.width = Math.round(stageWidth * effectiveDpr);
             this.canvas.height = Math.round(stageHeight * effectiveDpr);
 
-            // 设置 animation_container 尺寸
-            // this.animationContainer.style.width = stageWidth + 'px';
-            // this.animationContainer.style.height = stageHeight + 'px';
-            // this.animationContainer.style.position = 'absolute';
-            // this.animationContainer.style.left = '0px';
-            // this.animationContainer.style.top = '0px';
+
 
             // 根据配置的设计尺寸进行适配
             const designWidth = this.designWidth;
@@ -538,6 +533,19 @@ class GameEngine {
             const ctx = this.canvas.getContext('2d');
             if (ctx) ctx.imageSmoothingEnabled = smooth;
         } catch (e) { }
+    }
+
+    // Convert screen client coordinates (e.g. touch/mouse) to design coordinates
+    screenToDesign(clientX, clientY) {
+        if (!this.canvas || !this.designWidth || !this.designHeight) return { x: clientX, y: clientY };
+        const rect = this.canvas.getBoundingClientRect();
+        // normalized to 0..1 in visual canvas
+        const nx = (clientX - rect.left) / rect.width;
+        const ny = (clientY - rect.top) / rect.height;
+        // map to design coordinates
+        const designX = nx * this.designWidth;
+        const designY = ny * this.designHeight;
+        return { x: designX, y: designY };
     }
 
 
