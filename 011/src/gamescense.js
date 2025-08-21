@@ -2929,7 +2929,7 @@ class GameScense {
      */
     async playUnlockAnimation(unlockedLevel) {
         console.log(`🎉 播放解锁动画: 等级 ${unlockedLevel}`);
-        return new Promise((resolve) => {
+        new Promise((resolve) => {
             const maskMc = this.unlockAnimations.get(unlockedLevel);
             if (!maskMc) {
                 console.warn(`⚠️ 未找到等级 ${unlockedLevel} 对应的解锁动画元件`);
@@ -2948,6 +2948,7 @@ class GameScense {
                 utile.addFrameEnd(maskMc, () => {
                     // finish();
                     if( unlockedLevel === 7) {
+                        maskMc.visible = false;
                         const maskMc8 = this.unlockAnimations.get(8);
                         utile.addFrameEnd(maskMc8, null,true);
                         maskMc8.play();
