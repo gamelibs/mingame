@@ -156,7 +156,11 @@ class CardGame {
             this.goButton.on('click', (event) => {
                 console.log('🎯 GO按钮被点击');
                 event.stopImmediatePropagation(); // 阻止事件继续传播到屏蔽层
-                this.startCardDraw();
+
+                window.showRewardedAd(() => {
+                     this.startCardDraw();
+                })
+                
             });
 
             // 设置按钮可点击

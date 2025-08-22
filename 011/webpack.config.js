@@ -44,55 +44,64 @@ module.exports = (env, argv) => {
         },
         optimization: isProd
             ? {
-                  minimize: true,
-                  minimizer: [
-                      // 应用于业务 bundle 的压缩（移除 console/debugger 等）
-                      new TerserPlugin({
-                          extractComments: false,
-                          exclude: [/resan\/vendor-animate\.js$/],
-                          terserOptions: {
-                              compress: {
-                                  drop_console: true,
-                                  drop_debugger: true,
-                                  pure_funcs: [
-                                      'console.log',
-                                      'console.info',
-                                      'console.debug',
-                                      'console.warn',
-                                      'console.error'
-                                  ],
-                              },
-                              format: { comments: false },
-                          },
-                      }),
-                      // 仅对 vendor-animate.js 进行“安全压缩”（不混淆标识符）
-                      new TerserPlugin({
-                          extractComments: false,
-                          include: [/resan\/vendor-animate\.js$/],
-                          terserOptions: {
-                              mangle: false,
-                              keep_fnames: true,
-                              keep_classnames: true,
-                              compress: {
-                                  drop_debugger: true,
-                                  // 谨慎压缩，避免激进优化
-                                  // 不做函数提升/内联，降低风险
-                                  hoist_funs: false,
-                                  hoist_vars: false,
-                                  reduce_funcs: false,
-                                  // 如果这些库包含日志，可选择去掉
-                                  pure_funcs: ['console.log','console.info','console.debug','console.warn','console.error']
-                              },
-                              format: { comments: false },
-                          },
-                      }),
-                  ],
-              }
+                minimize: true,
+                minimizer: [
+                    // 应用于业务 bundle 的压缩（移除 console/debugger 等）
+                    new TerserPlugin({
+                        extractComments: false,
+                        exclude: [/resan\/vendor-animate\.js$/],
+                        terserOptions: {
+                            compress: {
+                                drop_console: true,
+                                drop_debugger: true,
+                                pure_funcs: [
+                                    'console.log',
+                                    'console.info',
+                                    'console.debug',
+                                    'console.warn',
+                                    'console.error'
+                                ],
+                            },
+                            format: { comments: false },
+                        },
+                    }),
+                    // 仅对 vendor-animate.js 进行“安全压缩”（不混淆标识符）
+                    new TerserPlugin({
+                        extractComments: false,
+                        include: [/resan\/vendor-animate\.js$/],
+                        terserOptions: {
+                            mangle: false,
+                            keep_fnames: true,
+                            keep_classnames: true,
+                            compress: {
+                                drop_debugger: true,
+                                // 谨慎压缩，避免激进优化
+                                // 不做函数提升/内联，降低风险
+                                hoist_funs: false,
+                                hoist_vars: false,
+                                reduce_funcs: false,
+                                // 如果这些库包含日志，可选择去掉
+                                pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn', 'console.error']
+                            },
+                            format: { comments: false },
+                        },
+                    }),
+                ],
+            }
             : {},
         plugins: [
             new HtmlWebpackPlugin({
                 template: './index.html',
                 inject: 'body',
+            }),
+            // 合并 config 与 tracker 为一个早期加载的全局脚本
+            new MergeIntoSingleFilePlugin({
+                files: {
+                    'resan/config.global.js': [
+                        path.resolve(__dirname, 'src/config.global.wrapper.js'),
+                        path.resolve(__dirname, 'src/ovosdk.js')
+                    ],
+                },
             }),
             // 合并外部全局脚本为单文件 resan/vendor-animate.js
             new MergeIntoSingleFilePlugin({
@@ -105,12 +114,13 @@ module.exports = (env, argv) => {
                 },
                 // 不进行任何转换，直接合并文件
             }),
+
             new CopyWebpackPlugin({
                 patterns: [
                     { from: 'assets', to: 'assets' },
                     { from: 'images', to: 'resan/images' }, // 将 Animate images 移动到 resan/images
                     { from: 'style.css', to: '' },
-                    { from: 'manifest.json', to: '' }, // 复制 manifest.json 到 dist 根目录
+                    // { from: 'manifest.json', to: '' }, // 复制 manifest.json 到 dist 根目录
                     // 不再逐一复制外部脚本，已合并为 resan/vendor-animate.js
                 ],
             }),
@@ -120,17 +130,17 @@ module.exports = (env, argv) => {
             // 对 vendor-animate.js 做混淆（仅生产）
             ...(isProd
                 ? [
-                      new WebpackObfuscator(
-                          {
-                              compact: true,
-                              simplify: true,
-                              rotateStringArray: false,
-                              stringArray: false,
-                              deadCodeInjection: false,
-                          },
-                          ['vendor-animate.js'] // 排除合并的外部库脚本
-                      ),
-                  ]
+                    new WebpackObfuscator(
+                        {
+                            compact: true,
+                            simplify: true,
+                            rotateStringArray: false,
+                            stringArray: false,
+                            deadCodeInjection: false,
+                        },
+                        ['vendor-animate.js'] // 排除合并的外部库脚本
+                    ),
+                ]
                 : []),
         ],
         performance: { hints: isProd ? 'warning' : false },

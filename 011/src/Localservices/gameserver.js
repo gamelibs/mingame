@@ -106,12 +106,12 @@ class GameServer {
         }
 
         // 启动时如果 localStorage 中存在明文敏感字段（cardBoosts/scoreSystem/eggs/maxUnlockedEggType），立即迁移为加密字段并删除明文
-        try {
-            const existing = this.loadGameData();
-            if (existing && (existing.cardBoosts || existing.scoreSystem || existing.eggs || existing.maxUnlockedEggType)) {
-                try { this._persistGameData(existing); } catch (e) {}
-            }
-        } catch (e) {}
+        // try {
+        //     const existing = this.loadGameData();
+        //     if (existing && (existing.cardBoosts || existing.scoreSystem || existing.eggs || existing.maxUnlockedEggType)) {
+        //         try { this._persistGameData(existing); } catch (e) {}
+        //     }
+        // } catch (e) {}
 
         this.initializeMapSystem();
 

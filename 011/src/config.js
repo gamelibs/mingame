@@ -1,3 +1,13 @@
+import tracker from './tracker.js';
+
+// initialize tracker as early as possible
+
+try {
+    tracker.init({ debug: false });
+} catch (e) {
+    console.warn('Tracker init failed', e);
+}
+
 const config = {
     "scene": {
         "width": 1080,
@@ -41,5 +51,99 @@ const config = {
         ]
     }
 }
- 
+
 export default config;
+// Expose a lightweight, early debug logger as window.__sdklog2 so
+// analytics/debug prints are available before `utile` is loaded.
+if (typeof window !== 'undefined') {
+    window.__sdklog2 = function (...args) {
+        if (typeof process !== 'undefined' && process.env && process.env.NODE_ENV === 'production') return; // 生产环境不输出
+        const formatParam = (arg) => {
+            if (typeof arg === 'string') return `'${arg}'`;
+            if (typeof arg === 'object') return JSON.stringify(arg);
+            return String(arg);
+        };
+
+        const params = args.map(formatParam).join(' ');
+
+        console.log(
+            `%c ***CPSDK***: ${params}`,
+            'background: linear-gradient(to right, #8e44ad, #ba43ff); ' +
+            'color: white; ' +
+            'padding: 5px 15px; ' +
+            'border-radius: 5px; ' +
+            'font-weight: bold; ' +
+            'text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);'
+
+        );
+    };
+
+    window.__sdklog3 = function (...args) {
+        if (process.env.NODE_ENV === 'production') return; // 生产环境不输出
+        const formatParam = (arg) => {
+            if (typeof arg === 'string') return `'${arg}'`;
+            if (typeof arg === 'object') return JSON.stringify(arg);
+            return String(arg);
+        };
+
+        const params = args.map(formatParam).join(' ');
+
+        console.log(
+            `%c ***DOTGTAG***: ${params}`,
+            'background: linear-gradient(to right,rgb(68, 173, 166),rgb(4, 170, 173)); ' +
+            'color: white; ' +
+            'padding: 5px 15px; ' +
+            'border-radius: 5px; ' +
+            'font-weight: bold; ' +
+            'text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);'
+
+        );
+    }
+}
+
+
+
+// Safe early initialization of GA4 (gtag) using data from this config.
+// This runs when config.js (merged into vendor-animate) is evaluated in the head.
+(function () {
+    try {
+        // Dynamically insert the official gtag loader script so the browser fetches gtag.js early.
+        if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+            const GA_SRC = 'https://www.googletagmanager.com/gtag/js?id=G-PM5MNMLL3R';
+            // Avoid inserting twice
+            if (!document.querySelector(`script[src="${GA_SRC}"]`)) {
+                const s = document.createElement('script');
+                s.async = true;
+                s.src = GA_SRC;
+                s.onload = function () {
+                    try { console.log('✅ gtag.js loaded'); } catch (e) { }
+                };
+                s.onerror = function (err) {
+                    try { console.warn('⚠️ gtag.js failed to load', err); } catch (e) { }
+                };
+                (document.head || document.getElementsByTagName('head')[0] || document.documentElement).appendChild(s);
+            }
+        }
+    } catch (e) { /* non-fatal */ }
+    try {
+        // Ensure dataLayer and a minimal gtag shim exist so calls won't throw
+        if (typeof window !== 'undefined') {
+            window.dataLayer = window.dataLayer || [];
+            if (typeof window.gtag !== 'function') {
+                window.gtag = function () { window.dataLayer.push(arguments); };
+            }
+        }
+
+        // Queue consent/config information via tracker only. Tracker will forward to gtag/dataLayer
+        // when they become available. This prevents duplicate events (gtag + tracker).
+        try { tracker.trackEvent('gtag_consent', { ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted', analytics_storage: 'granted' }); } catch (e) { }
+        try { tracker.trackEvent('gtag_js', { timestamp: Date.now() }); } catch (e) { }
+        try { tracker.trackEvent('gtag_set_cookie_flags', { cookie_flags: 'SameSite=None;Secure' }); } catch (e) { }
+        try { tracker.trackEvent('gtag_config', { measurement_id: 'G-PM5MNMLL3R', game_id: 1011, game_name: 'DragonEgg' }); } catch (e) { }
+    } catch (e) {
+        // Non-fatal: log for debugging but don't break app
+        try { console.warn('gtag init in config.js failed', e); } catch (e) { }
+    }
+})();
+
+

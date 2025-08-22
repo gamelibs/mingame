@@ -1,4 +1,5 @@
 import utile from './utile.js';
+import tracker from './tracker.js';
 /**
  * 游戏场景管理器
  * 负责游戏的主要逻辑和交互
@@ -93,9 +94,21 @@ class GameScense {
                     event.stopPropagation();
                     this.engine.playSound('select_wawa');
                     // 调用插页广告
-                    this.showInterstitialAd(() => {
+                    window.showInterstitialAd(() => {
                         // 广告关闭后的回调
                         this.showPanel(mc_start_over, false, () => {
+
+                            // increment restart confirmation count for guest users
+                            try {
+                                const key = 'guest_restart_confirm_count';
+                                let count = parseInt(localStorage.getItem(key) || '0', 10) || 0;
+                                count += 1;
+                                localStorage.setItem(key, String(count));
+                                // emit tracking event
+                                tracker.trackEvent('restart_confirm', { isGuest: true, count, timestamp: Date.now() });
+                            } catch (e) {
+                                // ignore storage/tracker errors
+                            }
 
                             this.resetGame(false);
                         });
@@ -108,7 +121,7 @@ class GameScense {
                     event.stopPropagation();
                     this.engine.playSound('select_wawa');
                     // 调用插页广告
-                    this.showInterstitialAd(() => {
+                    window.showInterstitialAd(() => {
 
                         mc_start_over.visible = false; // 隐藏重新开始界面
                     });
@@ -163,7 +176,7 @@ class GameScense {
                         event.stopPropagation();
 
                         // 调用插页广告
-                        this.showInterstitialAd(() => {
+                        window.showInterstitialAd(() => {
                             // 广告关闭后的回调
                             this.failureHandler(false);
                         });
@@ -208,7 +221,7 @@ class GameScense {
                         event.stopPropagation();
 
                         // 调用插页广告
-                        this.showInterstitialAd(() => {
+                        window.showInterstitialAd(() => {
                             // 广告关闭后的回调
                             this.victoryHandler(false);
                         });
@@ -2227,7 +2240,7 @@ class GameScense {
      * @param {Object} newEgg - 新蛋元件
      */
     playSynthesisEffect(newEgg) {
-        return new Promise((resolve) => {
+        new Promise((resolve) => {
             // 缩放弹出效果
             newEgg.scaleX = 0.1;
             newEgg.scaleY = 0.1;
@@ -2585,6 +2598,12 @@ class GameScense {
 
             });
 
+            try {
+                // report failure event — game has no level; report bestScore
+                const bestScore = this.gameData && this.gameData.scoreSystem ? this.gameData.scoreSystem.bestScore : null;
+                tracker.trackEvent('game_failure', { bestScore });
+            } catch (e) { }
+
             // console.log('✅ 失败界面显示完成');
         } else {
             this.closeCardRewardPanel()
@@ -2682,6 +2701,11 @@ class GameScense {
                 }
                 // this.openCardRewardPanel();
             })
+            try {
+                // report victory event — report bestScore
+                const bestScore = this.gameData && this.gameData.scoreSystem ? this.gameData.scoreSystem.bestScore : null;
+                tracker.trackEvent('game_victory', { bestScore });
+            } catch (e) { }
             // console.log('✅ 胜利界面显示完成');
         } else {
             this.closeCardRewardPanel()
@@ -2691,24 +2715,6 @@ class GameScense {
                 this.onRestartGame();
             })
 
-        }
-    }
-
-    /**
-    * 显示插页广告
-    * @param {Function} callback - 广告关闭后的回调函数
-    */
-    showInterstitialAd(callback) {
-        // console.log('📺 准备播放插页广告...');
-
-        if (window.showInterstitialAd) {
-            window.showInterstitialAd(() => {
-                console.log('📺 插页广告关闭');
-                if (callback) callback();
-            });
-        } else {
-            // console.log('📺 插页广告API不可用，直接执行回调');
-            if (callback) callback();
         }
     }
 
@@ -2947,10 +2953,10 @@ class GameScense {
 
                 utile.addFrameEnd(maskMc, () => {
                     // finish();
-                    if( unlockedLevel === 7) {
+                    if (unlockedLevel === 7) {
                         maskMc.visible = false;
                         const maskMc8 = this.unlockAnimations.get(8);
-                        utile.addFrameEnd(maskMc8, null,true);
+                        utile.addFrameEnd(maskMc8, null, true);
                         maskMc8.play();
 
                     }
@@ -3040,6 +3046,7 @@ class GameScense {
         guideMc.visible = true;
         guideMc.gotoAndPlay(0);
         console.log('✅ guide_mc 已赋值给 guideGesture 并开始播放');
+
     }
 
     /**
@@ -3084,12 +3091,14 @@ class GameScense {
             // console.log('💡 现在可以自由点击蛋进行游戏了！');
             this.guideGesture.gotoAndStop(0);
             this.guideGesture.visible = false;
+            tracker.trackEvent('guide_complete');
         }
 
         // 重置引导状态
         this.waitingForClick = false;
         this.expectedClickCellId = null;
         this.currentPointIndex = 0;
+
 
 
     }

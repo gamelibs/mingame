@@ -237,12 +237,12 @@ class GameEngine {
     setupFocusBlurHandler() {
         const pauseGame = () => {
             // console.log('🛑 页面失去焦点，暂停');
-            createjs.Ticker.paused = true;
+            // createjs.Ticker.paused = true;
             this.pauseAudio();
         };
         const resumeGame = () => {
             // console.log('▶️ 页面获得焦点，恢复');
-            createjs.Ticker.paused = false;
+            // createjs.Ticker.paused = false;
             this.resumeAudio();
         };
         window.addEventListener('blur', pauseGame);
@@ -702,22 +702,69 @@ class GameEngine {
         // 更新进度条到 100%
         this.updateLoadingProgress(1.0);
 
-        // 更新 HTML 界面显示
+        // 更新 HTML 界面显示，提示用户点击进入游戏
         const loadingText = document.querySelector('.loading-text');
-        if (loadingText) {
-            loadingText.textContent = 'Login complete';
-            loadingText.style.color = '#00FF00';
+
+        // If the platform is GameDistribution, require an explicit click to enter.
+        // Otherwise, continue immediately (original default behavior).
+        if (typeof window !== 'undefined' && window.Platform === 'gamedistribution') {
+            if (loadingText) {
+                loadingText.textContent = 'Click to enter game';
+                loadingText.style.color = '#00FF00';
+            }
+
+            const preloadContainer = document.getElementById('preload_container') || document.querySelector('.loading-container') || document.body;
+            const enterHandler = () => {
+                try {
+                    if (loadingText) {
+                        loadingText.textContent = 'Entering...';
+                        loadingText.style.color = '#FFFFFF';
+                    }
+                    if (preloadContainer) preloadContainer.style.cursor = 'default';
+                } catch (e) { }
+                try { if (preloadContainer) preloadContainer.removeEventListener('click', enterHandler); } catch (e) { }
+
+                // report click-to-enter
+                try {
+                    if (typeof window !== 'undefined' && window.tracker && typeof window.tracker.trackEvent === 'function') {
+                        window.tracker.trackEvent('enter_game_click', { platform: window.Platform || null });
+                    }
+                } catch (e) { }
+
+                // On GameDistribution, show an interstitial ad first (if available) then enter.
+                try {
+                    if (typeof window !== 'undefined' && typeof window.showInterstitialAd === 'function') {
+                        window.showInterstitialAd(() => {
+                            try { this.switchToGameScene(); } catch (e) { console.warn('switchToGameScene failed after ad', e); }
+                        });
+                        return;
+                    }
+                } catch (e) { try { window.__sdklog2 && window.__sdklog2('showInterstitialAd error', e); } catch (e) { } }
+
+                // Fallback: no ad API, enter immediately
+                this.switchToGameScene();
+            };
+
+            try {
+                if (preloadContainer) {
+                    preloadContainer.style.cursor = 'pointer';
+                    preloadContainer.addEventListener('click', enterHandler, { once: true });
+                } else {
+                    // Fallback: no container found, proceed immediately
+                    this.switchToGameScene();
+                }
+            } catch (e) {
+                console.warn('Failed to attach click-to-enter handler, auto-entering', e);
+                this.switchToGameScene();
+            }
+        } else {
+            // Non-GD platforms: proceed immediately
+            if (loadingText) {
+                loadingText.textContent = 'Entering...';
+                loadingText.style.color = '#FFFFFF';
+            }
+            this.switchToGameScene();
         }
-
-        // Remove the centered logo now that we're entering the game
-        // const logoEl = document.getElementById('site-logo');
-        // if (logoEl && logoEl.parentNode) {
-        //     logoEl.parentNode.removeChild(logoEl);
-        // }
-
-        // Keep the loading UI visible until scene resources finish loading.
-        // The actual hiding will be performed inside switchToGameScene() after preload completes.
-        this.switchToGameScene();
     }
 
     async startGameLogic() {
@@ -733,12 +780,10 @@ class GameEngine {
         // // 强制使用游客模式
         window.GameServer.setLoginConfig({
             forceLoginType: 'guest',
-            mockLoginDelay: 1000
+            mockLoginDelay: 500
         })
         // 为了避免长时间卡住，设置一个 10s 的前端超时作为兜底
         const FRONTEND_TIMEOUT_MS = 10000;
-
-        let completed = false;
 
         const initPromise = (async () => {
             // console.log(`🕒 calling GameServer.init() @ ${new Date().toISOString()}`);
@@ -758,7 +803,6 @@ class GameEngine {
 
             // 如果成功，进入登录完成流程
             if (serverResult?.success) {
-                completed = true;
                 this.onLoginComplete();
                 return;
             }
