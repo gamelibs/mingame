@@ -99,12 +99,17 @@ class Tracker {
                     console.log(eventName, payload);
                 }
             } catch (e) {}
-            if (this.gtag) {
-                this.gtag('event', eventName, Object.assign({}, payload, this.opts.gtagParams || {}));
+            
+            // Prefer gtag (GA4). Read runtime globals so tracker works before/after the gtag script loads.
+            const gtag = (typeof window !== 'undefined' && typeof window.gtag === 'function') ? window.gtag : null;
+            const dataLayer = (typeof window !== 'undefined' && window.dataLayer) ? window.dataLayer : null;
+            
+            if (gtag) {
+                gtag('event', eventName, Object.assign({}, payload, this.opts.gtagParams || {}));
                 return;
             }
-            if (this.dataLayer && typeof this.dataLayer.push === 'function') {
-                this.dataLayer.push(Object.assign({ event: eventName }, payload));
+            if (dataLayer && typeof dataLayer.push === 'function') {
+                dataLayer.push(Object.assign({ event: eventName }, payload));
                 return;
             }
             if (this.opts && this.opts.endpoint && typeof navigator !== 'undefined' && navigator.sendBeacon) {
@@ -140,32 +145,6 @@ class Tracker {
 
 const tracker = new Tracker();
 
-// Mark this tracker as the real implementation and flush any queued events
-try {
-    if (typeof window !== 'undefined') {
-        tracker.__isRealTracker = true;
-        tracker.__isShim = false;
-        // If the wrapper queued any events, flush them into the real tracker
-        if (typeof window.__flushPreTracker === 'function') {
-            try { window.__flushPreTracker(tracker); } catch (e) { /* non-fatal */ }
-        } else if (Array.isArray(window.__preTrackerEvents) && window.__preTrackerEvents.length) {
-            // naive fallback: replay init + events
-            try {
-                const q = window.__preTrackerEvents.slice();
-                for (let it of q) {
-                    try {
-                        if (it.type === 'init') tracker.init(it.opts || {});
-                        else if (it.type === 'startGameTimer') tracker.startGameTimer();
-                        else if (it.type === 'sendPlayTime') tracker.sendPlayTime();
-                        else if (it.type === 'stopGameTimer') tracker.stopGameTimer();
-                        else if (it.type === 'event') tracker.trackEvent(it.name, it.params || {});
-                    } catch (e) { /* ignore per-item errors */ }
-                }
-                window.__preTrackerEvents = [];
-                try { window.tracker = tracker; } catch (e) {}
-            } catch (e) { /* ignore */ }
-        }
-    }
-} catch (e) { /* ignore */ }
+
 
 export default tracker;

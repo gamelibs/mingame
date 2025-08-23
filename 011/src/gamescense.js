@@ -1,5 +1,5 @@
 import utile from './utile.js';
-import tracker from './tracker.js';
+// import tracker from './tracker.js'; // Removed - now using window.gtag directly
 /**
  * 游戏场景管理器
  * 负责游戏的主要逻辑和交互
@@ -104,8 +104,15 @@ class GameScense {
                                 let count = parseInt(localStorage.getItem(key) || '0', 10) || 0;
                                 count += 1;
                                 localStorage.setItem(key, String(count));
-                                // emit tracking event
-                                tracker.trackEvent('restart_confirm', { isGuest: true, count, timestamp: Date.now() });
+                                // emit tracking event using standard GA4 event
+                                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                                    window.gtag('event', 'select_content', {
+                                        content_type: 'game_action',
+                                        content_id: 'restart_confirm',
+                                        custom_parameter_1: count,
+                                        send: 'sdk'
+                                    });
+                                }
                             } catch (e) {
                                 // ignore storage/tracker errors
                             }
@@ -251,14 +258,15 @@ class GameScense {
                     btnSetting.on('click', () => {
                         event.stopPropagation();
                         this.engine.playSound("select_wawa")
-                        this.showPanel(settingsMc, true, () => {
-                            // console.log('✅ 设置界面显示完成');
+                        window.showInterstitialAd(() => {
 
-
-                            this.selectedDifficulty = window.GameServer.getDifficulty();
-
-                            this.selectDifficulty(this.selectedDifficulty, this.difficultyMap); // 更新按钮状态
-                        });
+                            this.showPanel(settingsMc, true, () => {
+                                // console.log('✅ 设置界面显示完成');
+                                this.selectedDifficulty = window.GameServer.getDifficulty();
+    
+                                this.selectDifficulty(this.selectedDifficulty, this.difficultyMap); // 更新按钮状态
+                            });
+                        })
                     });
                     // console.log('✅ btn_setting 按钮事件已绑定');
                 }
@@ -2100,11 +2108,11 @@ class GameScense {
         // 为元件添加缩放 tween
         createjs.Tween.get(piece, { loop: true })
             .to({ scaleX: 1.05, scaleY: 1.05 }, 300)
-            .to({ scaleX: 1.0, scaleY: 1.0 }, 300);
+            .to({ scaleX: 1.0, scaleY: 1.0 }, 300)
 
         // 创建新的选中指示器
         const indicator = new createjs.Shape();
-        indicator.graphics.setStrokeStyle(6).beginStroke('#ff9900ff').drawCircle(0, 0, 80);
+        indicator.graphics.setStrokeStyle(12).beginStroke('#ffffffff').drawCircle(0, 0, 60);
         indicator.x = piece.x;
         indicator.y = piece.y;
         indicator.name = 'selectionIndicator';
@@ -2118,8 +2126,8 @@ class GameScense {
 
         // 添加闪烁动画
         createjs.Tween.get(indicator, { loop: true })
-            .to({ alpha: 0, scaleX: 1.1, scaleY: 1.1 }, 300)
-            .to({ alpha: 1, scaleX: 0.5, scaleY: 0.5 }, 300);
+            .to({ alpha: 0, scaleX: 1.0, scaleY: 1.2 }, 300)
+            .to({ alpha: 1, scaleX: 0.4, scaleY: 0.6 }, 300);
 
         // 记录全局唯一指示器
         this.selectionIndicator = indicator;
@@ -2599,9 +2607,16 @@ class GameScense {
             });
 
             try {
-                // report failure event — game has no level; report bestScore
+                // report failure event using standard GA4 event
                 const bestScore = this.gameData && this.gameData.scoreSystem ? this.gameData.scoreSystem.bestScore : null;
-                tracker.trackEvent('game_failure', { bestScore });
+                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                    window.gtag('event', 'level_end', {
+                        level_name: 'main_game',
+                        success: false,
+                        score: bestScore || 0,
+                        send: 'sdk'
+                    });
+                }
             } catch (e) { }
 
             // console.log('✅ 失败界面显示完成');
@@ -2702,9 +2717,16 @@ class GameScense {
                 // this.openCardRewardPanel();
             })
             try {
-                // report victory event — report bestScore
+                // report victory event using standard GA4 event
                 const bestScore = this.gameData && this.gameData.scoreSystem ? this.gameData.scoreSystem.bestScore : null;
-                tracker.trackEvent('game_victory', { bestScore });
+                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                    window.gtag('event', 'level_end', {
+                        level_name: 'main_game',
+                        success: true,
+                        score: bestScore || 0,
+                        send: 'sdk'
+                    });
+                }
             } catch (e) { }
             // console.log('✅ 胜利界面显示完成');
         } else {
@@ -3091,7 +3113,14 @@ class GameScense {
             // console.log('💡 现在可以自由点击蛋进行游戏了！');
             this.guideGesture.gotoAndStop(0);
             this.guideGesture.visible = false;
-            tracker.trackEvent('guide_complete');
+            // report tutorial completion using standard GA4 event
+            try {
+                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                    window.gtag('event', 'tutorial_complete', {
+                        send: 'sdk'
+                    });
+                }
+            } catch (e) { }
         }
 
         // 重置引导状态

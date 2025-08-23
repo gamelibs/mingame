@@ -289,15 +289,15 @@ class GameEngine {
     async loadConfig() {
         try {
             // 优先从 manifest.json 加载配置
-            const response = await fetch('./manifest.json');
-            if (response.ok) {
-                this.config = await response.json();
+            // const response = await fetch('./manifest.json');
+            // if (response.ok) {
+            //     this.config = await response.json();
                 // console.log('Config loaded from manifest.json:', this.config);
-            } else {
+            // } else {
                 // 回退到模块化 config
                 this.config = config || {};
                 // console.log('Config loaded from config.js (fallback):', this.config);
-            }
+            // }
 
             // 兼容 manifest.json 中的 initial 字段，优先使用 config.initial，其次尝试 config.gameconfig.initial
             const initialList = this.config.initial || (this.config.gameconfig && this.config.gameconfig.initial) || null;
@@ -646,6 +646,16 @@ class GameEngine {
         const loadingText = document.querySelector('.loading-text');
         if (loadingText) {
             loadingText.textContent = 'Fetching user data...';
+            try {
+                // inject a small stylesheet once to enlarge and blink the loading text
+                if (!document.getElementById('sdk-loading-text-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'sdk-loading-text-style';
+                    style.textContent = "@keyframes sdk-blink{0%,100%{opacity:1}50%{opacity:0.15}}.sdk-loading-blink{animation:sdk-blink 1s linear infinite}.sdk-loading-large{font-size:22px !important;font-weight:600 !important;}";
+                    document.head.appendChild(style);
+                }
+                loadingText.classList.add('sdk-loading-blink', 'sdk-loading-large');
+            } catch (e) { }
         }
 
         // 重置进度条到 90%，为登录流程留出空间
@@ -709,7 +719,7 @@ class GameEngine {
         // Otherwise, continue immediately (original default behavior).
         if (typeof window !== 'undefined' && window.Platform === 'gamedistribution') {
             if (loadingText) {
-                loadingText.textContent = 'Click to enter game';
+                loadingText.textContent = 'Top to enter game';
                 loadingText.style.color = '#00FF00';
             }
 
@@ -724,10 +734,15 @@ class GameEngine {
                 } catch (e) { }
                 try { if (preloadContainer) preloadContainer.removeEventListener('click', enterHandler); } catch (e) { }
 
-                // report click-to-enter
+                // report click-to-enter using standard GA4 event
                 try {
-                    if (typeof window !== 'undefined' && window.tracker && typeof window.tracker.trackEvent === 'function') {
-                        window.tracker.trackEvent('enter_game_click', { platform: window.Platform || null });
+                    if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                        window.gtag('event', 'select_content', { 
+                            content_type: 'game_action',
+                            content_id: 'enter_game_click',
+                            platform: window.Platform || 'unknown',
+                            send: 'sdk'
+                        });
                     }
                 } catch (e) { }
 
@@ -739,7 +754,10 @@ class GameEngine {
                         });
                         return;
                     }
-                } catch (e) { try { window.__sdklog2 && window.__sdklog2('showInterstitialAd error', e); } catch (e) { } }
+                } catch (e) { 
+                    try { window.__sdklog2 && window.__sdklog2('window.preloadAd error', e); } catch (e) { } 
+                    try { this.switchToGameScene(); } catch (e) { console.warn('switchToGameScene failed after ad', e); }
+                }
 
                 // Fallback: no ad API, enter immediately
                 this.switchToGameScene();
@@ -1119,6 +1137,21 @@ class GameEngine {
 
         if (window.GameScense) {
             window.GameScense.init(gameData);
+        }
+
+        // 🎯 启动游戏时长统计和发送游戏开始事件
+        try {
+            // 发送标准 GA4 游戏开始事件 
+            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                window.gtag('event', 'level_start', { 
+                    level_name: 'main_game',
+                    character: 'player',
+                    send: 'sdk'
+                });
+                console.log('🎮 level_start 事件已发送');
+            }
+        } catch (e) {
+            console.warn('⚠️ 发送游戏开始事件失败', e);
         }
 
         this.preloadedGameScene = null;

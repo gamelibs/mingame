@@ -1,12 +1,12 @@
-import tracker from './tracker.js';
+// import tracker from './tracker.js';
 
 // initialize tracker as early as possible
 
-try {
-    tracker.init({ debug: false });
-} catch (e) {
-    console.warn('Tracker init failed', e);
-}
+// try {
+//     tracker.init({ debug: false });
+// } catch (e) {
+//     console.warn('Tracker init failed', e);
+// }
 
 const config = {
     "scene": {
@@ -103,46 +103,114 @@ if (typeof window !== 'undefined') {
 
 
 
-// Safe early initialization of GA4 (gtag) using data from this config.
+// Enhanced GA4 (gtag) initialization with consent management and event filtering
 // This runs when config.js (merged into vendor-animate) is evaluated in the head.
 (function () {
     try {
-        // Dynamically insert the official gtag loader script so the browser fetches gtag.js early.
         if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-            const GA_SRC = 'https://www.googletagmanager.com/gtag/js?id=G-PM5MNMLL3R';
-            // Avoid inserting twice
-            if (!document.querySelector(`script[src="${GA_SRC}"]`)) {
-                const s = document.createElement('script');
-                s.async = true;
-                s.src = GA_SRC;
-                s.onload = function () {
-                    try { console.log('✅ gtag.js loaded'); } catch (e) { }
-                };
-                s.onerror = function (err) {
-                    try { console.warn('⚠️ gtag.js failed to load', err); } catch (e) { }
-                };
-                (document.head || document.getElementsByTagName('head')[0] || document.documentElement).appendChild(s);
-            }
-        }
-    } catch (e) { /* non-fatal */ }
-    try {
-        // Ensure dataLayer and a minimal gtag shim exist so calls won't throw
-        if (typeof window !== 'undefined') {
-            window.dataLayer = window.dataLayer || [];
-            if (typeof window.gtag !== 'function') {
-                window.gtag = function () { window.dataLayer.push(arguments); };
-            }
-        }
+            // Game configuration for GA4
+            const gameConfig = {
+                gameid: "GameDistribution_97433fde06bb45aeb80c380ace3ece7f",
+                dev_name: "Dragon Egg"
+            };
 
-        // Queue consent/config information via tracker only. Tracker will forward to gtag/dataLayer
-        // when they become available. This prevents duplicate events (gtag + tracker).
-        try { tracker.trackEvent('gtag_consent', { ad_storage: 'granted', ad_user_data: 'granted', ad_personalization: 'granted', analytics_storage: 'granted' }); } catch (e) { }
-        try { tracker.trackEvent('gtag_js', { timestamp: Date.now() }); } catch (e) { }
-        try { tracker.trackEvent('gtag_set_cookie_flags', { cookie_flags: 'SameSite=None;Secure' }); } catch (e) { }
-        try { tracker.trackEvent('gtag_config', { measurement_id: 'G-PM5MNMLL3R', game_id: 1011, game_name: 'DragonEgg' }); } catch (e) { }
+            // Create and configure gtag script
+            const script = document.createElement("script");
+            script.async = true;
+            script.src = "https://www.googletagmanager.com/gtag/js?id=G-PM5MNMLL3R";
+            script.setAttribute("crossorigin", "anonymous");
+            
+            script.onload = () => {
+                // Set consent configuration
+                window.gtag("consent", "default", {
+                    ad_storage: "granted",
+                    ad_user_data: "granted", 
+                    ad_personalization: "granted",
+                    analytics_storage: "granted"
+                });
+                
+                // Initialize gtag
+                window.gtag("js", new Date());
+                window.gtag("set", "cookie_flags", "SameSite=None;Secure");
+                window.gtag("config", "G-PM5MNMLL3R", {
+                    game_id: gameConfig.gameid,
+                    dev_name: gameConfig.dev_name
+                });
+                
+                try { console.log('✅ gtag.js loaded with consent and game config'); } catch (e) { }
+            };
+            
+            script.onerror = function (err) {
+                try { console.warn('⚠️ gtag.js failed to load', err); } catch (e) { }
+            };
+
+            // Initialize dataLayer
+            window.dataLayer = window.dataLayer || [];
+            
+            // Track if game_start interval has been set
+            let gamePlayTimeIntervalSet = false;
+            
+            // Enhanced gtag wrapper with event filtering and automatic game_play_time
+            window.gtag = function() {
+                let args = [...arguments];
+                let eventAction = args[1];
+                let eventParams = args[2];
+                
+                // Allow specific gtag commands and events
+                const allowedCommands = ["set", "js", "config", "consent"];
+                const allowedGameEvents = ["game_start", "level_start", "level_end"];
+                const allowedSdkEvents = [
+                    // Standard GA4 events we use
+                    "ad_impression", "ad_click", "ad_error", "earn_virtual_currency",
+                    "select_content", "game_play_time", "tutorial_complete",
+                    // Legacy events for backward compatibility
+                    "game_reward_open", "game_interstitialad_open", 
+                    "game_reward_dismissed", "game_interstitialad", 
+                    "game_reward", "game_reward_viewed", "game_interstitialad_viewed", 
+                    "click_ad"
+                ];
+                
+                // Filter events: allow commands, game events, or SDK events with send: "sdk"
+                if (allowedCommands.includes(args[0]) || 
+                    allowedGameEvents.includes(eventAction) || 
+                    (allowedSdkEvents.includes(eventAction) && eventParams && eventParams.send === "sdk")) {
+                    
+                    // Log filtered events
+                    if (typeof window.__sdklog3 === 'function') {
+                        window.__sdklog3('gtag_filtered', arguments);
+                    }
+                    
+                    // Push to dataLayer
+                    try {
+                        if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+                            window.dataLayer.push(arguments);
+                        }
+                    } catch (e) {
+                        console.log("dataLayer error:", e);
+                    }
+                }
+                
+                // Set up automatic game_play_time interval on first level_start
+                if (eventAction === "level_start" && !gamePlayTimeIntervalSet) {
+                    gamePlayTimeIntervalSet = true;
+                    setInterval(function() {
+                        if (typeof window.gtag === 'function') {
+                            window.gtag("event", "game_play_time", {
+                                send: "sdk"
+                            });
+                        }
+                    }, 30000); // 30 seconds
+                    
+                    try { console.log('🕒 Automatic game_play_time interval started (30s)'); } catch (e) { }
+                }
+            };
+            
+            // Append script to head
+            document.head.appendChild(script);
+        }
     } catch (e) {
         // Non-fatal: log for debugging but don't break app
-        try { console.warn('gtag init in config.js failed', e); } catch (e) { }
+        try { console.warn('Enhanced gtag init failed', e); } catch (e) { }
     }
 })();
 

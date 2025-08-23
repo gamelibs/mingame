@@ -124,27 +124,16 @@ class GameServer {
     _persistGameData(obj) {
         try {
             if (!obj) return;
+            // 保存为明文（取消混淆/加密逻辑）
             // 深拷贝以免修改原对象
             const copy = JSON.parse(JSON.stringify(obj));
-            try {
-                // 需要加密混淆的字段列表
-                // 注意：加密字段会被写为 encryptedXxx 并删除原始明文字段
-                const encryptFields = ['cardBoosts', 'scoreSystem', 'maxUnlockedEggType', 'eggs'];
-                for (const f of encryptFields) {
-                    if (copy[f] !== undefined && utile && typeof utile.xorEncryptObject === 'function') {
-                        const encName = 'encrypted' + f.charAt(0).toUpperCase() + f.slice(1);
-                        try {
-                            copy[encName] = utile.xorEncryptObject(copy[f], this._localCryptoKey);
-                            try { delete copy[f]; } catch (e) {}
-                        } catch (e) {
-                            // ignore field-level encryption errors
-                        }
-                    }
-                }
-            } catch (e) {}
-            // 保证 saveTime
             if (!copy.saveTime) copy.saveTime = Date.now();
-            localStorage.setItem('GameData', JSON.stringify(copy));
+            try {
+                localStorage.setItem('GameData', JSON.stringify(copy));
+            } catch (e) {
+                // 在某些环境 localStorage 可能失败，尝试用备用键
+                try { localStorage.setItem('GameData_backup', JSON.stringify(copy)); } catch (e) { }
+            }
         } catch (e) {
             console.error('❌ _persistGameData failed:', e);
         }
@@ -392,34 +381,28 @@ class GameServer {
             this.saveUserData('currentUser', finalUserData);
             console.log(`👤 用户初始化完成: ${isNewUser ? '新用户(需要引导)' : '老用户(恢复数据)'}`);
 
-            // 🔥 初始化 cardBoosts（默认 base 权重），仅当没有持久化数据时使用
-            if (!this.cardBoosts || Object.keys(this.cardBoosts).length === 0) {
-                this.cardBoosts = {
-                    1: 0.5, // 灰
-                    2: 0.5, // 绿
-                    3: 0.5, // 蓝
-                    4: 0.4, // 紫
-                    5: 0.3, // 黄
-                    6: 0.2, // 橙
-                    7: 0.1 // 橙列5
-                  
-                };
-                // 持久化默认 gameData 中的 cardBoosts（便于后续调整）
-                try {
-                    const gd = this.loadGameData() || {};
-                    gd.cardBoosts = this.cardBoosts;
-                    try {
-                        if (utile && typeof utile.xorEncryptObject === 'function') {
-                            gd.encryptedCardBoosts = utile.xorEncryptObject(gd.cardBoosts, this._localCryptoKey);
-                            // 删除明文，避免控制台直接查看
-                            delete gd.cardBoosts;
-                        }
-                    } catch (e) {}
-                    gd.saveTime = Date.now();
-                    this._persistGameData(gd);
-                    console.log('🔁 初始化并持久化默认 cardBoosts');
-                } catch (e) { }
-            }
+            // 🔥 初始化 cardBoosts（每次启动都使用代码默认值，不从缓存读取也不保存到缓存）
+            this.cardBoosts = {
+                1: 0.5, // 灰
+                2: 0.5, // 绿
+                3: 0.5, // 蓝
+                4: 0.4, // 紫
+                5: 0.3, // 红
+                6: 0.2, // 黄
+                7: 0.08 // 橙 - 调整为0.08以达到约10%胜率
+            };
+            
+            // 注释掉持久化代码，确保每次启动都使用代码中的默认值
+            // 📊 胜率分析: Level 7权重=0.08 → 预期胜率≈10.5% (目标10%)
+            // try {
+            //     const gd = this.loadGameData() || {};
+            //     gd.cardBoosts = this.cardBoosts;
+            //     gd.saveTime = Date.now();
+            //     this._persistGameData(gd);
+            //     console.log('🔁 初始化并持久化默认 cardBoosts');
+            // } catch (e) { }
+            
+            console.log('🔁 使用代码默认 cardBoosts 配置 (不从缓存读取)');
 
             return finalUserData;
 
@@ -466,6 +449,8 @@ class GameServer {
             const gameData = localStorage.getItem('GameData');
             if (gameData) {
                 const parsedData = JSON.parse(gameData);
+                // 已禁用混淆/加密功能：不再尝试解密或迁移旧的 encryptedXxx 字段
+                /*
                 // 尝试解密一组可能被混淆的字段
                 const decryptFields = ['CardBoosts', 'ScoreSystem', 'MaxUnlockedEggType', 'Eggs'];
                 let _didAnyDecrypt = false;
@@ -485,14 +470,15 @@ class GameServer {
                             }
                         }
                     }
-                } catch (e) { /* ignore decryption errors */ }
+                } catch (e) { }
 
                 // 如果我们解密出了任意字段并且原始数据仍包含明文，立即覆写存储以移除明文
                 try {
                     if (_didAnyDecrypt) {
                         this._persistGameData(parsedData);
                     }
-                } catch (e) { /* ignore */ }
+                } catch (e) { }
+                */
                 console.log('📊 游戏数据加载成功');
                 return parsedData;
             }
@@ -1411,7 +1397,8 @@ class GameServer {
         // 如果强制类型数量 >= count，则直接返回前 count 个强制类型。
         try {
             // 解释：cardBoosts 的语义为：0 = 不参与，0~1 = 权重比例，1 = 最高权重（参与但不强制占位）
-            this.cardBoosts = this.cardBoosts || (this.loadGameData && this.loadGameData().cardBoosts) || {};
+            // 不从缓存读取，直接使用实例中已初始化的cardBoosts
+            this.cardBoosts = this.cardBoosts || {};
             const DEFAULT_WEIGHT = 0.5; // 未配置时的中性权重，可调整
 
             // 构建类型-权重池（跳过权重为0的类型）
@@ -1546,8 +1533,8 @@ class GameServer {
         // 算法3：使用 this.cardBoosts 作为基础权重（initializeUserData 时已设置默认值），
         // 并将 cardBoosts 的值视作 base 权重，抽卡时会在此基础上累加额外 boost。
         // 使用 this.cardBoosts 的 0..1 数值作为权重（0 = 永不出现，1 = 保证出现）。
-        // 确保 cardBoosts 已初始化（initializeUserData 已会设置默认值）
-        this.cardBoosts = this.cardBoosts || (this.loadGameData && this.loadGameData().cardBoosts) || {};
+        // 不从缓存读取，直接使用实例中已初始化的cardBoosts
+        this.cardBoosts = this.cardBoosts || {};
 
         // 构建权重数组，语义：0 = 不参与，0..1 = 权重，1 = 最大权重（参与但不强制）
         const DEFAULT_WEIGHT = 0.5;
@@ -1753,17 +1740,15 @@ class GameServer {
                 scoreSystem: this.scoreSystem, // 只保存总分数
                 difficulty: this.difficulty || 4,
                 maxUnlockedEggType: this.maxUnlockedEggType || 1,
-                // 保存抽卡带来的权重加成（card boosts），用于影响后续蛋的生成概率
-                cardBoosts: this.cardBoosts || {},
+                // 注释掉保存 cardBoosts，确保不保存到缓存
+                // cardBoosts: this.cardBoosts || {},
                 saveTime: Date.now()
             };
 
-            try {
-                if (utile && typeof utile.xorEncryptObject === 'function' && gameState.cardBoosts) {
-                    gameState.encryptedCardBoosts = utile.xorEncryptObject(gameState.cardBoosts, this._localCryptoKey);
-                    try { delete gameState.cardBoosts; } catch (e) {}
-                }
-            } catch (e) {}
+            // 注释掉禁用加密的 cardBoosts 保存
+            // try {
+            //     gameState.cardBoosts = this.cardBoosts || {};
+            // } catch (e) {}
             this._persistGameData(gameState);
 
             // console.log(`💾 游戏状态已保存: ${currentEggs.length}个蛋, 总分数${gameState.totalScore}`);
@@ -1793,22 +1778,22 @@ class GameServer {
             next = Math.max(0, Math.min(MAX_BOOST, next));
             // 保留两位小数，避免浮点数尾数过长
             this.cardBoosts[key] = Number(next.toFixed(2));
+            
+            // 注释掉持久化代码，确保不保存到缓存
             // 立即持久化：优先直接写入 GameData.cardBoosts（避免新手引导期间 saveCurrentGameState 被阻止）
-            try {
-                const gd = this.loadGameData() || {};
-                gd.cardBoosts = this.cardBoosts;
-                try {
-                    if (utile && typeof utile.xorEncryptObject === 'function') {
-                        gd.encryptedCardBoosts = utile.xorEncryptObject(gd.cardBoosts, this._localCryptoKey);
-                        try { delete gd.cardBoosts; } catch (e) {}
-                    }
-                } catch (e) {}
-                gd.saveTime = Date.now();
-                this._persistGameData(gd);
-            } catch (e) {
-                // 兜底尝试 saveCurrentGameState（老逻辑）
-                try { this.saveCurrentGameState(); } catch (e2) { /* ignore */ }
-            }
+            // try {
+            //     const gd = this.loadGameData() || {};
+            //     gd.cardBoosts = this.cardBoosts;
+            //     // 禁用混淆：保持 cardBoosts 明文
+            //     try { gd.cardBoosts = this.cardBoosts; } catch (e) {}
+            //     gd.saveTime = Date.now();
+            //     this._persistGameData(gd);
+            // } catch (e) {
+            //     // 兜底尝试 saveCurrentGameState（老逻辑）
+            //     try { this.saveCurrentGameState(); } catch (e2) { /* ignore */ }
+            // }
+            
+            console.log(`🔔 applyCardBoost: type=${key}, +${delta} -> ${next} (不保存到缓存)`);
             // console.log(`🔔 applyCardBoost: type=${key}, +${delta} -> ${next}`);
             return this.cardBoosts;
         } catch (e) {
@@ -1855,22 +1840,24 @@ class GameServer {
 
             }
 
-            // 🔥 恢复 cardBoosts（抽卡带来的概率加成）
-            if (gameData.cardBoosts !== undefined) {
-                // 恢复并规范化为两位小数
-                this.cardBoosts = gameData.cardBoosts || {};
-                try {
-                    Object.keys(this.cardBoosts).forEach(k => {
-                        const v = Number(this.cardBoosts[k]) || 0;
-                        this.cardBoosts[k] = Number(v.toFixed(2));
-                    });
-                } catch (e) {
-                    // ignore
-                }
-                // console.log('🔁 cardBoosts 已恢复并规范化:', this.cardBoosts);
-            } else {
-                this.cardBoosts = this.cardBoosts || {};
-            }
+            // 🔥 注释掉恢复 cardBoosts 的代码，确保每次启动都使用代码默认值
+            // if (gameData.cardBoosts !== undefined) {
+            //     // 恢复并规范化为两位小数
+            //     this.cardBoosts = gameData.cardBoosts || {};
+            //     try {
+            //         Object.keys(this.cardBoosts).forEach(k => {
+            //             const v = Number(this.cardBoosts[k]) || 0;
+            //             this.cardBoosts[k] = Number(v.toFixed(2));
+            //         });
+            //     } catch (e) {
+            //         // ignore
+            //     }
+            //     // console.log('🔁 cardBoosts 已恢复并规范化:', this.cardBoosts);
+            // } else {
+            //     this.cardBoosts = this.cardBoosts || {};
+            // }
+            
+            console.log('🔁 跳过 cardBoosts 恢复，使用代码默认值');
 
             // console.log('✅ 游戏状态恢复完成');
             return gameData;
@@ -2743,7 +2730,7 @@ class GameServer {
 
         const guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
-        return this.createNewUser('guest', { id: guestId, name: '游客' });
+        return this.createNewUser('guest', { id: guestId, name: 'vidar' });
     }
 
     /**
