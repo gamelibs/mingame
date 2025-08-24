@@ -715,9 +715,23 @@ class GameEngine {
         // 更新 HTML 界面显示，提示用户点击进入游戏
         const loadingText = document.querySelector('.loading-text');
 
-        // If the platform is GameDistribution, require an explicit click to enter.
-        // Otherwise, continue immediately (original default behavior).
-        if (typeof window !== 'undefined' && window.Platform === 'gamedistribution') {
+        // Determine platform behavior:
+        // - If platform is empty or explicit default marker 'defule' -> auto-enter
+        // - Otherwise require explicit click-to-enter and show an interstitial first
+        const platform = (typeof window !== 'undefined' && window.Platform) ? String(window.Platform).toLowerCase() : '';
+
+        if (!platform || platform === 'default') {
+            // Default/platform not provided -> proceed immediately
+            if (loadingText) {
+                loadingText.textContent = 'Entering...';
+                loadingText.style.color = '#FFFFFF';
+            }
+            this.switchToGameScene();
+            return;
+        }
+
+        // For any non-default platform, require explicit click-to-enter (GD, GooglePlay, etc.)
+        if (platform) {
             if (loadingText) {
                 loadingText.textContent = 'Top to enter game';
                 loadingText.style.color = '#00FF00';
@@ -746,7 +760,8 @@ class GameEngine {
                     }
                 } catch (e) { }
 
-                // On GameDistribution, show an interstitial ad first (if available) then enter.
+                // Show an interstitial ad first (provider-agnostic wrapper in ovosdk.js
+                // will route to GameDistribution or Android native as appropriate).
                 try {
                     if (typeof window !== 'undefined' && typeof window.showInterstitialAd === 'function') {
                         window.showInterstitialAd(() => {
@@ -754,8 +769,8 @@ class GameEngine {
                         });
                         return;
                     }
-                } catch (e) { 
-                    try { window.__sdklog2 && window.__sdklog2('window.preloadAd error', e); } catch (e) { } 
+                } catch (e) {
+                    try { window.__sdklog2 && window.__sdklog2('window.preloadAd error', e); } catch (e) { }
                     try { this.switchToGameScene(); } catch (e) { console.warn('switchToGameScene failed after ad', e); }
                 }
 

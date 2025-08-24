@@ -101,9 +101,7 @@ if (typeof window !== 'undefined') {
     }
 }
 
-// window.Platform = "gamedistribution";
-// window.Platform = "googleplay";
-window.Platform = "default";
+
 
 // Enhanced GA4 (gtag) initialization with consent management and event filtering
 // This runs when config.js (merged into vendor-animate) is evaluated in the head.
@@ -112,7 +110,7 @@ window.Platform = "default";
         if (typeof window !== 'undefined' && typeof document !== 'undefined') {
             // Game configuration for GA4
             const gameConfig = {
-                gameid: "GameDistribution_97433fde06bb45aeb80c380ace3ece7f",
+                gameid: "GooglePlay",
                 dev_name: "Dragon Egg"
             };
 

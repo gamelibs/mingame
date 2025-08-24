@@ -37,7 +37,7 @@ const resumeAudioAfterAd = () => {
     } catch (e) { try { window.__sdklog2('resumeAudioAfterAd error', e); } catch (e) { } }
 };
 
-window.Platform = "gamedistribution";
+
 
 function loadGameDistributionSDK() {
     return new Promise((resolve, reject) => {
@@ -90,52 +90,89 @@ function loadGameDistributionSDK() {
 }
 
 let isAd = false;
-loadGameDistributionSDK()
-    .then(() => {
-        console.log("GameDistribution SDK loaded successfully");
-        // Initialize your game here
-        window.GDAD = function (type) {
-            if (isAd) {
-                console.log("Ad is already shown");
-                return Promise.resolve(false);
-            }
-            isAd = true;
-            return new Promise((resolve, reject) => {
-                let st = setTimeout(() => {
-                    isAd = false;
-                    clearTimeout(st);
-                    console.log("Ad timeing");
-                }, 10000);
-                if (type === "interstitial") {
-                    gdsdk.showAd()
-                        .then(() => {
-                            console.log("Interstitial ad shown");
-                            resolve(true);
-                        })
-                        .catch((error) => {
-                            console.error("Error showing interstitial ad:", error);
-                            reject(false);
-                        });
-                } else if (type === "rewarded") {
-                    gdsdk.showAd("rewarded")
-                        .then(() => {
-                            console.log("Rewarded ad shown");
-                            resolve(true);
-                        })
-                        .catch((error) => {
-                            console.error("Error showing rewarded ad:", error);
-                            reject(false);
-                        });
-                } else {
-                    reject(new Error("Invalid ad type"));
-                }
-            });
-        };
+if(window.Platform === "gamedistribution"){
 
-    })
-    .catch((error) => {
-        console.error("Error loading GameDistribution SDK:", error);
+    loadGameDistributionSDK()
+        .then(() => {
+            console.log("GameDistribution SDK loaded successfully");
+            // Initialize your game here
+            window.GDAD = function (type) {
+                if (isAd) {
+                    console.log("Ad is already shown");
+                    return Promise.resolve(false);
+                }
+                isAd = true;
+                return new Promise((resolve, reject) => {
+                    let st = setTimeout(() => {
+                        isAd = false;
+                        clearTimeout(st);
+                        console.log("Ad timeing");
+                    }, 10000);
+                    if (type === "interstitial") {
+                        gdsdk.showAd()
+                            .then(() => {
+                                console.log("Interstitial ad shown");
+                                resolve(true);
+                            })
+                            .catch((error) => {
+                                console.error("Error showing interstitial ad:", error);
+                                reject(false);
+                            });
+                    } else if (type === "rewarded") {
+                        gdsdk.showAd("rewarded")
+                            .then(() => {
+                                console.log("Rewarded ad shown");
+                                resolve(true);
+                            })
+                            .catch((error) => {
+                                console.error("Error showing rewarded ad:", error);
+                                reject(false);
+                            });
+                    } else {
+                        reject(new Error("Invalid ad type"));
+                    }
+                });
+            };
+    
+        })
+        .catch((error) => {
+            console.error("Error loading GameDistribution SDK:", error);
+        });
+}
+
+// Android Google Play native ad bridge
+function androidShowAd(type, timeoutMs = 10000) {
+    return new Promise((resolve, reject) => {
+        try {
+            if (typeof window.AndroidAd === 'object' && typeof window.AndroidAd.showInterstitial === 'function' && typeof window.AndroidAd.showRewarded === 'function') {
+                let called = false;
+                const onSuccess = () => { if (!called) { called = true; resolve(true); } };
+                const onFail = () => { if (!called) { called = true; resolve(false); } };
+
+                // Android bridge may not support callbacks; use polling/timeouts
+                if (type === 'interstitial') {
+                    try { window.AndroidAd.showInterstitial(); onSuccess(); } catch (e) { onFail(); }
+                } else if (type === 'rewarded') {
+                    try { window.AndroidAd.showRewarded(); onSuccess(); } catch (e) { onFail(); }
+                } else {
+                    onFail();
+                }
+
+                // safety timeout
+                setTimeout(() => {
+                    if (!called) {
+                        called = true;
+                        resolve(false);
+                    }
+                }, timeoutMs);
+                return;
+            }
+        } catch (e) { }
+
+        // no android bridge found
+        resolve(false);
     });
+}
 
 let isRewardAd = false
 window.showRewardedAd = function (callback) {
@@ -143,7 +180,7 @@ window.showRewardedAd = function (callback) {
     try {
         if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
             window.gtag('event', 'ad_impression', {
-                ad_platform: 'gamedistribution',
+                ad_platform: (window.Platform === 'googleplay') ? 'googleplay' : 'gamedistribution',
                 ad_source: 'rewarded',
                 ad_format: 'video',
                 platform: window.Platform || 'unknown',
@@ -151,27 +188,34 @@ window.showRewardedAd = function (callback) {
             });
         }
     } catch (e) { }
-    try {
-        window.GDAD("rewarded").then((result) => {
-            isRewardAd = true;
+    // Prefer Android native on Google Play, otherwise fallback to GD
+    (async () => {
+        let ok = false;
+        if (window.Platform === 'googleplay') {
+            ok = await androidShowAd('rewarded');
+        }
+        if (!ok && typeof window.GDAD === 'function') {
+            try { ok = await window.GDAD('rewarded'); } catch (e) { ok = false; }
+        }
+
+        if (ok) {
             try {
                 if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
                     window.gtag('event', 'earn_virtual_currency', {
                         virtual_currency_name: 'reward',
                         value: 1,
-                        ad_platform: 'gamedistribution',
+                        ad_platform: window.Platform || 'unknown',
                         platform: window.Platform || 'unknown',
                         send: 'sdk'
                     });
                 }
             } catch (e) { }
             callback && callback(true);
-        }).catch((error) => {
-            isRewardAd = true;
+        } else {
             try {
                 if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
                     window.gtag('event', 'ad_error', {
-                        ad_platform: 'gamedistribution',
+                        ad_platform: window.Platform || 'unknown',
                         ad_source: 'rewarded',
                         error_reason: 'failed',
                         platform: window.Platform || 'unknown',
@@ -180,22 +224,10 @@ window.showRewardedAd = function (callback) {
                 }
             } catch (e) { }
             callback && callback(false);
-        }).finally(() => {
-            resumeAudioAfterAd();
-        });
-    } catch (e) {
-        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-            window.gtag('event', 'ad_error', {
-                ad_platform: 'gamedistribution',
-                ad_source: 'rewarded',
-                error_reason: 'failed',
-                platform: window.Platform || 'unknown',
-                send: 'sdk'
-            });
         }
+
         resumeAudioAfterAd();
-        callback && callback(false);
-    }
+    })();
 
 
     // let st = setTimeout(() => {
@@ -223,7 +255,7 @@ window.showInterstitialAd = function (callback) {
     try {
         if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
             window.gtag('event', 'ad_impression', {
-                ad_platform: 'gamedistribution',
+                ad_platform: (window.Platform === 'googleplay') ? 'googleplay' : 'gamedistribution',
                 ad_source: 'interstitial',
                 ad_format: 'display',
                 platform: window.Platform || 'unknown',
@@ -231,52 +263,44 @@ window.showInterstitialAd = function (callback) {
             });
         }
     } catch (e) { }
-    try {
-        window.GDAD("interstitial")
-            .then(() => {
-                console.log("Interstitial ad shown");
-                try {
-                    if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-                        window.gtag('event', 'ad_click', {
-                            ad_platform: 'gamedistribution',
-                            ad_source: 'interstitial',
-                            platform: window.Platform || 'unknown',
-                            send: 'sdk'
-                        });
-                    }
-                } catch (e) { }
-                callback && callback(true);
-            })
-            .catch((error) => {
-                console.error("Error showing interstitial ad:", error);
-                try {
-                    if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-                        window.gtag('event', 'ad_error', {
-                            ad_platform: 'gamedistribution',
-                            ad_source: 'interstitial',
-                            error_reason: 'closed_or_failed',
-                            platform: window.Platform || 'unknown',
-                            send: 'sdk'
-                        });
-                    }
-                } catch (e) { }
-                callback && callback(false);
-            }).finally(() => {
-                resumeAudioAfterAd();
-            });
-    } catch (e) {
-        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-            window.gtag('event', 'ad_error', {
-                ad_platform: 'gamedistribution',
-                ad_source: 'interstitial',
-                error_reason: 'closed_or_failed',
-                platform: window.Platform || 'unknown',
-                send: 'sdk'
-            });
+    (async () => {
+        let ok = false;
+        if (window.Platform === 'googleplay') {
+            ok = await androidShowAd('interstitial');
         }
+        if (!ok && typeof window.GDAD === 'function') {
+            try { ok = await window.GDAD('interstitial'); } catch (e) { ok = false; }
+        }
+
+        if (ok) {
+            try {
+                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                    window.gtag('event', 'ad_click', {
+                        ad_platform: window.Platform || 'unknown',
+                        ad_source: 'interstitial',
+                        platform: window.Platform || 'unknown',
+                        send: 'sdk'
+                    });
+                }
+            } catch (e) { }
+            callback && callback(true);
+        } else {
+            try {
+                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                    window.gtag('event', 'ad_error', {
+                        ad_platform: window.Platform || 'unknown',
+                        ad_source: 'interstitial',
+                        error_reason: 'closed_or_failed',
+                        platform: window.Platform || 'unknown',
+                        send: 'sdk'
+                    });
+                }
+            } catch (e) { }
+            callback && callback(false);
+        }
+
         resumeAudioAfterAd();
-        callback && callback(false);
-    }
+    })();
 
 }
 
