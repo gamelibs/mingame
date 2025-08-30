@@ -1,6 +1,7 @@
 // ...existing code...
 import utile from './utile.js';
 import config from './config.js';
+
 // 兼容旧脚本对 window.utile 的依赖
 if (typeof window !== 'undefined') {
     window.utile = utile;
@@ -716,12 +717,12 @@ class GameEngine {
         const loadingText = document.querySelector('.loading-text');
 
         // Determine platform behavior:
-        // - If platform is empty or explicit default marker 'defule' -> auto-enter
+        // - If platform is empty, default, or googleplay -> auto-enter
         // - Otherwise require explicit click-to-enter and show an interstitial first
         const platform = (typeof window !== 'undefined' && window.Platform) ? String(window.Platform).toLowerCase() : '';
 
-        if (!platform || platform === 'default') {
-            // Default/platform not provided -> proceed immediately
+        if (!platform || platform === 'default' || platform === 'googleplay') {
+            // Default/platform not provided, or Google Play -> proceed immediately
             if (loadingText) {
                 loadingText.textContent = 'Entering...';
                 loadingText.style.color = '#FFFFFF';
@@ -730,7 +731,7 @@ class GameEngine {
             return;
         }
 
-        // For any non-default platform, require explicit click-to-enter (GD, GooglePlay, etc.)
+        // For other platforms (like gamedistribution), require explicit click-to-enter
         if (platform) {
             if (loadingText) {
                 loadingText.textContent = 'Top to enter game';
@@ -748,34 +749,39 @@ class GameEngine {
                 } catch (e) { }
                 try { if (preloadContainer) preloadContainer.removeEventListener('click', enterHandler); } catch (e) { }
 
-                // report click-to-enter using standard GA4 event
+                try { console.log('[init] enterHandler click detected, Platform=', window.Platform); } catch (e) { }
+
+                // report click-to-enter using ovo method
                 try {
-                    if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-                        window.gtag('event', 'select_content', { 
-                            content_type: 'game_action',
-                            content_id: 'enter_game_click',
-                            platform: window.Platform || 'unknown',
-                            send: 'sdk'
-                        });
+                    if (typeof window.ovo !== 'undefined' && typeof window.ovo.dotSelectContent === 'function') {
+                        window.ovo.dotSelectContent('game_action', 'enter_game_click');
                     }
                 } catch (e) { }
 
                 // Show an interstitial ad first (provider-agnostic wrapper in ovosdk.js
                 // will route to GameDistribution or Android native as appropriate).
                 try {
-                    if (typeof window !== 'undefined' && typeof window.showInterstitialAd === 'function') {
-                        window.showInterstitialAd(() => {
+                    // Diagnostic: prefer explicit window.ovo access to avoid ReferenceError
+                    try { console.log('[init] window.ovo =', window.ovo); } catch (e) { }
+
+                    // For other platforms, show interstitial ad
+                    if (typeof window !== 'undefined' && window.ovo && typeof window.ovo.showInterstitialAd === 'function') {
+                        console.log('[init] calling window.ovo.showInterstitialAd()');
+                        window.ovo.showInterstitialAd(() => {
+                            try { console.log('[init] showInterstitialAd callback — switching to game scene'); } catch (e) { }
                             try { this.switchToGameScene(); } catch (e) { console.warn('switchToGameScene failed after ad', e); }
                         });
                         return;
+                    } else {
+                        try { console.log('[init] ovo.showInterstitialAd not available (will fallback)'); } catch (e) { }
                     }
                 } catch (e) {
                     try { window.__sdklog2 && window.__sdklog2('window.preloadAd error', e); } catch (e) { }
-                    try { this.switchToGameScene(); } catch (e) { console.warn('switchToGameScene failed after ad', e); }
+                    // try { this.switchToGameScene(); } catch (e) { console.warn('switchToGameScene failed after ad', e); }
                 }
 
                 // Fallback: no ad API, enter immediately
-                this.switchToGameScene();
+                // this.switchToGameScene();
             };
 
             try {
@@ -883,7 +889,7 @@ class GameEngine {
             return;
         }
         this.__sceneSwitching__ = true;
-        console.log('🔄 切换到GameScene...');
+        // console.log('🔄 切换到GameScene...');
         try {
             // 🔥 第一步：先加载GameScene（保持loading界面显示）
             // console.log('📦 预加载GameScene资源...');
@@ -1000,7 +1006,7 @@ class GameEngine {
                             exportRoot: exportRoot
                         };
 
-                        console.log('✅ GameScene资源预加载完成');
+                        // console.log('✅ GameScene资源预加载完成');
                         resolve();
                     } catch (ex) {
                         console.error('❌ Error during GameScene sprite setup:', ex);
@@ -1049,7 +1055,7 @@ class GameEngine {
                         }
                     });
 
-                    console.log('📦 preloadGameScene: loading manifest items=', remappedManifest.length);
+                    // console.log('📦 preloadGameScene: loading manifest items=', remappedManifest.length);
                     loader.loadManifest(remappedManifest);
             } else {
                 // 没有manifest时直接创建
@@ -1157,12 +1163,8 @@ class GameEngine {
         // 🎯 启动游戏时长统计和发送游戏开始事件
         try {
             // 发送标准 GA4 游戏开始事件 
-            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-                window.gtag('event', 'level_start', { 
-                    level_name: 'main_game',
-                    character: 'player',
-                    send: 'sdk'
-                });
+            if (typeof window.ovo !== 'undefined' && typeof window.ovo.dotGameStart === 'function') {
+                window.ovo.dotGameStart('main_game', 'player');
                 console.log('🎮 level_start 事件已发送');
             }
         } catch (e) {
@@ -1592,7 +1594,7 @@ class GameEngine {
     async loadCoreGameFiles() {
 
         const gameConfig = this.config.gameconfig;
-        console.log('🔍 gameConfig:', gameConfig);
+        // console.log('🔍 gameConfig:', gameConfig);
 
         // 将 gameconfig 转换为 preloadjs 期望的数组格式
         const mainJson = [];

@@ -94,7 +94,7 @@ class GameScense {
                     event.stopPropagation();
                     this.engine.playSound('select_wawa');
                     // 调用插页广告
-                    window.showInterstitialAd(() => {
+                    ovo.showInterstitialAd(() => {
                         // 广告关闭后的回调
                         this.showPanel(mc_start_over, false, () => {
 
@@ -104,14 +104,9 @@ class GameScense {
                                 let count = parseInt(localStorage.getItem(key) || '0', 10) || 0;
                                 count += 1;
                                 localStorage.setItem(key, String(count));
-                                // emit tracking event using standard GA4 event
-                                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-                                    window.gtag('event', 'select_content', {
-                                        content_type: 'game_action',
-                                        content_id: 'restart_confirm',
-                                        custom_parameter_1: count,
-                                        send: 'sdk'
-                                    });
+                                // emit tracking event using ovo method
+                                if (typeof window.ovo !== 'undefined' && typeof window.ovo.dotSelectContent === 'function') {
+                                    window.ovo.dotSelectContent('game_action', 'restart_confirm');
                                 }
                             } catch (e) {
                                 // ignore storage/tracker errors
@@ -128,7 +123,7 @@ class GameScense {
                     event.stopPropagation();
                     this.engine.playSound('select_wawa');
                     // 调用插页广告
-                    window.showInterstitialAd(() => {
+                    ovo.showInterstitialAd(() => {
 
                         mc_start_over.visible = false; // 隐藏重新开始界面
                     });
@@ -183,7 +178,7 @@ class GameScense {
                         event.stopPropagation();
 
                         // 调用插页广告
-                        window.showInterstitialAd(() => {
+                        ovo.showInterstitialAd(() => {
                             // 广告关闭后的回调
                             this.failureHandler(false);
                         });
@@ -228,7 +223,7 @@ class GameScense {
                         event.stopPropagation();
 
                         // 调用插页广告
-                        window.showInterstitialAd(() => {
+                        ovo.showInterstitialAd(() => {
                             // 广告关闭后的回调
                             this.victoryHandler(false);
                         });
@@ -258,15 +253,13 @@ class GameScense {
                     btnSetting.on('click', () => {
                         event.stopPropagation();
                         this.engine.playSound("select_wawa")
-                        window.showInterstitialAd(() => {
+                        
+                        this.showPanel(settingsMc, true, () => {
+                            // console.log('✅ 设置界面显示完成');
+                            this.selectedDifficulty = window.GameServer.getDifficulty();
 
-                            this.showPanel(settingsMc, true, () => {
-                                // console.log('✅ 设置界面显示完成');
-                                this.selectedDifficulty = window.GameServer.getDifficulty();
-    
-                                this.selectDifficulty(this.selectedDifficulty, this.difficultyMap); // 更新按钮状态
-                            });
-                        })
+                            this.selectDifficulty(this.selectedDifficulty, this.difficultyMap); // 更新按钮状态
+                        });
                     });
                     // console.log('✅ btn_setting 按钮事件已绑定');
                 }
@@ -1312,7 +1305,7 @@ class GameScense {
 
                 // 检查是否在等待引导点击
                 if (this.waitingForClick && this.expectedClickCellId === cellId) {
-                    console.log(`✅ 用户正确点击了引导位置 ${cellId}`);
+                    // console.log(`✅ 用户正确点击了引导位置 ${cellId}`);
                     this.onGuideClickSuccess(cellId);
 
                 }
@@ -1327,7 +1320,7 @@ class GameScense {
             // 调用 GameServer 处理点击逻辑
 
             const result = window.GameServer.processEggClick(cellId);
-            console.log('🎮 点击处理结果:', result);
+            // console.log('🎮 点击处理结果:', result);
 
             // 根据返回结果执行相应操作
             if (result.code === -1) {
@@ -1359,7 +1352,7 @@ class GameScense {
             // 延迟重置防抖标识
             setTimeout(() => {
                 this.isProcessingClick = false;
-                console.log('🔓 防抖解除，可以处理下一次点击');
+                // console.log('🔓 防抖解除，可以处理下一次点击');
             }, this.clickDebounceTime);
         }
     }
@@ -1752,7 +1745,7 @@ class GameScense {
             // console.log(`🎊 恭喜解锁 ${this.getEggTypeName(newEggType)} 蛋！`);
         }
 
-        console.log(`✅ 合成完成！${window.GameServer.getEggTypeName(eggType)} -> ${window.GameServer.getEggTypeName(newEggType)}`);
+        // console.log(`✅ 合成完成！${window.GameServer.getEggTypeName(eggType)} -> ${window.GameServer.getEggTypeName(newEggType)}`);
 
         // 返回完成标识
         return { completed: true };
@@ -1970,7 +1963,7 @@ class GameScense {
 
 
     playLongbossAnimation() {
-        console.log('🐉 播放龙boss动画');
+        // console.log('🐉 播放龙boss动画');
 
         try {
             const longboss = this.exportRoot.mc_longboss;
@@ -2208,7 +2201,7 @@ class GameScense {
      */
     showSynthesisInfo(newEggType) {
         const eggName = this.getEggTypeName(newEggType);
-        console.log(`🎊 合成成功！获得 ${eggName} 蛋 (egg_mc${newEggType})`);
+        // console.log(`🎊 合成成功！获得 ${eggName} 蛋 (egg_mc${newEggType})`);
 
         // 这里可以添加UI提示
         // this.showFloatingText(`合成 ${eggName} 蛋！`, cellData.centerX, cellData.centerY);
@@ -2314,7 +2307,7 @@ class GameScense {
      */
     showFloatingScore(score, cellId = null) {
         try {
-            console.log(`✨ 显示浮动分数: +${score}`);
+            // console.log(`✨ 显示浮动分数: +${score}`);
 
             // 创建文本对象
             // const floatingText = new createjs.Text(`+${score}`, "bold 42px Arial", "#FFD700");
@@ -2607,14 +2600,16 @@ class GameScense {
             });
 
             try {
-                // report failure event using standard GA4 event
+                // report failure event using ovo method
                 const bestScore = this.gameData && this.gameData.scoreSystem ? this.gameData.scoreSystem.bestScore : null;
-                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-                    window.gtag('event', 'level_end', {
-                        level_name: 'main_game',
-                        success: false,
-                        score: bestScore || 0,
-                        send: 'sdk'
+                if (typeof window.ovo !== 'undefined' && typeof window.ovo.dotGameOver === 'function') {
+                    window.ovo.dotGameOver(bestScore || 0, 1, 'game_over');
+                }
+
+                // 隐藏banner广告
+                if (typeof window.ovo !== 'undefined' && typeof window.ovo.hideBannerAd === 'function') {
+                    window.ovo.hideBannerAd(() => {
+                        console.log('📢 Banner ad hidden on game failure');
                     });
                 }
             } catch (e) { }
@@ -2717,14 +2712,16 @@ class GameScense {
                 // this.openCardRewardPanel();
             })
             try {
-                // report victory event using standard GA4 event
+                // report victory event using ovo method
                 const bestScore = this.gameData && this.gameData.scoreSystem ? this.gameData.scoreSystem.bestScore : null;
-                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-                    window.gtag('event', 'level_end', {
-                        level_name: 'main_game',
-                        success: true,
-                        score: bestScore || 0,
-                        send: 'sdk'
+                if (typeof window.ovo !== 'undefined' && typeof window.ovo.dotGameWin === 'function') {
+                    window.ovo.dotGameWin(bestScore || 0, 1, 0);
+                }
+
+                // 隐藏banner广告
+                if (typeof window.ovo !== 'undefined' && typeof window.ovo.hideBannerAd === 'function') {
+                    window.ovo.hideBannerAd(() => {
+                        console.log('📢 Banner ad hidden on game victory');
                     });
                 }
             } catch (e) { }
@@ -2820,7 +2817,7 @@ class GameScense {
      * 重置游戏
      */
     async resetGame() {
-        console.log('🔄 重置游戏状态...');
+        // console.log('🔄 重置游戏状态...');
 
         try {
             // 1. 清理前端蛋元件和状态
@@ -2843,7 +2840,7 @@ class GameScense {
                 const resetResult = window.GameServer.resetGame();
 
                 if (resetResult.success) {
-                    console.log('✅ 后端清理成功，开始重新请求游戏数据');
+                    // console.log('✅ 后端清理成功，开始重新请求游戏数据');
 
                     // 5. 重新请求游戏数据
                     // await this.loadGameDataByDifficulty(this.selectedDifficulty || 'normal');
@@ -2862,7 +2859,7 @@ class GameScense {
                         this.generateUserEggs();
                     }, 500);
 
-                    console.log('✅ 游戏重置完成');
+                    // console.log('✅ 游戏重置完成');
                 } else {
                     console.error('❌ 后端清理失败:', resetResult.message);
                 }
@@ -2879,7 +2876,7 @@ class GameScense {
     * 重置金币显示
     */
     resetGoldDisplay(reBestScore = true) {
-        console.log('💰 重置金币显示为0...');
+        // console.log('💰 重置金币显示为0...');
 
         try {
             // 获取金币显示元件
@@ -2887,7 +2884,7 @@ class GameScense {
             if (goldMc && goldMc.text) {
                 // 重置金币显示为0
                 goldMc.text.text = "score: 0";
-                console.log('✅ 金币显示已重置为0');
+                // console.log('✅ 金币显示已重置为0');
             } else {
                 console.warn('⚠️ 未找到 mc_gold 或其 text 属性');
             }
@@ -2897,7 +2894,7 @@ class GameScense {
             if (high_scoreMc && high_scoreMc.text && reBestScore) {
                 // 重置最佳显示为0
                 high_scoreMc.text.text = "best: 0";
-                console.log('✅ 最佳显示已重置为0');
+                // console.log('✅ 最佳显示已重置为0');
             }
         } catch (error) {
             console.error('❌ 重置金币显示失败:', error);
@@ -2908,7 +2905,7 @@ class GameScense {
     * 清理所有蛋元件
     */
     clearAllEggs() {
-        console.log('🧹 清理所有蛋元件...');
+        // console.log('🧹 清理所有蛋元件...');
 
         if (this.chessboard && this.chessboard.pieces) {
             // 移除所有蛋元件
@@ -2920,7 +2917,7 @@ class GameScense {
 
             // 清空映射
             this.chessboard.pieces.clear();
-            console.log('✅ 所有蛋元件已清理');
+            // console.log('✅ 所有蛋元件已清理');
         }
     }
 
@@ -2928,7 +2925,7 @@ class GameScense {
      * 初始化解锁动画元件
      */
     initUnlockAnimations() {
-        console.log('🎭 初始化解锁动画元件...');
+        // console.log('🎭 初始化解锁动画元件...');
 
         this.unlockAnimations = new Map();
 
@@ -2947,7 +2944,7 @@ class GameScense {
             }
         }
 
-        console.log(`📊 解锁动画元件初始化完成，共找到 ${this.unlockAnimations.size} 个`);
+        // console.log(`📊 解锁动画元件初始化完成，共找到 ${this.unlockAnimations.size} 个`);
     }
 
 
@@ -2956,7 +2953,7 @@ class GameScense {
      * @param {number} unlockedLevel - 解锁的等级 (2~8)
      */
     async playUnlockAnimation(unlockedLevel) {
-        console.log(`🎉 播放解锁动画: 等级 ${unlockedLevel}`);
+        // console.log(`🎉 播放解锁动画: 等级 ${unlockedLevel}`);
         new Promise((resolve) => {
             const maskMc = this.unlockAnimations.get(unlockedLevel);
             if (!maskMc) {
@@ -2970,7 +2967,7 @@ class GameScense {
                 maskMc.visible = true;
                 maskMc.gotoAndPlay(0);
 
-                console.log(`✨ 开始播放解锁动画: mc_egg_mask${unlockedLevel - 1} (等级${unlockedLevel})`);
+                // console.log(`✨ 开始播放解锁动画: mc_egg_mask${unlockedLevel - 1} (等级${unlockedLevel})`);
 
 
                 utile.addFrameEnd(maskMc, () => {
@@ -3113,12 +3110,10 @@ class GameScense {
             // console.log('💡 现在可以自由点击蛋进行游戏了！');
             this.guideGesture.gotoAndStop(0);
             this.guideGesture.visible = false;
-            // report tutorial completion using standard GA4 event
+            // report tutorial completion using ovo method
             try {
-                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-                    window.gtag('event', 'tutorial_complete', {
-                        send: 'sdk'
-                    });
+                if (typeof window.ovo !== 'undefined' && typeof window.ovo.dotTutorialComplete === 'function') {
+                    window.ovo.dotTutorialComplete();
                 }
             } catch (e) { }
         }

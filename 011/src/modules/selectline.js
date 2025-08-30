@@ -2,7 +2,7 @@
  * 难度选择模块
  * 负责游戏难度选择的交互逻辑
  */
-console.log('📁 SelectLine.js 开始加载...');
+// console.log('📁 SelectLine.js 开始加载...');
 
 class SelectLine {
     constructor() {
@@ -38,7 +38,7 @@ class SelectLine {
      * @param {Function} callback - 难度选择完成回调
      */
     init(gameData, callback) {
-        console.log('🎮 SelectLine 初始化...');
+        // console.log('🎮 SelectLine 初始化...');
 
         this.engine = gameData.engine;
         this.stage = gameData.stage;
@@ -53,25 +53,25 @@ class SelectLine {
  * 隐藏选择难度UI
  */
     hideDifficultyUI() {
-        console.log('🙈 隐藏选择难度UI...');
+        // console.log('🙈 隐藏选择难度UI...');
 
         const selectMc = utile.findMc(this.exportRoot, 'mc_select');
         if (selectMc) {
             selectMc.visible = false;
-            console.log('✅ 已隐藏 mc_select');
+            // console.log('✅ 已隐藏 mc_select');
         } else {
-            console.log('⚠️ 未找到 mc_select 元件');
+            // console.log('⚠️ 未找到 mc_select 元件');
         }
     }
     /**
      * 显示难度选择界面
      */
     selectDifficulty() {
-        console.log('🎮 选择游戏难度...');
+        // console.log('🎮 选择游戏难度...');
         this.startMc = utile.findMc(this.exportRoot, 'mc_select');
 
         if (this.startMc) {
-            console.log('✅ 找到难度选择界面');
+            // console.log('✅ 找到难度选择界面');
             this.startMc.visible = true;
 
             const btnEasy = utile.findMc(this.startMc, 'btn_e');
@@ -80,18 +80,18 @@ class SelectLine {
 
             this.stage.on('click', (event) => {
                 const target = event.target;
-                console.log('🎯 舞台点击事件，目标:', target);
+                // console.log('🎯 舞台点击事件，目标:', target);
 
                 const clickedButton = this.findButtonContainer(target, [btnEasy, btnNormal, btnHard]);
 
                 if (clickedButton === btnEasy) {
-                    console.log('🟢 检测到简单难度按钮点击');
+                    // console.log('🟢 检测到简单难度按钮点击');
                     this.onDifficultySelected('easy');
                 } else if (clickedButton === btnNormal) {
-                    console.log('🟡 检测到普通难度按钮点击');
+                    // console.log('🟡 检测到普通难度按钮点击');
                     this.onDifficultySelected('normal');
                 } else if (clickedButton === btnHard) {
-                    console.log('🔴 检测到困难难度按钮点击');
+                    // console.log('🔴 检测到困难难度按钮点击');
                     this.onDifficultySelected('hard');
                 }
             });
@@ -117,7 +117,7 @@ class SelectLine {
         for (let i = 0; i < 5 && current; i++) {
             for (const button of buttons) {
                 if (current === button) {
-                    console.log(`✅ 找到按钮容器: ${button.name} (向上${i}层)`);
+                    // console.log(`✅ 找到按钮容器: ${button.name} (向上${i}层)`);
                     return button;
                 }
             }
@@ -145,7 +145,7 @@ class SelectLine {
      * 处理难度选择
      */
     onDifficultySelected(difficulty) {
-        console.log(`🎯 用户选择难度: ${difficulty}`);
+        // console.log(`🎯 用户选择难度: ${difficulty}`);
 
         // 播放点击音效
         if (this.engine && this.loadedSounds.has('popo')) {
@@ -174,11 +174,11 @@ class SelectLine {
 
 
     selectDifficulty() {
-        console.log('🎮 选择游戏难度...');
+        // console.log('🎮 选择游戏难度...');
         this.startMc = utile.findMc(this.exportRoot, 'mc_select');
 
         if (this.startMc) {
-            console.log('✅ 找到难度选择界面');
+            // console.log('✅ 找到难度选择界面');
 
             // 显示难度选择界面
             this.startMc.visible = true;
@@ -190,24 +190,24 @@ class SelectLine {
 
             this.stage.on('click', (event) => {
                 const target = event.target;
-                console.log('🎯 舞台点击事件，目标:', target);
-                console.log('🎯 目标名称:', target.name);
-                console.log('🎯 目标父级:', target.parent);
+                // console.log('🎯 舞台点击事件，目标:', target);
+                // console.log('🎯 目标名称:', target.name);
+                // console.log('🎯 目标父级:', target.parent);
 
                 // 向上查找按钮容器
                 const clickedButton = this.findButtonContainer(target, [btnEasy, btnNormal, btnHard]);
 
                 if (clickedButton === btnEasy) {
-                    console.log('🟢 检测到简单难度按钮点击');
+                    // console.log('🟢 检测到简单难度按钮点击');
                     this.onDifficultySelected('easy');
                 } else if (clickedButton === btnNormal) {
-                    console.log('🟡 检测到普通难度按钮点击');
+                    // console.log('🟡 检测到普通难度按钮点击');
                     this.onDifficultySelected('normal');
                 } else if (clickedButton === btnHard) {
-                    console.log('🔴 检测到困难难度按钮点击');
+                    // console.log('🔴 检测到困难难度按钮点击');
                     this.onDifficultySelected('hard');
                 } else {
-                    console.log('🎯 点击了其他区域，目标路径:', this.getTargetPath(target));
+                    // console.log('🎯 点击了其他区域，目标路径:', this.getTargetPath(target));
                 }
             });
             // 设置按钮样式
@@ -238,7 +238,7 @@ class SelectLine {
             // 检查当前对象是否是按钮之一
             for (const button of buttons) {
                 if (current === button) {
-                    console.log(`✅ 找到按钮容器: ${button.name} (向上${i}层)`);
+                    // console.log(`✅ 找到按钮容器: ${button.name} (向上${i}层)`);
                     return button;
                 }
             }
@@ -281,7 +281,7 @@ class SelectLine {
  * @param {string} difficulty - 选择的难度 ('easy', 'normal', 'hard')
  */
     onDifficultySelected(difficulty) {
-        console.log(`🎯 用户选择难度: ${difficulty}`);
+        // console.log(`🎯 用户选择难度: ${difficulty}`);
 
         // 播放点击音效
         if (this.engine && this.loadedSounds.has('popo')) {
@@ -306,4 +306,4 @@ class SelectLine {
 
 // 创建全局实例
 window.SelectLine = new SelectLine();
-console.log('✅ SelectLine 模块加载完成');
+// console.log('✅ SelectLine 模块加载完成');

@@ -19,7 +19,7 @@ class CardGame {
         this.scoreDisplay = null;
         this.block = null;
 
-        console.log('🎴 CardGame 初始化完成');
+        // console.log('🎴 CardGame 初始化完成');
 
         // 卡牌配置
         this.cardConfig = {
@@ -157,7 +157,7 @@ class CardGame {
                 console.log('🎯 GO按钮被点击');
                 event.stopImmediatePropagation(); // 阻止事件继续传播到屏蔽层
 
-                window.showRewardedAd(() => {
+                ovo.showRewardedAd(() => {
                      this.startCardDraw();
                 })
                 

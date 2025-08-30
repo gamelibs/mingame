@@ -2,7 +2,7 @@
  * 引导功能模块
  * 负责游戏引导的交互逻辑
  */
-console.log('📁 GuideLine.js 开始加载...');
+// console.log('📁 GuideLine.js 开始加载...');
 
 class GuideLine {
     constructor() {
@@ -30,7 +30,7 @@ class GuideLine {
      * @param {Function} getCellData - 获取格子数据的回调
      */
     init(gameData, onComplete, getCellData) {
-        console.log('🎮 GuideLine 初始化...');
+        // console.log('🎮 GuideLine 初始化...');
         
         this.engine = gameData.engine;
         this.stage = gameData.stage;
@@ -49,7 +49,7 @@ class GuideLine {
      */
     showPointSeats(pointSeat) {
         if (!pointSeat || pointSeat.length === 0) {
-            console.log('📍 没有指示位置');
+            // console.log('📍 没有指示位置');
             this.pointSeats = [];
             return;
         }
@@ -58,20 +58,20 @@ class GuideLine {
         this.pointSeats = pointSeat.filter(seat => seat >= 0);
         this.currentPointIndex = 0; // 当前指示位置索引
 
-        console.log(`📍 记录了 ${this.pointSeats.length} 个指示位置:`, this.pointSeats);
+        // console.log(`📍 记录了 ${this.pointSeats.length} 个指示位置:`, this.pointSeats);
     }
 
     /**
      * 初始化引导手势
      */
     initGuideGesture() {
-        console.log('👆 初始化引导手势...');
+        // console.log('👆 初始化引导手势...');
 
         // 检查用户类型，决定是否需要引导
         const shouldShowGuide = this.shouldShowGuideForUser();
 
         if (!shouldShowGuide) {
-            console.log('👤 老用户无需引导，跳过引导功能');
+            // console.log('👤 老用户无需引导，跳过引导功能');
             return;
         }
 
@@ -94,12 +94,12 @@ class GuideLine {
         // 从游戏数据中获取用户状态
         if (this.gameData && this.gameData.isNewUser !== undefined) {
             const isNewUser = this.gameData.isNewUser;
-            console.log(`🔍 用户类型检查: ${isNewUser ? '新用户' : '老用户'}`);
+            // console.log(`🔍 用户类型检查: ${isNewUser ? '新用户' : '老用户'}`);
             return isNewUser;
         }
 
         // 如果没有用户数据，默认显示引导（安全起见）
-        console.log('⚠️ 无法确定用户类型，默认显示引导');
+        // console.log('⚠️ 无法确定用户类型，默认显示引导');
         return true;
     }
 
@@ -107,19 +107,19 @@ class GuideLine {
      * 查找引导手势元件
      */
     findGuideGesture() {
-        console.log('🔍 查找引导手势元件 guide_mc...');
+        // console.log('🔍 查找引导手势元件 guide_mc...');
 
         // 使用 utile 工具类查找元件
         this.guideGesture = utile.findMc(this.exportRoot, 'guide_mc');
 
         if (this.guideGesture) {
-            console.log('✅ 找到引导手势元件 guide_mc:', this.guideGesture);
+            // console.log('✅ 找到引导手势元件 guide_mc:', this.guideGesture);
             // 初始时隐藏引导手势
             this.guideGesture.visible = false;
         } else {
             console.warn('⚠️ 未找到引导手势元件 guide_mc');
             // 打印可用的子元件名称用于调试
-            console.log('📋 打印可用元件列表以便调试:');
+            // console.log('📋 打印可用元件列表以便调试:');
             utile.logAvailableChildren(this.exportRoot);
         }
     }
@@ -129,12 +129,12 @@ class GuideLine {
      */
     moveGuideGestureToTarget() {
         if (!this.guideGesture) {
-            console.log('📍 没有引导手势，跳过引导');
+            // console.log('📍 没有引导手势，跳过引导');
             return;
         }
 
         if (!this.pointSeats || this.pointSeats.length === 0) {
-            console.log('📍 没有有效的指示位置，隐藏引导手势');
+            // console.log('📍 没有有效的指示位置，隐藏引导手势');
             this.guideGesture.visible = false;
             return;
         }
@@ -148,7 +148,7 @@ class GuideLine {
      */
     moveGuideToCurrentPoint() {
         if (this.currentPointIndex >= this.pointSeats.length) {
-            console.log('🎉 所有指示点都已完成，隐藏引导手势');
+            // console.log('🎉 所有指示点都已完成，隐藏引导手势');
             this.hideGuideGesture();
             this.completeGuideProcess();
             return;
@@ -158,12 +158,12 @@ class GuideLine {
         const cellData = this.getCellDataCallback ? this.getCellDataCallback(targetCellId) : null;
 
         if (cellData) {
-            console.log(`👆 移动引导手势到格子 ${targetCellId} (${cellData.centerX}, ${cellData.centerY}) - 第 ${this.currentPointIndex + 1} 个指示点`);
+            // console.log(`👆 移动引导手势到格子 ${targetCellId} (${cellData.centerX}, ${cellData.centerY}) - 第 ${this.currentPointIndex + 1} 个指示点`);
 
             // 计算引导手势的正确位置
             const guidePosition = this.calculateGuidePosition(cellData);
 
-            console.log(`📍 引导手势坐标调整: 格子坐标(${cellData.centerX}, ${cellData.centerY}) -> 引导坐标(${guidePosition.x}, ${guidePosition.y})`);
+            // console.log(`📍 引导手势坐标调整: 格子坐标(${cellData.centerX}, ${cellData.centerY}) -> 引导坐标(${guidePosition.x}, ${guidePosition.y})`);
 
             // 设置引导手势位置
             this.guideGesture.x = guidePosition.x;
@@ -177,7 +177,7 @@ class GuideLine {
             this.waitingForClick = true;
             this.expectedClickCellId = targetCellId;
 
-            console.log(`⏳ 等待用户点击格子 ${targetCellId}`);
+            // console.log(`⏳ 等待用户点击格子 ${targetCellId}`);
         } else {
             console.warn(`⚠️ 格子 ${targetCellId} 数据不存在`);
         }
@@ -194,8 +194,8 @@ class GuideLine {
 
         // 检查引导手势的父容器
         const guideParent = this.guideGesture.parent;
-        console.log(`🔍 引导手势父容器:`, guideParent?.constructor?.name || 'unknown');
-        console.log(`🔍 gamebox 容器:`, this.gamebox?.constructor?.name || 'unknown');
+        // console.log(`🔍 引导手势父容器:`, guideParent?.constructor?.name || 'unknown');
+        // console.log(`🔍 gamebox 容器:`, this.gamebox?.constructor?.name || 'unknown');
 
         // 如果引导手势在 exportRoot 中，而格子坐标是相对于 gamebox 的
         if (guideParent === this.exportRoot && this.gamebox !== this.exportRoot) {
@@ -203,7 +203,7 @@ class GuideLine {
             const gameboxX = this.gamebox.x || 0;
             const gameboxY = this.gamebox.y || 0;
 
-            console.log(`📐 坐标转换: gamebox偏移(${gameboxX}, ${gameboxY})`);
+            // console.log(`📐 坐标转换: gamebox偏移(${gameboxX}, ${gameboxY})`);
 
             return {
                 x: cellData.centerX + gameboxX,
@@ -221,7 +221,7 @@ class GuideLine {
     animateGuideGesture() {
         if (!this.guideGesture) return;
 
-        console.log('✨ 启动引导手势动画');
+        // console.log('✨ 启动引导手势动画');
 
         // 停止之前的动画
         createjs.Tween.removeTweens(this.guideGesture);
@@ -238,7 +238,7 @@ class GuideLine {
      */
     hideGuideGesture() {
         if (this.guideGesture) {
-            console.log('👆 隐藏引导手势');
+            // console.log('👆 隐藏引导手势');
             createjs.Tween.removeTweens(this.guideGesture);
             this.guideGesture.visible = false;
         }
@@ -249,7 +249,7 @@ class GuideLine {
      */
     showGuideGesture() {
         if (this.guideGesture) {
-            console.log('👆 显示引导手势');
+            // console.log('👆 显示引导手势');
             this.guideGesture.visible = true;
             this.animateGuideGesture();
         }
@@ -259,7 +259,7 @@ class GuideLine {
      * 重置引导状态
      */
     resetGuideState() {
-        console.log('🔄 重置引导状态');
+        // console.log('🔄 重置引导状态');
         this.currentPointIndex = 0;
         this.waitingForClick = false;
         this.expectedClickCellId = null;
@@ -274,7 +274,7 @@ class GuideLine {
      * 开始引导流程
      */
     startGuideProcess() {
-        console.log('🎯 开始引导流程');
+        // console.log('🎯 开始引导流程');
         this.resetGuideState();
         this.moveGuideToCurrentPoint();
     }
@@ -283,7 +283,7 @@ class GuideLine {
      * 完成引导流程
      */
     completeGuideProcess() {
-        console.log('🎊 引导流程完成！');
+        // console.log('🎊 引导流程完成！');
 
         // 重置所有引导相关状态
         this.resetGuideState();
@@ -293,14 +293,14 @@ class GuideLine {
             this.onGuideCompleteCallback();
         }
 
-        console.log('💡 现在你可以点击蛋选中它，然后点击空格子移动蛋进行合成！');
+        // console.log('💡 现在你可以点击蛋选中它，然后点击空格子移动蛋进行合成！');
     }
 
     /**
      * 引导点击成功处理
      */
     onGuideClickSuccess(cellId) {
-        console.log(`🎯 引导点击成功: 格子 ${cellId}`);
+        // console.log(`🎯 引导点击成功: 格子 ${cellId}`);
 
         // 取消等待状态
         this.waitingForClick = false;
@@ -325,4 +325,4 @@ class GuideLine {
 
 // 创建全局实例
 window.GuideLine = new GuideLine();
-console.log('✅ GuideLine 模块加载完成');
+// console.log('✅ GuideLine 模块加载完成');

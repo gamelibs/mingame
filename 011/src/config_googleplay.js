@@ -53,6 +53,9 @@ const config = {
 }
 
 export default config;
+
+
+
 // Expose a lightweight, early debug logger as window.__sdklog2 so
 // analytics/debug prints are available before `utile` is loaded.
 if (typeof window !== 'undefined') {
@@ -103,115 +106,5 @@ if (typeof window !== 'undefined') {
 
 
 
-// Enhanced GA4 (gtag) initialization with consent management and event filtering
-// This runs when config.js (merged into vendor-animate) is evaluated in the head.
-(function () {
-    try {
-        if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-            // Game configuration for GA4
-            const gameConfig = {
-                gameid: "GooglePlay",
-                dev_name: "Dragon Egg"
-            };
-
-            // Create and configure gtag script
-            const script = document.createElement("script");
-            script.async = true;
-            script.src = "https://www.googletagmanager.com/gtag/js?id=G-PM5MNMLL3R";
-            script.setAttribute("crossorigin", "anonymous");
-            
-            script.onload = () => {
-                // Set consent configuration
-                window.gtag("consent", "default", {
-                    ad_storage: "granted",
-                    ad_user_data: "granted", 
-                    ad_personalization: "granted",
-                    analytics_storage: "granted"
-                });
-                
-                // Initialize gtag
-                window.gtag("js", new Date());
-                window.gtag("set", "cookie_flags", "SameSite=None;Secure");
-                window.gtag("config", "G-PM5MNMLL3R", {
-                    game_id: gameConfig.gameid,
-                    dev_name: gameConfig.dev_name
-                });
-                
-                try { console.log('✅ gtag.js loaded with consent and game config'); } catch (e) { }
-            };
-            
-            script.onerror = function (err) {
-                try { console.warn('⚠️ gtag.js failed to load', err); } catch (e) { }
-            };
-
-            // Initialize dataLayer
-            window.dataLayer = window.dataLayer || [];
-            
-            // Track if game_start interval has been set
-            let gamePlayTimeIntervalSet = false;
-            
-            // Enhanced gtag wrapper with event filtering and automatic game_play_time
-            window.gtag = function() {
-                let args = [...arguments];
-                let eventAction = args[1];
-                let eventParams = args[2];
-                
-                // Allow specific gtag commands and events
-                const allowedCommands = ["set", "js", "config", "consent"];
-                const allowedGameEvents = ["game_start", "level_start", "level_end"];
-                const allowedSdkEvents = [
-                    // Standard GA4 events we use
-                    "ad_impression", "ad_click", "ad_error", "earn_virtual_currency",
-                    "select_content", "game_play_time", "tutorial_complete",
-                    // Legacy events for backward compatibility
-                    "game_reward_open", "game_interstitialad_open", 
-                    "game_reward_dismissed", "game_interstitialad", 
-                    "game_reward", "game_reward_viewed", "game_interstitialad_viewed", 
-                    "click_ad"
-                ];
-                
-                // Filter events: allow commands, game events, or SDK events with send: "sdk"
-                if (allowedCommands.includes(args[0]) || 
-                    allowedGameEvents.includes(eventAction) || 
-                    (allowedSdkEvents.includes(eventAction) && eventParams && eventParams.send === "sdk")) {
-                    
-                    // Log filtered events
-                    if (typeof window.__sdklog3 === 'function') {
-                        window.__sdklog3('gtag_filtered', arguments);
-                    }
-                    
-                    // Push to dataLayer
-                    try {
-                        if (window.dataLayer && typeof window.dataLayer.push === 'function') {
-                            window.dataLayer.push(arguments);
-                        }
-                    } catch (e) {
-                        console.log("dataLayer error:", e);
-                    }
-                }
-                
-                // Set up automatic game_play_time interval on first level_start
-                if (eventAction === "level_start" && !gamePlayTimeIntervalSet) {
-                    gamePlayTimeIntervalSet = true;
-                    setInterval(function() {
-                        if (typeof window.gtag === 'function') {
-                            window.gtag("event", "game_play_time", {
-                                send: "sdk"
-                            });
-                        }
-                    }, 30000); // 30 seconds
-                    
-                    try { console.log('🕒 Automatic game_play_time interval started (30s)'); } catch (e) { }
-                }
-            };
-            
-            // Append script to head
-            document.head.appendChild(script);
-        }
-    } catch (e) {
-        // Non-fatal: log for debugging but don't break app
-        try { console.warn('Enhanced gtag init failed', e); } catch (e) { }
-    }
-})();
 
 

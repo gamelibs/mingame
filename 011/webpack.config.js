@@ -7,7 +7,9 @@ const WebpackObfuscator = require('webpack-obfuscator');
 const MergeIntoSingleFilePlugin = require('webpack-merge-and-include-globally');
 
 module.exports = (env, argv) => {
+    env = env || {};
     const isProd = argv && argv.mode === 'production';
+    const noMin = !!env.noMin;
 
     return {
         mode: isProd ? 'production' : 'development',
@@ -29,7 +31,7 @@ module.exports = (env, argv) => {
             // 生产构建使用相对路径（空字符串），以避免注入的资源以 '/' 开头导致在子路径或 file:// 下无法加载。
             publicPath: isProd ? '' : '/',
         },
-        devtool: isProd ? false : 'source-map',
+    devtool: (isProd && !noMin) ? false : 'source-map',
         devServer: {
             static: './dist',
             open: true,
@@ -42,30 +44,18 @@ module.exports = (env, argv) => {
                 },
             ],
         },
-        optimization: isProd
+        optimization: isProd && !noMin
             ? {
                 minimize: true,
                 minimizer: [
-                    // 应用于业务 bundle 的压缩（移除 console/debugger 等）
                     new TerserPlugin({
                         extractComments: false,
                         exclude: [/resan\/vendor-animate\.js$/],
                         terserOptions: {
-                            compress: {
-                                drop_console: true,
-                                drop_debugger: true,
-                                pure_funcs: [
-                                    'console.log',
-                                    'console.info',
-                                    'console.debug',
-                                    'console.warn',
-                                    'console.error'
-                                ],
-                            },
+                            compress: { drop_console: false, drop_debugger: false },
                             format: { comments: false },
                         },
                     }),
-                    // 仅对 vendor-animate.js 进行“安全压缩”（不混淆标识符）
                     new TerserPlugin({
                         extractComments: false,
                         include: [/resan\/vendor-animate\.js$/],
@@ -73,36 +63,27 @@ module.exports = (env, argv) => {
                             mangle: false,
                             keep_fnames: true,
                             keep_classnames: true,
-                            compress: {
-                                drop_debugger: true,
-                                // 谨慎压缩，避免激进优化
-                                // 不做函数提升/内联，降低风险
-                                hoist_funs: false,
-                                hoist_vars: false,
-                                reduce_funcs: false,
-                                // 如果这些库包含日志，可选择去掉
-                                pure_funcs: ['console.log', 'console.info', 'console.debug', 'console.warn', 'console.error']
-                            },
+                            compress: { drop_debugger: false, hoist_funs: false, hoist_vars: false, reduce_funcs: false },
                             format: { comments: false },
                         },
                     }),
                 ],
             }
-            : {},
+            : { minimize: false },
         plugins: [
             new HtmlWebpackPlugin({
                 template: './index.html',
                 inject: 'body',
             }),
             // 合并 config 与 tracker 为一个早期加载的全局脚本
-            new MergeIntoSingleFilePlugin({
-                files: {
-                    'resan/config.global.js': [
-                        path.resolve(__dirname, 'src/config.global.wrapper.js'),
-                        path.resolve(__dirname, 'src/ovosdk.js')
-                    ],
-                },
-            }),
+            // new MergeIntoSingleFilePlugin({
+            //     files: {
+            //         'resan/config.global.js': [
+            //             path.resolve(__dirname, 'src/ovosdk.js'),
+            //             path.resolve(__dirname, 'src/config.js')
+            //         ],
+            //     },
+            // }),
             // 合并外部全局脚本为单文件 resan/vendor-animate.js
             new MergeIntoSingleFilePlugin({
                 files: {
@@ -128,7 +109,7 @@ module.exports = (env, argv) => {
                 'process.env.NODE_ENV': JSON.stringify(isProd ? 'production' : 'development'),
             }),
             // 对 vendor-animate.js 做混淆（仅生产）
-            ...(isProd
+            ...(isProd && !noMin
                 ? [
                     new WebpackObfuscator(
                         {

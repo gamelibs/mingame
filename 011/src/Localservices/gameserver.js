@@ -143,7 +143,7 @@ class GameServer {
      * 初始化地图系统（棋盘 + 寻路）
      */
     async initializeMapSystem() {
-        console.log('🗺️ 初始化地图系统...');
+        // console.log('🗺️ 初始化地图系统...');
 
         try {
             // 检查依赖模块
@@ -158,12 +158,12 @@ class GameServer {
             // 3. 标记初始化完成
             this.mapState.isInitialized = true;
 
-            console.log('✅ 地图系统初始化完成');
+            // console.log('✅ 地图系统初始化完成');
         } catch (error) {
             console.error('❌ 地图系统初始化失败:', error);
 
             // 设置重试机制
-            console.log('🔄 5秒后重试初始化...');
+            // console.log('🔄 5秒后重试初始化...');
             setTimeout(() => {
                 this.initializeMapSystem();
             }, 5000);
@@ -174,7 +174,7 @@ class GameServer {
      * 检查依赖模块
      */
     checkDependencies() {
-        console.log('🔍 检查依赖模块...');
+        // console.log('🔍 检查依赖模块...');
 
         const dependencies = [
             { name: 'window.OvoAstar4', value: window.OvoAstar4 },
@@ -195,7 +195,7 @@ class GameServer {
      * 初始化棋盘系统
      */
     async initChessboard() {
-        console.log('♟️ 初始化棋盘系统...');
+        // console.log('♟️ 初始化棋盘系统...');
 
         const { rows, cols, cellWidth, cellHeight } = this.mapConfig;
 
@@ -232,14 +232,14 @@ class GameServer {
             }
         }
 
-        console.log(`✅ 棋盘系统初始化完成: ${rows}x${cols} = ${this.mapConfig.totalCells} 个格子`);
+        // console.log(`✅ 棋盘系统初始化完成: ${rows}x${cols} = ${this.mapConfig.totalCells} 个格子`);
     }
 
     /**
      * 初始化寻路系统
      */
     async initPathfinding() {
-        console.log('🗺️ 初始化寻路系统...');
+        // console.log('🗺️ 初始化寻路系统...');
 
         try {
             const { rows, cols, cellWidth } = this.mapConfig;
@@ -283,7 +283,7 @@ class GameServer {
                 astar: astar
             };
 
-            console.log('✅ 寻路系统初始化完成');
+            // console.log('✅ 寻路系统初始化完成');
         } catch (error) {
             console.error('❌ 寻路系统初始化失败:', error);
             throw error;
@@ -315,14 +315,14 @@ class GameServer {
      * 初始化服务器
      */
     async init() {
-    console.log('🚀 GameServer 启动中...');
-    console.log(`🕒 GameServer.init() start @ ${new Date().toISOString()}`);
+    // console.log('🚀 GameServer 启动中...');
+    // console.log(`🕒 GameServer.init() start @ ${new Date().toISOString()}`);
         // 🔥 使用新的用户数据初始化流程
         this.currentUserStatus = await this.initializeUserData();
 
         this.isInitialized = true;
-        console.log('✅ GameServer 启动完成');
-    console.log(`🕒 GameServer.init() end @ ${new Date().toISOString()}`);
+        // console.log('✅ GameServer 启动完成');
+    // console.log(`🕒 GameServer.init() end @ ${new Date().toISOString()}`);
 
         return {
             success: true,
@@ -335,14 +335,14 @@ class GameServer {
      * 用户数据初始化
      */
     async initializeUserData() {
-        console.log('👤 开始用户数据初始化...');
+        // console.log('👤 开始用户数据初始化...');
 
         // 把 loginType 提升到外层作用域，以便 catch 中也可访问
         let loginType = null;
         try {
             // 1. 检测登录方式
             loginType = this.detectLoginType();
-            console.log(`🔍 检测到登录方式: ${loginType}`);
+            // console.log(`🔍 检测到登录方式: ${loginType}`);
 
             let isNewUser = null
             // 2. 🔥 修正：优先加载本地用户数据
@@ -350,11 +350,11 @@ class GameServer {
 
             // 3. 🔥 修正：如果没有本地数据，则通过登录方式获取
             if (!userData) {
-                console.log('📱 没有本地用户数据，通过登录方式获取...');
+                // console.log('📱 没有本地用户数据，通过登录方式获取...');
                 userData = await this.loadUserDataByLoginType(loginType);
                 isNewUser = true;
             } else {
-                console.log('💾 找到本地用户数据，使用本地数据');
+                // console.log('💾 找到本地用户数据，使用本地数据');
                 // 更新最后登录时间
                 isNewUser = userData.isNewUser
                 userData.lastLoginTime = Date.now();
@@ -379,7 +379,7 @@ class GameServer {
 
             // 8. 保存用户身份数据（始终保存）
             this.saveUserData('currentUser', finalUserData);
-            console.log(`👤 用户初始化完成: ${isNewUser ? '新用户(需要引导)' : '老用户(恢复数据)'}`);
+            // console.log(`👤 用户初始化完成: ${isNewUser ? '新用户(需要引导)' : '老用户(恢复数据)'}`);
 
             // 🔥 初始化 cardBoosts（每次启动都使用代码默认值，不从缓存读取也不保存到缓存）
             this.cardBoosts = {
@@ -402,7 +402,7 @@ class GameServer {
             //     console.log('🔁 初始化并持久化默认 cardBoosts');
             // } catch (e) { }
             
-            console.log('🔁 使用代码默认 cardBoosts 配置 (不从缓存读取)');
+            // console.log('🔁 使用代码默认 cardBoosts 配置 (不从缓存读取)');
 
             return finalUserData;
 
@@ -411,7 +411,7 @@ class GameServer {
             // 如果登录方式是 wechat，则将错误向上抛出，由前端决定是否降级为游客登录
             try {
                 if (loginType === 'wechat') {
-                    console.log('🔁 WeChat 登录失败，向上抛出错误以便前端处理（then/catch）');
+                    // console.log('🔁 WeChat 登录失败，向上抛出错误以便前端处理（then/catch）');
                     throw error;
                 }
             } catch (e) {
@@ -431,7 +431,7 @@ class GameServer {
             if (userData) {
                 const parsedData = JSON.parse(userData);
                 this.userDataCache.set('currentUser', parsedData);
-                console.log('📂 用户数据缓存加载完成');
+                // console.log('📂 用户数据缓存加载完成');
                 return parsedData; // 🔥 返回解析后的数据
             }
             return null; // 🔥 没有数据时返回null
@@ -479,10 +479,10 @@ class GameServer {
                     }
                 } catch (e) { }
                 */
-                console.log('📊 游戏数据加载成功');
+                // console.log('📊 游戏数据加载成功');
                 return parsedData;
             }
-            console.log('📊 没有游戏数据（新用户）');
+            // console.log('📊 没有游戏数据（新用户）');
             return null;
         } catch (error) {
             console.error('❌ 游戏数据加载失败:', error);
@@ -821,7 +821,7 @@ class GameServer {
 
         if (type === 4) {
             if (window.OvoAstar4) {
-                console.log('✅ 找到 OvoAstar4 模块');
+                // console.log('✅ 找到 OvoAstar4 模块');
                 return window.OvoAstar4.getInstance();
             } else {
                 console.warn('⚠️ OvoAstar4 模块未加载');
@@ -830,7 +830,7 @@ class GameServer {
         }
         if (type === 8) {
             if (window.OvoAstar8) {
-                console.log('✅ 找到 OvoAstar8 模块');
+                // console.log('✅ 找到 OvoAstar8 模块');
                 return window.OvoAstar8.getInstance();
             } else {
                 console.warn('⚠️ OvoAstar8 模块未加载');
@@ -1857,7 +1857,7 @@ class GameServer {
             //     this.cardBoosts = this.cardBoosts || {};
             // }
             
-            console.log('🔁 跳过 cardBoosts 恢复，使用代码默认值');
+            // console.log('🔁 跳过 cardBoosts 恢复，使用代码默认值');
 
             // console.log('✅ 游戏状态恢复完成');
             return gameData;
@@ -2036,7 +2036,7 @@ class GameServer {
      * 清除选择状态
      */
     clearSelection() {
-        console.log('🔄 清除选择状态');
+        // console.log('🔄 清除选择状态');
         this.selectionState.selectedEgg = null;
         this.selectionState.isSelected = false;
     }
@@ -2347,7 +2347,7 @@ class GameServer {
 
         // 异步更新排行榜数据
         if (!this.currentUserStatus.isNewUser) {
-            console.log('🆕 新用户，跳过排行榜更新');
+            // console.log('🆕 新用户，跳过排行榜更新');
             this.updateLeaderboardAsync();
         }
 
@@ -2463,7 +2463,7 @@ class GameServer {
             const path = this.findPath(fromPos, toPos);
 
             if (path && path.length > 0) {
-                console.log(`📍 找到路径，步数: ${path.length}`);
+                // console.log(`📍 找到路径，步数: ${path.length}`);
                 return path;
             } else {
                 console.log('❌ 未找到可行路径');
@@ -2555,7 +2555,7 @@ class GameServer {
     detectLoginType() {
         // 🔥 如果强制指定了登录类型，直接返回
         if (this.loginConfig.forceLoginType) {
-            console.log(`🎯 强制使用登录方式: ${this.loginConfig.forceLoginType}`);
+            // console.log(`🎯 强制使用登录方式: ${this.loginConfig.forceLoginType}`);
             return this.loginConfig.forceLoginType;
         }
 
@@ -2564,13 +2564,13 @@ class GameServer {
             // 检查URL参数
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('mock_wechat') === 'true') {
-                console.log('🔍 URL参数强制微信模拟');
+                // console.log('🔍 URL参数强制微信模拟');
                 return 'wechat';
             }
 
             // 随机模拟微信环境
             if (Math.random() < this.loginConfig.mockWechatProbability) {
-                console.log('🔍 随机模拟微信环境');
+                // console.log('🔍 随机模拟微信环境');
                 return 'wechat';
             }
         }
@@ -2651,7 +2651,7 @@ class GameServer {
                     fromCloud: true
                 };
             } else {
-                console.log('👶 微信新用户，创建初始数据');
+                // console.log('👶 微信新用户，创建初始数据');
                 return this.createNewUser('wechat', userInfo);
             }
         } catch (error) {
@@ -2665,7 +2665,7 @@ class GameServer {
  * 加载Google用户数据
  */
     async loadGoogleUserData() {
-        console.log('🔐 加载Google用户数据...');
+        // console.log('🔐 加载Google用户数据...');
 
         try {
             // 获取Google用户信息
@@ -2675,7 +2675,7 @@ class GameServer {
             const cloudData = await this.loadFromGoogleCloud(userInfo.id);
 
             if (cloudData) {
-                console.log('☁️ 从Google云存档恢复数据');
+                // console.log('☁️ 从Google云存档恢复数据');
                 return {
                     ...cloudData,
                     loginType: 'google',
@@ -2683,7 +2683,7 @@ class GameServer {
                     lastLoginTime: Date.now()
                 };
             } else {
-                console.log('👶 Google新用户，创建初始数据');
+                // console.log('👶 Google新用户，创建初始数据');
                 return this.createNewUser('google', userInfo);
             }
         } catch (error) {
@@ -2696,13 +2696,13 @@ class GameServer {
      * 加载本地用户数据
      */
     async loadLocalUserData() {
-        console.log('💾 加载本地用户数据...');
+        // console.log('💾 加载本地用户数据...');
 
         try {
             const userData = localStorage.getItem('gameUserData');
             if (userData) {
                 const parsedData = JSON.parse(userData);
-                console.log('📂 本地数据加载成功');
+                // console.log('📂 本地数据加载成功');
                 return {
                     ...parsedData,
                     loginType: parsedData.loginType || 'local',
@@ -2720,11 +2720,11 @@ class GameServer {
      * 创建游客用户
      */
     async createGuestUser() {
-        console.log('👤 创建游客用户...');
+        // console.log('👤 创建游客用户...');
 
         // 🔥 支持模拟登录延迟
         if (this.loginConfig.mockLoginDelay && this.loginConfig.mockLoginDelay > 0) {
-            console.log(`⏳ 模拟游客登录延迟 ${this.loginConfig.mockLoginDelay / 1000} 秒...`);
+            // console.log(`⏳ 模拟游客登录延迟 ${this.loginConfig.mockLoginDelay / 1000} 秒...`);
             await new Promise(resolve => setTimeout(resolve, this.loginConfig.mockLoginDelay));
         }
 

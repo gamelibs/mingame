@@ -1,5 +1,13 @@
+// import androidAd;
 
-const pauseAudioForAd = () => {
+
+if (typeof window !== 'undefined') window.ovo = window.ovo || {};
+const ovo = (typeof window !== 'undefined') ? window.ovo : {};
+
+// Banner广告标志，确保只显示一次
+ovo.bannerShown = false;
+
+ovo.pauseAudioForAd = () => {
     try {
         if (window.__GAME_ENGINE_INSTANCE__ && typeof window.__GAME_ENGINE_INSTANCE__.pauseAudio === 'function') {
             window.__GAME_ENGINE_INSTANCE__.pauseAudio();
@@ -15,7 +23,7 @@ const pauseAudioForAd = () => {
     } catch (e) { try { window.__sdklog2('pauseAudioForAd error', e); } catch (e) { } }
 };
 
-const resumeAudioAfterAd = () => {
+ovo.resumeAudioAfterAd = () => {
     try {
         if (window.__adPausedBySdk__ === 'engine') {
             if (window.__GAME_ENGINE_INSTANCE__ && typeof window.__GAME_ENGINE_INSTANCE__.resumeAudio === 'function') {
@@ -37,272 +45,254 @@ const resumeAudioAfterAd = () => {
     } catch (e) { try { window.__sdklog2('resumeAudioAfterAd error', e); } catch (e) { } }
 };
 
-
-
-function loadGameDistributionSDK() {
-    return new Promise((resolve, reject) => {
-        window["GD_OPTIONS"] = {
-            debug: true,
-            gameId: "1726345e0eb4405a8bc8f20d14f33993",
-            onEvent: function (event) {
-                switch (event.name) {
-                    case "SDK_GAME_START":
-                        resumeAudioAfterAd();
-                        break;
-                    case "SDK_GAME_PAUSE":
-                        pauseAudioForAd();
-                        break;
-                    case "SDK_GDPR_TRACKING":
-                        break;
-                    case "SDK_GDPR_TARGETING":
-                        break;
-                    case "SDK_READY":
-                        console.log("GameDistribution SDK is ready");
-                        if (typeof gdsdk === 'undefined') {
-                            gdsdk.preloadAd()
-                        }
-                        break;
-                }
-            },
-        };
-
-        const scriptId = "gamedistribution-jssdk";
-        if (document.getElementById(scriptId)) {
-            resolve();
-            return;
+// 游戏暂停和恢复方法
+ovo.pauseGame = () => {
+    try {
+        // 暂停CreateJS Ticker
+        if (typeof createjs !== 'undefined' && createjs.Ticker) {
+            createjs.Ticker.paused = true;
+            window.__gamePausedBySdk__ = true;
+            try { console.log('[ovosdk] Game paused via Ticker'); } catch (e) { }
         }
+        
+        // 如果有游戏引擎实例，也暂停它
+        if (window.__GAME_ENGINE_INSTANCE__ && typeof window.__GAME_ENGINE_INSTANCE__.pause === 'function') {
+            window.__GAME_ENGINE_INSTANCE__.pause();
+        }
+    } catch (e) { try { window.__sdklog2('pauseGame error', e); } catch (e) { } }
+};
 
-        const js = document.createElement("script");
-        js.id = scriptId;
-        js.src = "https://html5.api.gamedistribution.com/main.min.js";
+ovo.resumeGame = () => {
+    try {
+        // 恢复CreateJS Ticker
+        if (typeof createjs !== 'undefined' && createjs.Ticker) {
+            createjs.Ticker.paused = false;
+            window.__gamePausedBySdk__ = false;
+            try { console.log('[ovosdk] Game resumed via Ticker'); } catch (e) { }
+        }
+        
+        // 如果有游戏引擎实例，也恢复它
+        if (window.__GAME_ENGINE_INSTANCE__ && typeof window.__GAME_ENGINE_INSTANCE__.resume === 'function') {
+            window.__GAME_ENGINE_INSTANCE__.resume();
+        }
+    } catch (e) { try { window.__sdklog2('resumeGame error', e); } catch (e) { } }
+};
 
-        js.onload = () => {
-            // SDK script loaded
-            resolve();
-        };
+// Banner广告方法
+ovo.showBannerAd = function (callback, opts) {
+    opts = opts || {};
+    try { console.log('[ovosdk] showBannerAd invoked, Platform=', window.Platform); } catch (e) { }
 
-        js.onerror = () => {
-            reject(new Error("Failed to load GameDistribution SDK"));
-        };
+    // 检查是否已经显示过banner
+    if (ovo.bannerShown) {
+        try { console.log('[ovosdk] Banner already shown, skipping'); } catch (e) { }
+        if (typeof callback === 'function') callback(false);
+        return;
+    }
 
-        document.getElementsByTagName("head")[0].appendChild(js);
-    });
-}
-
-let isAd = false;
-if(window.Platform === "gamedistribution"){
-
-    loadGameDistributionSDK()
-        .then(() => {
-            console.log("GameDistribution SDK loaded successfully");
-            // Initialize your game here
-            window.GDAD = function (type) {
-                if (isAd) {
-                    console.log("Ad is already shown");
-                    return Promise.resolve(false);
-                }
-                isAd = true;
-                return new Promise((resolve, reject) => {
-                    let st = setTimeout(() => {
-                        isAd = false;
-                        clearTimeout(st);
-                        console.log("Ad timeing");
-                    }, 10000);
-                    if (type === "interstitial") {
-                        gdsdk.showAd()
-                            .then(() => {
-                                console.log("Interstitial ad shown");
-                                resolve(true);
-                            })
-                            .catch((error) => {
-                                console.error("Error showing interstitial ad:", error);
-                                reject(false);
-                            });
-                    } else if (type === "rewarded") {
-                        gdsdk.showAd("rewarded")
-                            .then(() => {
-                                console.log("Rewarded ad shown");
-                                resolve(true);
-                            })
-                            .catch((error) => {
-                                console.error("Error showing rewarded ad:", error);
-                                reject(false);
-                            });
-                    } else {
-                        reject(new Error("Invalid ad type"));
-                    }
-                });
-            };
-    
-        })
-        .catch((error) => {
-            console.error("Error loading GameDistribution SDK:", error);
-        });
-}
-
-// Android Google Play native ad bridge
-function androidShowAd(type, timeoutMs = 10000) {
-    return new Promise((resolve, reject) => {
-        try {
-            if (typeof window.AndroidAd === 'object' && typeof window.AndroidAd.showInterstitial === 'function' && typeof window.AndroidAd.showRewarded === 'function') {
-                let called = false;
-                const onSuccess = () => { if (!called) { called = true; resolve(true); } };
-                const onFail = () => { if (!called) { called = true; resolve(false); } };
-
-                // Android bridge may not support callbacks; use polling/timeouts
-                if (type === 'interstitial') {
-                    try { window.AndroidAd.showInterstitial(); onSuccess(); } catch (e) { onFail(); }
-                } else if (type === 'rewarded') {
-                    try { window.AndroidAd.showRewarded(); onSuccess(); } catch (e) { onFail(); }
-                } else {
-                    onFail();
-                }
-
-                // safety timeout
-                setTimeout(() => {
-                    if (!called) {
-                        called = true;
-                        resolve(false);
-                    }
-                }, timeoutMs);
-                return;
+    if (typeof window.showBannerAd === 'function') {
+        window.showBannerAd(function (result) {
+            if (result) {
+                ovo.bannerShown = true; // 设置标志，表示已显示
             }
-        } catch (e) { }
+            if (typeof callback === 'function') callback(result);
+        }, opts);
+    } else {
+        try { console.log('[ovosdk] no banner ad bridge available'); } catch (e) { }
+        if (typeof callback === 'function') callback(false);
+    }
+};
 
-        // no android bridge found
-        resolve(false);
-    });
-}
+ovo.hideBannerAd = function (callback, opts) {
+    opts = opts || {};
+    try { console.log('[ovosdk] hideBannerAd invoked, Platform=', window.Platform); } catch (e) { }
 
-let isRewardAd = false
-window.showRewardedAd = function (callback) {
-    pauseAudioForAd();
+    if (typeof window.hideBannerAd === 'function') {
+        window.hideBannerAd(function (result) {
+            if (result) {
+                ovo.bannerShown = false; // 重置标志
+            }
+            if (typeof callback === 'function') callback(result);
+        }, opts);
+    } else {
+        try { console.log('[ovosdk] no banner ad bridge available'); } catch (e) { }
+        if (typeof callback === 'function') callback(false);
+    }
+};
+
+// 游戏事件上报方法
+ovo.dotScore = function (score, level) {
     try {
+        console.log('[ovosdk] dotScore:', score, 'level:', level);
+
+        // GA4 event
         if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-            window.gtag('event', 'ad_impression', {
-                ad_platform: (window.Platform === 'googleplay') ? 'googleplay' : 'gamedistribution',
-                ad_source: 'rewarded',
-                ad_format: 'video',
+            window.gtag('event', 'score_update', {
+                score: score,
+                level: level || 'unknown',
                 platform: window.Platform || 'unknown',
                 send: 'sdk'
             });
         }
-    } catch (e) { }
-    // Prefer Android native on Google Play, otherwise fallback to GD
-    (async () => {
-        let ok = false;
-        if (window.Platform === 'googleplay') {
-            ok = await androidShowAd('rewarded');
-        }
-        if (!ok && typeof window.GDAD === 'function') {
-            try { ok = await window.GDAD('rewarded'); } catch (e) { ok = false; }
-        }
+    } catch (e) { try { window.__sdklog2('dotScore error', e); } catch (e) { } }
+};
 
-        if (ok) {
-            try {
-                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-                    window.gtag('event', 'earn_virtual_currency', {
-                        virtual_currency_name: 'reward',
-                        value: 1,
-                        ad_platform: window.Platform || 'unknown',
-                        platform: window.Platform || 'unknown',
-                        send: 'sdk'
-                    });
-                }
-            } catch (e) { }
-            callback && callback(true);
-        } else {
-            try {
-                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-                    window.gtag('event', 'ad_error', {
-                        ad_platform: window.Platform || 'unknown',
-                        ad_source: 'rewarded',
-                        error_reason: 'failed',
-                        platform: window.Platform || 'unknown',
-                        send: 'sdk'
-                    });
-                }
-            } catch (e) { }
-            callback && callback(false);
-        }
-
-        resumeAudioAfterAd();
-    })();
-
-
-    // let st = setTimeout(() => {
-    //     if (!isRewardAd) {
-    //         callback && callback(false);
-    //     }
-    //     clearTimeout(st);
-    //     try {
-    //         if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-    //             window.gtag('event', 'ad_error', {
-    //                 ad_platform: 'gamedistribution',
-    //                 ad_source: 'rewarded',
-    //                 error_reason: 'timeout',
-    //                 platform: window.Platform || 'unknown',
-    //                 send: 'sdk'
-    //             });
-    //         }
-    //     } catch (e) { }
-    // }, 15000);
-}
-
-
-window.showInterstitialAd = function (callback) {
-    pauseAudioForAd();
+ovo.dotLevel = function (level, score) {
     try {
+        console.log('[ovosdk] dotLevel:', level, 'score:', score);
+
+        // GA4 event
         if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-            window.gtag('event', 'ad_impression', {
-                ad_platform: (window.Platform === 'googleplay') ? 'googleplay' : 'gamedistribution',
-                ad_source: 'interstitial',
-                ad_format: 'display',
+            window.gtag('event', 'level_up', {
+                level: level,
+                score: score || 0,
                 platform: window.Platform || 'unknown',
                 send: 'sdk'
             });
         }
-    } catch (e) { }
-    (async () => {
-        let ok = false;
-        if (window.Platform === 'googleplay') {
-            ok = await androidShowAd('interstitial');
-        }
-        if (!ok && typeof window.GDAD === 'function') {
-            try { ok = await window.GDAD('interstitial'); } catch (e) { ok = false; }
-        }
+    } catch (e) { try { window.__sdklog2('dotLevel error', e); } catch (e) { } }
+};
 
-        if (ok) {
-            try {
-                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-                    window.gtag('event', 'ad_click', {
-                        ad_platform: window.Platform || 'unknown',
-                        ad_source: 'interstitial',
-                        platform: window.Platform || 'unknown',
-                        send: 'sdk'
-                    });
-                }
-            } catch (e) { }
-            callback && callback(true);
-        } else {
-            try {
-                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
-                    window.gtag('event', 'ad_error', {
-                        ad_platform: window.Platform || 'unknown',
-                        ad_source: 'interstitial',
-                        error_reason: 'closed_or_failed',
-                        platform: window.Platform || 'unknown',
-                        send: 'sdk'
-                    });
-                }
-            } catch (e) { }
-            callback && callback(false);
+ovo.dotGameOver = function (score, level, reason) {
+    try {
+        console.log('[ovosdk] gameOver - score:', score, 'level:', level, 'reason:', reason);
+
+        // GA4 event
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+            window.gtag('event', 'level_end', {
+                level: level || 1,
+                score: score || 0,
+                success: false,
+                reason: reason || 'game_over',
+                platform: window.Platform || 'unknown',
+                send: 'sdk'
+            });
         }
+    } catch (e) { try { window.__sdklog2('gameOver error', e); } catch (e) { } }
+};
 
-        resumeAudioAfterAd();
-    })();
+ovo.dotGameWin = function (score, level, timeSpent) {
+    try {
+        console.log('[ovosdk] dotGameWin - score:', score, 'level:', level, 'time:', timeSpent);
 
+        // GA4 event
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+            window.gtag('event', 'level_end', {
+                level: level || 1,
+                score: score || 0,
+                success: true,
+                time_spent: timeSpent || 0,
+                platform: window.Platform || 'unknown',
+                send: 'sdk'
+            });
+        }
+    } catch (e) { try { window.__sdklog2('gameWin error', e); } catch (e) { } }
+};
+
+// 游戏开始事件
+ovo.dotGameStart = function (levelName, character) {
+    try {
+        console.log('[ovosdk] dotGameStart - level:', levelName, 'character:', character);
+
+        // GA4 event
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+            window.gtag('event', 'level_start', {
+                level_name: levelName || 'main_game',
+                character: character || 'player',
+                platform: window.Platform || 'unknown',
+                send: 'sdk'
+            });
+        }
+    } catch (e) { try { window.__sdklog2('dotGameStart error', e); } catch (e) { } }
+};
+
+// 游戏内容选择事件
+ovo.dotSelectContent = function (contentType, contentId) {
+    try {
+        console.log('[ovosdk] dotSelectContent - type:', contentType, 'id:', contentId);
+
+        // GA4 event
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+            window.gtag('event', 'select_content', {
+                content_type: contentType || 'game_action',
+                content_id: contentId || 'unknown',
+                platform: window.Platform || 'unknown',
+                send: 'sdk'
+            });
+        }
+    } catch (e) { try { window.__sdklog2('dotSelectContent error', e); } catch (e) { } }
+};
+
+// 引导完成事件
+ovo.dotTutorialComplete = function () {
+    try {
+        console.log('[ovosdk] dotTutorialComplete');
+
+        // GA4 event
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+            window.gtag('event', 'tutorial_complete', {
+                platform: window.Platform || 'unknown',
+                send: 'sdk'
+            });
+        }
+    } catch (e) { try { window.__sdklog2('dotTutorialComplete error', e); } catch (e) { } }
+};
+
+ovo.timeAd = 30000;
+
+ovo.showInterstitialAd = function (callback, opts) {
+    opts = opts || {};
+    const timeoutMs = (opts && opts.timeoutMs) || 8000;
+    try { console.log('[ovosdk] showInterstitialAd invoked, Platform=', window.Platform); } catch (e) { }
+    
+    // 暂停声音和游戏
+    ovo.pauseAudioForAd();
+    ovo.pauseGame();
+
+    if (typeof window.showInterstitialAd === 'function') {
+        window.showInterstitialAd(function (result) {
+            ovo.resumeAudioAfterAd();
+            ovo.resumeGame();
+            if (typeof callback === 'function') callback(result);
+        }, { timeoutMs: timeoutMs });
+    } else {
+        // No native or web ad available — call callback immediately (no ad shown)
+        try { console.log('[ovosdk] no ad bridge available, invoking callback immediately'); } catch (e) { }
+        ovo.resumeAudioAfterAd();
+        ovo.resumeGame();
+        if (typeof callback === 'function') callback(false);
+    }
+};
+
+ovo.showRewardedAd = function (callback, opts) {
+    opts = opts || {};
+    const timeoutMs = (opts && opts.timeoutMs) || 8000;
+
+    try { console.log('[ovosdk] showRewardedAd invoked, Platform=', window.Platform); } catch (e) { }
+    
+    // 暂停声音和游戏
+    ovo.pauseAudioForAd();
+    ovo.pauseGame();
+
+    if (typeof window.showRewardedAd === 'function') {
+        window.showRewardedAd(function (result) {
+            ovo.resumeAudioAfterAd();
+            ovo.resumeGame();
+            if (typeof callback === 'function') callback(result);
+        }, { timeoutMs: timeoutMs });
+    } else {
+        // No native or web ad available — call callback immediately (no ad shown)
+        try { console.log('[ovosdk] no ad bridge available, invoking callback immediately'); } catch (e) { }
+        ovo.resumeAudioAfterAd();
+        ovo.resumeGame();
+        if (typeof callback === 'function') callback(false);
+    }
+};
+// Export for module imports
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = ovo;
 }
+export default ovo;
 
 
 
