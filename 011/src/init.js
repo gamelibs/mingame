@@ -19,6 +19,7 @@ class GameEngine {
         this.stage = null;
         this.loadingProgress = null;
         this.currentProgress = 0;
+        this.loadingCompleteLogged = false; // 防止重复显示"Loading complete!"消息
 
         // 游戏相关变量
         this.publicRoot = null;
@@ -363,6 +364,12 @@ class GameEngine {
         this.gameContainer = document.getElementById('game-container');
         this.animationContainer = document.getElementById('animation_container');
         this.canvas = document.getElementById('canvas');
+        
+        // 设置Canvas willReadFrequently属性以优化getImageData性能
+        if (this.canvas) {
+            this.canvas.setAttribute('willReadFrequently', 'true');
+        }
+        
         this.loadingProgress = document.querySelector('.loading-progress');
 
         // 移除之前的事件监听器，避免重复
@@ -452,6 +459,11 @@ class GameEngine {
         this.canvas.height = height * initDpr;
         this.canvas.style.width = width + 'px';
         this.canvas.style.height = height + 'px';
+        
+        // 确保willReadFrequently属性已设置
+        if (this.canvas) {
+            this.canvas.setAttribute('willReadFrequently', 'true');
+        }
 
         // 应用方向设置
         if (orientation === 'portrait') {
@@ -583,6 +595,7 @@ class GameEngine {
 
             // 显示初始进度
             this.updateLoadingProgress(0);
+            this.loadingCompleteLogged = false; // 重置完成标志
 
             //. 优先加载图片资源（背景和Logo）
             console.log('🖼️ 优先加载UI资源...');
@@ -709,6 +722,9 @@ class GameEngine {
             clearInterval(this.userDataTimerInterval);
             this.userDataTimerInterval = null;
         }
+
+        // 重置加载完成标志，确保可以显示新的完成消息
+        this.loadingCompleteLogged = false;
 
         // 更新进度条到 100%
         this.updateLoadingProgress(1.0);
@@ -1167,6 +1183,16 @@ class GameEngine {
                 window.ovo.dotGameStart('main_game', 'player');
                 console.log('🎮 level_start 事件已发送');
             }
+
+            // 🎯 游戏开始30秒后显示banner广告
+            setTimeout(() => {
+                if (typeof window.ovo !== 'undefined' && typeof window.ovo.showBannerAd === 'function') {
+                    window.ovo.showBannerAd(() => {
+                        console.log('📢 Banner ad shown 30s after game start');
+                    });
+                }
+            }, 30000); // 30秒 = 30000毫秒
+
         } catch (e) {
             console.warn('⚠️ 发送游戏开始事件失败', e);
         }
@@ -1190,9 +1216,10 @@ class GameEngine {
 
             // console.log(`📊 HTML Loading progress: ${percentage}%`);
 
-            // 如果达到100%，显示完成信息
-            if (progress >= 1.0) {
+            // 如果达到100%，显示完成信息（只显示一次）
+            if (progress >= 1.0 && !this.loadingCompleteLogged) {
                 console.log('🎯 Loading complete!');
+                this.loadingCompleteLogged = true;
             }
         }
     }

@@ -6,6 +6,7 @@ class CardGame {
         this.stage = null;
         this.exportRoot = null;
         this.engine = null;
+        this.scene = null; // gamescense实例引用
         this.loadedSounds = null;
 
         // 游戏状态
@@ -50,6 +51,7 @@ class CardGame {
         this.stage = gameData.stage;
         this.exportRoot = gameData.exportRoot;
         this.engine = gameData.engine;
+        this.scene = gameData.scene; // 保存gamescense实例引用
         this.loadedSounds = gameData.loadedSounds;
 
         // 获取玩家积分
@@ -497,32 +499,50 @@ class CardGame {
     onAdWatchComplete(cardResult) {
         console.log(`🎉 广告观看完成，获得奖励: ${cardResult.name} (+${100 - cardResult.probability}分)`);
 
+        // 显示奖励提示文字（1秒后自动消失）
+        const rewardText = `获得 ${cardResult.name} (+${100 - cardResult.probability}分)`;
+        this.showRewardMessage(rewardText);
 
-
+        // 1秒后关闭失败面板并重新开始游戏
+        setTimeout(() => {
+            // 关闭失败面板并重新开始游戏
+            if (this.scene && typeof this.scene.failureHandler === 'function') {
+                this.scene.failureHandler(false);
+            } else {
+                console.warn('⚠️ scene.failureHandler 方法不可用');
+            }
+        }, 1000);
     }
 
     /**
-     * 显示消息
+     * 显示奖励消息（1秒后自动消失）
      */
-    showMessage(message) {
-        console.log(`💬 消息: ${message}`);
+    showRewardMessage(message) {
+        console.log(`💬 奖励消息: ${message}`);
 
-        const messageText = new createjs.Text(message, 'bold 20px Arial', '#FFD700');
-        messageText.textAlign = 'center';
-        messageText.x = this.cardContainer.x || 400;
-        messageText.y = (this.cardContainer.y || 300) - 100;
-        messageText.alpha = 0;
+        // 使用scene的tips方法在mc_tips中显示消息
+        if (this.scene && typeof this.scene.tips === 'function') {
+            this.scene.tips(message, null, "bold 28px Arial", "#FFD700", 1);
+        } else {
+            console.warn('⚠️ scene.tips 方法不可用，使用备用方式');
+            // 备用方式：直接创建文本对象
+            const messageText = new createjs.Text(message, 'bold 24px Arial', '#FFD700');
+            messageText.textAlign = 'center';
+            messageText.x = this.cardContainer.x || 400;
+            messageText.y = (this.cardContainer.y || 300) - 100;
+            messageText.alpha = 0;
 
-        this.stage.addChild(messageText);
+            this.stage.addChild(messageText);
 
-        // 消息动画
-        createjs.Tween.get(messageText)
-            .to({ alpha: 1, y: messageText.y - 20 }, 300)
-            .wait(2000)
-            .to({ alpha: 0, y: messageText.y - 40 }, 300)
-            .call(() => {
-                this.stage.removeChild(messageText);
-            });
+            // 奖励消息动画（1秒后消失）
+            createjs.Tween.get(messageText)
+                .to({ alpha: 1, y: messageText.y - 20 }, 300)
+                .wait(700) // 等待0.7秒，总共1秒
+                .to({ alpha: 0, y: messageText.y - 40 }, 300)
+                .call(() => {
+                    this.stage.removeChild(messageText);
+                });
+        }
     }
 
     /**

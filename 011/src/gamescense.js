@@ -278,6 +278,8 @@ class GameScense {
                     localStorage.getItem('musicEnabled') === 'true';
                 const isSoundEnabled = (localStorage.getItem('soundEnabled') === null) ||
                     localStorage.getItem('soundEnabled') === 'true';
+                const isVibrationEnabled = (localStorage.getItem('vibrationEnabled') === null) ||
+                    localStorage.getItem('vibrationEnabled') === 'true';
 
 
                 // 音乐
@@ -314,6 +316,20 @@ class GameScense {
                             localStorage.setItem('soundEnabled', next ? 'true' : 'false');
                         }
                         console.log(`🔊 音效状态已切换 -> ${next ? 'ON' : 'OFF'}`);
+                    });
+                }
+
+                // 震动
+                const btn_vibra = utile.findMc(settingsMc, 'mc_vibra');
+                if (btn_vibra) {
+                    btn_vibra.gotoAndStop(isVibrationEnabled ? 0 : 1);
+                    btn_vibra.removeAllEventListeners('click');
+                    btn_vibra.on('click', () => {
+                        const current = localStorage.getItem('vibrationEnabled') === null || localStorage.getItem('vibrationEnabled') === 'true';
+                        const next = !current;
+                        btn_vibra.gotoAndStop(next ? 0 : 1);
+                        localStorage.setItem('vibrationEnabled', next ? 'true' : 'false');
+                        console.log(`📳 震动状态已切换 -> ${next ? 'ON' : 'OFF'}`);
                     });
                 }
 
@@ -357,13 +373,13 @@ class GameScense {
 
             this.showFps = localStorage.getItem('fpsNum') === "60" || 60; // 默认60FPS
 
-            const btn_fps = utile.findMc(settingsMc, 'mc_fps');
-            btn_fps.on('click', () => {
-                // console.log('🔧 切换FPS显示状态');
-                this.showFps = !this.showFps;
-                btn_fps.gotoAndStop(this.showFps ? 0 : 1); // 播放/停止状态
-                localStorage.setItem('fpsNum', this.showFps ? "60" : "30"); // 保存到本地存储
-            });
+            // const btn_fps = utile.findMc(settingsMc, 'mc_fps');
+            // btn_fps.on('click', () => {
+            //     // console.log('🔧 切换FPS显示状态');
+            //     this.showFps = !this.showFps;
+            //     btn_fps.gotoAndStop(this.showFps ? 0 : 1); // 播放/停止状态
+            //     localStorage.setItem('fpsNum', this.showFps ? "60" : "30"); // 保存到本地存储
+            // });
 
             const blockLayer = utile.findMc(settingsMc, 'blockLayer');
             if (blockLayer) {
@@ -413,6 +429,7 @@ class GameScense {
                 stage: this.stage,
                 exportRoot: this.exportRoot,
                 engine: this.engine,
+                scene: this, // 传入gamescense实例，让CardGame可以调用failureHandler和tips方法
                 loadedSounds: this.loadedSounds
             });
             this.cardGameReady = true;
@@ -1697,6 +1714,18 @@ class GameScense {
 
         // console.log('🔍 使用score作为scoreDetail:', scoreDetail);
 
+        // 🎯 合成开始时触发震动（如果开启）
+        const isVibrationEnabled = localStorage.getItem('vibrationEnabled') === null ||
+            localStorage.getItem('vibrationEnabled') === 'true';
+        if (isVibrationEnabled && typeof window.ovo !== 'undefined' && typeof window.ovo.vibrate === 'function') {
+            console.log('📳 合成蛋，触发振动反馈');
+            window.ovo.vibrate([200, 100, 200]); // 振动模式：200ms 振动，100ms 暂停，200ms 振动
+        } else if (!isVibrationEnabled) {
+            console.log('🔕 震动已关闭，跳过振动反馈');
+        } else {
+            console.log('⚠️ 振动功能不可用，跳过振动反馈');
+        }
+
         // 收集所有参与合成的蛋元件（包括目标位置）
         const allEggsToSynthesize = [];
         for (const cellId of positionsToDelete) {
@@ -1736,6 +1765,7 @@ class GameScense {
             // console.log(`🎉 解锁新等级: ${this.maxUnlockedLevel} -> ${newEggType}`);
 
             this.engine.playSound('hecheng_open');
+
             // 播放解锁动画
             await this.playUnlockAnimation(newEggType);
 
@@ -2830,6 +2860,12 @@ class GameScense {
                 selectedEgg: null
             };
 
+            // 🎯 重置banner广告标志，允许重新开始后再次显示
+            if (typeof window.ovo !== 'undefined') {
+                window.ovo.bannerShown = false;
+                console.log('📢 Banner ad flag reset for game restart');
+            }
+
             // 3. 重置金币显示为0
             this.resetGoldDisplay(false);
             // 3. 停止所有动画
@@ -2858,6 +2894,15 @@ class GameScense {
                     setTimeout(() => {
                         this.generateUserEggs();
                     }, 500);
+
+                    // 🎯 游戏重新开始30秒后显示banner广告
+                    setTimeout(() => {
+                        if (typeof window.ovo !== 'undefined' && typeof window.ovo.showBannerAd === 'function') {
+                            window.ovo.showBannerAd(() => {
+                                console.log('📢 Banner ad shown 30s after game restart');
+                            });
+                        }
+                    }, 30000); // 30秒 = 30000毫秒
 
                     // console.log('✅ 游戏重置完成');
                 } else {

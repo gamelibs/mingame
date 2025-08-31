@@ -194,6 +194,7 @@ const android_ad = {
         window.showRewardedAd = this.showRewardedAd;
         window.showBannerAd = this.showBannerAd;
         window.hideBannerAd = this.hideBannerAd;
+        window.vibrate = this.vibrate;
     },
 
     // Interstitial Ad
@@ -424,6 +425,34 @@ const android_ad = {
         } else {
             console.warn('[android_ad] Android.hideBannerAd not available');
             if (typeof callback === 'function') callback(false);
+        }
+    },
+
+    // Vibration
+    vibrate: function (pattern) {
+        try {
+            console.log('[android_ad] vibrate invoked, pattern:', pattern);
+            
+            if (typeof window.Android !== 'undefined' && typeof window.Android.vibrate === 'function') {
+                try {
+                    if (Array.isArray(pattern)) {
+                        // 如果是数组，转换为字符串传递给 Android
+                        window.Android.vibrate(pattern.join(','));
+                    } else {
+                        window.Android.vibrate(String(pattern));
+                    }
+                    return true;
+                } catch (e) {
+                    console.error('[android_ad] Android.vibrate failed', e);
+                    return false;
+                }
+            } else {
+                console.warn('[android_ad] Android.vibrate not available');
+                return false;
+            }
+        } catch (e) {
+            console.error('[android_ad] vibrate error:', e);
+            return false;
         }
     }
 };

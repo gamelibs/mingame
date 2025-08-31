@@ -385,10 +385,10 @@ class GameServer {
             this.cardBoosts = {
                 1: 0.5, // 灰
                 2: 0.5, // 绿
-                3: 0.5, // 蓝
-                4: 0.4, // 紫
-                5: 0.3, // 红
-                6: 0.2, // 黄
+                3: 0.4, // 蓝
+                4: 0.3, // 紫
+                5: 0.2, // 红
+                6: 0.1, // 黄
                 7: 0.08 // 橙 - 调整为0.08以达到约10%胜率
             };
             
@@ -1604,9 +1604,10 @@ class GameServer {
 
             // console.log(`🎉 用户 ${userId} 解锁了新蛋等级: ${newEggType} (${this.getEggTypeName(newEggType)})`);
             // console.log(`📈 解锁进度: ${currentMax} -> ${newEggType}`);
-        } else {
-            console.log(`📊 用户 ${userId} 当前最高解锁等级: ${currentMax}, 合成等级: ${newEggType} (无需更新)`);
-        }
+        } 
+        // else {
+        //     console.log(`📊 用户 ${userId} 当前最高解锁等级: ${currentMax}, 合成等级: ${newEggType} (无需更新)`);
+        // }
 
         // 可以在这里添加其他奖励逻辑
         // 比如：经验值、成就、分数等

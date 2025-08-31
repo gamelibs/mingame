@@ -1,10 +1,12 @@
 
+// 先设置全局平台变量，确保在导入广告模块前可用
+window.Platform = "googleplay";
+
 import ovo from './ovosdk.js'
 import android_ad from '../adsdk/android_ad.js';
 import gd_ad from '../adsdk/gd_ad.js';
 
 // window.Platform = "gamedistribution";
-window.Platform = "googleplay";
 // window.Platform = "default";
 
 const config = {
