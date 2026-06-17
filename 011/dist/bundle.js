@@ -1,1 +1,11903 @@
-((()=>{var _0x2273f4={0xf:(_0x5542c8,_0x53caa8,_0x33d070)=>{'use strict';_0x33d070(0x38f),window['GameServer']=new class{constructor(){this['isInitialized']=!0x1,this['serverVersion']='1.0.0',this['loginConfig']={'forceLoginType':'null','enableMockLogin':!0x1,'mockLoginDelay':0x1388,'mockUserType':'old'},this['scoreSystem']={'currentScore':0x0,'totalScore':0x0,'sessionScore':0x0,'bestScore':0x0,'synthesisHistory':[]},this['userDataCache']=new Map(),this['difficulty']=0x4,this['maxUnlockedEggType']=0x1,this['newUserGuideData']={'lv0':[{'eggSeat':[0x0,0xa,0xb],'eggType':[0x1,0x1,0x1],'pointSeat':[0x0,0x9]},{'eggSeat':[0xe,0x3,0x12],'eggType':[0x1,0x2,0x2],'pointSeat':[0x12,0xf]},{'eggSeat':[0x8,0x20,0x11],'eggType':[0x2,0x3,0x3],'pointSeat':[0x20,0x10]},{'eggSeat':[0x12,0x1a,0x1e],'eggType':[0x4,0x2,0x3],'pointSeat':[-0x1]}]},this['currentUserStatus']=null,this['currentGameStatus']=null,this['guidestaute']={'currentLevel':0x0,'currentStep':0x0,'maxUnlockedEggType':0x1,'totalScore':0x0,'completedSteps':[]},this['pathfindingGrid']=null,this['mapConfig']={'rows':0x6,'cols':0x6,'cellWidth':0x96,'cellHeight':0x96,'totalCells':0x24,'width':0x384,'height':0x384,'offsetX':0x0,'offsetY':0x0},this['mapState']={'cells':{},'occupiedCells':new Set(),'emptyCells':new Set(),'isInitialized':!0x1},this['selectionState']={'selectedEgg':null,'isSelected':!0x1},console['log']('🖥️\x20GameServer\x20初始化完成');try{const _0x1c26c3='GameServer_crypto_key_v1';let _0x26ac35=null;try{_0x26ac35=sessionStorage['getItem'](_0x1c26c3);}catch(_0x3d6a34){_0x26ac35=null;}if(_0x26ac35)this['_localCryptoKey']=_0x26ac35;else{const _0x3be948=Math['floor'](Math['random']()*Number['MAX_SAFE_INTEGER'])['toString'](0x24)+Date['now']()['toString'](0x24);this['_localCryptoKey']=_0x3be948;try{sessionStorage['setItem'](_0x1c26c3,this['_localCryptoKey']);}catch(_0x4b3c83){}}}catch(_0x40749f){this['_localCryptoKey']='k_default';}this['initializeMapSystem']();}['_persistGameData'](_0xa1726){try{if(!_0xa1726)return;const _0x437eeb=JSON['parse'](JSON['stringify'](_0xa1726));_0x437eeb['saveTime']||(_0x437eeb['saveTime']=Date['now']());try{localStorage['setItem']('GameData',JSON['stringify'](_0x437eeb));}catch(_0x23cede){try{localStorage['setItem']('GameData_backup',JSON['stringify'](_0x437eeb));}catch(_0x1a7c0b){}}}catch(_0x17604f){console['error']('❌\x20_persistGameData\x20failed:',_0x17604f);}}async['initializeMapSystem'](){try{this['checkDependencies'](),await this['initChessboard'](),await this['initPathfinding'](),this['mapState']['isInitialized']=!0x0;}catch(_0x324a37){console['error']('❌\x20地图系统初始化失败:',_0x324a37),setTimeout(()=>{this['initializeMapSystem']();},0x1388);}}['checkDependencies'](){[{'name':'window.OvoAstar4','value':window['OvoAstar4']},{'name':'window.OvoAstar8','value':window['OvoAstar8']},{'name':'window.graphType','value':window['graphType']}]['forEach'](_0x57f3ed=>{_0x57f3ed['value']?console['log']('✅\x20'+_0x57f3ed['name']+'\x20已加载'):console['warn']('⚠️\x20'+_0x57f3ed['name']+'\x20未加载');});}async['initChessboard'](){const {rows:_0x3a27a4,cols:_0x317b9e,cellWidth:_0x5c622b,cellHeight:_0x193abc}=this['mapConfig'];for(let _0x3cea23=0x0;_0x3cea23<_0x3a27a4;_0x3cea23++)for(let _0x11e91b=0x0;_0x11e91b<_0x317b9e;_0x11e91b++){const _0x4293d4=this['getCellId'](_0x3cea23,_0x11e91b),_0x23a730=_0x11e91b*_0x5c622b,_0x1098b3=_0x3cea23*_0x193abc,_0x6e2697=_0x23a730+_0x5c622b/0x2,_0x51c07a=_0x1098b3+_0x193abc/0x2;this['mapState']['cells'][_0x4293d4]={'id':_0x4293d4,'row':_0x3cea23,'col':_0x11e91b,'x':_0x23a730,'y':_0x1098b3,'centerX':_0x6e2697,'centerY':_0x51c07a,'isEmpty':!0x0,'hasEgg':!0x1,'eggType':null,'piece':null,'walkable':!0x0,'occupied':!0x1},this['mapState']['emptyCells']['add'](_0x4293d4);}}async['initPathfinding'](){try{const {rows:_0x48f808,cols:_0x14b3d8,cellWidth:_0x1dd039}=this['mapConfig'],_0x10eb1e=[];for(let _0x4e60ca=0x0;_0x4e60ca<_0x48f808;_0x4e60ca++){_0x10eb1e[_0x4e60ca]=[];for(let _0xdc1c4d=0x0;_0xdc1c4d<_0x14b3d8;_0xdc1c4d++){const _0xc79fea=this['getCellId'](_0x4e60ca,_0xdc1c4d),_0x1ad581=this['mapState']['cells'][_0xc79fea];_0x10eb1e[_0x4e60ca][_0xdc1c4d]={'id':_0xc79fea,'row':_0x4e60ca,'col':_0xdc1c4d,'x':_0x1ad581['x'],'y':_0x1ad581['y'],'centerX':_0x1ad581['centerX'],'centerY':_0x1ad581['centerY'],'type':_0x1ad581['hasEgg']?window['graphType']?window['graphType']['wall']:0x1:window['graphType']?window['graphType']['open']:0x0,'walkable':!_0x1ad581['hasEgg'],'occupied':_0x1ad581['hasEgg']};}}const _0x473c7a=await this['waitForAstarModule'](0x4);_0x473c7a['init'](_0x48f808,_0x14b3d8,_0x1dd039,_0x10eb1e),this['pathfindingGrid']={'nodes':_0x10eb1e,'rows':_0x48f808,'cols':_0x14b3d8,'cellSize':_0x1dd039,'pathType':0x4,'astar':_0x473c7a};}catch(_0x586b76){throw console['error']('❌\x20寻路系统初始化失败:',_0x586b76),_0x586b76;}}['getCellId'](_0x5e1864,_0x1d633c){return _0x5e1864*this['mapConfig']['cols']+_0x1d633c;}['getRowCol'](_0xa8357e){return{'row':Math['floor'](_0xa8357e/this['mapConfig']['cols']),'col':_0xa8357e%this['mapConfig']['cols']};}async['init'](){return this['currentUserStatus']=await this['initializeUserData'](),this['isInitialized']=!0x0,{'success':!0x0,'version':this['serverVersion'],'message':'GameServer\x20initialized\x20successfully'};}async['initializeUserData'](){let _0xf06001=null;try{_0xf06001=this['detectLoginType']();let _0x10e249=null,_0x345f7f=this['loadUserDataCache']();_0x345f7f?(_0x10e249=_0x345f7f['isNewUser'],_0x345f7f['lastLoginTime']=Date['now']()):(_0x345f7f=await this['loadUserDataByLoginType'](_0xf06001),_0x10e249=!0x0),_0x10e249&&(this['difficulty']=this['getDifficultyLevel']('easy'));const _0x37452d={..._0x345f7f,'isNewUser':_0x10e249,'lastLoginTime':Date['now']()};return this['saveUserData']('currentUser',_0x37452d),this['cardBoosts']={0x1:0.5,0x2:0.5,0x3:0.4,0x4:0.3,0x5:0.2,0x6:0.1,0x7:0.08},_0x37452d;}catch(_0x39d120){console['error']('❌\x20用户数据初始化失败:',_0x39d120);try{if('wechat'===_0xf06001)throw _0x39d120;}catch(_0x211082){}return await this['createGuestUser']();}}['loadUserDataCache'](){try{const _0xf1e4c8=localStorage['getItem']('UserData');if(_0xf1e4c8){const _0x14c3d8=JSON['parse'](_0xf1e4c8);return this['userDataCache']['set']('currentUser',_0x14c3d8),_0x14c3d8;}return null;}catch(_0x5584b8){return console['error']('❌\x20用户数据缓存加载失败:',_0x5584b8),null;}}['loadGameData'](){try{const _0x26b898=localStorage['getItem']('GameData');if(_0x26b898)return JSON['parse'](_0x26b898);return null;}catch(_0x173ee0){return console['error']('❌\x20游戏数据加载失败:',_0x173ee0),null;}}['getGameData'](_0x33c3aa=null,_0x506b70='normal'){return console['log']('📊\x20获取游戏数据...'),_0x33c3aa['isNewUser']?this['getNewUserGuideData']():this['getAlgorithmData'](_0x33c3aa);}['getNewUserGuideData'](){const _0x579497=this['userDataCache']['get']('currentUser');if(!_0x579497)return console['error']('❌\x20用户状态不存在'),{'success':!0x1,'isNewUser':!0x0,'message':'User\x20status\x20not\x20found'};const _0x3d8889=this['newUserGuideData']['lv'+this['guidestaute']['currentLevel']];if(!_0x3d8889||this['guidestaute']>=_0x3d8889['length'])return _0x579497['isNewUser']=!0x1,this['saveUserData']('currentUser',_0x579497),{'success':!0x1,'isNewUser':!0x1,'message':'New\x20user\x20guide\x20completed'};const _0x40e635=_0x3d8889[this['guidestaute']['currentStep']];return _0x40e635?(_0x40e635['eggSeat']['forEach']((_0x4c0a68,_0x2a87c8)=>{this['occupyPosition'](_0x4c0a68,_0x40e635['eggType'][_0x2a87c8],null);}),{'success':!0x0,'isNewUser':!0x0,'data':_0x40e635,'message':'New\x20user\x20guide\x20data\x20retrieved\x20successfully'}):(_0x579497['isNewUser']=!0x1,this['saveUserData']('currentUser',_0x579497),console['warn']('⚠️\x20未找到新用户引导数据\x20-\x20等级:\x20'+_0x579497['currentLevel']+',\x20步骤:\x20'+this['guidestaute']['currentStep']),{'success':!0x1,'isNewUser':!0x1,'data':null,'message':'New\x20user\x20guide\x20data\x20not\x20found'});}['getAlgorithmData'](_0x11d71c=null){const _0x7802ad=this['loadGameData']();if(_0x7802ad&&_0x7802ad['saveTime']){if(Date['now']()-_0x7802ad['saveTime']>0x36ee80)return this['resetGame'](),this['getAlgorithmData'](_0x11d71c);}if(this['currentGameStatus']={'eggs':_0x7802ad?_0x7802ad['eggs']:[],'scoreSystem':_0x7802ad?_0x7802ad['scoreSystem']:this['scoreSystem'],'difficulty':_0x7802ad?_0x7802ad['difficulty']:this['difficulty'],'maxUnlockedEggType':_0x7802ad?_0x7802ad['maxUnlockedEggType']:0x1,'isInitialized':!!_0x7802ad,'hasGameData':!!_0x7802ad,'saveTime':_0x7802ad?_0x7802ad['saveTime']:Date['now'](),'isPlaying':!0x1,'isPaused':!0x1,'isCompleted':!0x1},_0x7802ad&&_0x7802ad['eggs']&&_0x7802ad['eggs']['length']>0x0)return this['loadSavedGameState'](_0x7802ad),{'success':!0x0,'isNewUser':!0x1,'difficulty':this['getDifficultyLevel'](_0x7802ad['difficulty'],!0x0),'scoreSystem':_0x7802ad['scoreSystem']||this['scoreSystem'],'data':{'eggSeat':_0x7802ad['eggs']['map'](_0x1f9c0e=>_0x1f9c0e['cellId']),'eggType':_0x7802ad['eggs']['map'](_0x4d18b7=>_0x4d18b7['eggType']),'pointSeat':[]},'unlockData':{'maxUnlockedEggType':_0x7802ad['maxUnlockedEggType']||0x1},'message':'Restored\x20saved\x20game\x20state'};const _0x70b104=this['difficulty'],_0x5b4011=this['generateRandomEggsFromMapState'](_0x70b104);return{'success':!0x0,'isNewUser':!0x1,'scoreSystem':this['scoreSystem'],'difficulty':this['getDifficultyLevel'](this['difficulty'],!0x0),'data':{'eggSeat':_0x5b4011['map'](_0x57fdbb=>_0x57fdbb['cellId']),'eggType':_0x5b4011['map'](_0x3ede1e=>_0x3ede1e['eggType']),'pointSeat':[]},'unlockData':{'maxUnlockedEggType':this['maxUnlockedEggType']||0x1},'message':'Algorithm\x20data\x20generated\x20successfully'};}['updateDifficulty'](_0x48a5f7){const _0xe81c34=this['getDifficultyLevel'](_0x48a5f7);if(_0xe81c34){this['difficulty']=_0xe81c34;const _0x1f6184=this['loadGameData']()||{};_0x1f6184['difficulty']=this['difficulty'],_0x1f6184['scoreSystem']=this['scoreSystem'],_0x1f6184['maxUnlockedEggType']=this['maxUnlockedEggType'],_0x1f6184['eggs']=_0x1f6184['eggs']||[],_0x1f6184['saveTime']=Date['now'](),this['_persistGameData'](_0x1f6184);}else console['warn']('⚠️\x20无效的难度:\x20'+_0x48a5f7);}['getDifficulty'](){return this['getDifficultyLevel'](this['difficulty'],!0x0);}['getDifficultyLevel'](_0x27bb9b,_0x493f16=!0x1){const _0x4f9ba9={'easy':0x3,'normal':0x4,'hard':0x5};if(_0x493f16){for(const [_0x2fac4c,_0x3a76ed]of Object['entries'](_0x4f9ba9))if(_0x3a76ed===_0x27bb9b)return _0x2fac4c;return'normal';}return _0x4f9ba9[_0x27bb9b]||0x4;}['resetGame'](){try{const _0x1f3bd9=this['loadGameData'](),_0x47e555=_0x1f3bd9?.['scoreSystem']?.['bestScore']||0x0;for(const _0x130852 in this['mapState']['cells']){const _0x3e29ef=this['mapState']['cells'][_0x130852];_0x3e29ef&&(_0x3e29ef['isEmpty']=!0x0,_0x3e29ef['hasEgg']=!0x1,_0x3e29ef['eggType']=null,_0x3e29ef['piece']=null,_0x3e29ef['occupied']=!0x1);}this['mapState']['occupiedCells']['clear'](),this['mapState']['emptyCells']['clear']();for(let _0x16472e=0x0;_0x16472e<this['mapConfig']['totalCells'];_0x16472e++)this['mapState']['emptyCells']['add'](_0x16472e);this['clearSelection'](),this['scoreSystem']&&(this['scoreSystem']['currentScore']=0x0,this['scoreSystem']['totalScore']=0x0,this['scoreSystem']['sessionScore']=0x0,this['scoreSystem']['synthesisHistory']=[],this['scoreSystem']['bestScore']=_0x47e555),this['maxUnlockedEggType']=0x1,this['difficulty']=_0x1f3bd9?_0x1f3bd9['difficulty']:0x4,this['currentGameStatus']&&(this['currentGameStatus']['eggs']=[],this['currentGameStatus']['totalScore']=0x0,this['currentGameStatus']['maxUnlockedEggType']=0x1,this['currentGameStatus']['hasGameData']=!0x1,this['currentGameStatus']['isInitialized']=!0x1,this['currentGameStatus']['saveTime']=null);const _0x3474e2={'eggs':[],'scoreSystem':this['scoreSystem'],'difficulty':this['difficulty'],'maxUnlockedEggType':this['maxUnlockedEggType'],'saveTime':Date['now']()};return this['_persistGameData'](_0x3474e2),{'success':!0x0,'message':'Game\x20state\x20reset\x20successfully'};}catch(_0x1341ac){return console['error']('❌\x20GameServer\x20游戏状态重置失败:',_0x1341ac),{'success':!0x1,'message':_0x1341ac['message']};}}['saveUserData'](_0x40bd87,_0x29cc24){try{return this['userDataCache']['set'](_0x40bd87,_0x29cc24),localStorage['setItem']('UserData',JSON['stringify'](_0x29cc24)),{'success':!0x0,'message':'User\x20data\x20saved\x20successfully'};}catch(_0x1dea8b){return console['error']('❌\x20用户数据保存失败:',_0x1dea8b),{'success':!0x1,'message':'Failed\x20to\x20save\x20user\x20data','error':_0x1dea8b['message']};}}['getAstar'](_0x5c0715=0x4){return 0x4===_0x5c0715?window['OvoAstar4']?window['OvoAstar4']['getInstance']():(console['warn']('⚠️\x20OvoAstar4\x20模块未加载'),null):0x8===_0x5c0715?window['OvoAstar8']?window['OvoAstar8']['getInstance']():(console['warn']('⚠️\x20OvoAstar8\x20模块未加载'),null):(console['warn']('⚠️\x20不支持的寻路类型:\x20'+_0x5c0715),null);}async['waitForAstarModule'](_0x42f36b=0x4,_0x4a813f=0x1388){return new Promise((_0x4134c6,_0x1842e1)=>{const _0x45763b=Date['now'](),_0x1213fe=()=>{const _0x3ab0f2=this['getAstar'](_0x42f36b);if(!_0x3ab0f2)return Date['now']()-_0x45763b>_0x4a813f?(console['error']('❌\x20A*\x20模块加载超时，类型:\x20'+_0x42f36b),void _0x1842e1(new Error('A*\x20模块加载超时，类型:\x20'+_0x42f36b))):void setTimeout(_0x1213fe,0x64);_0x4134c6(_0x3ab0f2);};_0x1213fe();});}['initPathfindingGrid'](_0x23f855=0x6,_0x4409cc=0x6,_0x1470dd=0x96,_0x337a4e=0x4){return new Promise((_0xc64256,_0x9ea82b)=>{try{const _0x41cbb7=[];for(let _0x4ec7f1=0x0;_0x4ec7f1<_0x23f855;_0x4ec7f1++){_0x41cbb7[_0x4ec7f1]=[];for(let _0x4ffa2f=0x0;_0x4ffa2f<_0x4409cc;_0x4ffa2f++){const _0x2fd672={'id':_0x4ec7f1*_0x4409cc+_0x4ffa2f,'row':_0x4ec7f1,'col':_0x4ffa2f,'x':_0x4ffa2f*_0x1470dd,'y':_0x4ec7f1*_0x1470dd,'centerX':_0x4ffa2f*_0x1470dd+_0x1470dd/0x2,'centerY':_0x4ec7f1*_0x1470dd+_0x1470dd/0x2,'type':window['graphType']?window['graphType']['open']:0x0,'walkable':!0x0,'occupied':!0x1};_0x41cbb7[_0x4ec7f1][_0x4ffa2f]=_0x2fd672;}}const _0x30cc4b=this['getAstar'](_0x337a4e);if(!_0x30cc4b)throw new Error('无法获取\x20A*\x20寻路实例，类型:\x20'+_0x337a4e);_0x30cc4b['init'](_0x23f855,_0x4409cc,_0x1470dd,_0x41cbb7),this['pathfindingGrid']={'nodes':_0x41cbb7,'rows':_0x23f855,'cols':_0x4409cc,'cellSize':_0x1470dd,'pathType':_0x337a4e,'astar':_0x30cc4b},_0xc64256({'nodes':_0x41cbb7,'astar':_0x30cc4b,'config':{'rows':_0x23f855,'cols':_0x4409cc,'cellSize':_0x1470dd,'pathType':_0x337a4e}});}catch(_0xd5cff9){console['error']('❌\x20寻路网格初始化失败:',_0xd5cff9),_0x9ea82b(_0xd5cff9);}});}['updateGridCell'](_0x2d479f,_0x393df6,_0x10e2cf=!0x0,_0x38e1f9=!0x1){if(!this['pathfindingGrid']||!this['pathfindingGrid']['nodes'])return void console['warn']('⚠️\x20寻路网格未初始化');const {nodes:_0x3d012b,rows:_0x3cf50e,cols:_0x726d67}=this['pathfindingGrid'];if(_0x2d479f>=0x0&&_0x2d479f<_0x3cf50e&&_0x393df6>=0x0&&_0x393df6<_0x726d67){const _0x126607=_0x3d012b[_0x2d479f][_0x393df6];_0x126607['walkable']=_0x10e2cf,_0x126607['occupied']=_0x38e1f9,_0x126607['type']=_0x10e2cf?window['graphType']?window['graphType']['open']:0x0:window['graphType']?window['graphType']['wall']:0x1;}}['findPath'](_0x4d741e,_0x4cfaf3){if(!this['pathfindingGrid']||!this['pathfindingGrid']['astar'])return console['warn']('⚠️\x20寻路系统未初始化'),[];const {astar:_0x3bff44}=this['pathfindingGrid'],_0x5ee1c6=void 0x0!==_0x4d741e['row']?_0x4d741e:this['positionToGrid'](_0x4d741e['x'],_0x4d741e['y']),_0x536674=void 0x0!==_0x4cfaf3['row']?_0x4cfaf3:this['positionToGrid'](_0x4cfaf3['x'],_0x4cfaf3['y']);return _0x3bff44['search']({'x':_0x5ee1c6['row'],'y':_0x5ee1c6['col']},{'x':_0x536674['row'],'y':_0x536674['col']});}['positionToGrid'](_0xbbb132,_0x4860e8){if(!this['pathfindingGrid'])return{'row':0x0,'col':0x0};const {cellSize:_0x1ea2a5}=this['pathfindingGrid'];return{'row':Math['floor'](_0x4860e8/_0x1ea2a5),'col':Math['floor'](_0xbbb132/_0x1ea2a5)};}['validateEggMove'](_0x15a6b1,_0x5df6b0){return{'code':0x0,'message':'移动有效'};}['cellIdToPosition'](_0x5cf2f8){if(!this['pathfindingGrid'])return{'row':0x0,'col':0x0};const {cols:_0x370111}=this['pathfindingGrid'];return{'row':Math['floor'](_0x5cf2f8/_0x370111),'col':_0x5cf2f8%_0x370111};}['findSynthesisMatches'](_0x40a329){const _0x45490c=[],_0x5b6843=new Set(),_0x50823a=[_0x40a329];_0x5b6843['add'](_0x40a329);for(;_0x50823a['length']>0x0;){const _0x5d9500=_0x50823a['shift']();_0x45490c['push'](_0x5d9500);const _0x42fd9c=this['getAdjacentCells'](_0x5d9500);for(const _0x245972 of _0x42fd9c)!_0x5b6843['has'](_0x245972)&&(Math['random']()>0.7&&(_0x5b6843['add'](_0x245972),_0x50823a['push'](_0x245972)));}return{'matches':_0x45490c,'eggType':0x0,'newEggType':0x1,'synthesisPosition':_0x40a329,'score':0xa*_0x45490c['length']};}['getAdjacentCells'](_0x3d3905){if(!this['pathfindingGrid'])return[];const {rows:_0x48aee5,cols:_0x254045}=this['pathfindingGrid'],_0x8628c6=this['cellIdToPosition'](_0x3d3905),_0x1e2a35=[],_0x50164e=[[-0x1,0x0],[0x1,0x0],[0x0,-0x1],[0x0,0x1]];for(const [_0x235442,_0x1a8c1b]of _0x50164e){const _0x56e3f0=_0x8628c6['row']+_0x235442,_0x3dc759=_0x8628c6['col']+_0x1a8c1b;if(_0x56e3f0>=0x0&&_0x56e3f0<_0x48aee5&&_0x3dc759>=0x0&&_0x3dc759<_0x254045){const _0x199602=_0x56e3f0*_0x254045+_0x3dc759;_0x1e2a35['push'](_0x199602);}}return _0x1e2a35;}['checkEggSynthesis'](_0x653ab8,_0x4e9eef){return new Promise(_0x47459f=>{const _0x5b8bd3=this['findEggMatches'](_0x653ab8,_0x4e9eef);_0x5b8bd3&&_0x5b8bd3['matches']['length']>=0x3?_0x47459f({'code':0x0,'matches':_0x5b8bd3['matches'],'eggType':_0x5b8bd3['eggType'],'newEggType':_0x5b8bd3['newEggType'],'synthesisPosition':_0x5b8bd3['synthesisPosition'],'score':_0x5b8bd3['score'],'message':'找到合成匹配'}):_0x47459f({'code':-0x1,'message':'没有找到合成匹配'});});}['findEggMatches'](_0x4b2b5a,_0x6e3972){if(!_0x6e3972['cells'][_0x4b2b5a]||!_0x6e3972['cells'][_0x4b2b5a]['hasEgg'])return null;const _0x1c8aa4=_0x6e3972['cells'][_0x4b2b5a]['eggType'],_0x4aa212=[],_0x26f1ac=new Set(),_0x4bf38f=[_0x4b2b5a];for(_0x26f1ac['add'](_0x4b2b5a);_0x4bf38f['length']>0x0;){const _0x4a788d=_0x4bf38f['shift']();_0x4aa212['push'](_0x4a788d);const _0x117a0b=this['getAdjacentCells'](_0x4a788d);for(const _0x1b85e6 of _0x117a0b)!_0x26f1ac['has'](_0x1b85e6)&&_0x6e3972['cells'][_0x1b85e6]&&_0x6e3972['cells'][_0x1b85e6]['hasEgg']&&_0x6e3972['cells'][_0x1b85e6]['eggType']===_0x1c8aa4&&(_0x26f1ac['add'](_0x1b85e6),_0x4bf38f['push'](_0x1b85e6));}if(_0x4aa212['length']>=0x3){const _0x580c26=Math['min'](_0x1c8aa4+0x1,0x8);return{'matches':_0x4aa212,'eggType':_0x1c8aa4,'newEggType':_0x580c26,'synthesisPosition':_0x4b2b5a,'score':this['calculateSynthesisScore'](_0x4aa212['length'],_0x1c8aa4,_0x580c26)};}return null;}['calculateSynthesisScore'](_0x436529,_0x1e8e32,_0x1980f8){const _0x9cd03c=Math['min'](0x2*_0x1e8e32,0x14),_0x1cd1f4=_0x1e8e32,_0x3be2b5=Math['round'](Math['pow'](_0x436529-0x3,1.5)),_0x3e943b=Math['pow'](_0x1e8e32,0x2);return{'baseScore':_0x9cd03c,'typeMultiplier':_0x1cd1f4,'countBonus':_0x3be2b5,'levelBonus':_0x3e943b,'totalScore':Math['round'](_0x9cd03c+_0x1cd1f4+_0x3be2b5+_0x3e943b)*this['difficulty'],'eggCount':_0x436529,'fromType':_0x1e8e32,'toType':_0x1980f8};}['updateScoreSystem'](_0x30f3cd){return this['scoreSystem']['currentScore']+=_0x30f3cd['totalScore'],this['scoreSystem']['totalScore']+=_0x30f3cd['totalScore'],this['scoreSystem']['sessionScore']+=_0x30f3cd['totalScore'],this['scoreSystem']['totalScore']>this['scoreSystem']['bestScore']&&(this['scoreSystem']['bestScore']=this['scoreSystem']['totalScore']),this['scoreSystem']['synthesisHistory']['push']({'timestamp':Date['now'](),'scoreDetail':_0x30f3cd,'currentTotal':this['scoreSystem']['currentScore']}),{'currentScore':this['scoreSystem']['currentScore'],'addedScore':_0x30f3cd['totalScore'],'scoreDetail':_0x30f3cd,'bestScore':this['scoreSystem']['bestScore']};}['getScoreStatus'](){return{'currentScore':this['scoreSystem']['currentScore'],'totalScore':this['scoreSystem']['totalScore'],'sessionScore':this['scoreSystem']['sessionScore'],'synthesisCount':this['scoreSystem']['synthesisHistory']['length'],'bestScore':this['scoreSystem']['bestScore']};}['getEggTypeName'](_0x524bb8){return{0x1:'白色',0x2:'绿色',0x3:'蓝色',0x4:'紫色',0x5:'红色',0x6:'黄色',0x7:'橙色'}[_0x524bb8]||'未知';}['calculateEmptyPositions'](_0x4cf9ae=null){const _0x28ba61=[];if(_0x4cf9ae&&_0x4cf9ae['cells'])for(let _0x1b0a46=0x0;_0x1b0a46<0x30;_0x1b0a46++){const _0x408e7b=_0x4cf9ae['cells'][_0x1b0a46];_0x408e7b&&_0x408e7b['hasEgg']||_0x28ba61['push'](_0x1b0a46);}else{for(let _0x3e74ab=0x0;_0x3e74ab<0x30;_0x3e74ab++)_0x28ba61['push'](_0x3e74ab);}return _0x28ba61;}['selectRandomPositions'](_0x3dbeac,_0x35b99b){const _0x28b2de=[],_0x14661e=[..._0x3dbeac];for(let _0x2845e5=0x0;_0x2845e5<_0x35b99b&&_0x14661e['length']>0x0;_0x2845e5++){const _0x21f3ca=Math['floor'](Math['random']()*_0x14661e['length']),_0x16252f=_0x14661e['splice'](_0x21f3ca,0x1)[0x0];_0x28b2de['push'](_0x16252f);}return _0x28b2de;}['getAvailableEggTypes'](_0x4b5f89){const _0x3d39f6=[];for(let _0x2c01fc=0x1;_0x2c01fc<=Math['min'](_0x4b5f89,0x8);_0x2c01fc++)_0x3d39f6['push'](_0x2c01fc);return _0x3d39f6;}['selectRandomEggTypes'](_0x40f8bc,_0x1296a2){const _0x31a1bc=[];try{this['cardBoosts']=this['cardBoosts']||{};const _0x19d943=0.5,_0x1b5492=[];for(const _0x2bc6b1 of _0x40f8bc){let _0x4228f0=Number(this['cardBoosts'][_0x2bc6b1]);isFinite(_0x4228f0)||(_0x4228f0=_0x19d943),_0x4228f0=Math['max'](0x0,Math['min'](0x1,_0x4228f0)),_0x4228f0>0x0&&_0x1b5492['push']({'type':_0x2bc6b1,'weight':_0x4228f0});}if(0x0===_0x1b5492['length']){const _0x92a518=[];for(let _0x128219=0x0;_0x128219<_0x1296a2;_0x128219++)_0x92a518['push'](_0x40f8bc[Math['floor'](Math['random']()*_0x40f8bc['length'])]);return _0x92a518;}const _0x2e690d=Math['min'](_0x1296a2,_0x1b5492['length']);for(let _0x21b1b1=0x0;_0x21b1b1<_0x2e690d;_0x21b1b1++){const _0xd23fe2=_0x1b5492['reduce']((_0x45f204,_0x32df4e)=>_0x45f204+_0x32df4e['weight'],0x0);let _0x8610a=Math['random']()*_0xd23fe2,_0x202871=0x0;for(;_0x202871<_0x1b5492['length']&&(_0x8610a-=_0x1b5492[_0x202871]['weight'],!(_0x8610a<=0x0));_0x202871++);_0x202871>=_0x1b5492['length']&&(_0x202871=_0x1b5492['length']-0x1),_0x31a1bc['push'](_0x1b5492[_0x202871]['type']),_0x1b5492['splice'](_0x202871,0x1);}for(;_0x31a1bc['length']<_0x1296a2;)_0x31a1bc['push'](_0x40f8bc[Math['floor'](Math['random']()*_0x40f8bc['length'])]);return _0x31a1bc;}catch(_0x3237e4){console['error']('❌\x20selectRandomEggTypes\x20失败，回退到等概率选择:',_0x3237e4);const _0xb2719d=[],_0x460980=[..._0x40f8bc];for(let _0x30f5b7=0x0;_0x30f5b7<_0x1296a2;_0x30f5b7++)_0xb2719d['push'](_0x460980[Math['floor'](Math['random']()*_0x460980['length'])]);return _0xb2719d;}}['generateWeightedRandomEggType'](_0x4c1476){if(0x0===_0x4c1476['length'])return 0x1;if(0x1===_0x4c1476['length'])return _0x4c1476[0x0];this['cardBoosts']=this['cardBoosts']||{};const _0x464169=[],_0x29974b=[];for(const _0x29b5d0 of _0x4c1476){let _0x5c8f11=Number(this['cardBoosts'][_0x29b5d0]);isFinite(_0x5c8f11)||(_0x5c8f11=0.5),_0x5c8f11=Math['max'](0x0,Math['min'](0x1,_0x5c8f11)),_0x5c8f11<=0x0||(_0x464169['push'](_0x5c8f11),_0x29974b['push'](_0x29b5d0));}if(0x0===_0x464169['length'])return _0x4c1476[Math['floor'](Math['random']()*_0x4c1476['length'])];const _0x27f78e=_0x464169['reduce']((_0x3ef778,_0x42e90d)=>_0x3ef778+_0x42e90d,0x0);if(_0x27f78e<=0x0)return _0x29974b[0x0]||_0x4c1476[0x0];let _0x17daf2=Math['random']()*_0x27f78e;for(let _0x20fadf=0x0;_0x20fadf<_0x464169['length'];_0x20fadf++)if(_0x17daf2-=_0x464169[_0x20fadf],_0x17daf2<=0x0)return _0x29974b[_0x20fadf];return _0x29974b[_0x29974b['length']-0x1]||_0x4c1476[0x0];}['onEggSynthesisSuccess'](_0x27117f,_0x118c82,_0x475be6){let _0x27f90e=_0x118c82;_0x27f90e>(this['maxUnlockedEggType']||0x1)&&(this['maxUnlockedEggType']=_0x27f90e);}['gridToPosition'](_0x301209,_0x1f2a50){if(!this['pathfindingGrid'])return{'x':0x0,'y':0x0,'centerX':0x0,'centerY':0x0};const {cellSize:_0x361a34}=this['pathfindingGrid'];return{'x':_0x1f2a50*_0x361a34,'y':_0x301209*_0x361a34,'centerX':_0x1f2a50*_0x361a34+_0x361a34/0x2,'centerY':_0x301209*_0x361a34+_0x361a34/0x2};}['getEmptyPositionsFromMap'](){return Array['from'](this['mapState']['emptyCells']);}['reservePositionsForEggs'](_0x5cd2bb,_0x96b8ac){for(let _0x19949e=0x0;_0x19949e<_0x5cd2bb['length'];_0x19949e++){const _0x2d93b0=_0x5cd2bb[_0x19949e],_0x5f397e=_0x96b8ac[_0x19949e];this['mapState']['cells'][_0x2d93b0]&&(this['mapState']['cells'][_0x2d93b0]['isEmpty']=!0x1,this['mapState']['cells'][_0x2d93b0]['hasEgg']=!0x0,this['mapState']['cells'][_0x2d93b0]['eggType']=_0x5f397e,this['mapState']['cells'][_0x2d93b0]['occupied']=!0x0,this['mapState']['emptyCells']['delete'](_0x2d93b0),this['mapState']['occupiedCells']['add'](_0x2d93b0));}}['releasePosition'](_0x5794d0){this['mapState']['cells'][_0x5794d0]&&(this['mapState']['cells'][_0x5794d0]['isEmpty']=!0x0,this['mapState']['cells'][_0x5794d0]['hasEgg']=!0x1,this['mapState']['cells'][_0x5794d0]['eggType']=null,this['mapState']['cells'][_0x5794d0]['piece']=null,this['mapState']['cells'][_0x5794d0]['occupied']=!0x1,this['mapState']['occupiedCells']['delete'](_0x5794d0),this['mapState']['emptyCells']['add'](_0x5794d0));}['occupyPosition'](_0x231fc5,_0x38c24c,_0x5b62b7=null){this['mapState']['cells'][_0x231fc5]&&(this['mapState']['cells'][_0x231fc5]['isEmpty']=!0x1,this['mapState']['cells'][_0x231fc5]['hasEgg']=!0x0,this['mapState']['cells'][_0x231fc5]['eggType']=_0x38c24c,this['mapState']['cells'][_0x231fc5]['piece']=_0x5b62b7,this['mapState']['cells'][_0x231fc5]['occupied']=!0x0,this['mapState']['emptyCells']['delete'](_0x231fc5),this['mapState']['occupiedCells']['add'](_0x231fc5));}['saveCurrentGameState'](){if(this['currentUserStatus']?.['isNewUser'])console['log']('🆕\x20新用户，不保存游戏状态');else try{const _0x49c389=[];for(const [_0xfa7afe,_0x53c878]of Object['entries'](this['mapState']['cells']))_0x53c878['hasEgg']&&null!==_0x53c878['eggType']&&_0x49c389['push']({'cellId':parseInt(_0xfa7afe),'eggType':_0x53c878['eggType']});const _0x55f0f5={'eggs':_0x49c389,'scoreSystem':this['scoreSystem'],'difficulty':this['difficulty']||0x4,'maxUnlockedEggType':this['maxUnlockedEggType']||0x1,'saveTime':Date['now']()};this['_persistGameData'](_0x55f0f5);}catch(_0x8f081a){console['error']('❌\x20保存游戏状态失败:',_0x8f081a);}}['applyCardBoost'](_0x47eb8e,_0x4b0bcd=0x0){try{if(null==_0x47eb8e)return;const _0x30995b=String(_0x47eb8e);this['cardBoosts']||(this['cardBoosts']={});const _0x45f0c8=Number(this['cardBoosts'][_0x30995b])||0x0;let _0x170ebe=Number(_0x4b0bcd||0x0);isFinite(_0x170ebe)||(_0x170ebe=0x0);let _0x1921cd=_0x45f0c8+_0x170ebe;const _0x134774=0x1;return _0x1921cd=Math['max'](0x0,Math['min'](_0x134774,_0x1921cd)),this['cardBoosts'][_0x30995b]=Number(_0x1921cd['toFixed'](0x2)),console['log']('🔔\x20applyCardBoost:\x20type='+_0x30995b+',\x20+'+_0x170ebe+'\x20->\x20'+_0x1921cd+'\x20(不保存到缓存)'),this['cardBoosts'];}catch(_0x2024ae){return console['error']('❌\x20applyCardBoost\x20失败:',_0x2024ae),null;}}['loadSavedGameState'](_0x5d6f05){try{if(!_0x5d6f05||!_0x5d6f05['eggs'])return console['log']('📝\x20没有需要恢复的游戏状态'),null;for(const _0x40e93b of _0x5d6f05['eggs'])this['occupyPositionSilently'](_0x40e93b['cellId'],_0x40e93b['eggType']);return _0x5d6f05['scoreSystem']&&(this['scoreSystem']=_0x5d6f05['scoreSystem']),void 0x0!==_0x5d6f05['difficulty']&&(this['difficulty']=_0x5d6f05['difficulty']),void 0x0!==_0x5d6f05['maxUnlockedEggType']&&(this['maxUnlockedEggType']=_0x5d6f05['maxUnlockedEggType']),_0x5d6f05;}catch(_0x74a29){return console['error']('❌\x20恢复游戏状态失败:',_0x74a29),null;}}['occupyPositionSilently'](_0x1972ac,_0x578226){this['mapState']['cells'][_0x1972ac]&&(this['mapState']['cells'][_0x1972ac]['isEmpty']=!0x1,this['mapState']['cells'][_0x1972ac]['hasEgg']=!0x0,this['mapState']['cells'][_0x1972ac]['eggType']=_0x578226,this['mapState']['cells'][_0x1972ac]['piece']=null,this['mapState']['cells'][_0x1972ac]['occupied']=!0x0,this['mapState']['emptyCells']['delete'](_0x1972ac),this['mapState']['occupiedCells']['add'](_0x1972ac));}['getMapStateInfo'](){return{'totalCells':this['mapConfig']['totalCells'],'emptyCells':this['mapState']['emptyCells']['size'],'occupiedCells':this['mapState']['occupiedCells']['size'],'isInitialized':this['mapState']['isInitialized'],'config':this['mapConfig']};}['processEggClick'](_0x428b82){if(this['printMapState'](),!this['mapState']['cells'][_0x428b82])return{'code':-0x1,'message':'无效的格子位置','cellId':_0x428b82};const _0x19c25e=this['mapState']['cells'][_0x428b82];if((_0x19c25e['isEmpty']||!_0x19c25e['hasEgg'])&&this['selectionState']['isSelected']){const _0x41326c=this['processEggMove'](this['selectionState']['selectedEgg']['cellId'],_0x428b82);return 0x0===_0x41326c['code']?(this['clearSelection'](),{'code':0x0,'step':0x2,'guideData':_0x41326c['guideData'],'fromCellId':_0x41326c['fromCellId'],'toCellId':_0x41326c['toCellId'],'path':_0x41326c['path'],'eggType':_0x41326c['eggType'],'positionsToDelete':_0x41326c['positionsToDelete'],'synthesis':_0x41326c['synthesis'],'newEggs':_0x41326c['newEggs'],'isVictory':_0x41326c['isVictory'],'isFailure':_0x41326c['isFailure'],'message':'点击空位置，移动蛋'}):{'code':-0x1,'step':0x0,'message':_0x41326c['message']||'无法移动到该位置','cellId':_0x428b82};}if(_0x19c25e['isEmpty']||!_0x19c25e['hasEgg'])return{'code':-0x1,'step':0x0,'message':'位置为空','cellId':_0x428b82};if(!this['selectionState']['isSelected'])return this['selectionState']['selectedEgg']={'cellId':_0x428b82,'eggType':_0x19c25e['eggType']},this['selectionState']['isSelected']=!0x0,{'code':0x0,'step':0x1,'cellId':_0x428b82,'eggType':_0x19c25e['eggType'],'message':'选择蛋'};if(this['selectionState']['selectedEgg']['cellId']===_0x428b82)return this['selectionState']['selectedEgg']=null,this['selectionState']['isSelected']=!0x1,{'code':0x0,'step':0x3,'cellId':_0x428b82,'message':'取消选择'};const _0x5ac036=this['selectionState']['selectedEgg']['cellId'];return this['selectionState']['selectedEgg']={'cellId':_0x428b82,'eggType':_0x19c25e['eggType']},{'code':0x0,'step':0x4,'oldCellId':_0x5ac036,'newCellId':_0x428b82,'eggType':_0x19c25e['eggType'],'message':'切换选择'};}['getSelectionState'](){return{'isSelected':this['selectionState']['isSelected'],'selectedEgg':this['selectionState']['selectedEgg']};}['clearSelection'](){this['selectionState']['selectedEgg']=null,this['selectionState']['isSelected']=!0x1;}['currNum']=0x0;['processEggMove'](_0x2fc833,_0x48426d){const _0x288881=this['mapState']['cells'][_0x2fc833];if(!_0x288881||_0x288881['isEmpty']||!_0x288881['hasEgg'])return{'code':-0x1,'message':'起始位置没有蛋'};const _0xd3a7c5=this['mapState']['cells'][_0x48426d];if(!_0xd3a7c5||!_0xd3a7c5['isEmpty']||_0xd3a7c5['hasEgg'])return{'code':-0x1,'message':'目标位置不可用'};const _0x352ab5=this['findMovePath'](_0x2fc833,_0x48426d);if(!_0x352ab5||0x0===_0x352ab5['length'])return{'code':-0x1,'message':'无法找到移动路径'};const _0x56fc32=_0x288881['eggType'],_0x5c1473=_0x288881['piece'];this['releasePosition'](_0x2fc833),this['occupyPosition'](_0x48426d,_0x56fc32,_0x5c1473);const _0x3e4370=this['findEggMatches'](_0x48426d,{'cells':this['mapState']['cells']});let _0x5336de,_0x22bbac=[_0x2fc833],_0x3b8c55={'canSynthesize':!0x1};if(_0x3e4370&&_0x3e4370['matches']['length']>=0x3&&(_0x3b8c55={'canSynthesize':!0x0,'matches':_0x3e4370['matches'],'eggType':_0x3e4370['eggType'],'newEggType':_0x3e4370['newEggType'],'synthesisPosition':_0x48426d,'score':_0x3e4370['score']},_0x22bbac=_0x3e4370['matches']['filter'](_0x4e47a6=>_0x4e47a6!==_0x48426d),_0x22bbac['includes'](_0x2fc833)||_0x22bbac['push'](_0x2fc833),this['processSynthesisResult'](_0x3e4370,_0x48426d)),this['currentUserStatus']['isNewUser']){this['guidestaute']['currentStep']+=0x1;const _0x31ab4c=this['getNewUserGuideData']();if(_0x31ab4c['success'])return _0x5336de=_0x31ab4c['data']['eggSeat']['map']((_0x32abb0,_0xd04f73)=>({'cellId':_0x32abb0,'eggType':_0x31ab4c['data']['eggType'][_0xd04f73]})),{'code':0x0,'fromCellId':_0x2fc833,'toCellId':_0x48426d,'path':_0x352ab5,'eggType':_0x56fc32,'positionsToDelete':_0x22bbac,'synthesis':_0x3b8c55,'newEggs':_0x5336de,'guideData':{'isNewUser':!0x0,'pointSeat':_0x31ab4c['data']['pointSeat'],'currentStep':_0x31ab4c['step'],'currentLevel':_0x31ab4c['level']},'message':'移动处理完成'};_0x31ab4c['isNewUser']?(console['warn']('⚠️\x20未找到引导数据，使用随机生成数据'),_0x5336de=this['generateRandomEggsFromMapState'](this['difficulty'])||[]):_0x5336de=this['generateRandomEggsFromMapState'](this['difficulty'])||[];}else _0x5336de=this['generateRandomEggsFromMapState'](this['difficulty'])||[];if(_0x3b8c55['canSynthesize']&&_0x3b8c55['newEggType']>0x7){const _0x21bf0e=[];try{if(this['mapState']&&this['mapState']['occupiedCells']&&this['mapState']['occupiedCells']['size']>0x0)_0x21bf0e['push'](...Array['from'](this['mapState']['occupiedCells']));else{if(this['mapState']&&this['mapState']['cells']){for(const [_0x2b6307,_0xe4ab82]of Object['entries'](this['mapState']['cells']))_0xe4ab82&&_0xe4ab82['hasEgg']&&_0x21bf0e['push'](Number(_0x2b6307));}}}catch(_0x39f6af){console['error']('⚠️\x20获取所有蛋位置失败，使用默认参与位置',_0x39f6af);}const _0x6eb881=Array['isArray'](_0x22bbac)?_0x22bbac['slice']():[];try{const _0x17b2cc=new Set(_0x6eb881['map'](_0x35eda8=>Number(_0x35eda8)));for(const _0x3edb47 of _0x21bf0e){const _0x5f08cc=Number(_0x3edb47);_0x17b2cc['has'](_0x5f08cc)||(_0x6eb881['push'](_0x5f08cc),_0x17b2cc['add'](_0x5f08cc));}}catch(_0x3c537e){console['error']('⚠️\x20合并全图蛋位置失败，使用原参与位置',_0x3c537e);}return{'code':0x0,'fromCellId':_0x2fc833,'toCellId':_0x48426d,'path':_0x352ab5,'eggType':_0x56fc32,'positionsToDelete':_0x6eb881,'synthesis':_0x3b8c55,'newEggs':[],'isVictory':!0x0,'reason':'max_egg_level_reached','message':'恭喜！您合成了最高等级的蛋！'};}return 0x0===this['mapState']['emptyCells']['size']?(console['warn']('💀\x20地图已满，游戏结束'),{'code':0x0,'fromCellId':_0x2fc833,'toCellId':_0x48426d,'path':_0x352ab5,'eggType':_0x56fc32,'positionsToDelete':_0x22bbac,'synthesis':_0x3b8c55,'newEggs':_0x5336de,'isFailure':!0x0,'reason':'map_full','message':'地图已满，游戏结束！'}):(this['saveCurrentGameState'](),{'code':0x0,'fromCellId':_0x2fc833,'toCellId':_0x48426d,'path':_0x352ab5,'eggType':_0x56fc32,'positionsToDelete':_0x22bbac,'synthesis':_0x3b8c55,'newEggs':_0x5336de,'message':'移动处理完成'});}['processSynthesisResult'](_0x2e93a9,_0x2f0094){for(const _0x362fce of _0x2e93a9['matches'])_0x362fce!==_0x2f0094&&this['releasePosition'](_0x362fce);const _0x5249f4=this['mapState']['cells'][_0x2f0094];_0x5249f4&&(_0x5249f4['eggType']=_0x2e93a9['newEggType']);const _0x4e841d=_0x2e93a9['score'],_0x1a7f0e=this['updateScoreSystem'](_0x4e841d);_0x2e93a9['scoreDetail']=_0x4e841d,_0x2e93a9['scoreUpdate']=_0x1a7f0e,this['onEggSynthesisSuccess']('currentUser',_0x2e93a9['newEggType'],_0x2e93a9['matches']['length']),this['currentUserStatus']['isNewUser']||this['updateLeaderboardAsync']();}['updateLeaderboardAsync'](){}['generateRandomEggsFromMapState'](_0x29d22b=0x3){const _0x451541=Array['from'](this['mapState']['emptyCells']);_0x451541['length']<_0x29d22b&&(console['warn']('⚠️\x20空闲位置不足，需要\x20'+_0x29d22b+'\x20个，只有\x20'+_0x451541['length']+'\x20个'),_0x29d22b=_0x451541['length']);const _0x2179fc=this['maxUnlockedEggType'],_0x3b7652=this['getAvailableEggTypes'](_0x2179fc),_0x3d75dd=this['selectRandomEggTypes'](_0x3b7652,_0x29d22b),_0x3f8700=this['selectRandomPositions'](_0x451541,_0x29d22b);for(let _0x4a3f28=0x0;_0x4a3f28<_0x3f8700['length'];_0x4a3f28++){const _0x1c226b=_0x3f8700[_0x4a3f28],_0x558ebb=_0x3d75dd[_0x4a3f28];this['occupyPosition'](_0x1c226b,_0x558ebb,null);}const _0x272412=_0x3f8700['map']((_0x54e028,_0x5adb89)=>({'cellId':_0x54e028,'eggType':_0x3d75dd[_0x5adb89]})),_0x522808=[];return Object['keys'](this['mapState']['cells'])['forEach'](_0x4b0bc7=>{const _0x265d4a=this['mapState']['cells'][_0x4b0bc7];_0x265d4a['hasEgg']&&_0x522808['push']({'cellId':parseInt(_0x4b0bc7),'eggType':_0x265d4a['eggType'],'hasPiece':!!_0x265d4a['piece']});}),_0x272412;}['findMovePath'](_0x38f7cc,_0x128229){this['updatePathfindingGrid']();const _0x411d7f=this['getCellPosition'](_0x38f7cc),_0x5df4b8=this['getCellPosition'](_0x128229);try{const _0x1a0ee4=this['findPath'](_0x411d7f,_0x5df4b8);return _0x1a0ee4&&_0x1a0ee4['length']>0x0?_0x1a0ee4:(console['log']('❌\x20未找到可行路径'),[]);}catch(_0x421cfb){return console['error']('❌\x20寻路失败:',_0x421cfb),[];}}['updatePathfindingGrid'](){if(!this['pathfindingGrid']||!this['pathfindingGrid']['nodes'])return void console['warn']('⚠️\x20寻路网格未初始化');const {nodes:_0x4953f8,rows:_0x30a8c5,cols:_0x239444}=this['pathfindingGrid'];for(let _0x80d341=0x0;_0x80d341<_0x30a8c5;_0x80d341++)for(let _0x12beb0=0x0;_0x12beb0<_0x239444;_0x12beb0++){const _0x287649=this['getCellId'](_0x80d341,_0x12beb0),_0x2f51f4=this['mapState']['cells'][_0x287649],_0x57274b=_0x4953f8[_0x80d341][_0x12beb0];_0x57274b['walkable']=!_0x2f51f4['hasEgg'],_0x57274b['occupied']=_0x2f51f4['hasEgg'],_0x57274b['type']=_0x2f51f4['hasEgg']?window['graphType']?window['graphType']['wall']:0x1:window['graphType']?window['graphType']['open']:0x0;}}['getCellPosition'](_0x38eeb6){return{'row':Math['floor'](_0x38eeb6/this['mapConfig']['cols']),'col':_0x38eeb6%this['mapConfig']['cols']};}['printMapState'](){const _0x580464=[];for(const [_0xb42ff9,_0x308ec1]of Object['entries'](this['mapState']['cells']))!_0x308ec1['isEmpty']&&_0x308ec1['hasEgg']&&_0x580464['push']({'cellId':parseInt(_0xb42ff9),'eggType':_0x308ec1['eggType'],'hasEgg':_0x308ec1['hasEgg'],'occupied':_0x308ec1['occupied']});return _0x580464;}['setLoginConfig'](_0x5ef5bd){this['loginConfig']={...this['loginConfig'],..._0x5ef5bd};}['detectLoginType'](){if(this['loginConfig']['forceLoginType'])return this['loginConfig']['forceLoginType'];if(this['loginConfig']['enableMockLogin']){if('true'===new URLSearchParams(window['location']['search'])['get']('mock_wechat'))return'wechat';if(Math['random']()<this['loginConfig']['mockWechatProbability'])return'wechat';}if(window['wx']&&window['wx']['miniProgram'])return'wechat';if(window['gapi']&&window['gapi']['auth2'])return'google';return localStorage['getItem']('gameUserData')?'local':'guest';}async['loadUserDataByLoginType'](_0x2a9f9b){switch(_0x2a9f9b){case'wechat':return await this['loadWechatUserData']();case'google':return await this['loadGoogleUserData']();case'local':return await this['loadLocalUserData']();default:return await this['createGuestUser']();}}async['loadWechatUserData'](){try{const _0xa335b=this['loginConfig']['mockLoginDelay']||0x3e8;throw await new Promise(_0x360866=>setTimeout(_0x360866,_0xa335b)),console['warn']('⚠️\x20强制模拟微信登录失败（测试用），将抛出错误以便前端处理'),new Error('模拟微信登录失败（测试）');}catch(_0x33dd6b){throw console['error']('❌\x20微信登录失败:',_0x33dd6b),new Error('WeChat\x20login\x20failed:\x20'+(_0x33dd6b&&_0x33dd6b['message']?_0x33dd6b['message']:String(_0x33dd6b)));}}async['loadGoogleUserData'](){try{const _0x298fea=await this['getGoogleUserInfo'](),_0x2120b5=await this['loadFromGoogleCloud'](_0x298fea['id']);return _0x2120b5?{..._0x2120b5,'loginType':'google','userInfo':_0x298fea,'lastLoginTime':Date['now']()}:this['createNewUser']('google',_0x298fea);}catch(_0xa58c42){return console['error']('❌\x20Google登录失败，使用游客模式:',_0xa58c42),await this['createGuestUser']();}}async['loadLocalUserData'](){try{const _0x167c65=localStorage['getItem']('gameUserData');if(_0x167c65){const _0x559c12=JSON['parse'](_0x167c65);return{..._0x559c12,'loginType':_0x559c12['loginType']||'local','lastLoginTime':Date['now']()};}}catch(_0x244ae7){console['error']('❌\x20本地数据解析失败:',_0x244ae7);}return await this['createGuestUser']();}async['createGuestUser'](){this['loginConfig']['mockLoginDelay']&&this['loginConfig']['mockLoginDelay']>0x0&&await new Promise(_0x392632=>setTimeout(_0x392632,this['loginConfig']['mockLoginDelay']));const _0x303c7c='guest_'+Date['now']()+'_'+Math['random']()['toString'](0x24)['substr'](0x2,0x9);return this['createNewUser']('guest',{'id':_0x303c7c,'name':'vidar'});}['createNewUser'](_0xc3c4b5,_0x4a709d){return{'userId':_0x4a709d['id']||_0x4a709d['openid']||'guest_'+Date['now'](),'loginType':_0xc3c4b5,'userInfo':_0x4a709d,'createTime':Date['now'](),'lastLoginTime':Date['now'](),'fromCloud':!0x1};}}();},0x68:()=>{window['GuideLine']=new class{constructor(){this['engine']=null,this['stage']=null,this['exportRoot']=null,this['gamebox']=null,this['loadedSounds']=null,this['gameData']=null,this['guideGesture']=null,this['pointSeats']=[],this['currentPointIndex']=0x0,this['waitingForClick']=!0x1,this['expectedClickCellId']=null,this['onGuideCompleteCallback']=null,this['getCellDataCallback']=null;}['init'](_0x28d81f,_0x504908,_0x42e640){this['engine']=_0x28d81f['engine'],this['stage']=_0x28d81f['stage'],this['exportRoot']=_0x28d81f['exportRoot'],this['gamebox']=_0x28d81f['gamebox'],this['loadedSounds']=_0x28d81f['loadedSounds'],this['gameData']=_0x28d81f['gameData'],this['onGuideCompleteCallback']=_0x504908,this['getCellDataCallback']=_0x42e640;}['showPointSeats'](_0xb01ff4){_0xb01ff4&&0x0!==_0xb01ff4['length']?(this['pointSeats']=_0xb01ff4['filter'](_0x925d86=>_0x925d86>=0x0),this['currentPointIndex']=0x0):this['pointSeats']=[];}['initGuideGesture'](){this['shouldShowGuideForUser']()&&(this['findGuideGesture'](),this['guideGesture']&&this['pointSeats']&&this['pointSeats']['length']>0x0?this['startGuideProcess']():console['log']('📍\x20没有引导手势或指示位置，跳过引导'));}['shouldShowGuideForUser'](){if(this['gameData']&&void 0x0!==this['gameData']['isNewUser'])return this['gameData']['isNewUser'];return!0x0;}['findGuideGesture'](){this['guideGesture']=utile['findMc'](this['exportRoot'],'guide_mc'),this['guideGesture']?this['guideGesture']['visible']=!0x1:(console['warn']('⚠️\x20未找到引导手势元件\x20guide_mc'),utile['logAvailableChildren'](this['exportRoot']));}['moveGuideGestureToTarget'](){this['guideGesture']&&(this['pointSeats']&&0x0!==this['pointSeats']['length']?this['moveGuideToCurrentPoint']():this['guideGesture']['visible']=!0x1);}['moveGuideToCurrentPoint'](){if(this['currentPointIndex']>=this['pointSeats']['length'])return this['hideGuideGesture'](),void this['completeGuideProcess']();const _0x3211b8=this['pointSeats'][this['currentPointIndex']],_0x55cd2b=this['getCellDataCallback']?this['getCellDataCallback'](_0x3211b8):null;if(_0x55cd2b){const _0x44a40d=this['calculateGuidePosition'](_0x55cd2b);this['guideGesture']['x']=_0x44a40d['x'],this['guideGesture']['y']=_0x44a40d['y'],this['guideGesture']['visible']=!0x0,this['animateGuideGesture'](),this['waitingForClick']=!0x0,this['expectedClickCellId']=_0x3211b8;}else console['warn']('⚠️\x20格子\x20'+_0x3211b8+'\x20数据不存在');}['calculateGuidePosition'](_0xbe5e2d){if(!this['guideGesture']||!this['gamebox'])return{'x':_0xbe5e2d['centerX'],'y':_0xbe5e2d['centerY']};if(this['guideGesture']['parent']===this['exportRoot']&&this['gamebox']!==this['exportRoot']){const _0x3eda78=this['gamebox']['x']||0x0,_0x50d894=this['gamebox']['y']||0x0;return{'x':_0xbe5e2d['centerX']+_0x3eda78,'y':_0xbe5e2d['centerY']+_0x50d894};}return{'x':_0xbe5e2d['centerX'],'y':_0xbe5e2d['centerY']};}['animateGuideGesture'](){this['guideGesture']&&(createjs['Tween']['removeTweens'](this['guideGesture']),createjs['Tween']['get'](this['guideGesture'],{'loop':!0x0})['to']({'scaleX':1.2,'scaleY':1.2,'alpha':0.8},0x258,createjs['Ease']['sineInOut'])['to']({'scaleX':0x1,'scaleY':0x1,'alpha':0x1},0x258,createjs['Ease']['sineInOut'])['wait'](0x1f4));}['hideGuideGesture'](){this['guideGesture']&&(createjs['Tween']['removeTweens'](this['guideGesture']),this['guideGesture']['visible']=!0x1);}['showGuideGesture'](){this['guideGesture']&&(this['guideGesture']['visible']=!0x0,this['animateGuideGesture']());}['resetGuideState'](){this['currentPointIndex']=0x0,this['waitingForClick']=!0x1,this['expectedClickCellId']=null,this['guideGesture']&&(createjs['Tween']['removeTweens'](this['guideGesture']),this['guideGesture']['visible']=!0x1);}['startGuideProcess'](){this['resetGuideState'](),this['moveGuideToCurrentPoint']();}['completeGuideProcess'](){this['resetGuideState'](),this['onGuideCompleteCallback']&&this['onGuideCompleteCallback']();}['onGuideClickSuccess'](_0x1c24fc){this['waitingForClick']=!0x1,this['expectedClickCellId']=null,this['currentPointIndex']++,setTimeout(()=>{this['moveGuideToCurrentPoint']();},0x1f4);}['isWaitingForGuideClick'](_0x1b3670){return this['waitingForClick']&&this['expectedClickCellId']===_0x1b3670;}}();},0x121:(_0x2b16df,_0xa155f8,_0x49af93)=>{'use strict';var _0x282899=_0x49af93(0x38f);window['GameScense']=new class{constructor(){this['engine']=null,this['stage']=null,this['exportRoot']=null,this['canvas']=null,this['loadedSounds']=null,this['loadedImages']=null,this['gamebox']=null,this['tipsPanel']=null,this['showFps']=!0x1,this['gameRunState']='init',this['isInitialized']=!0x1,this['selectedDifficulty']='easy',this['gameData']=null,this['userStatus']=null,this['guideGesture']=null,this['guidePoints']=[],this['pointSeats']=[],this['currentPointIndex']=0x0,this['waitingForClick']=!0x1,this['expectedClickCellId']=null,this['startMc']=null,this['cardGame']=null,this['cardGameReady']=!0x1,this['selectedPiece']=null,this['selectedCellId']=null,this['isWaitingForTarget']=!0x1,this['selectionIndicator']=null,this['gameDataState']={'cells':{},'selectedEgg':null,'score':0x0,'isProcessing':!0x1};}async['initUIElements'](){console['log']('🎨\x20初始化UI元件...');try{if(!this['exportRoot']||!this['exportRoot']['children'])return void console['warn']('⚠️\x20exportRoot\x20仍然无效，跳过UI初始化');this['gamebox']=_0x282899['A']['findMc'](this['exportRoot'],'gamebox'),this['gamebox']&&!this['gamebox']['hasEventListener']('click')&&this['gamebox']['on']('click',this['onGameboxClick'],this);const _0x2ec620=_0x282899['A']['findMc'](this['exportRoot'],'mc_start_over');_0x2ec620&&(_0x2ec620['visible']=!0x1,_0x282899['A']['findMc'](_0x2ec620,'btn_yes')['on']('click',_0x3afc58=>{_0x3afc58['stopPropagation'](),this['engine']['playSound']('select_wawa'),ovo['showInterstitialAd'](()=>{this['showPanel'](_0x2ec620,!0x1,()=>{try{const _0x59e9b6='guest_restart_confirm_count';let _0x2b34ef=parseInt(localStorage['getItem'](_0x59e9b6)||'0',0xa)||0x0;_0x2b34ef+=0x1,localStorage['setItem'](_0x59e9b6,String(_0x2b34ef)),void 0x0!==window['ovo']&&'function'==typeof window['ovo']['dotSelectContent']&&window['ovo']['dotSelectContent']('game_action','restart_confirm');}catch(_0x3a9796){}this['resetGame'](!0x1);});});}),_0x282899['A']['findMc'](_0x2ec620,'btn_no')['on']('click',_0x43f93f=>{_0x43f93f['stopPropagation'](),this['engine']['playSound']('select_wawa'),ovo['showInterstitialAd'](()=>{_0x2ec620['visible']=!0x1;});}));const _0x485978=_0x282899['A']['findMc'](this['exportRoot'],'btn_restart');_0x485978&&_0x485978['on']('click',_0x455aa0=>{console['log']('🔄\x20点击重新开始按钮\x20(btn_restart)'),_0x455aa0['stopPropagation'](),this['engine']['playSound']('select_wawa'),this['showPanel'](_0x2ec620,!0x0);});const _0x12a58a=_0x282899['A']['findMc'](this['exportRoot'],'mc_failure');if(_0x12a58a){_0x12a58a['visible']=!0x1;const _0x2d5db7=_0x282899['A']['findMc'](_0x12a58a,'blockLayer');_0x2d5db7&&(_0x2d5db7['mouseEnabled']=!0x0,_0x2d5db7['hasEventListener']('click')||_0x2d5db7['on']('click',function(_0x103149){return _0x103149['stopImmediatePropagation'](),_0x103149['stopPropagation'](),_0x103149['preventDefault'](),!0x1;}));const _0x58a65d=_0x282899['A']['findMc'](_0x12a58a,'btn_tryagain');_0x58a65d['gotoAndStop'](0x0),_0x58a65d&&!_0x58a65d['hasEventListener']('click')&&(_0x58a65d['on']('click',_0x22816e=>{_0x22816e['stopPropagation'](),ovo['showInterstitialAd'](()=>{this['failureHandler'](!0x1);});}),_0x2d5db7&&_0x12a58a['setChildIndex'](_0x58a65d,_0x12a58a['children']['length']-0x1));}const _0x417183=_0x282899['A']['findMc'](this['exportRoot'],'mc_victory');if(_0x417183){_0x417183['visible']=!0x1;const _0x26114c=_0x282899['A']['findMc'](_0x417183,'blockLayer');_0x26114c&&(_0x26114c['mouseEnabled']=!0x0,_0x26114c['hasEventListener']('click')||_0x26114c['on']('click',function(_0x40548a){return _0x40548a['stopImmediatePropagation'](),_0x40548a['stopPropagation'](),_0x40548a['preventDefault'](),!0x1;}));const _0xb8e79=_0x282899['A']['findMc'](_0x417183,'btn_playagain');_0xb8e79&&!_0xb8e79['hasEventListener']('click')&&(_0xb8e79['on']('click',_0x669bf8=>{_0x669bf8['stopPropagation'](),ovo['showInterstitialAd'](()=>{this['victoryHandler'](!0x1);});}),_0x26114c&&_0x417183['setChildIndex'](_0xb8e79,_0x417183['children']['length']-0x1));}const _0xb2b738=_0x282899['A']['findMc'](this['exportRoot'],'mc_settings');if(_0xb2b738){_0xb2b738['visible']=!0x1;const _0x291840=_0x282899['A']['findMc'](this['exportRoot'],'btn_setting');_0x291840&&_0x291840['on']('click',()=>{event['stopPropagation'](),this['engine']['playSound']('select_wawa'),this['showPanel'](_0xb2b738,!0x0,()=>{this['selectedDifficulty']=window['GameServer']['getDifficulty'](),this['selectDifficulty'](this['selectedDifficulty'],this['difficultyMap']);});}),_0x282899['A']['findMc'](_0xb2b738,'btn_clos_setting')['on']('click',()=>{this['engine']['playSound']('select_wawa'),this['showPanel'](_0xb2b738,!0x1,()=>{console['log']('🔧\x20设置界面已关闭');});});const _0x56f52b=null===localStorage['getItem']('musicEnabled')||'true'===localStorage['getItem']('musicEnabled'),_0x3537e2=null===localStorage['getItem']('soundEnabled')||'true'===localStorage['getItem']('soundEnabled'),_0x3c3e2c=null===localStorage['getItem']('vibrationEnabled')||'true'===localStorage['getItem']('vibrationEnabled'),_0x35e3f4=_0x282899['A']['findMc'](_0xb2b738,'mc_sound_bg');_0x35e3f4&&(_0x35e3f4['gotoAndStop'](_0x56f52b?0x0:0x1),_0x35e3f4['removeAllEventListeners']('click'),_0x35e3f4['on']('click',()=>{const _0x17506e=!(null===localStorage['getItem']('musicEnabled')||'true'===localStorage['getItem']('musicEnabled'));_0x35e3f4['gotoAndStop'](_0x17506e?0x0:0x1),this['engine']?this['engine']['setMusicEnabled'](_0x17506e):localStorage['setItem']('musicEnabled',_0x17506e?'true':'false'),console['log']('🎵\x20音乐状态已切换\x20->\x20'+(_0x17506e?'ON':'OFF'));}));const _0x3d796f=_0x282899['A']['findMc'](_0xb2b738,'mc_sound_eff');_0x3d796f&&(_0x3d796f['gotoAndStop'](_0x3537e2?0x0:0x1),_0x3d796f['removeAllEventListeners']('click'),_0x3d796f['on']('click',()=>{const _0x44fc6e=!(null===localStorage['getItem']('soundEnabled')||'true'===localStorage['getItem']('soundEnabled'));_0x3d796f['gotoAndStop'](_0x44fc6e?0x0:0x1),this['engine']?this['engine']['setSoundEnabled'](_0x44fc6e):localStorage['setItem']('soundEnabled',_0x44fc6e?'true':'false'),console['log']('🔊\x20音效状态已切换\x20->\x20'+(_0x44fc6e?'ON':'OFF'));}));const _0x652e5b=_0x282899['A']['findMc'](_0xb2b738,'mc_vibra');_0x652e5b&&(_0x652e5b['gotoAndStop'](_0x3c3e2c?0x0:0x1),_0x652e5b['removeAllEventListeners']('click'),_0x652e5b['on']('click',()=>{const _0xb60bbf=!(null===localStorage['getItem']('vibrationEnabled')||'true'===localStorage['getItem']('vibrationEnabled'));_0x652e5b['gotoAndStop'](_0xb60bbf?0x0:0x1),localStorage['setItem']('vibrationEnabled',_0xb60bbf?'true':'false'),console['log']('📳\x20震动状态已切换\x20->\x20'+(_0xb60bbf?'ON':'OFF'));}));}const _0x295f59=_0x282899['A']['findMc'](_0xb2b738,'mc_diff_easy'),_0x147269=_0x282899['A']['findMc'](_0xb2b738,'mc_diff_normal'),_0x4769bd=_0x282899['A']['findMc'](_0xb2b738,'mc_diff_hard');let _0x46c6b8=[_0x295f59,_0x147269,_0x4769bd];this['difficultyMap']={'easy':_0x295f59,'normal':_0x147269,'hard':_0x4769bd};for(let _0x87103d=0x0;_0x87103d<_0x46c6b8['length'];_0x87103d++){const _0x2209f5=_0x46c6b8[_0x87103d];_0x2209f5['on']('click',()=>{this['selectedDifficulty']=_0x2209f5['name']['replace']('mc_diff_',''),this['userStatus']['isNewUser']?this['tips']('🚫\x20新手引导模式下无法切换难度'):(this['selectDifficulty'](this['selectedDifficulty'],this['difficultyMap']),window['GameServer']?(window['GameServer']['updateDifficulty'](this['selectedDifficulty']),console['log']('🔄\x20难度已同步到后端:\x20'+this['selectedDifficulty'])):console['warn']('⚠️\x20后端\x20GameServer\x20未初始化'));});}this['showFps']='60'===localStorage['getItem']('fpsNum')||0x3c;const _0x5339eb=_0x282899['A']['findMc'](_0xb2b738,'blockLayer');_0x5339eb&&(_0x5339eb['mouseEnabled']=!0x0,_0x5339eb['hasEventListener']('click')||_0x5339eb['on']('click',function(_0x516ab3){return _0x516ab3['stopImmediatePropagation'](),_0x516ab3['stopPropagation'](),_0x516ab3['preventDefault'](),!0x1;})),this['initUnlockAnimations'](),this['exportRoot']['visible']=!0x0;}catch(_0x400edd){console['error']('❌\x20UI元件初始化失败:',_0x400edd);}}async['ensureCardGame'](){if(!this['cardGameReady']){if('function'==typeof window['CardGame']){this['cardGame']=new window['CardGame']();try{await this['cardGame']['init']({'stage':this['stage'],'exportRoot':this['exportRoot'],'engine':this['engine'],'scene':this,'loadedSounds':this['loadedSounds']}),this['cardGameReady']=!0x0;}catch(_0x66abe5){console['error']('❌\x20CardGame\x20初始化失败:',_0x66abe5);}}else console['warn']('⚠️\x20CardGame\x20类尚未加载');}}async['openCardRewardPanel'](_0x144740=0x320){await this['ensureCardGame'](),this['cardGame']&&this['cardGame']['card_reward_Mc']?setTimeout(()=>{this['cardGame']['card_reward_Mc']['visible']=!0x0,this['cardGame']['card_reward_Mc']['gotoAndStop']&&this['cardGame']['card_reward_Mc']['gotoAndStop'](0x0);},_0x144740):console['warn']('⚠️\x20抽卡面板不可用');}['closeCardRewardPanel'](){if(!this['cardGame']||!this['cardGame']['card_reward_Mc'])return;const _0x5b0979=this['cardGame']['card_reward_Mc'];_0x5b0979['visible']&&(createjs['Tween']['removeTweens'](_0x5b0979),createjs['Tween']['get'](_0x5b0979)['to']({'scaleX':1.05,'scaleY':1.05},0x64)['to']({'scaleX':0.2,'scaleY':0.2,'alpha':0x0},0xb4,createjs['Ease']['quadIn'])['call'](()=>{_0x5b0979['visible']=!0x1,_0x5b0979['alpha']=0x1,_0x5b0979['scaleX']=_0x5b0979['scaleY']=0x1,this['cardGame']['goButton']&&(this['cardGame']['goButton']['mouseEnabled']=!0x0);}));}async['init'](_0x5c5206){try{this['engine']=_0x5c5206['engine'],this['stage']=_0x5c5206['stage'],this['exportRoot']=_0x5c5206['exportRoot'],this['canvas']=_0x5c5206['canvas'],this['config']=_0x5c5206['config'],this['loadedSounds']=_0x5c5206['loadedSounds'],this['loadedImages']=_0x5c5206['loadedImages'],this['difficultySelectionEnabled']=!0x1,this['maxUnlockedLevel']=0x1,this['isProcessingClick']=!0x1,this['clickDebounceTime']=0x12c,await this['initUIElements'](),await this['initGameSystems'](),this['initTipsPanel'](),this['userStatus']=_0x5c5206['userStatus'];const _0x6cbc3e=this['userStatus']?.['isNewUser'];_0x6cbc3e&&(this['waitingForClick']=!0x0,this['initGuideGesture']());const _0x32a7fd=await window['GameServer']['getGameData'](this['userStatus'],this['selectedDifficulty']);this['gameData']=_0x32a7fd,setTimeout(()=>{this['generateUserEggs']();},0x3e8),this['isInitialized']=!0x0;}catch(_0x14a599){console['error']('❌\x20GameScense\x20初始化失败:',_0x14a599);}}async['generateUserEggs'](){try{if(this['gameData']&&this['gameData']['data']){const {eggSeat:_0x48ab10,eggType:_0x36f999,pointSeat:_0x3116fc}=this['gameData']['data'];if(this['gameData']['scoreSystem']&&this['updateScoreDisplayDirectly'](this['gameData']['scoreSystem']),this['playUnlockedAnimations'](this['gameData']['unlockData']),this['selectedDifficulty']=this['gameData']['difficulty'],this['userStatus']['isNewUser']&&_0x3116fc['length']>0x0&&(this['expectedClickCellId']=_0x3116fc[0x0],setTimeout(()=>{this['moveGuideGestureToCell'](_0x3116fc[0x0]);},0x1f4)),_0x48ab10&&_0x36f999&&_0x48ab10['length']===_0x36f999['length']){this['playLongbossAnimation']();const _0x8f11f1=_0x48ab10['map']((_0x6688f1,_0x4df318)=>this['createEggAtPosition'](_0x6688f1,_0x36f999[_0x4df318]));await Promise['all'](_0x8f11f1);}}}catch(_0x217582){console['error']('❌\x20蛋生成失败:',_0x217582);}}['lockGameInteraction'](_0x3644e7='处理中'){this['isGameLocked']=!0x0,this['lockReason']=_0x3644e7;}['unlockGameInteraction'](){this['lockReason'],(this['isGameLocked']=!0x1,this['lockReason']='');}['canInteract'](){return!this['isGameLocked']&&!this['isProcessingClick'];}async['initGameSystems'](){try{await this['initMapFromServer'](),this['initGoldDisplay']();}catch(_0x3a8328){console['error']('❌\x20游戏系统初始化失败:',_0x3a8328);}}async['initMapFromServer'](){try{window['GameServer']['mapState']['isInitialized']||await this['waitForMapInitialization']();const _0xe92a97=window['GameServer']['getMapStateInfo']();this['chessboard']={'rows':_0xe92a97['config']['rows'],'cols':_0xe92a97['config']['cols'],'cellWidth':_0xe92a97['config']['cellWidth'],'cellHeight':_0xe92a97['config']['cellHeight'],'totalCells':_0xe92a97['config']['totalCells'],'width':_0xe92a97['config']['width'],'height':_0xe92a97['config']['height'],'offsetX':_0xe92a97['config']['offsetX'],'offsetY':_0xe92a97['config']['offsetY'],'pieces':new Map()};}catch(_0xe2e6e4){console['error']('❌\x20地图配置获取失败:',_0xe2e6e4),this['chessboard']={'rows':0x6,'cols':0x6,'cellWidth':0x96,'cellHeight':0x96,'totalCells':0x24,'width':0x384,'height':0x384,'offsetX':0x0,'offsetY':0x0,'pieces':new Map()};}}async['waitForMapInitialization'](){return new Promise(_0x5adff7=>{const _0x13e190=setInterval(()=>{window['GameServer']&&window['GameServer']['mapState']['isInitialized']&&(clearInterval(_0x13e190),_0x5adff7());},0x64);setTimeout(()=>{clearInterval(_0x13e190),console['warn']('⚠️\x20等待地图初始化超时'),_0x5adff7();},0x1388);});}['moveElementWithPathfinding'](_0x881a55,_0x33032b,_0x124cc0,_0x82021a){const _0x5e7ccb=this['findMovePath'](_0x33032b,_0x124cc0);if(0x0===_0x5e7ccb['length'])return console['warn']('⚠️\x20无法找到移动路径'),void(_0x82021a&&_0x82021a(!0x1));this['animateAlongPath'](_0x881a55,_0x5e7ccb,_0x82021a);}['animateAlongPath'](_0x11b386,_0x5bfded,_0x2b42b0){if(!_0x11b386||0x0===_0x5bfded['length'])return void(_0x2b42b0&&_0x2b42b0(!0x1));let _0x3ed455=0x0;const _0x55806f=()=>{if(_0x3ed455>=_0x5bfded['length'])return void(_0x2b42b0&&_0x2b42b0(!0x0));const _0x3b72fc=_0x5bfded[_0x3ed455],_0xc08c60=this['getCellData'](_0x3b72fc);_0xc08c60?(this['engine']&&this['loadedSounds']['has']('popo')&&this['engine']['playSound']('popo'),createjs['Tween']['get'](_0x11b386)['to']({'x':_0xc08c60['centerX'],'y':_0xc08c60['centerY'],'scaleX':1.1,'scaleY':1.1},0x64,createjs['Ease']['quadOut'])['to']({'scaleX':0x1,'scaleY':0x1},0x64,createjs['Ease']['quadOut'])['call'](()=>{_0x3ed455++,_0x55806f();})):(console['error']('❌\x20格子\x20'+_0x3b72fc+'\x20数据不存在'),_0x2b42b0&&_0x2b42b0(!0x1));};_0x55806f();}['getCellId'](_0x2190dd,_0x257994){return _0x2190dd*this['chessboard']['cols']+_0x257994;}['getRowCol'](_0x2e97c7){return{'row':Math['floor'](_0x2e97c7/this['chessboard']['cols']),'col':_0x2e97c7%this['chessboard']['cols']};}['getCellIdFromPosition'](_0x4e91b0,_0x59b83b){const _0x5f1bc1=_0x4e91b0-(this['chessboard']['offsetX']||0x0),_0x4ece73=_0x59b83b-(this['chessboard']['offsetY']||0x0),_0x5e2c92=Math['floor'](_0x5f1bc1/this['chessboard']['cellWidth']),_0x56dedd=Math['floor'](_0x4ece73/this['chessboard']['cellHeight']);if(_0x5e2c92>=0x0&&_0x5e2c92<this['chessboard']['cols']&&_0x56dedd>=0x0&&_0x56dedd<this['chessboard']['rows'])return this['getCellId'](_0x56dedd,_0x5e2c92);return console['log']('❌\x20超出范围:\x20行'+_0x56dedd+'(0-'+(this['chessboard']['rows']-0x1)+'),\x20列'+_0x5e2c92+'(0-'+(this['chessboard']['cols']-0x1)+')'),-0x1;}['getCellPosition'](_0x4c54fb){const {row:_0x1f4362,col:_0x2c6292}=this['getRowCol'](_0x4c54fb),_0x3aef40=_0x2c6292*this['chessboard']['cellWidth'],_0x6fc0a1=_0x1f4362*this['chessboard']['cellHeight'];return{'x':_0x3aef40,'y':_0x6fc0a1,'centerX':_0x3aef40+this['chessboard']['cellWidth']/0x2,'centerY':_0x6fc0a1+this['chessboard']['cellHeight']/0x2};}['getCellData'](_0x441caf){if(window['GameServer']&&window['GameServer']['mapState']&&window['GameServer']['mapState']['cells']){const _0x29d10b=window['GameServer']['mapState']['cells'][_0x441caf];if(_0x29d10b)return{'id':_0x29d10b['id'],'row':_0x29d10b['row'],'col':_0x29d10b['col'],'x':_0x29d10b['x'],'y':_0x29d10b['y'],'centerX':_0x29d10b['centerX'],'centerY':_0x29d10b['centerY'],'isEmpty':_0x29d10b['isEmpty'],'hasEgg':_0x29d10b['hasEgg'],'eggType':_0x29d10b['eggType'],'piece':_0x29d10b['piece'],'walkable':_0x29d10b['walkable'],'occupied':_0x29d10b['occupied']};}return console['warn']('⚠️\x20无法从\x20GameServer\x20获取格子\x20'+_0x441caf+'\x20的数据'),null;}['updateScoreDisplayDirectly'](_0x16864a){try{const _0x563118=this['exportRoot']['mc_gold'];_0x563118&&_0x563118['text']&&(_0x563118['text']['text']='score:\x20'+_0x16864a['totalScore']);const _0x30081a=this['exportRoot']['mc_high_score'];_0x30081a&&_0x30081a['text']&&(_0x30081a['text']['text']='best:\x20'+_0x16864a['bestScore']);}catch(_0xa27a07){console['error']('❌\x20更新分数显示失败:',_0xa27a07);}}['getEggFromFlygame'](_0x8e56ac){const _0x554ed4='egg_mc'+_0x8e56ac;try{const _0x17ce12=_0x282899['A']['findMc'](this['exportRoot'],_0x554ed4);if(_0x17ce12)return _0x17ce12['clone']?_0x17ce12['clone']():this['cloneDisplayObject'](_0x17ce12);return console['warn']('⚠️\x20在\x20exportRoot\x20中未找到蛋元件:\x20'+_0x554ed4),this['logAvailableEggs'](),null;}catch(_0x4ec5ca){return console['error']('❌\x20从\x20exportRoot\x20获取蛋元件失败:\x20'+_0x554ed4,_0x4ec5ca),null;}}['cloneDisplayObject'](_0x49f997){try{if(_0x49f997['clone'])return _0x49f997['clone']();if(_0x49f997['constructor']){const _0x114dc2=new _0x49f997['constructor']();return _0x114dc2['x']=_0x49f997['x'],_0x114dc2['y']=_0x49f997['y'],_0x114dc2['scaleX']=_0x49f997['scaleX'],_0x114dc2['scaleY']=_0x49f997['scaleY'],_0x114dc2['rotation']=_0x49f997['rotation'],_0x114dc2['alpha']=_0x49f997['alpha'],_0x114dc2['visible']=_0x49f997['visible'],_0x114dc2;}return console['warn']('⚠️\x20无法克隆元件，返回原始元件'),_0x49f997;}catch(_0xdd0f8d){return console['error']('❌\x20克隆元件失败:',_0xdd0f8d),_0x49f997;}}['logAvailableEggs'](){console['log']('🥚\x20查找可用的蛋元件:'),_0x282899['A']['logAvailableChildren'](this['exportRoot']);}['showPointSeats'](_0x94bc1b){if(!_0x94bc1b||0x0===_0x94bc1b['length'])return console['log']('📍\x20没有指示位置'),void(this['pointSeats']=[]);this['pointSeats']=_0x94bc1b['filter'](_0x233a63=>_0x233a63>=0x0),this['currentPointIndex']=0x0,console['log']('📍\x20记录了\x20'+this['pointSeats']['length']+'\x20个指示位置:',this['pointSeats']);}['findChildByName'](_0x1581ed,_0x3e80fd){if(!_0x1581ed||!_0x1581ed['children'])return null;for(let _0x427359 of _0x1581ed['children']){if(_0x427359['name']===_0x3e80fd)return _0x427359;const _0x48b19e=this['findChildByName'](_0x427359,_0x3e80fd);if(_0x48b19e)return _0x48b19e;}return null;}['restartCurrentLevel'](){return this['gameData']?(console['log']('🔄\x20重新开始关卡\x20-\x20等级:\x20'+this['gameData']['level']+',\x20步骤:\x20'+this['gameData']['step']),this['initGameBoard'](),!0x0):(console['error']('❌\x20没有当前关卡数据'),!0x1);}['getGamebox'](){if(console['log']('🔍\x20查找\x20gamebox\x20元件...'),!this['exportRoot'])throw new Error('exportRoot\x20未找到');if(this['gamebox'])return console['log']('✅\x20使用\x20utile.findMc\x20找到\x20gamebox:',this['gamebox']),console['log']('📐\x20gamebox\x20位置:\x20('+(this['gamebox']['x']||0x0)+',\x20'+(this['gamebox']['y']||0x0)+')'),void console['log']('📏\x20gamebox\x20尺寸:\x20'+(this['gamebox']['getBounds']?this['gamebox']['getBounds']():'unknown'));this['gamebox']=this['exportRoot'];}['formatNumber'](_0x4d1245){return _0x4d1245<0x3e8?_0x4d1245['toString']():_0x4d1245<0xf4240?(_0x4d1245/0x3e8)['toFixed'](_0x4d1245>=0x2710?0x0:0x1)+'k':_0x4d1245<0x3b9aca00?(_0x4d1245/0xf4240)['toFixed'](0x1)+'m':(_0x4d1245/0x3b9aca00)['toFixed'](0x1)+'b';}['initGoldDisplay'](){console['log']('💰\x20初始化金币显示...');try{const _0x1f0d2c=this['exportRoot']['mc_gold'];if(_0x1f0d2c&&_0x1f0d2c['text'])this['userStatus']&&this['userStatus']['currentScore'],_0x1f0d2c['text']['text']='score:\x200';else console['warn']('⚠️\x20未找到\x20mc_gold\x20或其\x20text\x20属性');const _0xdf4ff7=this['exportRoot']['mc_high_score'];if(_0xdf4ff7&&_0xdf4ff7['text'])this['userStatus']&&this['userStatus']['bestScore'],_0xdf4ff7['text']['text']='best:\x200';else console['warn']('⚠️\x20未找到\x20mc_high_score\x20或其\x20text\x20属性');}catch(_0x4cfadb){console['error']('❌\x20初始化金币显示失败:',_0x4cfadb);}}['onGameboxClick'](_0x494ebe){const _0x4a61c6=_0x494ebe['localX']||_0x494ebe['stageX'],_0xcc1de3=_0x494ebe['localY']||_0x494ebe['stageY'];if(_0x494ebe['currentTarget']['name']!==this['gamebox']['name'])return;const _0x49f024=this['getCellIdFromPosition'](_0x4a61c6,_0xcc1de3);if(_0x49f024>=0x0){const {row:_0x50d28f,col:_0x17505a}=this['getRowCol'](_0x49f024);this['handleCellClick'](_0x49f024);}}['isInGuideMode'](){return this['gameData']&&this['userStatus']['isNewUser']&&this['waitingForClick'];}['isGuideClickAllowed'](_0x2f31be){return!(!this['waitingForClick']||null===this['expectedClickCellId'])&&_0x2f31be===this['expectedClickCellId'];}['onGuideClickSuccess'](_0x3978e1){console['log']('🎯\x20引导点击成功:\x20格子\x20'+_0x3978e1),this['waitingForClick']=!0x1,this['expectedClickCellId']=null,this['moveToNextGuidePoint']();}['moveToNextGuidePoint'](){if(!this['gameData']?.['data']?.['pointSeat'])return void console['log']('📍\x20没有引导点数据');const {pointSeat:_0x6273f3}=this['gameData']['data'];if(this['currentPointIndex']=(this['currentPointIndex']||0x0)+0x1,this['currentPointIndex']>=_0x6273f3['length'])return console['log']('🎉\x20所有引导点都已完成'),void this['completeGuide']();const _0x21a62c=_0x6273f3[this['currentPointIndex']];_0x21a62c>=0x0?(console['log']('👉\x20移动引导手势到下一个位置:\x20'+_0x21a62c),this['expectedClickCellId']=_0x21a62c,this['waitingForClick']=!0x0,this['moveGuideGestureToCell'](_0x21a62c)):(console['log']('🎉\x20引导完成（遇到-1标记）'),this['completeGuide']());}async['handleCellClick'](_0x12087f){try{if(!this['canInteract']())return;if(this['userStatus']?.['isNewUser']){if(this['isInGuideMode']()){if(!this['isGuideClickAllowed'](_0x12087f))return void console['log']('🚫\x20引导阶段：只能点击引导指示位置，当前点击格子'+_0x12087f+'被忽略');console['log']('✅\x20引导阶段：允许点击引导位置'+_0x12087f);}this['waitingForClick']&&this['expectedClickCellId']===_0x12087f&&this['onGuideClickSuccess'](_0x12087f);}this['isProcessingClick']=!0x0;const _0xb4125=window['GameServer']['processEggClick'](_0x12087f);if(-0x1===_0xb4125['code'])await this['handleStep0'](_0xb4125);else{if(0x0===_0xb4125['code'])switch(_0xb4125['step']){case 0x1:await this['handleStep1'](_0xb4125);break;case 0x2:await this['handleStep2'](_0xb4125);break;case 0x3:await this['handleStep3'](_0xb4125);break;case 0x4:await this['handleStep4'](_0xb4125);break;default:console['warn']('⚠️\x20未知的步骤:',_0xb4125['step']);}}}catch(_0x1bb86d){console['error']('❌\x20处理点击失败:',_0x1bb86d);}finally{setTimeout(()=>{this['isProcessingClick']=!0x1;},this['clickDebounceTime']);}}async['handleStep0'](_0x38c4bc){console['log']('⚠️\x20无效操作:',_0x38c4bc['message']);}async['handleStep1'](_0x141b1d){this['engine']['playSound']('select_jiji'),this['gameDataState']['selectedEgg']={'cellId':_0x141b1d['cellId'],'eggType':_0x141b1d['eggType'],'isSelected':!0x0};const _0x438cb6=this['getCellData'](_0x141b1d['cellId']);if(_0x438cb6&&!_0x438cb6['isEmpty']){const _0x3fbb24=this['chessboard']['pieces']['get'](_0x141b1d['cellId']);this['addSelectionEffect'](_0x3fbb24),this['selectedPiece']=_0x3fbb24,this['selectedCellId']=_0x141b1d['cellId'];}}async['handleStep2'](_0x5a00e8){const _0x348358=_0x5a00e8['isVictory']||!0x1,_0x1ff8f0=_0x5a00e8['isFailure']||!0x1,_0x1903f2=this['chessboard']['pieces']['get'](_0x5a00e8['fromCellId']);_0x1903f2?(this['removeSelectionEffect'](_0x1903f2),this['executeEggMovement'](_0x1903f2,_0x5a00e8['fromCellId'],_0x5a00e8['toCellId'],_0x5a00e8['path'],_0x5a00e8['synthesis']['canSynthesize'])['then'](()=>_0x5a00e8['synthesis']&&_0x5a00e8['synthesis']['canSynthesize']?this['executeSynthesisAnimation'](_0x5a00e8['synthesis'],_0x5a00e8['positionsToDelete']):(this['chessboard']['pieces']['set'](_0x5a00e8['toCellId'],_0x1903f2),Promise['resolve']()))['then'](()=>{if(_0x5a00e8['guideData']){if(_0x5a00e8['guideData']['isNewUser']&&_0x5a00e8['guideData']['pointSeat']){this['gameData']['data']['pointSeat']=_0x5a00e8['guideData']['pointSeat'],this['gameData']['step']=_0x5a00e8['guideData']['currentStep'],this['gameData']['level']=_0x5a00e8['guideData']['currentLevel'];const {pointSeat:_0x5de881}=_0x5a00e8['guideData'];_0x5de881['length']>0x0&&_0x5de881[0x0]>=0x0?(this['expectedClickCellId']=_0x5de881[0x0],this['waitingForClick']=!0x0,setTimeout(()=>{this['moveGuideGestureToCell'](_0x5de881[0x0]);},0x1f4)):(this['waitingForClick']=!0x1,this['expectedClickCellId']=null,this['completeGuide'](!0x1));}else _0x5a00e8['guideData']['completed']&&this['completeGuide'](!0x1);}if(_0x5a00e8['newEggs']&&_0x5a00e8['newEggs']['length']>0x0){this['playLongbossAnimation']();const _0x44cc19=_0x5a00e8['newEggs']['map'](_0x43c1fd=>this['createEggAtPosition'](_0x43c1fd['cellId'],_0x43c1fd['eggType']));return Promise['all'](_0x44cc19);}return Promise['resolve']();})['then'](()=>{if(this['gameDataState']['selectedEgg']=null,this['selectedPiece']=null,this['selectedCellId']=null,_0x348358){const _0xed69b2=_0x5a00e8['synthesis']&&_0x5a00e8['synthesis']['synthesisPosition'];let _0x34a066=null;'number'==typeof _0xed69b2&&(_0x34a066=this['chessboard']['pieces']['get'](_0xed69b2)||null),_0x34a066||(_0x34a066=_0x1903f2);const _0x47e8fe=this['gamebox']||this['exportRoot'];if(_0x34a066&&_0x34a066['parent']!==_0x47e8fe){const _0x51fb82=_0x34a066['parent']||this['exportRoot'],_0x8d26b6=(_0x34a066['x']||0x0)+(_0x51fb82['x']||0x0),_0x42bb50=(_0x34a066['y']||0x0)+(_0x51fb82['y']||0x0);try{_0x47e8fe['addChild'](_0x34a066);}catch(_0x1615b8){}_0x34a066['x']=_0x8d26b6-(_0x47e8fe['x']||0x0),_0x34a066['y']=_0x42bb50-(_0x47e8fe['y']||0x0);}const _0x3718ee='function'==typeof _0x47e8fe['getBounds']?_0x47e8fe['getBounds']():null,_0x1bc641=_0x3718ee&&_0x3718ee['width']?_0x3718ee['width']/0x2:(this['mapConfig']?.['width']||0x384)/0x2,_0x2caba1=_0x3718ee&&_0x3718ee['height']?_0x3718ee['height']/0x2:(this['mapConfig']?.['height']||0x384)/0x2;_0x34a066&&createjs['Tween']['get'](_0x34a066)['to']({'x':_0x1bc641,'y':_0x2caba1},0x1f4,createjs['Ease']['quadOut'])['call'](()=>{try{_0x34a066['visible']=!0x1;}catch(_0x250531){}const _0x3f9b8e=_0x282899['A']['findMc'](this['exportRoot'],'mc_egg_mask8');if(_0x3f9b8e){let _0x31832b={'x':_0x1bc641,'y':_0x2caba1};_0x47e8fe&&'function'==typeof _0x47e8fe['localToGlobal']&&(_0x31832b=_0x47e8fe['localToGlobal'](_0x1bc641,_0x2caba1));const _0xff5dad=_0x3f9b8e['parent']||this['exportRoot'];let _0x2919de={'x':_0x31832b['x'],'y':_0x31832b['y']};_0x2919de=_0xff5dad&&'function'==typeof _0xff5dad['globalToLocal']?_0xff5dad['globalToLocal'](_0x31832b['x'],_0x31832b['y']):this['stage']&&'function'==typeof this['stage']['globalToLocal']?this['stage']['globalToLocal'](_0x31832b['x'],_0x31832b['y']):{'x':_0x31832b['x']-(_0xff5dad['x']||0x0),'y':_0x31832b['y']-(_0xff5dad['y']||0x0)},_0x3f9b8e['x']=_0x2919de['x'],_0x3f9b8e['y']=_0x2919de['y'],_0x3f9b8e['alpha']=0x1,_0x3f9b8e['play'](),_0x282899['A']['addFrameEnd'](_0x3f9b8e,()=>{createjs['Tween']['get'](_0x3f9b8e)['to']({'scaleX':1.5,'scaleY':1.5,'alpha':0x0},0x1f4)['call'](()=>{this['victoryHandler'](!0x0);});},!0x0);}});}return _0x1ff8f0&&setTimeout(()=>{this['failureHandler'](!0x0);},0x3e8),Promise['resolve']();})['catch'](_0x276e41=>(console['error']('❌\x20执行过程中出现错误:',_0x276e41),Promise['resolve']()))['finally'](()=>{})):console['error']('❌\x20前端找不到蛋元件:',_0x5a00e8['fromCellId']);}async['handleStep3'](_0x4baf2c){this['engine']['playSound']('select_jiji'),this['selectedPiece']&&this['removeSelectionEffect'](this['selectedPiece']),this['gameDataState']['selectedEgg']=null,this['selectedPiece']=null,this['selectedCellId']=null;}async['handleStep4'](_0x4e0b88){this['engine']['playSound']('select_jiji'),this['selectedPiece']&&this['removeSelectionEffect'](this['selectedPiece']);const _0x41be1e=this['chessboard']['pieces']['get'](_0x4e0b88['newCellId']);_0x41be1e?(this['addSelectionEffect'](_0x41be1e),this['selectedPiece']=_0x41be1e,this['selectedCellId']=_0x4e0b88['newCellId'],this['gameDataState']['selectedEgg']={'cellId':_0x4e0b88['newCellId'],'eggType':_0x41be1e['eggType'],'isSelected':!0x0}):(console['error']('❌\x20前端映射中找不到格子'+_0x4e0b88['newCellId']+'的蛋元件'),this['printCurrentPiecesMapping'](),this['selectedPiece']=null,this['selectedCellId']=null,this['gameDataState']['selectedEgg']=null);}async['executeEggMovement'](_0x22bfa5,_0x1f5715,_0x3d23c9,_0x18870a,_0x540d91){const _0x3becaa=_0x18870a['map'](_0x4fb1c2=>this['getCellId'](_0x4fb1c2['x'],_0x4fb1c2['y']));return new Promise(_0x30eeab=>{_0x540d91||this['chessboard']['pieces']['delete'](_0x1f5715),this['animateAlongPath'](_0x22bfa5,_0x3becaa,_0x587dfd=>{_0x540d91||(this['chessboard']['pieces']['set'](_0x3d23c9,_0x22bfa5),_0x22bfa5['cellId']=_0x3d23c9),_0x30eeab();});});}async['executeSynthesisAnimation'](_0x3a92c2,_0x12e210){const {matches:_0x15f363,eggType:_0x7dad6a,newEggType:_0x10914d,synthesisPosition:_0x5c0720,score:_0x321335}=_0x3a92c2,_0x3558f9=_0x321335,_0x8e4a6b=null===localStorage['getItem']('vibrationEnabled')||'true'===localStorage['getItem']('vibrationEnabled');_0x8e4a6b&&void 0x0!==window['ovo']&&'function'==typeof window['ovo']['vibrate']?(console['log']('📳\x20合成蛋，触发振动反馈'),window['ovo']['vibrate']([0xc8,0x64,0xc8])):_0x8e4a6b?console['log']('⚠️\x20振动功能不可用，跳过振动反馈'):console['log']('🔕\x20震动已关闭，跳过振动反馈');const _0x4c31e2=[];for(const _0x3ba06d of _0x12e210){const _0x535ebe=this['chessboard']['pieces']['get'](_0x3ba06d);_0x535ebe?_0x4c31e2['push']({'cellId':_0x3ba06d,'piece':_0x535ebe,'isTarget':_0x3ba06d===_0x5c0720}):console['warn']('⚠️\x20格子\x20'+_0x3ba06d+'\x20没有找到对应的蛋元件');}return await this['playEggCollectionAnimation'](_0x4c31e2,_0x5c0720),await this['createSynthesizedEgg'](_0x5c0720,_0x10914d),_0x3558f9&&_0x3558f9['totalScore']?(this['showFloatingScore'](_0x3558f9['totalScore'],_0x5c0720),this['updateScoreDisplay'](_0x3558f9['totalScore'])):console['warn']('⚠️\x20scoreDetail\x20数据缺失:',_0x3558f9),_0x10914d>this['maxUnlockedLevel']&&(this['engine']['playSound']('hecheng_open'),await this['playUnlockAnimation'](_0x10914d),this['maxUnlockedLevel']=_0x10914d),{'completed':!0x0};}async['playEggCollectionAnimation'](_0x5a7f9e,_0x284511){const _0x157f54=this['getCellPosition'](_0x284511);if(!_0x157f54)return void console['error']('❌\x20无法获取目标位置\x20'+_0x284511+'\x20的坐标');const _0x1e1f05=[];this['engine']&&this['loadedSounds']['has']('goodmin')&&this['engine']['playSound']('goodmin');for(const _0x44450c of _0x5a7f9e)if(_0x44450c['piece']){if(_0x44450c['piece']['setChildIndex'](0x64),_0x44450c['isTarget'])_0x44450c['piece']['parent']&&_0x44450c['piece']['parent']['removeChild'](_0x44450c['piece']),this['chessboard']['pieces']['delete'](_0x44450c['cellId']);else{const _0x4f519e=new Promise(_0x3a38f0=>{createjs['Tween']['get'](_0x44450c['piece'])['to']({'x':_0x157f54['centerX'],'y':_0x157f54['centerY'],'scaleX':0.8,'scaleY':0.8,'alpha':0.8},0x12c,createjs['Ease']['quadInOut'])['call'](()=>{_0x44450c['piece']['parent']&&_0x44450c['piece']['parent']['removeChild'](_0x44450c['piece']),this['chessboard']['pieces']['delete'](_0x44450c['cellId']),_0x3a38f0();});});_0x1e1f05['push'](_0x4f519e);}}await Promise['all'](_0x1e1f05);}async['createSynthesizedEgg'](_0x286c1d,_0x4f5d29){const _0x31053a=this['getCellPosition'](_0x286c1d);if(!_0x31053a)return void console['error']('❌\x20无法获取格子\x20'+_0x286c1d+'\x20的位置坐标');const _0x10b8a4=this['getEggFromFlygame'](_0x4f5d29);_0x10b8a4&&(_0x10b8a4['eggType']=_0x4f5d29,_0x10b8a4['cellId']=_0x286c1d,_0x10b8a4['x']=_0x31053a['centerX'],_0x10b8a4['y']=_0x31053a['centerY'],this['gamebox']['addChild'](_0x10b8a4),this['chessboard']['pieces']['set'](_0x286c1d,_0x10b8a4),await this['playSynthesisEffect'](_0x10b8a4),this['showSynthesisInfo'](_0x4f5d29));}async['createEggAtPosition'](_0x220b13,_0x56afba){const _0x58c173=this['getCellPosition'](_0x220b13);if(!_0x58c173)return void console['error']('❌\x20无法获取格子\x20'+_0x220b13+'\x20的位置坐标');const _0x534c29='egg_mc'+_0x56afba,_0x57ab15=this['exportRoot'][_0x534c29];if(!_0x57ab15)return void console['error']('❌\x20找不到源蛋元件:\x20'+_0x534c29);const _0x4b55cf=this['gamebox']['x']||0x0,_0x29a313=this['gamebox']['y']||0x0,_0x54108d={'x':_0x57ab15['x']-_0x4b55cf,'y':_0x57ab15['y']-_0x29a313},_0x3b4abe=this['getEggFromFlygame'](_0x56afba);if(_0x3b4abe)return _0x3b4abe['eggType']=_0x56afba,_0x3b4abe['cellId']=_0x220b13,_0x3b4abe['x']=_0x54108d['x'],_0x3b4abe['y']=_0x54108d['y'],_0x3b4abe['alpha']=0x1,this['gamebox']['addChild'](_0x3b4abe),this['engine']['playSound']('longhou_min'),new Promise(_0xdfc7c3=>{createjs['Tween']['get'](_0x3b4abe)['to']({'x':_0x58c173['centerX'],'y':_0x58c173['centerY'],'scaleX':0x1,'scaleY':0x1},0x12c,createjs['Ease']['quadOut'])['call'](()=>{this['chessboard']['pieces']['set'](_0x220b13,_0x3b4abe),_0xdfc7c3();});});console['error']('❌\x20无法创建蛋元件:\x20egg_mc'+_0x56afba);}['playLongbossAnimation'](){try{const _0x5466df=this['exportRoot']['mc_longboss'];_0x5466df?(_0x5466df['gotoAndPlay'](0x0),_0x282899['A']['addFrameEnd'](_0x5466df,function(){_0x5466df['gotoAndStop'](0x0);})):console['warn']('⚠️\x20未找到\x20mc_longboss\x20元件');}catch(_0x173ea6){console['error']('❌\x20播放龙boss动画失败:',_0x173ea6);}}['moveElementToPosition'](_0x282c54,_0x36dece){if(!_0x282c54)return console['error']('❌\x20元件为空，无法移动到格子\x20'+_0x36dece),!0x1;const _0x1d2539=this['getCellPosition'](_0x36dece);return _0x282c54['x']=_0x1d2539['centerX'],_0x282c54['y']=_0x1d2539['centerY'],_0x282c54['cellId']=_0x36dece,!0x0;}['playEggAppearAnimation'](_0x127781){_0x127781['scaleX']=0x0,_0x127781['scaleY']=0x0,_0x127781['alpha']=0x0,createjs['Tween']['get'](_0x127781)['to']({'scaleX':0x1,'scaleY':0x1,'alpha':0x1},0x12c,createjs['Ease']['backOut']);}['selectPieceAtCell'](_0x3a98d6){const _0x5adf72=this['getCellData'](_0x3a98d6);_0x5adf72&&!_0x5adf72['isEmpty']?(this['selectedPiece']=_0x5adf72['piece'],this['selectedCellId']=_0x3a98d6,this['isWaitingForTarget']=!0x0,this['addSelectionEffect'](this['selectedPiece'])):console['warn']('⚠️\x20格子\x20'+_0x3a98d6+'\x20没有元件可选中');}['addSelectionEffect'](_0x3b1df6){if(!_0x3b1df6)return;if(this['selectionIndicator']){try{if(this['selectionIndicator']['parent']!==_0x3b1df6['parent']&&(this['selectionIndicator']['parent']&&this['selectionIndicator']['parent']['removeChild'](this['selectionIndicator']),_0x3b1df6['parent']?_0x3b1df6['parent']['addChild'](this['selectionIndicator']):this['gamebox']['addChild'](this['selectionIndicator'])),this['selectionIndicator']['visible']=!0x0,this['selectionIndicator']['x']=_0x3b1df6['x'],this['selectionIndicator']['y']=_0x3b1df6['y'],this['selectedPiece']&&this['selectedPiece']!==_0x3b1df6)try{createjs['Tween']['removeTweens'](this['selectedPiece']),this['selectedPiece']['scaleX']=this['selectedPiece']['scaleY']=0x1;}catch(_0x10c580){}createjs['Tween']['removeTweens'](_0x3b1df6),createjs['Tween']['get'](_0x3b1df6,{'loop':!0x0})['to']({'scaleX':1.05,'scaleY':1.05},0x12c)['to']({'scaleX':0x1,'scaleY':0x1},0x12c),this['selectedPiece']=_0x3b1df6;}catch(_0x185b1c){console['error']('❌\x20复用选中指示器失败:',_0x185b1c);}return;}createjs['Tween']['get'](_0x3b1df6,{'loop':!0x0})['to']({'scaleX':1.05,'scaleY':1.05},0x12c)['to']({'scaleX':0x1,'scaleY':0x1},0x12c);const _0x4a4052=new createjs['Shape']();_0x4a4052['graphics']['setStrokeStyle'](0xc)['beginStroke']('#ffffffff')['drawCircle'](0x0,0x0,0x3c),_0x4a4052['x']=_0x3b1df6['x'],_0x4a4052['y']=_0x3b1df6['y'],_0x4a4052['name']='selectionIndicator',_0x3b1df6['parent']?_0x3b1df6['parent']['addChild'](_0x4a4052):this['gamebox']['addChild'](_0x4a4052),createjs['Tween']['get'](_0x4a4052,{'loop':!0x0})['to']({'alpha':0x0,'scaleX':0x1,'scaleY':1.2},0x12c)['to']({'alpha':0x1,'scaleX':0.4,'scaleY':0.6},0x12c),this['selectionIndicator']=_0x4a4052,this['selectedPiece']=_0x3b1df6;}['removeSelectionEffect'](_0x11f6fa){if(this['selectionIndicator']){try{this['selectionIndicator']['visible']=!0x1,this['selectionIndicator']['parent']&&this['selectionIndicator']['parent']['removeChild'](this['selectionIndicator']);}catch(_0x4ea077){}this['selectionIndicator']=null;}try{_0x11f6fa&&(createjs['Tween']['removeTweens'](_0x11f6fa),_0x11f6fa['scaleX']=_0x11f6fa['scaleY']=0x1);}catch(_0x4726db){}this['selectedPiece']=null;}['clearSelection'](){this['selectedPiece']&&this['removeSelectionEffect'](this['selectedPiece']),this['selectedPiece']=null,this['selectedCellId']=null,this['isWaitingForTarget']=!0x1;}['getEggTypeName'](_0x1e2877){return{0x0:'白色',0x1:'绿色',0x2:'蓝色',0x3:'紫色',0x4:'红色',0x5:'黄色',0x6:'橙色'}[_0x1e2877]||'未知';}['showSynthesisInfo'](_0x19c90a){this['getEggTypeName'](_0x19c90a);}['addSynthesisEffect'](_0x1fdcce){if(!_0x1fdcce)return void console['warn']('⚠️\x20蛋元件为空，无法添加合成特效');const _0x4bfc11=new createjs['Shape']();_0x4bfc11['graphics']['beginRadialGradientFill'](['rgba(255,\x20215,\x200,\x200.8)','rgba(255,\x20215,\x200,\x200)'],[0x0,0x1],_0x1fdcce['x'],_0x1fdcce['y'],0x0,_0x1fdcce['x'],_0x1fdcce['y'],0x64)['drawCircle'](_0x1fdcce['x'],_0x1fdcce['y'],0x64),this['gamebox']['addChild'](_0x4bfc11),createjs['Tween']['get'](_0x4bfc11)['to']({'alpha':0x0},0x3e8)['call'](()=>{this['gamebox']['removeChild'](_0x4bfc11);});}['playSynthesisEffect'](_0x437ec8){new Promise(_0x184b58=>{_0x437ec8['scaleX']=0.1,_0x437ec8['scaleY']=0.1,createjs['Tween']['get'](_0x437ec8)['to']({'scaleX':1.2,'scaleY':1.2},0x12c,createjs['Ease']['backOut'])['to']({'scaleX':0x1,'scaleY':0x1},0xc8,createjs['Ease']['backIn'])['call'](()=>{_0x184b58();}),this['addSynthesisEffect'](_0x437ec8);});}['updateScoreDisplay'](_0x4ff206){return new Promise(_0x5c02fc=>{try{const _0x3f5021=this['exportRoot']['mc_gold'];if(_0x3f5021&&_0x3f5021['text']){const _0x5ca826=this['parseFormattedNumber'](_0x3f5021['text']['text']['replace']('score:','')['trim']()),_0x2bad2d=_0x5ca826+_0x4ff206,_0x11a8d8={'score':_0x5ca826};createjs['Tween']['get'](_0x11a8d8)['to']({'score':_0x2bad2d},0x1f4,createjs['Ease']['quadOut'])['addEventListener']('change',()=>{_0x3f5021['text']['text']='score:\x20'+Math['floor'](_0x11a8d8['score']);})['call'](()=>{_0x3f5021['text']['text']='score:\x20'+_0x2bad2d,_0x5c02fc();});}else console['warn']('⚠️\x20未找到\x20mc_gold\x20或其\x20text\x20属性'),_0x5c02fc();}catch(_0x45138d){console['error']('❌\x20更新分数显示失败:',_0x45138d),_0x5c02fc();}});}['showFloatingScore'](_0x418567,_0x3b8ba7=null){try{if(null!==_0x3b8ba7){const _0xe22534=this['getCellPosition'](_0x3b8ba7);_0xe22534?this['tips']('+'+_0x418567,{'x':_0xe22534['centerX'],'y':_0xe22534['centerY']},'bold\x2042px\x20Arial','#FFD700',0x1):console['warn']('⚠️\x20无法获取格子\x20'+_0x3b8ba7+'\x20的位置，使用默认位置');}}catch(_0x484de2){console['error']('❌\x20显示浮动分数失败:',_0x484de2);}}['setDefaultFloatingPosition'](_0x364711){const _0x3e367a=this['exportRoot']['mc_gold'];if(_0x3e367a){const _0x21c725=this['gamebox']['x']||0x0,_0x14eea3=this['gamebox']['y']||0x0;_0x364711['x']=_0x3e367a['x']-_0x21c725+0x32,_0x364711['y']=_0x3e367a['y']-_0x14eea3;}else _0x364711['x']=0x258,_0x364711['y']=0x64;}['parseFormattedNumber'](_0x4e4982){if(!_0x4e4982||'0'===_0x4e4982)return 0x0;const _0x26f21d=_0x4e4982['toLowerCase'](),_0x38517e=parseFloat(_0x26f21d);return _0x26f21d['includes']('k')?Math['floor'](0x3e8*_0x38517e):_0x26f21d['includes']('m')?Math['floor'](0xf4240*_0x38517e):_0x26f21d['includes']('b')?Math['floor'](0x3b9aca00*_0x38517e):Math['floor'](_0x38517e);}['getGameboxElement'](){return this['gamebox'];}['printCurrentPiecesMapping'](){const _0x2b3e3d=[];if(this['chessboard']['pieces']['forEach']((_0x4d4d8e,_0x43b4c4)=>{_0x2b3e3d['push']({'cellId':parseInt(_0x43b4c4),'eggType':_0x4d4d8e['eggType'],'elementName':_0x4d4d8e['name']||'unnamed','elementId':_0x4d4d8e['id']||'no-id'});}),window['GameServer']){const _0x5e2ef4=window['GameServer']['getMapStateInfo']();console['log']('🔍\x20后端vs前端对比:\x20后端'+_0x5e2ef4['occupiedCells']+'个蛋\x20vs\x20前端'+_0x2b3e3d['length']+'个元件'),_0x5e2ef4['occupiedCells']!==_0x2b3e3d['length']&&console['warn']('⚠️\x20后端蛋数量与前端元件数量不匹配！');}return _0x2b3e3d;}['initTipsPanel'](){const _0x3c19ce=_0x282899['A']['findMc'](this['exportRoot'],'mc_tips');_0x3c19ce?this['tipsPanel']=_0x3c19ce:console['warn']('⚠️\x20未找到\x20mc_tips\x20元件');}['tips'](_0x371145,_0x460385=null,_0x57fca4='bold\x2028px\x20Arial',_0x33ae95='#FFFFFF',_0x1c4b26=null){if(!this['tipsPanel'])return void console['warn']('⚠️\x20提示文本面板未初始化');let _0xfe8eaa=_0x57fca4,_0x3fcb2d=_0x33ae95;const _0x1381ea=new createjs['Text'](_0x371145,_0xfe8eaa,_0x3fcb2d);if(_0x1381ea['textAlign']='center',_0x1381ea['textBaseline']='middle',_0x1381ea['lineWidth']=0x258,_0x460385)try{if(this['gamebox']&&'function'==typeof this['gamebox']['localToGlobal']&&this['tipsPanel']&&'function'==typeof this['tipsPanel']['globalToLocal']){const _0x24f921=this['gamebox']['localToGlobal'](_0x460385['x'],_0x460385['y']),_0x3c9ed9=this['tipsPanel']['globalToLocal'](_0x24f921['x'],_0x24f921['y']);_0x1381ea['x']=_0x3c9ed9['x'],_0x1381ea['y']=_0x3c9ed9['y'];}else{if(this['tipsPanel']&&'function'==typeof this['tipsPanel']['globalToLocal']){const _0x6a7fd6=this['tipsPanel']['globalToLocal'](_0x460385['x'],_0x460385['y']);_0x1381ea['x']=_0x6a7fd6['x'],_0x1381ea['y']=_0x6a7fd6['y'];}else _0x1381ea['x']=_0x460385['x']||this['config']['scene']['width']/0x2,_0x1381ea['y']=_0x460385['y']||this['config']['scene']['height']/0x2-0x64;}}catch(_0xc01fd6){console['warn']('tips:\x20position\x20conversion\x20failed,\x20using\x20fallback',_0xc01fd6),_0x1381ea['x']=this['config']['scene']['width']/0x2,_0x1381ea['y']=this['config']['scene']['height']/0x2-0x64;}else _0x1381ea['x']=this['config']['scene']['width']/0x2,_0x1381ea['y']=this['config']['scene']['height']/0x2-0x64;if(this['tipsPanel']['addChild'](_0x1381ea),0x1==_0x1c4b26){const _0x5ef824=_0x1381ea['y'];createjs['Tween']['get'](_0x1381ea)['to']({'y':_0x5ef824-0x50,'alpha':0.8,'scaleX':1.2,'scaleY':1.2},0x190,createjs['Ease']['quadOut'])['to']({'y':_0x5ef824-0x78,'alpha':0x0,'scaleX':0x1,'scaleY':0x1},0x320,createjs['Ease']['quadIn'])['call'](()=>{this['gamebox']['removeChild'](_0x1381ea);});}else createjs['Tween']['get'](_0x1381ea)['to']({'alpha':0x1},0xc8)['wait'](0x7d0)['to']({'alpha':0x0},0x12c)['call'](()=>{_0x1381ea['parent']&&_0x1381ea['parent']['removeChild'](_0x1381ea);});}['selectDifficulty'](_0x18ee01,_0x20a327){const _0x374414=_0x20a327[_0x18ee01];if(_0x374414)for(const _0xf7f195 in _0x20a327){const _0x538ca7=_0x20a327[_0xf7f195];_0x538ca7['gotoAndStop'](_0x538ca7===_0x374414?0x1:0x0);}else console['warn']('⚠️\x20未找到对应难度的按钮:\x20'+_0x18ee01);}['failureHandler'](_0x849576){const _0x3e411e=_0x282899['A']['findMc'](this['exportRoot'],'mc_failure');if(_0x3e411e){if(_0x849576){this['engine']['playSound']('wrong2');const _0x1859aa=_0x282899['A']['findMc'](_0x3e411e,'btn_tryagain');_0x1859aa['alpha']=0x0;const _0x33c1bb=_0x1859aa['y'];_0x1859aa['y']=_0x33c1bb+0x12c,this['showPanel'](_0x3e411e,!0x0,async()=>{this['gameData']&&(this['gameData']['scoreSystem']=await window['GameServer']['getScoreStatus'](),_0x3e411e['mc_ranking']['mc_best']['text']['text']=''+this['gameData']['scoreSystem']['bestScore'],_0x3e411e['mc_ranking']['mc_score']['text']['text']=''+this['gameData']['scoreSystem']['currentScore']),this['openCardRewardPanel'](0x64),createjs['Tween']['get'](_0x1859aa)['wait'](0xbb8)['to']({'y':_0x33c1bb,'alpha':0x1},0x12c,createjs['Ease']['backOut']);});try{const _0x4015b8=this['gameData']&&this['gameData']['scoreSystem']?this['gameData']['scoreSystem']['bestScore']:null;void 0x0!==window['ovo']&&'function'==typeof window['ovo']['dotGameOver']&&window['ovo']['dotGameOver'](_0x4015b8||0x0,0x1,'game_over'),void 0x0!==window['ovo']&&'function'==typeof window['ovo']['hideBannerAd']&&window['ovo']['hideBannerAd'](()=>{console['log']('📢\x20Banner\x20ad\x20hidden\x20on\x20game\x20failure');});}catch(_0x511d8b){}}else this['closeCardRewardPanel'](),this['engine']['playSound']('select_jiji'),this['showPanel'](_0x3e411e,!0x1,()=>{this['onRestartGame']();});}else console['warn']('⚠️\x20未找到\x20mc_failure\x20元件');}['showPanel'](_0xcf5823,_0x3f565e=!0x0,_0x450dfe){_0xcf5823?(_0xcf5823['visible']=!0x0,_0xcf5823['alpha']=0x1,_0x3f565e?createjs['Tween']['get'](_0xcf5823)['to']({'scaleX':1.05,'scaleY':1.05},0xc8,createjs['Ease']['backOut'])['to']({'scaleX':0x1,'scaleY':0x1},0xc8,createjs['Ease']['backIn'])['call'](()=>{_0x450dfe&&_0x450dfe();}):createjs['Tween']['get'](_0xcf5823)['to']({'scaleX':1.05,'scaleY':1.05},0xc8,createjs['Ease']['backOut'])['to']({'scaleX':0.1,'scaleY':0.1,'alpha':0x0},0xc8,createjs['Ease']['backIn'])['call'](()=>{_0xcf5823['visible']=!0x1,_0x450dfe&&_0x450dfe();})):console['warn']('⚠️\x20未找到\x20panelMc\x20元件');}['victoryHandler'](_0x3756e2){const _0x1f69cc=_0x282899['A']['findMc'](this['exportRoot'],'mc_victory');if(_0x1f69cc){if(_0x3756e2){this['engine']['playSound']('win'),this['showPanel'](_0x1f69cc,!0x0,async()=>{this['gameData']&&(this['gameData']['scoreSystem']=await window['GameServer']['getScoreStatus'](),_0x1f69cc['mc_ranking']['mc_best']['text']['text']=''+this['gameData']['scoreSystem']['bestScore'],_0x1f69cc['mc_ranking']['mc_score']['text']['text']=''+this['gameData']['scoreSystem']['currentScore']);});try{const _0x31efe3=this['gameData']&&this['gameData']['scoreSystem']?this['gameData']['scoreSystem']['bestScore']:null;void 0x0!==window['ovo']&&'function'==typeof window['ovo']['dotGameWin']&&window['ovo']['dotGameWin'](_0x31efe3||0x0,0x1,0x0),void 0x0!==window['ovo']&&'function'==typeof window['ovo']['hideBannerAd']&&window['ovo']['hideBannerAd'](()=>{console['log']('📢\x20Banner\x20ad\x20hidden\x20on\x20game\x20victory');});}catch(_0x5152e2){}}else this['closeCardRewardPanel'](),this['showPanel'](_0x1f69cc,!0x1,()=>{this['onRestartGame']();});}else console['warn']('⚠️\x20未找到\x20mc_victory\x20元件');}['isTargetOrChild'](_0xfbe06,_0x180475){if(!_0xfbe06||!_0x180475)return!0x1;if(_0xfbe06['currentTarget']===_0x180475)return!0x0;if(_0xfbe06['currentTarget']&&_0xfbe06['currentTarget']['name']===_0x180475['name'])return!0x0;let _0x2633c3=_0xfbe06['target'];for(;_0x2633c3;){if(_0x2633c3===_0x180475)return!0x0;_0x2633c3=_0x2633c3['parent'];}return!0x1;}['closeVictoryPanel'](){const _0x195881=_0x282899['A']['findMc'](this['exportRoot'],'mc_victory');_0x195881?createjs['Tween']['get'](_0x195881)['to']({'scaleX':0.1,'scaleY':0.1},0x12c,createjs['Ease']['backIn'])['call'](()=>{this['victoryHandler'](!0x1),this['onRestartGame']();}):console['warn']('⚠️\x20未找到\x20mc_victory\x20元件');}['onRestartGame'](){this['userStatus']['isNewUser']?this['tips']('In\x20tutorial\x20mode,\x20the\x20game\x20cannot\x20be\x20restarted.\x20Please\x20complete\x20the\x20current\x20task.'):this['resetGame']();}async['resetGame'](){try{if(this['clearAllEggs'](),this['clearSelection'](),this['gameRunState']='init',this['gameDataState']={'selectedEgg':null},void 0x0!==window['ovo']&&(window['ovo']['bannerShown']=!0x1,console['log']('📢\x20Banner\x20ad\x20flag\x20reset\x20for\x20game\x20restart')),this['resetGoldDisplay'](!0x1),createjs['Tween']['removeAllTweens'](),window['GameServer']){const _0x3d59ae=window['GameServer']['resetGame']();if(_0x3d59ae['success']){const _0x17ac12=await window['GameServer']['getGameData'](this['userStatus']);this['gameData']=_0x17ac12,this['resetUnlockAnimations'](),setTimeout(()=>{this['generateUserEggs']();},0x1f4),setTimeout(()=>{void 0x0!==window['ovo']&&'function'==typeof window['ovo']['showBannerAd']&&window['ovo']['showBannerAd'](()=>{console['log']('📢\x20Banner\x20ad\x20shown\x2030s\x20after\x20game\x20restart');});},0x7530);}else console['error']('❌\x20后端清理失败:',_0x3d59ae['message']);}else console['error']('❌\x20GameServer\x20未找到');}catch(_0x6ac5d1){console['error']('❌\x20游戏重置失败:',_0x6ac5d1);}}['resetGoldDisplay'](_0x404834=!0x0){try{const _0x3688aa=this['exportRoot']['mc_gold'];_0x3688aa&&_0x3688aa['text']?_0x3688aa['text']['text']='score:\x200':console['warn']('⚠️\x20未找到\x20mc_gold\x20或其\x20text\x20属性');const _0x4cfa8e=this['exportRoot']['mc_high_score'];_0x4cfa8e&&_0x4cfa8e['text']&&_0x404834&&(_0x4cfa8e['text']['text']='best:\x200');}catch(_0x177b26){console['error']('❌\x20重置金币显示失败:',_0x177b26);}}['clearAllEggs'](){this['chessboard']&&this['chessboard']['pieces']&&(this['chessboard']['pieces']['forEach']((_0x2e9c81,_0x31b360)=>{_0x2e9c81&&_0x2e9c81['parent']&&_0x2e9c81['parent']['removeChild'](_0x2e9c81);}),this['chessboard']['pieces']['clear']());}['initUnlockAnimations'](){this['unlockAnimations']=new Map();for(let _0x217ea6=0x1;_0x217ea6<=0x7;_0x217ea6++){const _0x5056d9='mc_egg_mask'+_0x217ea6,_0x384b96=_0x282899['A']['findMc'](this['exportRoot'],_0x5056d9);_0x384b96?this['unlockAnimations']['set'](_0x217ea6+0x1,_0x384b96):console['warn']('⚠️\x20未找到解锁动画元件:\x20'+_0x5056d9);}}async['playUnlockAnimation'](_0x562a95){new Promise(_0x4e1f54=>{const _0x1ace7d=this['unlockAnimations']['get'](_0x562a95);if(!_0x1ace7d)return console['warn']('⚠️\x20未找到等级\x20'+_0x562a95+'\x20对应的解锁动画元件'),_0x4e1f54();try{_0x1ace7d['visible']=!0x0,_0x1ace7d['gotoAndPlay'](0x0),_0x282899['A']['addFrameEnd'](_0x1ace7d,()=>{if(0x7===_0x562a95){_0x1ace7d['visible']=!0x1;const _0x5d10fe=this['unlockAnimations']['get'](0x8);_0x282899['A']['addFrameEnd'](_0x5d10fe,null,!0x0),_0x5d10fe['play']();}_0x4e1f54();},!0x0);}catch(_0xa6eb18){console['error']('❌\x20播放解锁动画失败:\x20等级'+_0x562a95,_0xa6eb18),_0x4e1f54();}});}['playUnlockedAnimations'](_0x3ad0f2=null){this['maxUnlockedLevel']=_0x3ad0f2&&_0x3ad0f2['maxUnlockedEggType']||0x0;for(let _0x2e97e1=0x2;_0x2e97e1<=Math['min'](this['maxUnlockedLevel'],0x8);_0x2e97e1++)setTimeout(()=>{const _0x2a1932=this['unlockAnimations']['get'](_0x2e97e1);_0x2a1932&&(_0x2a1932['visible']=!0x0,_0x2a1932['gotoAndPlay'](0x0),_0x282899['A']['addFrameEnd'](_0x2a1932,()=>{},!0x0));},0x64*_0x2e97e1);this['maxUnlockedLevel']<=0x1&&console['log']('📝\x20用户尚未解锁高级蛋类型，无需播放解锁动画');}['resetUnlockAnimations'](){this['unlockAnimations']?this['unlockAnimations']['forEach']((_0x2f789f,_0x10f732)=>{_0x2f789f&&(_0x2f789f['gotoAndStop'](0x0),_0x2f789f['visible']=!0x0);}):console['warn']('⚠️\x20解锁动画元件未初始化');}['initGuideGesture'](){const _0x56db6b=_0x282899['A']['findMc'](this['exportRoot'],'guide_mc');_0x56db6b?(this['guideGesture']=_0x56db6b,this['guidePoints']=[_0x56db6b['x'],_0x56db6b['y']],_0x56db6b['visible']=!0x0,_0x56db6b['gotoAndPlay'](0x0),console['log']('✅\x20guide_mc\x20已赋值给\x20guideGesture\x20并开始播放')):console['warn']('⚠️\x20未找到\x20guide_mc\x20元件');}['moveGuideGestureToCell'](_0x4fa587){if(!this['guideGesture'])return void console['warn']('⚠️\x20guideGesture\x20未初始化');const _0x3dd706=this['getCellData'](_0x4fa587);if(!_0x3dd706)return void console['warn']('⚠️\x20无法获取格子\x20'+_0x4fa587+'\x20的数据');const _0x2c62f6=this['calculateGuidePosition'](_0x3dd706);createjs['Tween']['get'](this['guideGesture'])['to']({'x':_0x2c62f6['x'],'y':_0x2c62f6['y']},0x258,createjs['Ease']['quadOut']);}['completeGuide'](_0x28c755=!0x0){if(this['guideGesture']['visible']=!0x0,createjs['Tween']['get'](this['guideGesture'])['to']({'x':this['guidePoints'][0x0],'y':this['guidePoints'][0x1]},0x190,createjs['Ease']['quadOut']),this['guideGesture']&&!_0x28c755){this['guideGesture']['gotoAndStop'](0x0),this['guideGesture']['visible']=!0x1;try{void 0x0!==window['ovo']&&'function'==typeof window['ovo']['dotTutorialComplete']&&window['ovo']['dotTutorialComplete']();}catch(_0x33dcdd){}}this['waitingForClick']=!0x1,this['expectedClickCellId']=null,this['currentPointIndex']=0x0;}['calculateGuidePosition'](_0x50cec8){if(!this['guideGesture']||!this['gamebox'])return{'x':_0x50cec8['centerX'],'y':_0x50cec8['centerY']};if(this['guideGesture']['parent']===this['exportRoot']&&this['gamebox']!==this['exportRoot']){const _0x312758=this['gamebox']['x']||0x0,_0x2c67ee=this['gamebox']['y']||0x0;return{'x':_0x50cec8['centerX']+_0x312758,'y':_0x50cec8['centerY']+_0x2c67ee};}return{'x':_0x50cec8['centerX'],'y':_0x50cec8['centerY']};}}();},0x128:(_0x1778d0,_0x552378,_0x4c9ed3)=>{'use strict';_0x1778d0=_0x4c9ed3['hmd'](_0x1778d0);const _0x161015={'init':function(){'gamedistribution'===window['Platform']?(console['log']('[gd_ad]\x20Initializing\x20for\x20GameDistribution\x20platform'),this['initGA4'](),this['loadGameDistributionSDK'](),this['setupGtagWrapper'](),this['attachToWindow']()):console['log']('[gd_ad]\x20Platform\x20is\x20not\x20gamedistribution,\x20skipping\x20initialization');},'initGA4':function(){try{if('undefined'!=typeof window&&'undefined'!=typeof document){const _0x31dadf={'gameid':'GameDistribution_97433fde06bb45aeb80c380ace3ece7f','dev_name':'Dragon\x20Egg'},_0x1902c5=document['createElement']('script');_0x1902c5['async']=!0x0,_0x1902c5['src']='https://www.googletagmanager.com/gtag/js?id=G-PM5MNMLL3R',_0x1902c5['setAttribute']('crossorigin','anonymous'),_0x1902c5['onload']=()=>{window['gtag']('consent','default',{'ad_storage':'granted','ad_user_data':'granted','ad_personalization':'granted','analytics_storage':'granted'}),window['gtag']('js',new Date()),window['gtag']('set','cookie_flags','SameSite=None;Secure'),window['gtag']('config','G-PM5MNMLL3R',{'game_id':_0x31dadf['gameid'],'dev_name':_0x31dadf['dev_name']}),console['log']('✅\x20gtag.js\x20loaded\x20with\x20consent\x20and\x20game\x20config');},_0x1902c5['onerror']=function(_0x345488){console['warn']('⚠️\x20gtag.js\x20failed\x20to\x20load',_0x345488);},window['dataLayer']=window['dataLayer']||[],document['getElementsByTagName']('head')[0x0]['appendChild'](_0x1902c5);}}catch(_0x2ea030){console['error']('[gd_ad]\x20GA4\x20initialization\x20failed',_0x2ea030);}},'loadGameDistributionSDK':function(){return new Promise((_0xc637d9,_0x58a5eb)=>{if(void 0x0!==window['gdsdk'])return console['log']('[gd_ad]\x20GameDistribution\x20SDK\x20already\x20loaded'),void _0xc637d9();window['GD_OPTIONS']={'debug':!0x0,'gameId':'1726345e0eb4405a8bc8f20d14f33993','onEvent':function(_0x5abcb6){switch(_0x5abcb6['name']){case'SDK_GAME_START':case'SDK_GAME_PAUSE':case'SDK_GDPR_TRACKING':case'SDK_GDPR_TARGETING':break;case'SDK_READY':void 0x0!==window['gdsdk']&&window['gdsdk']['preloadAd']();}}};const _0x226f48=document['createElement']('script');_0x226f48['src']='https://html5.api.gamedistribution.com/main.min.js',_0x226f48['onload']=()=>{console['log']('[gd_ad]\x20GameDistribution\x20SDK\x20loaded\x20successfully'),_0xc637d9();},_0x226f48['onerror']=_0x5dab95=>{console['error']('[gd_ad]\x20Failed\x20to\x20load\x20GameDistribution\x20SDK',_0x5dab95),_0x58a5eb(_0x5dab95);},document['getElementsByTagName']('head')[0x0]['appendChild'](_0x226f48);});},'setupGtagWrapper':function(){let _0x554fe0=!0x1;window['gtag']=function(){let _0x2cde36=[...arguments],_0x4e480d=_0x2cde36[0x1],_0x5cae4a=_0x2cde36[0x2];if(['set','js','config','consent']['includes'](_0x2cde36[0x0])||['game_start','level_start','level_end']['includes'](_0x4e480d)||['ad_impression','ad_click','ad_error','earn_virtual_currency','select_content','game_play_time','tutorial_complete','game_reward_open','game_interstitialad_open','game_reward_dismissed','game_interstitialad','game_reward','game_reward_viewed','game_interstitialad_viewed','click_ad']['includes'](_0x4e480d)&&_0x5cae4a&&'sdk'===_0x5cae4a['send']){'function'==typeof window['__sdklog3']&&window['__sdklog3']('gtag_filtered',arguments);try{window['dataLayer']&&'function'==typeof window['dataLayer']['push']&&window['dataLayer']['push'](arguments);}catch(_0x183ad5){console['log']('dataLayer\x20error:',_0x183ad5);}}'level_start'!==_0x4e480d||_0x554fe0||(_0x554fe0=!0x0,setInterval(function(){'function'==typeof window['gtag']&&window['gtag']('event','game_play_time',{'send':'sdk'});},0x7530),console['log']('🕒\x20Automatic\x20game_play_time\x20interval\x20started\x20(30s)'));};},'attachToWindow':function(){window['showInterstitialAd']=this['showInterstitialAd'],window['showRewardedAd']=this['showRewardedAd'],window['showBannerAd']=this['showBannerAd'],window['hideBannerAd']=this['hideBannerAd'];},'showInterstitialAd':function(_0x56c565,_0x10b985){_0x10b985=_0x10b985||{};try{console['log']('[gd_ad]\x20showInterstitialAd\x20invoked'),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_impression',{'ad_platform':'gamedistribution','ad_source':'interstitial','ad_format':'display','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x17ef69){}if(void 0x0!==window['gdsdk']&&'function'==typeof window['gdsdk']['showAd'])try{window['gdsdk']['showAd']()['then'](()=>{try{'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_click',{'ad_platform':'gamedistribution','ad_source':'interstitial','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x540ad2){}'function'==typeof _0x56c565&&_0x56c565(!0x0);})['catch'](_0x2cc220=>{try{'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_error',{'ad_platform':'gamedistribution','ad_source':'interstitial','error_reason':'closed_or_failed','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0xfb9546){}'function'==typeof _0x56c565&&_0x56c565(!0x1);});}catch(_0x4d25e8){console['error']('[gd_ad]\x20showInterstitialAd\x20failed',_0x4d25e8),'function'==typeof _0x56c565&&_0x56c565(!0x1);}else console['warn']('[gd_ad]\x20gdsdk.showAd\x20not\x20available'),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_error',{'ad_platform':'gamedistribution','ad_source':'interstitial','error_reason':'not_available','platform':window['Platform']||'unknown','send':'sdk'}),'function'==typeof _0x56c565&&_0x56c565(!0x1);},'showRewardedAd':function(_0xe85fd9,_0x520ec1){_0x520ec1=_0x520ec1||{};try{console['log']('[gd_ad]\x20showRewardedAd\x20invoked'),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_impression',{'ad_platform':'gamedistribution','ad_source':'rewarded','ad_format':'video','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x10dc88){}if(void 0x0!==window['gdsdk']&&'function'==typeof window['gdsdk']['showAd'])try{window['gdsdk']['showAd']('rewarded')['then'](()=>{try{'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','earn_virtual_currency',{'virtual_currency_name':'reward','value':0x1,'ad_platform':'gamedistribution','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x66cab5){}'function'==typeof _0xe85fd9&&_0xe85fd9(!0x0);})['catch'](_0x3c2621=>{try{'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_error',{'ad_platform':'gamedistribution','ad_source':'rewarded','error_reason':'closed_or_failed','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x4a23d8){}'function'==typeof _0xe85fd9&&_0xe85fd9(!0x1);});}catch(_0x389686){console['error']('[gd_ad]\x20showRewardedAd\x20failed',_0x389686),'function'==typeof _0xe85fd9&&_0xe85fd9(!0x1);}else console['warn']('[gd_ad]\x20gdsdk.showAd\x20not\x20available'),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_error',{'ad_platform':'gamedistribution','ad_source':'rewarded','error_reason':'not_available','platform':window['Platform']||'unknown','send':'sdk'}),'function'==typeof _0xe85fd9&&_0xe85fd9(!0x1);},'showBannerAd':function(_0x2a3c74,_0x2d894b){_0x2d894b=_0x2d894b||{};try{console['log']('[gd_ad]\x20showBannerAd\x20invoked'),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_impression',{'ad_platform':'gamedistribution','ad_source':'banner','ad_format':'display','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x3d3ffc){}if(void 0x0!==window['gdsdk']&&'function'==typeof window['gdsdk']['showAd'])try{window['gdsdk']['showAd']('banner')['then'](()=>{try{'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_click',{'ad_platform':'gamedistribution','ad_source':'banner','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x446f1f){}'function'==typeof _0x2a3c74&&_0x2a3c74(!0x0);})['catch'](_0x5d951a=>{try{'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_error',{'ad_platform':'gamedistribution','ad_source':'banner','error_reason':'closed_or_failed','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x112cdf){}'function'==typeof _0x2a3c74&&_0x2a3c74(!0x1);});}catch(_0x27070e){console['error']('[gd_ad]\x20showBannerAd\x20failed',_0x27070e),'function'==typeof _0x2a3c74&&_0x2a3c74(!0x1);}else console['warn']('[gd_ad]\x20gdsdk.showAd\x20not\x20available'),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_error',{'ad_platform':'gamedistribution','ad_source':'banner','error_reason':'not_available','platform':window['Platform']||'unknown','send':'sdk'}),'function'==typeof _0x2a3c74&&_0x2a3c74(!0x1);},'hideBannerAd':function(_0x5c74cb){try{console['log']('[gd_ad]\x20hideBannerAd\x20invoked');}catch(_0x3ccb11){}if(void 0x0!==window['gdsdk']&&'function'==typeof window['gdsdk']['hideAd'])try{window['gdsdk']['hideAd']('banner'),'function'==typeof _0x5c74cb&&_0x5c74cb(!0x0);}catch(_0x15b3ce){console['error']('[gd_ad]\x20hideBannerAd\x20failed',_0x15b3ce),'function'==typeof _0x5c74cb&&_0x5c74cb(!0x1);}else console['warn']('[gd_ad]\x20gdsdk.hideAd\x20not\x20available'),'function'==typeof _0x5c74cb&&_0x5c74cb(!0x1);}};_0x161015['init'](),_0x1778d0['exports']&&(_0x1778d0['exports']=_0x161015);},0x1b2:()=>{window['SelectLine']=new class{constructor(){this['engine']=null,this['stage']=null,this['exportRoot']=null,this['loadedSounds']=null,this['startMc']=null,this['selectedDifficulty']=null,this['onDifficultyCallback']=null;}['getDifficultyLevel'](_0x36c493){return{'easy':0x3,'normal':0x4,'hard':0x5}[_0x36c493]||0x4;}['init'](_0x349040,_0x3878fe){this['engine']=_0x349040['engine'],this['stage']=_0x349040['stage'],this['exportRoot']=_0x349040['exportRoot'],this['loadedSounds']=_0x349040['loadedSounds'],this['onDifficultyCallback']=_0x3878fe,this['selectDifficulty']();}['hideDifficultyUI'](){const _0x1e9607=utile['findMc'](this['exportRoot'],'mc_select');_0x1e9607&&(_0x1e9607['visible']=!0x1);}['selectDifficulty'](){if(this['startMc']=utile['findMc'](this['exportRoot'],'mc_select'),this['startMc']){this['startMc']['visible']=!0x0;const _0x3cde04=utile['findMc'](this['startMc'],'btn_e'),_0x17e6db=utile['findMc'](this['startMc'],'btn_n'),_0x3de668=utile['findMc'](this['startMc'],'btn_h');this['stage']['on']('click',_0x3e7143=>{const _0x4a98b2=_0x3e7143['target'],_0x1d48ff=this['findButtonContainer'](_0x4a98b2,[_0x3cde04,_0x17e6db,_0x3de668]);_0x1d48ff===_0x3cde04?this['onDifficultySelected']('easy'):_0x1d48ff===_0x17e6db?this['onDifficultySelected']('normal'):_0x1d48ff===_0x3de668&&this['onDifficultySelected']('hard');}),[_0x3cde04,_0x17e6db,_0x3de668]['forEach'](_0x5ccceb=>{_0x5ccceb&&(_0x5ccceb['mouseEnabled']=!0x0,_0x5ccceb['cursor']='pointer');});}else console['warn']('⚠️\x20未找到难度选择界面，使用默认难度'),this['onDifficultySelected']('normal');}['findButtonContainer'](_0x4d6b90,_0x222a18){let _0x2345fc=_0x4d6b90;for(let _0x964560=0x0;_0x964560<0x5&&_0x2345fc;_0x964560++){for(const _0x24baf7 of _0x222a18)if(_0x2345fc===_0x24baf7)return _0x24baf7;_0x2345fc=_0x2345fc['parent'];}return null;}['getTargetPath'](_0x123c42){const _0x341d9a=[];let _0x5e0149=_0x123c42;for(let _0x4dcc4d=0x0;_0x4dcc4d<0x5&&_0x5e0149;_0x4dcc4d++){const _0x5b85fb=_0x5e0149['name']||_0x5e0149['constructor']['name'];_0x341d9a['push'](_0x5b85fb),_0x5e0149=_0x5e0149['parent'];}return _0x341d9a['join']('\x20->\x20');}['onDifficultySelected'](_0x445f43){this['engine']&&this['loadedSounds']['has']('popo')&&this['engine']['playSound']('popo'),this['startMc']&&(this['startMc']['visible']=!0x1),this['selectedDifficulty']=_0x445f43,this['onDifficultyCallback']&&this['onDifficultyCallback'](_0x445f43);}['getSelectedDifficulty'](){return this['selectedDifficulty'];}['selectDifficulty'](){if(this['startMc']=utile['findMc'](this['exportRoot'],'mc_select'),this['startMc']){this['startMc']['visible']=!0x0;const _0x416ae2=utile['findMc'](this['startMc'],'btn_e'),_0xba6116=utile['findMc'](this['startMc'],'btn_n'),_0x3e049c=utile['findMc'](this['startMc'],'btn_h');this['stage']['on']('click',_0x1965e6=>{const _0x5d7f31=_0x1965e6['target'],_0x32a45c=this['findButtonContainer'](_0x5d7f31,[_0x416ae2,_0xba6116,_0x3e049c]);_0x32a45c===_0x416ae2?this['onDifficultySelected']('easy'):_0x32a45c===_0xba6116?this['onDifficultySelected']('normal'):_0x32a45c===_0x3e049c&&this['onDifficultySelected']('hard');}),[_0x416ae2,_0xba6116,_0x3e049c]['forEach'](_0x1617ad=>{_0x1617ad&&(_0x1617ad['mouseEnabled']=!0x0,_0x1617ad['cursor']='pointer');});}else console['warn']('⚠️\x20未找到难度选择界面，跳过难度选择'),this['onDifficultySelected']('normal');}['findButtonContainer'](_0x4f62e3,_0x246e78){let _0x545728=_0x4f62e3;for(let _0x448262=0x0;_0x448262<0x5&&_0x545728;_0x448262++){for(const _0x23653d of _0x246e78)if(_0x545728===_0x23653d)return _0x23653d;_0x545728=_0x545728['parent'];}return null;}['getTargetPath'](_0x2201f1){const _0x10f87b=[];let _0x2aa0c0=_0x2201f1;for(let _0x42c183=0x0;_0x42c183<0x5&&_0x2aa0c0;_0x42c183++){const _0x40afb7=_0x2aa0c0['name']||_0x2aa0c0['constructor']['name'];_0x10f87b['push'](_0x40afb7),_0x2aa0c0=_0x2aa0c0['parent'];}return _0x10f87b['join']('\x20->\x20');}['isChildOf'](_0x5c7a51,_0x5d5fdd){if(!_0x5c7a51||!_0x5d5fdd)return!0x1;let _0x23e8f0=_0x5c7a51['parent'];for(;_0x23e8f0;){if(_0x23e8f0===_0x5d5fdd)return!0x0;_0x23e8f0=_0x23e8f0['parent'];}return!0x1;}['onDifficultySelected'](_0x2dd625){this['engine']&&this['loadedSounds']['has']('popo')&&this['engine']['playSound']('popo'),this['startMc']&&(this['startMc']['visible']=!0x1),this['selectedDifficulty']=_0x2dd625;}}();},0x25c:(_0x20b44a,_0xba5511,_0x5eff3f)=>{'use strict';_0x20b44a=_0x5eff3f['hmd'](_0x20b44a),'undefined'!=typeof window&&(window['ovo']=window['ovo']||{});const _0x1ef95e='undefined'!=typeof window?window['ovo']:{};_0x1ef95e['bannerShown']=!0x1,_0x1ef95e['lastInterstitialAdTime']=0x0,_0x1ef95e['interstitialAdCooldown']=0x7530,_0x1ef95e['lastRewardedAdTime']=0x0,_0x1ef95e['rewardedAdCooldown']=0x7530,_0x1ef95e['getInterstitialAdCooldownRemaining']=function(){const _0x511724=Date['now']()-_0x1ef95e['lastInterstitialAdTime'];return Math['max'](0x0,_0x1ef95e['interstitialAdCooldown']-_0x511724);},_0x1ef95e['getRewardedAdCooldownRemaining']=function(){const _0x55eb53=Date['now']()-_0x1ef95e['lastRewardedAdTime'];return Math['max'](0x0,_0x1ef95e['rewardedAdCooldown']-_0x55eb53);},_0x1ef95e['resetInterstitialAdCooldown']=function(){_0x1ef95e['lastInterstitialAdTime']=0x0;try{console['log']('[ovosdk]\x20Interstitial\x20ad\x20cooldown\x20reset');}catch(_0xdeea85){}},_0x1ef95e['resetRewardedAdCooldown']=function(){_0x1ef95e['lastRewardedAdTime']=0x0;try{console['log']('[ovosdk]\x20Rewarded\x20ad\x20cooldown\x20reset');}catch(_0x488f7c){}},_0x1ef95e['pauseAudioForAd']=()=>{try{if(window['__GAME_ENGINE_INSTANCE__']&&'function'==typeof window['__GAME_ENGINE_INSTANCE__']['pauseAudio'])return window['__GAME_ENGINE_INSTANCE__']['pauseAudio'](),void(window['__adPausedBySdk__']='engine');if('undefined'!=typeof createjs&&createjs['Sound']&&'function'==typeof createjs['Sound']['setMute'])return window['__adUserMusicEnabled__']=null===localStorage['getItem']('musicEnabled')||'true'===localStorage['getItem']('musicEnabled'),createjs['Sound']['setMute'](!0x0),void(window['__adPausedBySdk__']='soundjs');}catch(_0x5b3745){try{window['__sdklog2']('pauseAudioForAd\x20error',_0x5b3745);}catch(_0x5bc1a5){}}},_0x1ef95e['resumeAudioAfterAd']=()=>{try{if('engine'===window['__adPausedBySdk__'])return window['__GAME_ENGINE_INSTANCE__']&&'function'==typeof window['__GAME_ENGINE_INSTANCE__']['resumeAudio']&&window['__GAME_ENGINE_INSTANCE__']['resumeAudio'](),void(window['__adPausedBySdk__']=null);if('soundjs'===window['__adPausedBySdk__'])return(null===localStorage['getItem']('musicEnabled')||'true'===localStorage['getItem']('musicEnabled'))&&'undefined'!=typeof createjs&&createjs['Sound']&&'function'==typeof createjs['Sound']['setMute']&&createjs['Sound']['setMute'](!0x1),void(window['__adPausedBySdk__']=null);}catch(_0x580166){try{window['__sdklog2']('resumeAudioAfterAd\x20error',_0x580166);}catch(_0x4b8642){}}},_0x1ef95e['pauseGame']=()=>{try{if('undefined'!=typeof createjs&&createjs['Ticker']){createjs['Ticker']['paused']=!0x0,window['__gamePausedBySdk__']=!0x0;try{console['log']('[ovosdk]\x20Game\x20paused\x20via\x20Ticker');}catch(_0x41eec3){}}window['__GAME_ENGINE_INSTANCE__']&&'function'==typeof window['__GAME_ENGINE_INSTANCE__']['pause']&&window['__GAME_ENGINE_INSTANCE__']['pause']();}catch(_0x5e2037){try{window['__sdklog2']('pauseGame\x20error',_0x5e2037);}catch(_0x3fb70b){}}},_0x1ef95e['resumeGame']=()=>{try{if('undefined'!=typeof createjs&&createjs['Ticker']){createjs['Ticker']['paused']=!0x1,window['__gamePausedBySdk__']=!0x1;try{console['log']('[ovosdk]\x20Game\x20resumed\x20via\x20Ticker');}catch(_0x531be1){}}window['__GAME_ENGINE_INSTANCE__']&&'function'==typeof window['__GAME_ENGINE_INSTANCE__']['resume']&&window['__GAME_ENGINE_INSTANCE__']['resume']();}catch(_0x52ffd2){try{window['__sdklog2']('resumeGame\x20error',_0x52ffd2);}catch(_0x12474b){}}},_0x1ef95e['vibrate']=function(_0x635813){try{if(console['log']('[ovosdk]\x20vibrate\x20invoked,\x20pattern:',_0x635813),_0x635813||(_0x635813=[0x64]),void 0x0!==window['Android']&&'function'==typeof window['Android']['vibrate'])try{return Array['isArray'](_0x635813)?window['Android']['vibrate'](_0x635813['join'](',')):window['Android']['vibrate'](String(_0x635813)),!0x0;}catch(_0x2ac8e5){console['warn']('[ovosdk]\x20Android.vibrate\x20failed,\x20falling\x20back\x20to\x20navigator',_0x2ac8e5);}return'undefined'!=typeof navigator&&'function'==typeof navigator['vibrate']?(navigator['vibrate'](_0x635813),!0x0):(console['log']('[ovosdk]\x20Vibration\x20not\x20supported\x20on\x20this\x20platform'),!0x1);}catch(_0x3ca3a5){try{console['log']('[ovosdk]\x20vibrate\x20error:',_0x3ca3a5);}catch(_0x37d00b){}return!0x1;}},_0x1ef95e['showBannerAd']=function(_0x11c9f2,_0x4fe9f8){_0x4fe9f8=_0x4fe9f8||{};try{console['log']('[ovosdk]\x20showBannerAd\x20invoked,\x20Platform=',window['Platform']);}catch(_0x414264){}if(_0x1ef95e['bannerShown']){try{console['log']('[ovosdk]\x20Banner\x20already\x20shown,\x20skipping');}catch(_0x223a9d){}'function'==typeof _0x11c9f2&&_0x11c9f2(!0x1);}else{if('function'==typeof window['showBannerAd'])window['showBannerAd'](function(_0x1104ed){_0x1104ed&&(_0x1ef95e['bannerShown']=!0x0),'function'==typeof _0x11c9f2&&_0x11c9f2(_0x1104ed);},_0x4fe9f8);else{try{console['log']('[ovosdk]\x20no\x20banner\x20ad\x20bridge\x20available');}catch(_0x14b41f){}'function'==typeof _0x11c9f2&&_0x11c9f2(!0x1);}}},_0x1ef95e['hideBannerAd']=function(_0xff2a1d,_0x3f3636){_0x3f3636=_0x3f3636||{};try{console['log']('[ovosdk]\x20hideBannerAd\x20invoked,\x20Platform=',window['Platform']);}catch(_0x505a0a){}if('function'==typeof window['hideBannerAd'])window['hideBannerAd'](function(_0xb20270){_0xb20270&&(_0x1ef95e['bannerShown']=!0x1),'function'==typeof _0xff2a1d&&_0xff2a1d(_0xb20270);},_0x3f3636);else{try{console['log']('[ovosdk]\x20no\x20banner\x20ad\x20bridge\x20available');}catch(_0x157df5){}'function'==typeof _0xff2a1d&&_0xff2a1d(!0x1);}},_0x1ef95e['dotScore']=function(_0x2a349b,_0x465c23){try{console['log']('[ovosdk]\x20dotScore:',_0x2a349b,'level:',_0x465c23),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','score_update',{'score':_0x2a349b,'level':_0x465c23||'unknown','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x5eb2f6){try{window['__sdklog2']('dotScore\x20error',_0x5eb2f6);}catch(_0x2cd508){}}},_0x1ef95e['dotLevel']=function(_0x201896,_0x10a874){try{console['log']('[ovosdk]\x20dotLevel:',_0x201896,'score:',_0x10a874),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','level_up',{'level':_0x201896,'score':_0x10a874||0x0,'platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x37d899){try{window['__sdklog2']('dotLevel\x20error',_0x37d899);}catch(_0xdb563b){}}},_0x1ef95e['dotGameOver']=function(_0x47dd76,_0xd23b61,_0x35c81d){try{console['log']('[ovosdk]\x20gameOver\x20-\x20score:',_0x47dd76,'level:',_0xd23b61,'reason:',_0x35c81d),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','level_end',{'level':_0xd23b61||0x1,'score':_0x47dd76||0x0,'success':!0x1,'reason':_0x35c81d||'game_over','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x502312){try{window['__sdklog2']('gameOver\x20error',_0x502312);}catch(_0x1ed3d3){}}},_0x1ef95e['dotGameWin']=function(_0x2b6feb,_0x4be546,_0x1e2117){try{console['log']('[ovosdk]\x20dotGameWin\x20-\x20score:',_0x2b6feb,'level:',_0x4be546,'time:',_0x1e2117),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','level_end',{'level':_0x4be546||0x1,'score':_0x2b6feb||0x0,'success':!0x0,'time_spent':_0x1e2117||0x0,'platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x926b31){try{window['__sdklog2']('gameWin\x20error',_0x926b31);}catch(_0x4dd304){}}},_0x1ef95e['dotGameStart']=function(_0x31cfc4,_0x1e22a8){try{console['log']('[ovosdk]\x20dotGameStart\x20-\x20level:',_0x31cfc4,'character:',_0x1e22a8),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','level_start',{'level_name':_0x31cfc4||'main_game','character':_0x1e22a8||'player','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x4aa6a7){try{window['__sdklog2']('dotGameStart\x20error',_0x4aa6a7);}catch(_0x43a84b){}}},_0x1ef95e['dotSelectContent']=function(_0x52e547,_0x42c6f2){try{console['log']('[ovosdk]\x20dotSelectContent\x20-\x20type:',_0x52e547,'id:',_0x42c6f2),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','select_content',{'content_type':_0x52e547||'game_action','content_id':_0x42c6f2||'unknown','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x1b6653){try{window['__sdklog2']('dotSelectContent\x20error',_0x1b6653);}catch(_0x1a5369){}}},_0x1ef95e['dotTutorialComplete']=function(){try{console['log']('[ovosdk]\x20dotTutorialComplete'),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','tutorial_complete',{'platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x3e8f47){try{window['__sdklog2']('dotTutorialComplete\x20error',_0x3e8f47);}catch(_0x472cf5){}}},_0x1ef95e['timeAd']=0x7530,_0x1ef95e['showInterstitialAd']=function(_0x54af82,_0x5b65b6){const _0x14f7b6=(_0x5b65b6=_0x5b65b6||{})&&_0x5b65b6['timeoutMs']||0x1f40,_0xd18c4d=_0x5b65b6['force']||!0x1;try{console['log']('[ovosdk]\x20showInterstitialAd\x20invoked,\x20Platform=',window['Platform']);}catch(_0x551e24){}if(!_0xd18c4d){const _0x37d392=Date['now']()-_0x1ef95e['lastInterstitialAdTime'];if(_0x37d392<_0x1ef95e['interstitialAdCooldown']){const _0x243e80=Math['ceil']((_0x1ef95e['interstitialAdCooldown']-_0x37d392)/0x3e8);try{console['log']('[ovosdk]\x20Interstitial\x20ad\x20on\x20cooldown.\x20'+_0x243e80+'\x20seconds\x20remaining.');}catch(_0x28f79a){}return void('function'==typeof _0x54af82&&_0x54af82(!0x1));}}if(_0x1ef95e['pauseAudioForAd'](),_0x1ef95e['pauseGame'](),'function'==typeof window['showInterstitialAd'])window['showInterstitialAd'](function(_0x48c982){_0x48c982&&(_0x1ef95e['lastInterstitialAdTime']=Date['now']()),_0x1ef95e['resumeAudioAfterAd'](),_0x1ef95e['resumeGame'](),'function'==typeof _0x54af82&&_0x54af82(_0x48c982);},{'timeoutMs':_0x14f7b6});else{try{console['log']('[ovosdk]\x20no\x20ad\x20bridge\x20available,\x20invoking\x20callback\x20immediately');}catch(_0x5dbf22){}_0x1ef95e['resumeAudioAfterAd'](),_0x1ef95e['resumeGame'](),'function'==typeof _0x54af82&&_0x54af82(!0x1);}},_0x1ef95e['showRewardedAd']=function(_0x2e685c,_0x521535){const _0xe68e07=(_0x521535=_0x521535||{})&&_0x521535['timeoutMs']||0x1f40,_0x480011=_0x521535['force']||!0x1;try{console['log']('[ovosdk]\x20showRewardedAd\x20invoked,\x20Platform=',window['Platform']);}catch(_0x5c2025){}if(!_0x480011){const _0x18d275=Date['now']()-_0x1ef95e['lastRewardedAdTime'];if(_0x18d275<_0x1ef95e['rewardedAdCooldown']){const _0x4bba25=Math['ceil']((_0x1ef95e['rewardedAdCooldown']-_0x18d275)/0x3e8);try{console['log']('[ovosdk]\x20Rewarded\x20ad\x20on\x20cooldown.\x20'+_0x4bba25+'\x20seconds\x20remaining.');}catch(_0x5cf195){}return void('function'==typeof _0x2e685c&&_0x2e685c(!0x1));}}if(_0x1ef95e['pauseAudioForAd'](),_0x1ef95e['pauseGame'](),'function'==typeof window['showRewardedAd'])window['showRewardedAd'](function(_0x8316d){_0x8316d&&(_0x1ef95e['lastRewardedAdTime']=Date['now']()),_0x1ef95e['resumeAudioAfterAd'](),_0x1ef95e['resumeGame'](),'function'==typeof _0x2e685c&&_0x2e685c(_0x8316d);},{'timeoutMs':_0xe68e07});else{try{console['log']('[ovosdk]\x20no\x20ad\x20bridge\x20available,\x20invoking\x20callback\x20immediately');}catch(_0x5d79c6){}_0x1ef95e['resumeAudioAfterAd'](),_0x1ef95e['resumeGame'](),'function'==typeof _0x2e685c&&_0x2e685c(!0x1);}},_0x20b44a['exports']&&(_0x20b44a['exports']=_0x1ef95e);},0x321:(_0xf832b8,_0x38518d,_0x5c77f3)=>{'use strict';var _0x1f0edf=_0x5c77f3(0x38f);_0x5c77f3(0x25c),_0x5c77f3(0x360),_0x5c77f3(0x128),window['Platform']='googleplay';const _0x577312={'scene':{'width':0x438,'height':0x780,'orientation':'portrait','backgroundColor':'#ffffff','fps':0x1e},'compositions':{'loading':{'id':'12AB51DFDAB942FF88C62B7BF520AB4C','src':'resan/vendor-animate.js','description':'Loading\x20screen\x20composition'},'game':{'id':'994179DFE830400BA68CFA701D2BB3AB','src':'resan/vendor-animate.js','description':'Main\x20game\x20composition'}},'gameconfig':{'sounds':[{'id':'bgm','src':'assets/sound/bgm.mp3','type':'sound'},{'id':'popo','src':'assets/sound/popo.mp3','type':'sound'},{'id':'goodmin','src':'assets/sound/goodmin.mp3','type':'sound'},{'id':'click','src':'assets/sound/click.mp3','type':'sound'},{'id':'win','src':'assets/sound/win.mp3','type':'sound'},{'id':'wrong','src':'assets/sound/wrong.mp3','type':'sound'},{'id':'open','src':'assets/sound/open.mp3','type':'sound'},{'id':'longhou_min','src':'assets/sound/longhou_min.mp3','type':'sound'},{'id':'select_wawa','src':'assets/sound/select_wawa.mp3','type':'sound'},{'id':'select_jiji','src':'assets/sound/select_jiji.mp3','type':'sound'},{'id':'hecheng_open','src':'assets/sound/hecheng_open.mp3','type':'sound'},{'id':'wrong2','src':'assets/sound/wrong2.mp3','type':'sound'},{'id':'card','src':'assets/sound/card.mp3','type':'sound'}],'images':[{'id':'bg','src':'assets/image/background.jpg','type':'image'},{'id':'logo','src':'assets/image/logo.png','type':'image'}]}};window['__sdklog2']=function(..._0x12bbfd){if('undefined'!=typeof process&&process['env'])return;const _0x43731d=_0x12bbfd['map'](_0x141b4b=>'string'==typeof _0x141b4b?'\x27'+_0x141b4b+'\x27':'object'==typeof _0x141b4b?JSON['stringify'](_0x141b4b):String(_0x141b4b))['join']('\x20');console['log']('%c\x20***CPSDK***:\x20'+_0x43731d,'background:\x20linear-gradient(to\x20right,\x20#8e44ad,\x20#ba43ff);\x20color:\x20white;\x20padding:\x205px\x2015px;\x20border-radius:\x205px;\x20font-weight:\x20bold;\x20text-shadow:\x201px\x201px\x202px\x20rgba(0,\x200,\x200,\x200.3);');},window['__sdklog3']=function(..._0x582da3){},'undefined'!=typeof window&&(window['utile']=_0x1f0edf['A'],window['__GAME_ENGINE_STARTED__']=window['__GAME_ENGINE_STARTED__']||!0x1);class _0x5a23fc{constructor(){this['config']=null,this['gameContainer']=null,this['animationContainer']=null,this['canvas']=null,this['stage']=null,this['loadingProgress']=null,this['currentProgress']=0x0,this['loadingCompleteLogged']=!0x1,this['publicRoot']=null,this['exportRoot']=null,this['mainComp']=null,this['pubComp']=null,this['mainLib']=null,this['pubLib']=null,this['pubSound']=[],this['soundArr']=[],this['imgArr']=[],this['gl_mc']=null,this['gl_loadBar']=null,this['template']=null,this['mainCode']=null,this['mainName']=null,this['config_data']={},this['soundInitialized']=!0x1,this['loadedSounds']=new Map(),this['loadedImages']=new Map(),this['soundStatus']={},this['__resourcesLoading__']=!0x1,this['__sceneSwitching__']=!0x1,this['bgmInstance']=null,this['_bgmNext']=null,this['_bgmTicker']=null,this['_bgmCrossfadeMs']=0x32,this['_bgmOffsetMs']=0x0,this['_bgmDurMs']=null,this['activeSFX']=new Set();}['ensureAllAssetsReady'](_0x79d145=0x2710){const _0x5df782=Date['now'](),_0x8bfaed=_0x1bfe77=>{try{return!!this['loadedImages']&&(this['loadedImages']instanceof Map?!!this['loadedImages']['get'](_0x1bfe77):!!this['loadedImages'][_0x1bfe77]);}catch(_0x27f19f){return!0x1;}},_0x4c2b70=_0x36b2f7=>{try{if(!window['createjs']||!window['createjs']['Sound'])return!0x1;const _0x777961=window['createjs']['Sound']['_soundInstances']||window['createjs']['Sound']['_idHash']||window['createjs']['Sound']['_namedSounds'];return!_0x777961||(!!_0x777961[_0x36b2f7]||!!window['createjs']['Sound']['_idHash']&&!!window['createjs']['Sound']['_idHash'][_0x36b2f7]);}catch(_0x5a1c2c){return!0x0;}};return new Promise(_0x4429d4=>{console['log']('ensureAllAssetsReady:\x20start,\x20timeoutMs=',_0x79d145,'sceneManifest=',!!this['sceneManifest']);const _0x4652d2=()=>{let _0x3edc1f=!0x0;if(this['sceneManifest']&&Array['isArray'](this['sceneManifest']['images'])){for(const _0x39a3f6 of this['sceneManifest']['images'])if(!_0x8bfaed(_0x39a3f6['id'])&&!_0x8bfaed(_0x39a3f6['src'])){_0x3edc1f=!0x1;break;}}let _0x18cee3=!0x0;if(this['sceneManifest']&&Array['isArray'](this['sceneManifest']['sounds'])){for(const _0xdc386b of this['sceneManifest']['sounds'])if('bgm'!==_0xdc386b['id']&&!_0x4c2b70(_0xdc386b['id'])&&!_0x4c2b70(_0xdc386b['src'])){_0x18cee3=!0x1;break;}}const _0xca746b=Date['now']()-_0x5df782;return _0x3edc1f&&_0x18cee3?(console['log']('ensureAllAssetsReady:\x20all\x20critical\x20assets\x20ready\x20after',_0xca746b,'ms'),_0x4429d4(!0x0)):_0xca746b>=_0x79d145?(console['warn']('ensureAllAssetsReady:\x20timeout\x20after',_0xca746b,'ms\x20—\x20proceeding\x20anyway'),_0x4429d4(!0x1)):void setTimeout(_0x4652d2,0xfa);};_0x4652d2();});}async['init'](){window['__GAME_ENGINE_STARTED__']?console['warn']('⚠️\x20GameEngine\x20已启动，跳过重复初始化'):(window['__GAME_ENGINE_STARTED__']=!0x0,await this['loadConfig'](),this['applyConfig'](),await this['loadPreloader'](),await this['startGameConfigLoading'](),this['setupAutoplayHandler'](),this['setupFocusBlurHandler']());}['pauseAudio'](){if(this['bgmInstance']&&this['bgmInstance']['playState']===createjs['Sound']['PLAY_SUCCEEDED']&&!this['bgmInstance']['paused'])try{if('function'==typeof this['bgmInstance']['pause'])this['bgmInstance']['pause']();else{if('function'==typeof this['bgmInstance']['setPaused'])this['bgmInstance']['setPaused'](!0x0);else{if('paused'in this['bgmInstance'])this['bgmInstance']['paused']=!0x0;else try{this['bgmInstance']&&'function'==typeof this['bgmInstance']['setPaused']?this['bgmInstance']['setPaused'](!0x0):this['bgmInstance']&&'paused'in this['bgmInstance']&&(this['bgmInstance']['paused']=!0x0);}catch(_0x15277f){this['soundStatus']['bgm']=!0x1;}}}}catch(_0xb780e8){console['warn']('暂停\x20BGM\x20失败,\x20采用\x20stop\x20回退',_0xb780e8),this['stopSound']('bgm');}this['_pausedSFX']=[],this['activeSFX']['forEach'](_0x2f4706=>{createjs['Sound']['_instances']&&createjs['Sound']['_instances'][_0x2f4706];try{createjs['Sound']['stop'](_0x2f4706),this['_pausedSFX']['push'](_0x2f4706);}catch(_0x339894){}});}['resumeAudio'](){if(null===localStorage['getItem']('musicEnabled')||'true'===localStorage['getItem']('musicEnabled')){if(this['bgmInstance'])try{this['bgmInstance']['paused']&&('function'==typeof this['bgmInstance']['resume']?this['bgmInstance']['resume']():'function'==typeof this['bgmInstance']['play']&&'function'!=typeof this['bgmInstance']['setPaused']?this['bgmInstance']['play']():'function'==typeof this['bgmInstance']['setPaused']?this['bgmInstance']['setPaused'](!0x1):'paused'in this['bgmInstance']?this['bgmInstance']['paused']=!0x1:this['playSound']('bgm',{'loop':-0x1,'volume':0.4}),this['soundStatus']['bgm']=!0x0);}catch(_0x502232){console['warn']('恢复\x20BGM\x20失败，重新播放回退',_0x502232),this['playSound']('bgm',{'loop':-0x1,'volume':0.4});}else this['soundStatus']['bgm']||this['playSound']('bgm',{'loop':-0x1,'volume':0.4});}(null===localStorage['getItem']('soundEnabled')||'true'===localStorage['getItem']('soundEnabled'))&&Array['isArray'](this['_pausedSFX'])&&this['_pausedSFX']['forEach'](_0x4448e2=>this['playSound'](_0x4448e2,{'loop':-0x1,'volume':0x1})),this['_pausedSFX']=null;}['setupFocusBlurHandler'](){window['addEventListener']('blur',()=>{this['pauseAudio']();}),window['addEventListener']('focus',()=>{this['resumeAudio']();});}['getLoadingCompositionId'](){return null;}['getGameCompositionId'](){if(this['config']&&this['config']['compositions']&&this['config']['compositions']['game'])return this['config']['compositions']['game']['id'];return console['warn']('无法从配置获取游戏组合ID，使用默认值'),'994179DFE830400BA68CFA701D2BB3AB';}['applyStageTransform'](){this['stage']&&(this['stage']['rotation']=this['stageRotation'],this['stage']['x']=this['stageX'],this['stage']['y']=this['stageY'],this['stage']['scaleX']=this['stageScale'],this['stage']['scaleY']=this['stageScale'],this['stage']['update']());}async['loadConfig'](){try{this['config']=_0x577312||{};const _0x3786ab=this['config']['initial']||this['config']['gameconfig']&&this['config']['gameconfig']['initial']||null;if(_0x3786ab&&Array['isArray'](_0x3786ab)){for(const _0xc16e5b of _0x3786ab)await this['loadScript'](_0xc16e5b);}}catch(_0x53efb2){console['error']('Failed\x20to\x20load\x20config:',_0x53efb2),this['config']=_0x577312||{};}}['isPCDevice'](){const _0x5b7922=navigator['userAgent']['toLowerCase'](),_0x58160f=['android','iphone','ipad','ipod','blackberry','windows\x20phone','mobile','tablet','webos','opera\x20mini']['some'](_0x15b4c6=>_0x5b7922['includes'](_0x15b4c6)),_0x2f5a59='ontouchstart'in window||navigator['maxTouchPoints']>0x0,_0x101c7b=window['screen']['width'],_0x4668cb=window['screen']['height'],_0x16520d=Math['min'](_0x101c7b,_0x4668cb),_0x3c1428=Math['max'](_0x101c7b,_0x4668cb);return!_0x58160f&&(_0x16520d>=0x300&&_0x3c1428>=0x400||!_0x2f5a59);}['applyConfig'](){this['gameContainer']=document['getElementById']('game-container'),this['animationContainer']=document['getElementById']('animation_container'),this['canvas']=document['getElementById']('canvas'),this['canvas']&&this['canvas']['setAttribute']('willReadFrequently','true'),this['loadingProgress']=document['querySelector']('.loading-progress'),window['removeEventListener']('resize',this['resizeHandler']),this['resizeHandler']=()=>{if(!this['designWidth']||!this['designHeight'])return;const _0x309c49=this['gameContainer']['clientWidth'],_0x41c3de=this['gameContainer']['clientHeight'];this['dpr']=window['devicePixelRatio']||0x1;const _0x2da765='true'===(localStorage['getItem']('hiDPI')||'true')?this['dpr']:0x1;this['canvas']['style']['width']=_0x309c49+'px',this['canvas']['style']['height']=_0x41c3de+'px',this['canvas']['width']=Math['round'](_0x309c49*_0x2da765),this['canvas']['height']=Math['round'](_0x41c3de*_0x2da765);const _0x54a813=this['designWidth'],_0x44def0=this['designHeight'],_0x1536ec=_0x309c49<_0x41c3de,_0x18f689=_0x54a813<_0x44def0;this['isPCDevice']()?(this['baseStageScale']=Math['min'](_0x309c49/_0x54a813,_0x41c3de/_0x44def0),this['stageRotation']=0x0,this['stageX']=(_0x309c49-_0x54a813*this['baseStageScale'])/0x2,this['stageY']=(_0x41c3de-_0x44def0*this['baseStageScale'])/0x2):_0x1536ec===_0x18f689?(this['baseStageScale']=Math['min'](_0x309c49/_0x54a813,_0x41c3de/_0x44def0),this['stageRotation']=0x0,this['stageX']=_0x309c49/0x2-_0x54a813*this['baseStageScale']/0x2,this['stageY']=_0x41c3de/0x2-_0x44def0*this['baseStageScale']/0x2):(this['baseStageScale']=Math['min'](_0x309c49/_0x44def0,_0x41c3de/_0x54a813),this['stageRotation']=0x5a,this['stageX']=_0x44def0*this['baseStageScale']+_0x309c49/0x2-_0x44def0*this['baseStageScale']/0x2,this['stageY']=_0x41c3de/0x2-_0x54a813*this['baseStageScale']/0x2),this['stageScale']=this['baseStageScale']*_0x2da765,this['stageX']=Math['round'](this['stageX']*_0x2da765),this['stageY']=Math['round'](this['stageY']*_0x2da765),this['applyStageTransform'](),this['updateImageSmoothing']();},window['addEventListener']('resize',this['resizeHandler']);const {width:_0x5eeb1a=0x780,height:_0x175108=0x438,orientation:_0x414cee='landscape',backgroundColor:_0x2f6c17='#CED1D3'}=this['config']['scene']||{};this['designWidth']=_0x5eeb1a,this['designHeight']=_0x175108,this['orientation']=_0x414cee;const _0x11a275=window['devicePixelRatio']||0x1;this['canvas']['width']=_0x5eeb1a*_0x11a275,this['canvas']['height']=_0x175108*_0x11a275,this['canvas']['style']['width']=_0x5eeb1a+'px',this['canvas']['style']['height']=_0x175108+'px',this['canvas']&&this['canvas']['setAttribute']('willReadFrequently','true'),'portrait'===_0x414cee?this['animationContainer']['classList']['add']('portrait'):this['animationContainer']['classList']['remove']('portrait'),this['resizeHandler']();}async['loadGameResources'](){const _0x36a66c=[...Array['isArray'](this['config']['initial'])?this['config']['initial']:[],...Array['isArray'](this['config']['game'])?this['config']['game']:[]],_0x53b54b=this['config']['gameconfig']['sounds']||[],_0x5b12f3=this['config']['gameconfig']['images']||[],_0x190641=_0x53b54b['find'](_0x57dc69=>'bgm'===_0x57dc69['id']),_0x338fd5=_0x53b54b['filter'](_0x11673e=>'bgm'!==_0x11673e['id']),_0x43dc2e=_0x190641?[_0x190641,..._0x338fd5]:_0x338fd5,_0x1d2c44=_0x36a66c['length']+_0x43dc2e['length']+_0x5b12f3['length'];let _0x54fec0=0x0;const _0x55f34b=[..._0x36a66c['map'](async _0x3bb67d=>{await this['loadScript'](_0x3bb67d),_0x54fec0++,this['updateLoadingProgress'](_0x54fec0/_0x1d2c44*0x64);}),..._0x43dc2e['map'](async _0x2f8568=>{await this['loadSound'](_0x2f8568['id'],_0x2f8568['src']),_0x54fec0++,this['updateLoadingProgress'](_0x54fec0/_0x1d2c44*0x64);}),..._0x5b12f3['map'](async _0xf36375=>{await this['loadImage'](_0xf36375['id'],_0xf36375['src']),_0x54fec0++,this['updateLoadingProgress'](_0x54fec0/_0x1d2c44*0x64);})];await Promise['all'](_0x55f34b);}async['loadPreloader'](){return new Promise(_0x624600=>{this['stage']=new createjs['Stage'](this['canvas']),this['stage']['snapToPixelEnabled']=!0x0,createjs['Ticker']['framerate']=this['config']['scene']?.['fps']||0x1e,createjs['Ticker']['addEventListener']('tick',this['stageUpdateHandler']['bind'](this)),this['applyStageTransform'](),_0x624600();});}['updateImageSmoothing'](){try{const _0x41d9bb='true'===(localStorage['getItem']('imageSmooth')||'true'),_0xb609b4=this['canvas']['getContext']('2d');_0xb609b4&&(_0xb609b4['imageSmoothingEnabled']=_0x41d9bb);}catch(_0x5a50f1){}}['screenToDesign'](_0x395fab,_0x4ce9a9){if(!this['canvas']||!this['designWidth']||!this['designHeight'])return{'x':_0x395fab,'y':_0x4ce9a9};const _0x29361a=this['canvas']['getBoundingClientRect'](),_0x3adc9a=(_0x395fab-_0x29361a['left'])/_0x29361a['width'],_0x1b5ff0=(_0x4ce9a9-_0x29361a['top'])/_0x29361a['height'];return{'x':_0x3adc9a*this['designWidth'],'y':_0x1b5ff0*this['designHeight']};}async['startGameConfigLoading'](){if(this['__resourcesLoading__'])console['warn']('⚠️\x20资源加载已在进行或完成，跳过重复调用');else{this['__resourcesLoading__']=!0x0;try{const _0x4f2988=this['config']['gameconfig']||{},_0x4a9813=_0x4f2988['scripts']||[],_0x22db8c=_0x4f2988['sounds']||[],_0x44a49f=_0x4f2988['images']||[],_0x47ca4a=_0x4a9813['length']+_0x22db8c['length']+_0x44a49f['length'];if(0x0===_0x47ca4a)return this['updateLoadingProgress'](0x1),void this['switchToGameScene']();let _0x4bc874=0x0;this['updateLoadingProgress'](0x0),this['loadingCompleteLogged']=!0x1,console['log']('🖼️\x20优先加载UI资源...');for(const _0x501a78 of _0x44a49f)try{await this['loadResource'](_0x501a78,_0x4bc874,_0x47ca4a),_0x4bc874++,'bg'===_0x501a78['id']||_0x501a78['id'];}catch(_0x1fcff6){console['warn']('⚠️\x20图片加载失败:\x20'+_0x501a78['src'],_0x1fcff6['message']),_0x4bc874++;}for(const _0x13e623 of _0x4a9813){try{await this['loadResource'](_0x13e623,_0x4bc874,_0x47ca4a);}catch(_0x5ca1c3){console['error']('💥\x20脚本加载失败，但继续加载其他资源:\x20'+_0x13e623['src'],_0x5ca1c3);}_0x4bc874++;}for(const _0x4d1f12 of _0x22db8c){try{await this['loadResource'](_0x4d1f12,_0x4bc874,_0x47ca4a);}catch(_0x256049){console['error']('声音加载异常:\x20'+_0x4d1f12['src'],_0x256049);}_0x4bc874++;}createjs['Sound']['muted']=!0x1,this['tryAutoStartBGM'](),this['updateLoadingProgress'](0x1),this['loadedHandler']();}catch(_0x52e99a){console['error']('游戏资源加载失败:',_0x52e99a);}}}['loadedHandler'](){console['log']('🎮\x20资源加载完成，开始用户登录流程');const _0x1d691c=document['querySelector']('.loading-text');if(_0x1d691c){_0x1d691c['textContent']='Fetching\x20user\x20data...';try{if(!document['getElementById']('sdk-loading-text-style')){const _0x32874e=document['createElement']('style');_0x32874e['id']='sdk-loading-text-style',_0x32874e['textContent']='@keyframes\x20sdk-blink{0%,100%{opacity:1}50%{opacity:0.15}}.sdk-loading-blink{animation:sdk-blink\x201s\x20linear\x20infinite}.sdk-loading-large{font-size:22px\x20!important;font-weight:600\x20!important;}',document['head']['appendChild'](_0x32874e);}_0x1d691c['classList']['add']('sdk-loading-blink','sdk-loading-large');}catch(_0x439863){}}this['updateLoadingProgress'](0.9),this['startUserDataTimer'](),this['startGameLogic']();}['startUserDataTimer'](){this['userDataStartTime']=Date['now'](),this['userDataTimerInterval']=setInterval(()=>{const _0x28cb96=Math['floor']((Date['now']()-this['userDataStartTime'])/0x3e8),_0x349caa=document['querySelector']('.loading-text');_0x349caa&&(_0x28cb96>0xa?(_0x349caa['textContent']='Network\x20is\x20slow,\x20please\x20wait...\x20('+_0x28cb96+'s)',_0x349caa['style']['color']='#FF6B6B'):_0x28cb96>0x14?(_0x349caa['textContent']='Loading\x20timed\x20out,\x20please\x20try\x20again...\x20('+_0x28cb96+'s)',_0x349caa['style']['color']='#FF0000'):_0x349caa['textContent']='Fetching\x20user\x20data...\x20('+_0x28cb96+'s)');},0x3e8);}['onLoginComplete'](){this['userDataTimerInterval']&&(clearInterval(this['userDataTimerInterval']),this['userDataTimerInterval']=null),this['loadingCompleteLogged']=!0x1,this['updateLoadingProgress'](0x1);const _0x484ada=document['querySelector']('.loading-text'),_0x28d78e='undefined'!=typeof window&&window['Platform']?String(window['Platform'])['toLowerCase']():'';if(!_0x28d78e||'default'===_0x28d78e||'googleplay'===_0x28d78e)return _0x484ada&&(_0x484ada['textContent']='Entering...',_0x484ada['style']['color']='#FFFFFF'),void this['switchToGameScene']();if(_0x28d78e){_0x484ada&&(_0x484ada['textContent']='Top\x20to\x20enter\x20game',_0x484ada['style']['color']='#00FF00');const _0x4d722b=document['getElementById']('preload_container')||document['querySelector']('.loading-container')||document['body'],_0x36669e=()=>{try{_0x484ada&&(_0x484ada['textContent']='Entering...',_0x484ada['style']['color']='#FFFFFF'),_0x4d722b&&(_0x4d722b['style']['cursor']='default');}catch(_0x4c0fe1){}try{_0x4d722b&&_0x4d722b['removeEventListener']('click',_0x36669e);}catch(_0x41027b){}try{console['log']('[init]\x20enterHandler\x20click\x20detected,\x20Platform=',window['Platform']);}catch(_0x1ae5d6){}try{void 0x0!==window['ovo']&&'function'==typeof window['ovo']['dotSelectContent']&&window['ovo']['dotSelectContent']('game_action','enter_game_click');}catch(_0x53dc0d){}try{try{console['log']('[init]\x20window.ovo\x20=',window['ovo']);}catch(_0x4b9666){}if('undefined'!=typeof window&&window['ovo']&&'function'==typeof window['ovo']['showInterstitialAd'])return console['log']('[init]\x20calling\x20window.ovo.showInterstitialAd()'),void window['ovo']['showInterstitialAd'](()=>{try{console['log']('[init]\x20showInterstitialAd\x20callback\x20—\x20switching\x20to\x20game\x20scene');}catch(_0x42c9c2){}try{this['switchToGameScene']();}catch(_0x1899ab){console['warn']('switchToGameScene\x20failed\x20after\x20ad',_0x1899ab);}});try{console['log']('[init]\x20ovo.showInterstitialAd\x20not\x20available\x20(will\x20fallback)');}catch(_0x56b116){}}catch(_0x2426a7){try{window['__sdklog2']&&window['__sdklog2']('window.preloadAd\x20error',_0x2426a7);}catch(_0x584864){}}};try{_0x4d722b?(_0x4d722b['style']['cursor']='pointer',_0x4d722b['addEventListener']('click',_0x36669e,{'once':!0x0})):this['switchToGameScene']();}catch(_0x1aa5a2){console['warn']('Failed\x20to\x20attach\x20click-to-enter\x20handler,\x20auto-entering',_0x1aa5a2),this['switchToGameScene']();}}else _0x484ada&&(_0x484ada['textContent']='Entering...',_0x484ada['style']['color']='#FFFFFF'),this['switchToGameScene']();}async['startGameLogic'](){window['GameServer']['setLoginConfig']({'forceLoginType':'guest','mockLoginDelay':0x1f4});const _0x2d3421=((async()=>await window['GameServer']['init']())()),_0x43f2bc=new Promise((_0x1df2ba,_0x4f1cd4)=>{setTimeout(()=>_0x4f1cd4(new Error('FRONTEND_TIMEOUT')),0x2710);});try{const _0x223364=await Promise['race']([_0x2d3421,_0x43f2bc]);if(_0x223364?.['success'])return void this['onLoginComplete']();}catch(_0x8513f5){console['warn']('🟠\x20GameServer.init()\x20failed\x20or\x20timed\x20out:',_0x8513f5&&_0x8513f5['message']?_0x8513f5['message']:_0x8513f5);}try{console['log']('➡️\x20触发游客登录回退流程');const _0x149711=await window['GameServer']['createGuestUser']();window['GameServer']['saveUserData']('currentUser',_0x149711),window['GameServer']['currentUserStatus']=_0x149711,this['onLoginComplete']();}catch(_0x548999){console['error']('❌\x20游客登录回退失败:',_0x548999);}}['updateLoadingProgress'](_0x4e3d59){if(this['loadingProgress']){_0x4e3d59=Math['max'](0x0,Math['min'](0x1,_0x4e3d59));const _0x243e45=Math['round'](0x64*_0x4e3d59);this['loadingProgress']['style']['width']=_0x243e45+'%',_0x4e3d59>=0x1&&console['log']('🎯\x20Loading\x20complete!');}}async['switchToGameScene'](){if(this['__sceneSwitching__'])console['warn']('⚠️\x20场景切换已在进行，跳过重复调用');else{this['__sceneSwitching__']=!0x0;try{await this['preloadGameScene'](),await this['ensureAllAssetsReady'](0x2710),this['hideBasicLoading'](),await this['performSceneTransition'](),this['cleanupLoadingScene'](),await this['activateGameScene']();}catch(_0x456761){console['error']('❌\x20场景切换失败:',_0x456761),this['cleanupLoadingScene']();}}}async['preloadGameScene'](){return new Promise((_0x5d1d67,_0x357668)=>{const _0x53634c=this['getGameCompositionId'](),_0x21ffbd=AdobeAn['getComposition'](_0x53634c),_0x4c4769=_0x21ffbd['getLibrary']();if(this['sceneManifest']=_0x4c4769['properties']['manifest']||[],_0x4c4769['properties']['manifest']&&_0x4c4769['properties']['manifest']['length']>0x0){const _0x5dd0d8=new createjs['LoadQueue'](!0x1);let _0x842561=0x0;const _0x58f6e5=_0x4c4769['properties']['manifest']['length'];_0x5dd0d8['addEventListener']('fileload',_0x5b0086=>{_0x842561++;const _0x44c9f8=_0x842561/_0x58f6e5;this['updateLoadingProgress'](0.8+0.2*_0x44c9f8);const _0x2f6eff=_0x21ffbd['getImages']();if(_0x5b0086&&'image'===_0x5b0086['item']['type']){_0x2f6eff[_0x5b0086['item']['id']]=_0x5b0086['result'];try{this['loadedImages']||(this['loadedImages']=new Map()),this['loadedImages']instanceof Map?(this['loadedImages']['set'](_0x5b0086['item']['id'],_0x5b0086['result']),_0x5b0086['item']&&_0x5b0086['item']['src']&&this['loadedImages']['set'](_0x5b0086['item']['src'],_0x5b0086['result'])):(this['loadedImages'][_0x5b0086['item']['id']]=_0x5b0086['result'],_0x5b0086['item']&&_0x5b0086['item']['src']&&(this['loadedImages'][_0x5b0086['item']['src']]=_0x5b0086['result']));}catch(_0x4e6330){}}}),_0x5dd0d8['addEventListener']('complete',()=>{_0x5dd0d8['removeAllEventListeners']();const _0x15feb5=_0x21ffbd['getSpriteSheet'](),_0x2c248a=_0x4c4769['ssMetadata'];try{for(let _0x2af181=0x0;_0x2af181<_0x2c248a['length'];_0x2af181++){const _0x505e61=_0x2c248a[_0x2af181]['name'],_0x28037d=_0x5dd0d8['getResult'](_0x505e61);_0x28037d||console['warn']('⚠️\x20SpriteSheet\x20image\x20missing\x20for',_0x505e61,'—\x20loader\x20result\x20is\x20null'),_0x15feb5[_0x505e61]=new createjs['SpriteSheet']({'images':[_0x28037d],'frames':_0x2c248a[_0x2af181]['frames']});}let _0x36a372=null;try{_0x36a372=new _0x4c4769['flygame']();}catch(_0x23bc47){return console['error']('❌\x20exportRoot\x20creation\x20failed:',_0x23bc47),this['preloadedGameScene']={'comp':_0x21ffbd,'lib':_0x4c4769,'exportRoot':null},_0x5d1d67();}this['preloadedGameScene']={'comp':_0x21ffbd,'lib':_0x4c4769,'exportRoot':_0x36a372},_0x5d1d67();}catch(_0x1c40cd){console['error']('❌\x20Error\x20during\x20GameScene\x20sprite\x20setup:',_0x1c40cd),this['preloadedGameScene']={'comp':_0x21ffbd,'lib':_0x4c4769,'exportRoot':null},_0x5d1d67();}}),_0x5dd0d8['addEventListener']('error',_0x56364b=>{console['error']('❌\x20GameScene资源加载失败:',_0x56364b),_0x357668(new Error('GameScene资源加载失败:\x20'+(_0x56364b['item']&&_0x56364b['item']['src'])));}),setTimeout(()=>{_0x842561<_0x58f6e5&&(console['warn']('⚠️\x20GameScene加载超时，强制继续'),_0x5dd0d8['removeAllEventListeners'](),_0x5d1d67());},0x2710);const _0x4de8db=_0x4c4769['properties']['manifest']['map'](_0x45ab5a=>({..._0x45ab5a,'src':_0x45ab5a['src']&&_0x45ab5a['src']['startsWith']('images/')?'resan/'+_0x45ab5a['src']:_0x45ab5a['src']}));this['sceneManifest']=_0x4de8db,_0x5dd0d8['addEventListener']('fileload',_0x5d5e3b=>{try{if(_0x5d5e3b&&_0x5d5e3b['item']&&'image'===_0x5d5e3b['item']['type']){const _0x5b59b2=_0x5d5e3b['item']['id'];this['loadedImages']||(this['loadedImages']=new Map()),this['loadedImages']['set'](_0x5b59b2,_0x5d5e3b['result']),window['gameImages']||(window['gameImages']={}),window['gameImages'][_0x5b59b2]=_0x5d5e3b['result'];}}catch(_0x52aec4){console['warn']('预加载场景时缓存图片失败',_0x52aec4);}}),_0x5dd0d8['loadManifest'](_0x4de8db);}else{const _0x59445d=_0x21ffbd['getLibrary']();this['preloadedGameScene']={'comp':_0x21ffbd,'lib':_0x59445d,'exportRoot':new _0x59445d['flygame']()},_0x5d1d67();}});}async['performSceneTransition'](){return new Promise(_0x175d45=>{this['gl_mc']?createjs['Tween']['get'](this['gl_mc'])['to']({'alpha':0x0},0x1f4,createjs['Ease']['quadOut'])['call'](()=>{_0x175d45();}):_0x175d45();});}['cleanupLoadingScene'](){this['gl_mc']&&(this['stage']['removeChild'](this['gl_mc']),this['gl_mc']=null,this['gl_loadBar']=null),this['stage']['removeAllChildren']();}async['activateGameScene'](){if(!this['preloadedGameScene'])return void console['error']('❌\x20预加载的GameScene不存在');if(!this['preloadedGameScene']['exportRoot'])return void console['error']('❌\x20activateGameScene:\x20exportRoot\x20is\x20null\x20—\x20preload\x20likely\x20failed\x20or\x20timed\x20out.\x20Aborting\x20activation.');for(var _0x32c405 in(this['exportRoot']=this['preloadedGameScene']['exportRoot'],this['exportRoot']['children']))_0x1f0edf['A']['goStop'](this['exportRoot']['children'][_0x32c405],!0x0);this['exportRoot']['visible']=!0x1,this['stage']['addChild'](this['exportRoot']);const _0x4674f8=window['GameServer']['currentUserStatus'],_0x55a9cf={'engine':this,'stage':this['stage'],'exportRoot':this['exportRoot'],'canvas':this['canvas'],'config':this['config'],'loadedSounds':this['loadedSounds'],'loadedImages':this['loadedImages'],'userStatus':_0x4674f8};window['GameScense']&&window['GameScense']['init'](_0x55a9cf);try{void 0x0!==window['ovo']&&'function'==typeof window['ovo']['dotGameStart']&&(window['ovo']['dotGameStart']('main_game','player'),console['log']('🎮\x20level_start\x20事件已发送')),setTimeout(()=>{void 0x0!==window['ovo']&&'function'==typeof window['ovo']['showBannerAd']&&window['ovo']['showBannerAd'](()=>{console['log']('📢\x20Banner\x20ad\x20shown\x2030s\x20after\x20game\x20start');});},0x7530);}catch(_0x2804c1){console['warn']('⚠️\x20发送游戏开始事件失败',_0x2804c1);}this['preloadedGameScene']=null;}['updateLoadingProgress'](_0xca8a15){if(this['loadingProgress']){_0xca8a15=Math['max'](0x0,Math['min'](0x1,_0xca8a15));const _0x28cec2=Math['round'](0x64*_0xca8a15);this['loadingProgress']['style']['width']=_0x28cec2+'%',_0xca8a15>=0x1&&!this['loadingCompleteLogged']&&(console['log']('🎯\x20Loading\x20complete!'),this['loadingCompleteLogged']=!0x0);}}['testAudioPlayback'](_0x3ab741){if(0x0===this['pubSound']['length'])return void _0x3ab741();let _0x3cca50=0x0;const _0x572837=_0x5e29f9=>{createjs['Sound']['play'](_0x5e29f9),setTimeout(()=>{createjs['Sound']['stop'](),_0x3cca50++,this['goPlayFrameEnd'](this['gl_loadBar'],0x32+_0x3cca50),this['pubSound']['shift'](),0x0===this['pubSound']['length']?(createjs['Sound']['muted']=!0x1,_0x3ab741()):_0x572837(this['pubSound'][0x0]);},0x64);};_0x572837(this['pubSound'][0x0]);}['stageUpdateHandler'](){this['stage']&&this['stage']['update']();}['updateProgress'](_0x149968){this['currentProgress']=_0x149968,this['loadingProgress']['style']['width']=_0x149968+'%';}['goPlayFrameEnd'](_0x5cfbf5,_0x142d91){_0x5cfbf5&&_0x5cfbf5['gotoAndStop'](_0x142d91-0x2);}['hideBasicLoading'](){const _0x3b5925=document['getElementById']('preload_container');_0x3b5925&&(_0x3b5925['style']['opacity']='0',setTimeout(()=>{_0x3b5925['style']['display']='none';},0x1f4));}['playSound'](_0x4895fa,_0x465de7={}){if(!this['soundInitialized'])return console['warn']('🎵\x20SoundJS\x20未初始化，无法播放声音:\x20'+_0x4895fa),null;null===localStorage['getItem']('musicEnabled')||localStorage['getItem']('musicEnabled');const _0x3e4add=null===localStorage['getItem']('soundEnabled')||'true'===localStorage['getItem']('soundEnabled');if('bgm'===_0x4895fa)return this['playBGM']({'volume':'number'==typeof _0x465de7['volume']?_0x465de7['volume']:0.4});if('bgm'!==_0x4895fa&&!_0x3e4add)return console['warn']('🎵\x20音效已被禁用:\x20'+_0x4895fa),null;if(!this['loadedSounds']['has'](_0x4895fa))return console['warn']('🎵\x20声音未加载或加载失败:\x20'+_0x4895fa),null;try{const _0x71657e=createjs['Sound']['play'](_0x4895fa,_0x465de7);return _0x71657e?(_0x71657e['playState']===createjs['Sound']['PLAY_SUCCEEDED']?this['soundStatus'][_0x4895fa]=!0x0:_0x71657e['playState']===createjs['Sound']['PLAY_FAILED']&&(this['soundStatus'][_0x4895fa]=!0x1),_0x71657e):(this['soundStatus'][_0x4895fa]=!0x1,console['warn']('🎵\x20声音播放失败:\x20'+_0x4895fa),null);}catch(_0x4b9d25){return console['error']('🎵\x20声音播放异常:\x20'+_0x4895fa,_0x4b9d25),null;}}['stopSound'](_0x298cf4){if(this['soundInitialized'])try{createjs['Sound']['stop'](_0x298cf4),this['soundStatus'][_0x298cf4]=!0x1,'bgm'===_0x298cf4&&(this['bgmInstance']=null),console['log']('🎵\x20停止声音:\x20'+_0x298cf4);}catch(_0x47a461){console['error']('🎵\x20停止声音异常:\x20'+_0x298cf4,_0x47a461);}else console['warn']('🎵\x20SoundJS\x20未初始化，无法停止声音:\x20'+_0x298cf4);}['isBGMPlaying'](){return!!this['soundStatus']['bgm'];}['setBGMLoopWindow'](_0x20e56f=0x0,_0x493106=null,_0x247f81=0x50){this['_bgmOffsetMs']=Math['max'](0x0,_0x20e56f),this['_bgmDurMs']=null!=_0x493106?Math['max'](0x64,_0x493106):null,this['_bgmCrossfadeMs']=Math['max'](0x0,_0x247f81);}['playBGM'](_0x3b1402={'volume':0.5}){if(!(null!==localStorage['getItem']('musicEnabled')&&'true'!==localStorage['getItem']('musicEnabled')||this['bgmInstance']&&this['bgmInstance']['playState']===createjs['Sound']['PLAY_SUCCEEDED']))try{const _0x2d62ca=null!=_0x3b1402['volume']?_0x3b1402['volume']:0.5,_0x4173be=createjs['Sound']['play']('bgm',{'loop':-0x1,'volume':_0x2d62ca,'offset':this['_bgmOffsetMs']||0x0});_0x4173be&&_0x4173be['playState']===createjs['Sound']['PLAY_SUCCEEDED']&&(this['bgmInstance']=_0x4173be,this['soundStatus']&&(this['soundStatus']['bgm']=!0x0));}catch(_0x1d8c41){console['warn']('⚠️\x20playBGM\x20fallback\x20failed',_0x1d8c41);}}['stopBGM'](){this['_bgmTicker']&&(createjs['Ticker']['off']('tick',this['_bgmTicker']),this['_bgmTicker']=null);try{this['bgmInstance']&&this['bgmInstance']['stop']&&this['bgmInstance']['stop']();}catch(_0xf2c7c8){}try{this['_bgmNext']&&this['_bgmNext']['stop']&&this['_bgmNext']['stop']();}catch(_0x333fd4){}this['bgmInstance']=null,this['_bgmNext']=null,this['soundStatus']&&(this['soundStatus']['bgm']=!0x1);}['_startBgmSegment'](_0x52d102=0.5){try{const _0x19ccca={'loop':0x0,'volume':_0x52d102,'offset':this['_bgmOffsetMs']||0x0};null!=this['_bgmDurMs']&&(_0x19ccca['duration']=this['_bgmDurMs']);const _0x3cc63c=createjs['Sound']['play']('bgm',_0x19ccca);_0x3cc63c&&_0x3cc63c['playState']===createjs['Sound']['PLAY_SUCCEEDED']&&(this['bgmInstance']=_0x3cc63c,this['soundStatus']&&(this['soundStatus']['bgm']=!0x0),_0x3cc63c['on']('complete',()=>{this['soundStatus']['bgm']=!0x1,this['_bgmNext']||this['_startBgmSegment'](_0x52d102);}),_0x3cc63c['on']('failed',()=>{this['soundStatus']['bgm']=!0x1;}),_0x3cc63c['on']('interrupted',()=>{this['soundStatus']['bgm']=!0x1;}));}catch(_0x2ebb38){console['warn']('⚠️\x20BGM\x20段播放失败',_0x2ebb38);}}['_beginBgmMonitor'](){this['_bgmTicker']||(this['_bgmTicker']=()=>{const _0x99deae=this['bgmInstance'];if(!_0x99deae)return;const _0x8716f9=null!=this['_bgmDurMs']?this['_bgmDurMs']:_0x99deae['duration']||0x0,_0x11b177=_0x99deae['position']||0x0;if(_0x8716f9&&_0x8716f9-_0x11b177<=this['_bgmCrossfadeMs']){if(!this['_bgmNext'])try{this['_bgmNext']=createjs['Sound']['play']('bgm',{'loop':0x0,'offset':this['_bgmOffsetMs']||0x0,'volume':0x0});}catch(_0x4db378){}if(_0x8716f9-_0x11b177<=0xa){try{_0x99deae['stop']();}catch(_0x559a1d){}this['bgmInstance']=this['_bgmNext']||this['bgmInstance'],this['_bgmNext']=null;}}},createjs['Ticker']['on']('tick',this['_bgmTicker']));}['setMusicEnabled'](_0x8bf627){localStorage['setItem']('musicEnabled',_0x8bf627?'true':'false'),_0x8bf627?this['playBGM']({'loop':-0x1,'volume':0.4}):this['stopBGM']();}['setSoundEnabled'](_0x47f290){if(localStorage['setItem']('soundEnabled',_0x47f290?'true':'false'),!_0x47f290)try{createjs['Sound']['stop']();}catch(_0x1366d6){}}['setSoundVolume'](_0x5a0b93){if(this['soundInitialized'])try{const _0x32bb6f=Math['max'](0x0,Math['min'](0x1,_0x5a0b93));createjs['Sound']['volume']=_0x32bb6f;}catch(_0x398729){console['error']('🎵\x20设置音量异常:',_0x398729);}else console['warn']('🎵\x20SoundJS\x20未初始化，无法设置音量');}['isSoundPlaying'](_0x4c9b6e){return!!this['soundStatus'][_0x4c9b6e];}['setupAutoplayHandler'](){if(this['isSoundPlaying']&&this['isSoundPlaying']('bgm'))return;if(this['__autoPlayBound__'])return;this['__autoPlayBound__']=!0x0;const _0x27b9ba=()=>{this['audioEnabled']||(this['audioEnabled']=!0x0,createjs['Sound']['muted']=!0x1,this['isSoundPlaying']('bgm')||this['playBGM']({'volume':0.4})),document['removeEventListener']('click',_0x27b9ba),document['removeEventListener']('touchstart',_0x27b9ba),document['removeEventListener']('keydown',_0x27b9ba);};document['addEventListener']('click',_0x27b9ba),document['addEventListener']('touchstart',_0x27b9ba),document['addEventListener']('keydown',_0x27b9ba);}['tryAutoStartBGM'](){if(!(null===localStorage['getItem']('musicEnabled')||'true'===localStorage['getItem']('musicEnabled')))return;if(this['isSoundPlaying']&&this['isSoundPlaying']('bgm'))return;try{createjs['Sound']&&createjs['Sound']['activePlugin']&&createjs['Sound']['activePlugin']['context']&&createjs['Sound']['activePlugin']['context'];}catch(_0x772570){}const _0x17c7fc=this['playSound']('bgm',{'loop':-0x1,'volume':0.4,'autoAttempt':!0x0});let _0x221f6a=!0x0;try{const _0x4368cb=createjs['Sound']['activePlugin']&&createjs['Sound']['activePlugin']['context'];_0x4368cb&&'running'!==_0x4368cb['state']&&(_0x221f6a=!0x1);}catch(_0x311244){}_0x17c7fc&&_0x17c7fc['playState']===createjs['Sound']['PLAY_SUCCEEDED']&&_0x221f6a?(this['audioEnabled']=!0x0,this['__autoPlayBound__']&&(document['removeEventListener']('click',this['__autoPlayClickHandler__']),document['removeEventListener']('touchstart',this['__autoPlayClickHandler__']),document['removeEventListener']('keydown',this['__autoPlayClickHandler__']))):console['log']('⚠️\x20自动播放\x20BGM\x20失败或被阻止，等待用户点击');}['getImage'](_0x17a02a){return this['loadedImages']['has'](_0x17a02a)?this['loadedImages']['get'](_0x17a02a):(console['warn']('🖼️\x20图片未找到:\x20'+_0x17a02a),null);}async['loadCoreGameFiles'](){const _0x5c7ce5=this['config']['gameconfig'],_0x470ff9=[];return _0x5c7ce5&&_0x5c7ce5['scripts']&&_0x470ff9['push'](..._0x5c7ce5['scripts']),_0x5c7ce5&&_0x5c7ce5['sounds']&&_0x470ff9['push'](..._0x5c7ce5['sounds']),_0x5c7ce5&&_0x5c7ce5['images']&&_0x470ff9['push'](..._0x5c7ce5['images']),0x0===_0x470ff9['length']?(console['log']('⚠️\x20没有资源需要加载，直接完成'),Promise['resolve']()):new Promise(_0x508a5b=>{const _0x41c5a3=new createjs['LoadQueue'](!0x1);_0x41c5a3['on']('fileload',_0x109498=>{const _0x58ba6b=_0x109498['item'],_0x48b8a5=_0x58ba6b['id'],_0x113189=_0x109498['result'];switch(_0x58ba6b['type']){case createjs['Types']['JAVASCRIPT']:_0x48b8a5===this['compName']&&(this['pubComp']=AdobeAn['getComposition'](this['commCode']),this['pubLib']=this['pubComp']['getLibrary']()),_0x48b8a5===this['mainName']&&(this['mainComp']=AdobeAn['getComposition'](this['mainCode']),this['mainLib']=this['mainComp']['getLibrary']());break;case createjs['Types']['JSON']:if(_0x48b8a5==='resdata_'+this['mainName']){this['soundArr']=[],this['imgArr']=[];for(const _0x474ea0 in _0x113189){if(_0x113189[_0x474ea0]['soundData']){const _0x578aa8=_0x113189[_0x474ea0]['route']||'';this['soundArr']['push']({'id':_0x113189[_0x474ea0]['soundid'],'src':'sounds/'+_0x578aa8+_0x113189[_0x474ea0]['soundData']+'.mp3'});}if(_0x113189[_0x474ea0]['imgData']){const _0x55c74e=_0x113189[_0x474ea0]['image']||'';this['imgArr']['push']({'id':_0x113189[_0x474ea0]['imgid'],'src':'images/'+_0x55c74e+_0x113189[_0x474ea0]['imgData']});}}}}}),_0x41c5a3['on']('complete',()=>{this['goPlayFrameEnd'](this['gl_loadBar'],0xa),_0x508a5b();}),_0x41c5a3['loadManifest'](_0x470ff9);});}['loadScript'](_0x2aa5f1){return new Promise((_0x359cfd,_0x2c414b)=>{if(this['loadedScripts']&&this['loadedScripts']['has'](_0x2aa5f1))return void _0x359cfd();const _0x4745f3=document['createElement']('script');_0x4745f3['async']=!0x1,_0x4745f3['src']=_0x2aa5f1,_0x4745f3['onload']=()=>{this['loadedScripts']||(this['loadedScripts']=new Set()),this['loadedScripts']['add'](_0x2aa5f1),_0x4745f3['remove'](),_0x359cfd();},_0x4745f3['onerror']=_0x239448=>{console['error']('脚本加载失败:\x20'+_0x2aa5f1,_0x239448),_0x2c414b(_0x239448);},document['body']['appendChild'](_0x4745f3);});}async['loadImageResources'](){if(0x0!==this['imgArr']['length'])return new Promise(_0x10ea97=>{const _0x139f05=new createjs['LoadQueue'](!0x1);_0x139f05['on']('fileload',_0x10a803=>{const _0x456494=_0x10a803['item']['id'];if(this['pubComp']&&_0x456494===this['imgArr'][0x0]['id']){const _0x17bc0e=this['pubComp']['getImages']();_0x10a803&&'image'===_0x10a803['item']['type']&&(_0x17bc0e[_0x10a803['item']['id']]=_0x10a803['result']);const _0x96ce11=this['pubComp']['getSpriteSheet'](),_0x414215=this['pubComp']['getLibrary']()['ssMetadata'];for(let _0x338045=0x0;_0x338045<_0x414215['length'];_0x338045++)_0x96ce11[_0x414215[_0x338045]['name']]=new createjs['SpriteSheet']({'images':[_0x139f05['getResult'](_0x414215[_0x338045]['name'])],'frames':_0x414215[_0x338045]['frames']});}if(this['mainComp']){const _0xf8d27c=this['mainComp']['getLibrary'](),_0x45a862=this['mainComp']['getSpriteSheet'](),_0x1c88f8=_0xf8d27c['ssMetadata'];for(const _0x44f5a5 in _0xf8d27c['properties']['manifest']){const _0x5e6812=this['mainComp']['getImages']();if(_0x456494===_0xf8d27c['properties']['manifest'][_0x44f5a5]['id']){_0x10a803&&'image'===_0x10a803['item']['type']&&(_0x5e6812[_0x10a803['item']['id']]=_0x10a803['result']);for(let _0x2ccdb4=0x0;_0x2ccdb4<_0x1c88f8['length'];_0x2ccdb4++)_0x456494===_0x1c88f8[_0x2ccdb4]['name']&&(_0x45a862[_0x1c88f8[_0x2ccdb4]['name']]=new createjs['SpriteSheet']({'images':[_0x139f05['getResult'](_0x1c88f8[_0x2ccdb4]['name'])],'frames':_0x1c88f8[_0x2ccdb4]['frames']}));}}}}),_0x139f05['on']('complete',()=>{this['goPlayFrameEnd'](this['gl_loadBar'],0x64),setTimeout(()=>{this['stage']['removeAllChildren'](),_0x10ea97();},0x1f4);}),_0x139f05['loadManifest'](this['imgArr']);});}async['loadResource'](_0x2bc73d,_0x50a1ce,_0x1314a7){const {id:_0x2f8e0e,src:_0x50aaaf,type:_0x38e2ee}=_0x2bc73d;if('sound'===_0x38e2ee&&this['loadedSounds']['has'](_0x2f8e0e))return;try{switch(_0x38e2ee){case'script':await this['loadScript'](_0x50aaaf);break;case'sound':try{'bgm'===_0x2f8e0e?this['loadSound'](_0x2f8e0e,_0x50aaaf)['catch'](_0x3a65b9=>{console['warn']('⚠️\x20bgm\x20background\x20load\x20failed:\x20'+_0x50aaaf,_0x3a65b9&&_0x3a65b9['message']?_0x3a65b9['message']:_0x3a65b9);}):await this['loadSound'](_0x2f8e0e,_0x50aaaf);}catch(_0x149046){console['warn']('⚠️\x20声音加载失败，但不影响游戏运行:\x20'+_0x50aaaf,_0x149046&&_0x149046['message']?_0x149046['message']:_0x149046);}break;case'image':try{await this['loadImage'](_0x2f8e0e,_0x50aaaf);}catch(_0x15e457){console['warn']('⚠️\x20图片加载失败，但不影响游戏运行:\x20'+_0x50aaaf,_0x15e457['message']);}break;default:console['warn']('未知的资源类型:\x20'+_0x38e2ee);}}catch(_0x832900){throw console['error']('❌\x20关键资源加载失败:\x20'+_0x50aaaf,_0x832900),_0x832900;}const _0x252752=(_0x50a1ce+0x1)/_0x1314a7;this['updateLoadingProgress'](_0x252752),await new Promise(_0x31c0ec=>setTimeout(_0x31c0ec,0x96));}async['loadSound'](_0x5bd50a,_0x4eca1e){return new Promise((_0x2ee67d,_0x5ecd3c)=>{if(!this['soundInitialized'])try{createjs['Sound']['registerPlugins']([createjs['WebAudioPlugin']]),createjs['Sound']['alternateExtensions']=['mp3','ogg'],createjs['Sound']['muted']=!0x0,this['soundInitialized']=!0x0;}catch(_0x4caadf){return console['error']('🎵\x20SoundJS\x20初始化失败:',_0x4caadf),void _0x5ecd3c(new Error('SoundJS\x20initialization\x20failed:\x20'+_0x4caadf['message']));}const _0x188e33=setTimeout(()=>{console['warn']('🎵\x20声音加载超时:\x20'+_0x5bd50a+'\x20('+_0x4eca1e+')'),_0x5ecd3c(new Error('Sound\x20load\x20timeout:\x20'+_0x4eca1e));},0x2710),_0x21022f=_0x33efc7=>{_0x33efc7['id']===_0x5bd50a&&(clearTimeout(_0x188e33),createjs['Sound']['removeEventListener']('fileload',_0x21022f),createjs['Sound']['removeEventListener']('fileerror',_0x44d373),this['loadedSounds']['set'](_0x5bd50a,_0x4eca1e),_0x2ee67d());},_0x44d373=_0x17cda8=>{_0x17cda8['id']===_0x5bd50a&&(clearTimeout(_0x188e33),createjs['Sound']['removeEventListener']('fileload',_0x21022f),createjs['Sound']['removeEventListener']('fileerror',_0x44d373),console['error']('🎵\x20声音文件加载失败:\x20'+_0x5bd50a,_0x17cda8),_0x5ecd3c(new Error('Sound\x20load\x20failed:\x20'+_0x4eca1e+'\x20-\x20'+(_0x17cda8['message']||'Unknown\x20error'))));};createjs['Sound']['addEventListener']('fileload',_0x21022f),createjs['Sound']['addEventListener']('fileerror',_0x44d373);try{createjs['Sound']['registerSound'](_0x4eca1e,_0x5bd50a);}catch(_0x29253e){clearTimeout(_0x188e33),createjs['Sound']['removeEventListener']('fileload',_0x21022f),createjs['Sound']['removeEventListener']('fileerror',_0x44d373),_0x5ecd3c(new Error('Failed\x20to\x20register\x20sound:\x20'+_0x4eca1e+'\x20-\x20'+_0x29253e['message']));}});}async['loadImage'](_0x5c8e58,_0x1322a1){return new Promise((_0xf910b8,_0x21da8f)=>{const _0x844bdd=new Image(),_0x46c7a3=setTimeout(()=>{console['warn']('🖼️\x20图片加载超时:\x20'+_0x5c8e58+'\x20('+_0x1322a1+')'),_0x21da8f(new Error('Image\x20load\x20timeout:\x20'+_0x1322a1));},0x3a98);_0x844bdd['onload']=()=>{clearTimeout(_0x46c7a3),this['loadedImages']['set'](_0x5c8e58,_0x844bdd),window['gameImages']||(window['gameImages']={}),window['gameImages'][_0x5c8e58]=_0x844bdd,_0xf910b8(_0x844bdd);},_0x844bdd['onerror']=_0x46c867=>{clearTimeout(_0x46c7a3),console['error']('🖼️\x20图片加载失败:\x20'+_0x5c8e58,_0x46c867),_0x21da8f(new Error('Image\x20load\x20failed:\x20'+_0x1322a1+'\x20-\x20'+(_0x46c867['message']||'Unknown\x20error')));},_0x844bdd['crossOrigin']='anonymous',_0x844bdd['src']=_0x1322a1;});}}document['addEventListener']('DOMContentLoaded',()=>{if(window['__GAME_ENGINE_INSTANCE__'])return void console['warn']('⚠️\x20引擎实例已存在，跳过创建');new _0x5a23fc()['init']()['catch'](_0x44c038=>{console['error']('Game\x20engine\x20failed\x20to\x20start:',_0x44c038);});});},0x324:()=>{window['CardGame']=class{constructor(){this['stage']=null,this['exportRoot']=null,this['engine']=null,this['scene']=null,this['loadedSounds']=null,this['isDrawing']=!0x1,this['playerScore']=0x0,this['drawCost']=0x64,this['goButton']=null,this['cardContainer']=null,this['scoreDisplay']=null,this['block']=null,this['cardConfig']={0x0:{'name':'锤子','eggid':0x7,'rarity':'hammer','probability':0x0},0x1:{'name':'黄金龙','eggid':0x6,'rarity':'legendary','probability':0x46},0x2:{'name':'红龙','eggid':0x5,'rarity':'legendary','probability':0x50},0x3:{'name':'紫龙','eggid':0x4,'rarity':'legendary','probability':0x32},0x4:{'name':'黑龙','eggid':0x0,'rarity':'evildragon','probability':0x64},0x5:{'name':'灰龙','eggid':0x1,'rarity':'common','probability':0x5a},0x6:{'name':'绿龙','eggid':0x2,'rarity':'rare','probability':0x28},0x7:{'name':'蓝龙','eggid':0x3,'rarity':'epic','probability':0x14}},this['cardContainer']=null,this['cardSlots']=[],this['goButton']=null,this['scoreDisplay']=null,console['log']('🎴\x20CardGame\x20初始化完成');}async['init'](_0x45873c){console['log']('🎴\x20抽卡游戏初始化开始...'),this['stage']=_0x45873c['stage'],this['exportRoot']=_0x45873c['exportRoot'],this['engine']=_0x45873c['engine'],this['scene']=_0x45873c['scene'],this['loadedSounds']=_0x45873c['loadedSounds'],this['playerScore']=this['getPlayerScore']();const _0x45fad2=utile['findMc'](this['exportRoot'],'mc_failure');this['card_reward_Mc']=utile['findMc'](_0x45fad2,'mc_card_reward'),this['card_reward_Mc']?(this['block']=utile['findMc'](this['card_reward_Mc'],'mc_card_container'),this['block']&&(this['block']['mouseEnabled']=!0x0,this['block']['hasEventListener']('click')||this['block']['on']('click',function(_0x104c22){return console['log']('🛡️\x20胜利界面屏蔽层拦截了点击事件'),_0x104c22['stopImmediatePropagation'](),_0x104c22['stopPropagation'](),_0x104c22['preventDefault'](),!0x1;})),this['cardContainer']=utile['findMc'](this['card_reward_Mc'],'mc_card_container'),this['cardContainer']||console['warn']('⚠️\x20未找到\x20mc_card_container，动画逻辑将退化'),this['goButton']=utile['findMc'](this['card_reward_Mc'],'btn_go'),this['goButton']?(this['goButton']['play'](),this['bindEvents'](),console['log']('✅\x20抽卡游戏初始化完成'),console['log']('📽️\x20mc_card_container\x20总帧数:\x20'+this['cardContainer']['totalFrames'])):console['error']('❌\x20未找到\x20btn_go')):console['error']('❌\x20未找到\x20mc_card_reward\x20元件');}['playSoundWait'](_0x3a1d2f){return this['engine']&&this['loadedSounds']&&this['loadedSounds']['has'](_0x3a1d2f)?new Promise(_0x199ad7=>{try{const _0x3727a5=this['engine']['playSound'](_0x3a1d2f);if(!_0x3727a5||!_0x3727a5['on'])return _0x199ad7();const _0x4641e1=()=>_0x199ad7();_0x3727a5['on']('complete',_0x4641e1),_0x3727a5['on']('failed',_0x4641e1),_0x3727a5['on']('interrupted',_0x4641e1);}catch(_0x4b270e){_0x199ad7();}}):Promise['resolve']();}['initScoreDisplay'](){const _0x14ad59=utile['findMc'](this['cardContainer'],'mc_score');_0x14ad59?(this['scoreDisplay']=utile['findMc'](_0x14ad59,'text_score'),this['scoreDisplay']?(this['updateScoreDisplay'](),console['log']('💰\x20积分显示初始化完成')):console['error']('❌\x20未找到\x20text_score\x20元件')):console['error']('❌\x20未找到\x20mc_score\x20元件');}['bindEvents'](){console['log']('🔗\x20绑定抽卡事件...'),setTimeout(()=>{this['goButton']['removeAllEventListeners']('click'),this['goButton']['on']('click',_0x36da47=>{console['log']('🎯\x20GO按钮被点击'),_0x36da47['stopImmediatePropagation'](),ovo['showRewardedAd'](()=>{this['startCardDraw']();});}),this['goButton']['cursor']='pointer',this['goButton']['mouseEnabled']=!0x0,console['log']('✅\x20GO按钮事件绑定完成');},0x64);}async['startCardDraw'](){if(this['goButton']['stop'](),this['cardContainer']&&!this['isDrawing']){this['isDrawing']=!0x0,this['goButton']&&(this['goButton']['mouseEnabled']=!0x1);try{const _0x3b7d74=this['getCardByProbability']();try{if(window['GameServer']&&'function'==typeof window['GameServer']['applyCardBoost']){const _0x412f57=Number(_0x3b7d74['probability'])||0x0,_0x15e627=Math['max'](0x0,Math['min'](0x1,(0x64-_0x412f57)/0x3e8));0x0!==_0x15e627&&window['GameServer']['applyCardBoost'](_0x3b7d74['eggid'],_0x15e627);}}catch(_0x591304){}const _0x3111d1=0x9+Math['floor'](0x4*Math['random']());await this['spinToResultSimple'](_0x3b7d74,{'rotations':_0x3111d1,'framesPerTick':0x1,'loopSound':!0x0}),this['playSound']('cardReveal'),this['showRewardedAd'](_0x3b7d74);}catch(_0x271011){console['error']('❌\x20抽卡失败:',_0x271011);}finally{this['isDrawing']=!0x1,this['goButton']&&(this['goButton']['mouseEnabled']=!0x0);}}}['spinToResultSimple'](_0x219e3e,_0x4dad21={}){return new Promise(_0x133f99=>{const _0x40e0a2=this['cardContainer'];if(!_0x40e0a2||!_0x40e0a2['totalFrames'])return _0x133f99();const _0x165824=_0x40e0a2['totalFrames'],_0x1fe7b5=_0x40e0a2['currentFrame']||0x0,_0x442b90=this['getFrameByCardId'](_0x219e3e['id']),_0x5f00b2=Math['max'](0x1,_0x4dad21['rotations']||0x6),_0x128131=Math['max'](0x1,_0x4dad21['framesPerTick']||0x6),_0x305987=_0x5f00b2*_0x165824+(_0x442b90-_0x1fe7b5+_0x165824)%_0x165824;let _0x55b4c4=0x0,_0x3820d8=null;if(_0x4dad21['loopSound']&&this['engine']&&this['loadedSounds']&&this['loadedSounds']['has']('card'))try{_0x3820d8=this['engine']['playSound']('card',{'loop':-0x1,'volume':0x1});}catch(_0x52af38){}_0x40e0a2['gotoAndStop'](_0x1fe7b5);let _0x28e281=!0x1;const _0x95fcf6=()=>{if(this['goButton']['play'](),!_0x28e281){_0x28e281=!0x0;try{_0x40e0a2['gotoAndStop'](_0x442b90),_0x3820d8&&_0x3820d8['stop']&&_0x3820d8['stop']();}catch(_0x4bbf5b){}createjs['Ticker']['off']('tick',_0x163a8d),_0x133f99();}},_0x163a8d=()=>{if(_0x28e281)return;const _0x647d4=_0x305987-_0x55b4c4;if(_0x647d4<=0x0)return void _0x95fcf6();_0x55b4c4+=_0x647d4<_0x128131?_0x647d4:_0x128131;const _0x235b66=(_0x1fe7b5+_0x55b4c4)%_0x165824;_0x40e0a2['gotoAndStop'](_0x235b66),_0x55b4c4>=_0x305987&&_0x95fcf6();};createjs['Ticker']['on']('tick',_0x163a8d),setTimeout(()=>_0x95fcf6(),0x7530);});}async['playCardAnimation'](_0x20d6bc='card'){return new Promise(async _0x231590=>{if(!this['cardContainer'])return console['error']('❌\x20cardContainer\x20为空'),_0x231590();this['cardContainer']['gotoAndStop'](0x0),this['cardContainer']['totalFrames'];let _0x1573c1=!0x1;this['playSoundWait'](_0x20d6bc)['then'](()=>{_0x1573c1=!0x0;})['catch'](()=>{_0x1573c1=!0x0;});});}['updateScoreDisplay'](){this['scoreDisplay']&&void 0x0!==this['scoreDisplay']['text']&&(this['scoreDisplay']['text']=''+this['playerScore']);}['getCardByProbability'](){const _0x2a6d7c=Object['entries'](this['cardConfig'])['map'](([_0x4dcde8,_0x59b902])=>({'id':_0x4dcde8,'config':_0x59b902})),_0x40be17=_0x2a6d7c['map'](_0x2b62e2=>{const _0x169d1d=Number(_0x2b62e2['config']['probability']);return isFinite(_0x169d1d)&&_0x169d1d>0x0?_0x169d1d:0x0;}),_0xb8f764=_0x40be17['reduce']((_0x3e8374,_0x820f9b)=>_0x3e8374+_0x820f9b,0x0);if(_0xb8f764<=0x0){const _0x15e151=Math['floor'](Math['random']()*_0x2a6d7c['length']);return{..._0x2a6d7c[_0x15e151]['config'],'id':_0x2a6d7c[_0x15e151]['id']};}if(Math['min'](..._0x40be17)===Math['max'](..._0x40be17)){const _0x3e202e=Math['floor'](Math['random']()*_0x2a6d7c['length']);return{..._0x2a6d7c[_0x3e202e]['config'],'id':_0x2a6d7c[_0x3e202e]['id']};}let _0x44d9db=Math['random']()*_0xb8f764;for(let _0x2f81ae=0x0;_0x2f81ae<_0x2a6d7c['length'];_0x2f81ae++)if(_0x44d9db-=_0x40be17[_0x2f81ae],_0x44d9db<=0x0)return{..._0x2a6d7c[_0x2f81ae]['config'],'id':_0x2a6d7c[_0x2f81ae]['id']};const _0x3817bc=_0x2a6d7c[_0x2a6d7c['length']-0x1];return{..._0x3817bc['config'],'id':_0x3817bc['id']};}['getFrameByCardId'](_0x5645b4){const _0x4f6fc3=this['cardContainer']['totalFrames'],_0x5c1fba=parseInt(_0x5645b4);return Math['floor'](_0x5c1fba*_0x4f6fc3/0x8);}['showRewardedAd'](_0x26d1ca){window['showRewardedVideo']?window['showRewardedVideo'](()=>{this['onAdWatchComplete'](_0x26d1ca);}):(console['log']('🎬\x20激励广告API不可用，直接给予奖励'),this['onAdWatchComplete'](_0x26d1ca));}['onAdWatchComplete'](_0x39a7be){console['log']('🎉\x20广告观看完成，获得奖励:\x20'+_0x39a7be['name']+'\x20(+'+(0x64-_0x39a7be['probability'])+'分)');const _0x61abcf='获得\x20'+_0x39a7be['name']+'\x20(+'+(0x64-_0x39a7be['probability'])+'分)';this['showRewardMessage'](_0x61abcf),setTimeout(()=>{this['scene']&&'function'==typeof this['scene']['failureHandler']?this['scene']['failureHandler'](!0x1):console['warn']('⚠️\x20scene.failureHandler\x20方法不可用');},0x3e8);}['showRewardMessage'](_0x53e89d){if(console['log']('💬\x20奖励消息:\x20'+_0x53e89d),this['scene']&&'function'==typeof this['scene']['tips'])this['scene']['tips'](_0x53e89d,null,'bold\x2028px\x20Arial','#FFD700',0x1);else{console['warn']('⚠️\x20scene.tips\x20方法不可用，使用备用方式');const _0x17b10e=new createjs['Text'](_0x53e89d,'bold\x2024px\x20Arial','#FFD700');_0x17b10e['textAlign']='center',_0x17b10e['x']=this['cardContainer']['x']||0x190,_0x17b10e['y']=(this['cardContainer']['y']||0x12c)-0x64,_0x17b10e['alpha']=0x0,this['stage']['addChild'](_0x17b10e),createjs['Tween']['get'](_0x17b10e)['to']({'alpha':0x1,'y':_0x17b10e['y']-0x14},0x12c)['wait'](0x2bc)['to']({'alpha':0x0,'y':_0x17b10e['y']-0x28},0x12c)['call'](()=>{this['stage']['removeChild'](_0x17b10e);});}}['playSound'](_0x1f0d97){this['engine']&&this['loadedSounds']&&this['loadedSounds']['has'](_0x1f0d97)&&this['engine']['playSound'](_0x1f0d97);}['getPlayerScore'](){return 0x3e8;}['show'](){this['cardContainer']&&(this['cardContainer']['visible']=!0x0);}['hide'](){this['cardContainer']&&(this['cardContainer']['visible']=!0x1);}};},0x360:(_0x4e8f7a,_0x185541,_0x58386a)=>{'use strict';function _0x2eb291(_0x23d585,_0x313562,_0x170072){_0x170072=_0x170072||0x1f40;let _0x869a53=!0x1;const _0x45c1ee=window['SuccessAd'];function _0x2934a9(_0x8e3c3a){if(!_0x869a53){_0x869a53=!0x0,(function(){try{void 0x0===_0x45c1ee?delete window['SuccessAd']:window['SuccessAd']=_0x45c1ee;}catch(_0x47ff53){}}());try{resumeAudioAfterAd();}catch(_0x56ca28){}try{'function'==typeof _0x313562&&_0x313562(!0x1!==_0x8e3c3a);}catch(_0x449a38){}}}try{window['SuccessAd']=function(){try{console['log']('[ovosdk]\x20native\x20SuccessAd\x20called');}catch(_0x179866){}_0x2934a9(!0x0);};}catch(_0x37651c){}const _0x49e389=setTimeout(function(){try{console['log']('[ovosdk]\x20androidShowAd\x20timeout');}catch(_0xd9d4ba){}_0x2934a9(!0x1);},_0x170072),_0x360f10=_0x2934a9;_0x2934a9=function(_0x3e6fb7){clearTimeout(_0x49e389),_0x360f10(_0x3e6fb7);};try{pauseAudioForAd();}catch(_0x47aa86){}try{_0x23d585();}catch(_0x394a4f){try{console['log']('[ovosdk]\x20callNativeFn\x20failed,\x20falling\x20back',_0x394a4f);}catch(_0x42f2d7){}_0x2934a9(!0x1);}return{'cancel':function(){_0x2934a9(!0x1);}};}_0x4e8f7a=_0x58386a['hmd'](_0x4e8f7a);const _0x57b99d={'init':function(){'googleplay'===window['Platform']?(console['log']('[android_ad]\x20Initializing\x20for\x20Google\x20Play\x20platform'),this['initGA4'](),this['setupGtagWrapper'](),this['attachToWindow']()):console['log']('[android_ad]\x20Platform\x20is\x20not\x20googleplay,\x20skipping\x20initialization');},'initGA4':function(){try{if('undefined'!=typeof window&&'undefined'!=typeof document){const _0x2de6fa={'gameid':'GooglePlay','dev_name':'Dragon\x20Egg'},_0x321d06=document['createElement']('script');_0x321d06['async']=!0x0,_0x321d06['src']='https://www.googletagmanager.com/gtag/js?id=G-PM5MNMLL3R',_0x321d06['setAttribute']('crossorigin','anonymous'),_0x321d06['onload']=()=>{window['gtag']('consent','default',{'ad_storage':'granted','ad_user_data':'granted','ad_personalization':'granted','analytics_storage':'granted'}),window['gtag']('js',new Date()),window['gtag']('set','cookie_flags','SameSite=None;Secure'),window['gtag']('config','G-PM5MNMLL3R',{'game_id':_0x2de6fa['gameid'],'dev_name':_0x2de6fa['dev_name']}),console['log']('✅\x20gtag.js\x20loaded\x20with\x20consent\x20and\x20game\x20config');},_0x321d06['onerror']=function(_0x36eacc){console['warn']('⚠️\x20gtag.js\x20failed\x20to\x20load',_0x36eacc);},window['dataLayer']=window['dataLayer']||[],document['getElementsByTagName']('head')[0x0]['appendChild'](_0x321d06);}}catch(_0x4298ec){console['error']('[android_ad]\x20GA4\x20initialization\x20failed',_0x4298ec);}},'setupGtagWrapper':function(){let _0x42df4e=!0x1;window['gtag']=function(){let _0x2a21a1=[...arguments],_0x19b06d=_0x2a21a1[0x1],_0x5713d1=_0x2a21a1[0x2];if(['set','js','config','consent']['includes'](_0x2a21a1[0x0])||['game_start','level_start','level_end']['includes'](_0x19b06d)||['ad_impression','ad_click','ad_error','earn_virtual_currency','select_content','game_play_time','tutorial_complete','game_reward_open','game_interstitialad_open','game_reward_dismissed','game_interstitialad','game_reward','game_reward_viewed','game_interstitialad_viewed','click_ad']['includes'](_0x19b06d)&&_0x5713d1&&'sdk'===_0x5713d1['send']){'function'==typeof window['__sdklog3']&&window['__sdklog3']('gtag_filtered',arguments);try{window['dataLayer']&&'function'==typeof window['dataLayer']['push']&&window['dataLayer']['push'](arguments);}catch(_0x37a7d6){console['log']('dataLayer\x20error:',_0x37a7d6);}}'level_start'!==_0x19b06d||_0x42df4e||(_0x42df4e=!0x0,setInterval(function(){'function'==typeof window['gtag']&&window['gtag']('event','game_play_time',{'send':'sdk'});},0x7530),console['log']('🕒\x20Automatic\x20game_play_time\x20interval\x20started\x20(30s)'));};},'attachToWindow':function(){window['showInterstitialAd']=this['showInterstitialAd'],window['showRewardedAd']=this['showRewardedAd'],window['showBannerAd']=this['showBannerAd'],window['hideBannerAd']=this['hideBannerAd'],window['vibrate']=this['vibrate'];},'showInterstitialAd':function(_0x492fed,_0x1d1e73){const _0x4f03e2=(_0x1d1e73=_0x1d1e73||{})['timeoutMs']||0x1f40;try{console['log']('[android_ad]\x20showInterstitialAd\x20invoked'),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_impression',{'ad_platform':'android','ad_source':'interstitial','ad_format':'display','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x117212){}if(void 0x0!==window['Android']&&'function'==typeof window['Android']['showInterstitialAd'])return _0x2eb291(()=>{try{window['Android']['showInterstitialAd']();}catch(_0x556741){throw'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_error',{'ad_platform':'android','ad_source':'interstitial','error_reason':'native_call_failed','platform':window['Platform']||'unknown','send':'sdk'}),_0x556741;}},_0x47609d=>{_0x47609d?'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_click',{'ad_platform':'android','ad_source':'interstitial','platform':window['Platform']||'unknown','send':'sdk'}):'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_error',{'ad_platform':'android','ad_source':'interstitial','error_reason':'closed_or_failed','platform':window['Platform']||'unknown','send':'sdk'}),'function'==typeof _0x492fed&&_0x492fed(_0x47609d);},_0x4f03e2);console['warn']('[android_ad]\x20Android.showInterstitialAd\x20not\x20available'),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_error',{'ad_platform':'android','ad_source':'interstitial','error_reason':'not_available','platform':window['Platform']||'unknown','send':'sdk'}),'function'==typeof _0x492fed&&_0x492fed(!0x1);},'showRewardedAd':function(_0x32ee61,_0x3f1abd){const _0x5ec6c3=(_0x3f1abd=_0x3f1abd||{})['timeoutMs']||0x2710;try{console['log']('[android_ad]\x20showRewardedAd\x20invoked'),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_impression',{'ad_platform':'android','ad_source':'rewarded','ad_format':'video','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x439885){}if(void 0x0!==window['Android']&&'function'==typeof window['Android']['showRewardedAd'])return _0x2eb291(()=>{try{window['Android']['showRewardedAd']();}catch(_0x44e169){throw'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_error',{'ad_platform':'android','ad_source':'rewarded','error_reason':'native_call_failed','platform':window['Platform']||'unknown','send':'sdk'}),_0x44e169;}},_0x5e1d6c=>{_0x5e1d6c?'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','earn_virtual_currency',{'virtual_currency_name':'reward','value':0x1,'ad_platform':'android','platform':window['Platform']||'unknown','send':'sdk'}):'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_error',{'ad_platform':'android','ad_source':'rewarded','error_reason':'closed_or_failed','platform':window['Platform']||'unknown','send':'sdk'}),'function'==typeof _0x32ee61&&_0x32ee61(_0x5e1d6c);},_0x5ec6c3);console['warn']('[android_ad]\x20Android.showRewardedAd\x20not\x20available'),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_error',{'ad_platform':'android','ad_source':'rewarded','error_reason':'not_available','platform':window['Platform']||'unknown','send':'sdk'}),'function'==typeof _0x32ee61&&_0x32ee61(!0x1);},'showBannerAd':function(_0x5a4c4a,_0x460e67){_0x460e67=_0x460e67||{};try{console['log']('[android_ad]\x20showBannerAd\x20invoked'),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_impression',{'ad_platform':'android','ad_source':'banner','ad_format':'display','platform':window['Platform']||'unknown','send':'sdk'});}catch(_0x276804){}if(void 0x0!==window['Android']&&'function'==typeof window['Android']['showBannerAd'])try{window['Android']['showBannerAd'](),'function'==typeof _0x5a4c4a&&_0x5a4c4a(!0x0);}catch(_0x6af03e){console['error']('[android_ad]\x20showBannerAd\x20failed',_0x6af03e),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_error',{'ad_platform':'android','ad_source':'banner','error_reason':'native_call_failed','platform':window['Platform']||'unknown','send':'sdk'}),'function'==typeof _0x5a4c4a&&_0x5a4c4a(!0x1);}else console['warn']('[android_ad]\x20Android.showBannerAd\x20not\x20available'),'undefined'!=typeof window&&'function'==typeof window['gtag']&&window['gtag']('event','ad_error',{'ad_platform':'android','ad_source':'banner','error_reason':'not_available','platform':window['Platform']||'unknown','send':'sdk'}),'function'==typeof _0x5a4c4a&&_0x5a4c4a(!0x1);},'hideBannerAd':function(_0x3dbc95){try{console['log']('[android_ad]\x20hideBannerAd\x20invoked');}catch(_0x2db816){}if(void 0x0!==window['Android']&&'function'==typeof window['Android']['hideBannerAd'])try{window['Android']['hideBannerAd'](),'function'==typeof _0x3dbc95&&_0x3dbc95(!0x0);}catch(_0x3e2baf){console['error']('[android_ad]\x20hideBannerAd\x20failed',_0x3e2baf),'function'==typeof _0x3dbc95&&_0x3dbc95(!0x1);}else console['warn']('[android_ad]\x20Android.hideBannerAd\x20not\x20available'),'function'==typeof _0x3dbc95&&_0x3dbc95(!0x1);},'vibrate':function(_0x369da8){try{if(console['log']('[android_ad]\x20vibrate\x20invoked,\x20pattern:',_0x369da8),void 0x0===window['Android']||'function'!=typeof window['Android']['vibrate'])return console['warn']('[android_ad]\x20Android.vibrate\x20not\x20available'),!0x1;try{return Array['isArray'](_0x369da8)?window['Android']['vibrate'](_0x369da8['join'](',')):window['Android']['vibrate'](String(_0x369da8)),!0x0;}catch(_0x210271){return console['error']('[android_ad]\x20Android.vibrate\x20failed',_0x210271),!0x1;}}catch(_0x2deb31){return console['error']('[android_ad]\x20vibrate\x20error:',_0x2deb31),!0x1;}}};_0x57b99d['init'](),_0x4e8f7a['exports']&&(_0x4e8f7a['exports']=_0x57b99d);},0x373:_0x102dfe=>{const _0x581a7e={'open':0x0,'wall':0x1,'clos':-0x1};class _0x533810{constructor(){this['grid']=null,this['mapWidth']=0x0,this['mapHeight']=0x0,this['moveD']=0xa,this['moveR']=0xe,this['move']=[this['moveD'],this['moveR']],this['mapCell']=[],this['lastOpenCell']=null,this['markTag']=0x0;}static['getInstance'](){return _0x533810['_instance']||(_0x533810['_instance']=new _0x533810()),_0x533810['_instance'];}static get['posXarr'](){return[0x0,0x1,0x0,-0x1];}static get['posYarr'](){return[-0x1,0x0,0x1,0x0];}['init'](_0x28d9c1,_0x22550f,_0x268e3c,_0xe34d96){this['grid']=_0xe34d96,this['mapWidth']=_0x28d9c1,this['mapHeight']=_0x22550f,this['moveD']=_0x268e3c,this['move']=[this['moveD'],this['moveD'],this['moveD'],this['moveD']];let _0x4f4f6a=this['mapWidth']*this['mapHeight'];_0x4f4f6a>this['mapCell']['length']&&(this['mapCell']['length']=_0x4f4f6a);let _0x401e90=0x0;for(let _0x39dea6=0x0;_0x39dea6<this['mapWidth'];++_0x39dea6)for(let _0xc233ef=0x0;_0xc233ef<this['mapHeight'];++_0xc233ef)this['mapCell'][_0x401e90]=new _0x3a056b(),this['mapCell'][_0x401e90]['x']=_0x39dea6,this['mapCell'][_0x401e90]['y']=_0xc233ef,this['mapCell'][_0x401e90]['unMove']=_0xe34d96[_0x39dea6][_0xc233ef]['type']!==_0x581a7e['open'],_0x401e90++;}['search'](_0x3122ab,_0x4ecd47){if(_0x3122ab['x']===_0x4ecd47['x']&&_0x3122ab['y']===_0x4ecd47['y'])return[];this['reStartXY'](_0x3122ab['x'],_0x3122ab['y']);let _0x527eb0=!0x1,_0xc27c08=_0x3122ab['x'],_0x5e4deb=_0x3122ab['y'],_0x3d9e76=this['mapCell'][_0xc27c08*this['mapHeight']+_0x5e4deb];for(_0x3d9e76['lastX']=-0x1,_0x3d9e76['lastY']=-0x1,_0x3d9e76['x']=_0xc27c08,_0x3d9e76['y']=_0x5e4deb,_0x3d9e76['markTag']=this['markTag'],_0x3d9e76['h']=Math['abs'](_0x4ecd47['x']-_0x3122ab['x'])+Math['abs'](_0x4ecd47['y']-_0x3122ab['y']);;){if(_0xc27c08===_0x4ecd47['x']&&_0x5e4deb===_0x4ecd47['y']){_0x527eb0=!0x0;break;}_0x3d9e76['state']!==_0x3a056b['close']&&this['closeCell'](_0x3d9e76);for(let _0x60bde6=0x0;_0x60bde6<0x4;_0x60bde6++){let _0x6094cf=_0xc27c08+_0x533810['posXarr'][_0x60bde6],_0x23a82c=_0x5e4deb+_0x533810['posYarr'][_0x60bde6];if(_0x6094cf<0x0||_0x6094cf>=this['mapWidth']||_0x23a82c<0x0||_0x23a82c>=this['mapHeight'])continue;let _0x41e568=this['mapCell'][_0x6094cf*this['mapHeight']+_0x23a82c];if(_0x41e568['unMove']=this['grid'][_0x6094cf][_0x23a82c]['type']!==_0x581a7e['open'],_0x41e568['unMove'])continue;let _0x27ee19=this['moveD'];_0x41e568['markTag']!==this['markTag']||_0x41e568['state']===_0x3a056b['none']?(_0x41e568['markTag']=this['markTag'],_0x41e568['lastX']=_0xc27c08,_0x41e568['lastY']=_0x5e4deb,_0x41e568['dir']=_0x60bde6,_0x41e568['g']=_0x3d9e76['g']+_0x27ee19,_0x41e568['h']=Math['abs'](_0x4ecd47['x']-_0x6094cf)+Math['abs'](_0x4ecd47['y']-_0x23a82c),this['openCell'](_0x41e568)):_0x41e568['state']===_0x3a056b['open']&&_0x41e568['g']>_0x3d9e76['g']+_0x27ee19&&(_0x41e568['lastX']=_0xc27c08,_0x41e568['lastY']=_0x5e4deb,_0x41e568['dir']=_0x60bde6,_0x41e568['g']=_0x3d9e76['g']+_0x27ee19,this['reopenCell'](_0x41e568));}if(!this['lastOpenCell'])break;_0x3d9e76=this['lastOpenCell'],_0xc27c08=_0x3d9e76['x'],_0x5e4deb=_0x3d9e76['y'];}if(_0x527eb0){let _0x1d1c8e=[];for(;_0x3d9e76&&_0x3d9e76['lastX']>=0x0&&_0x3d9e76['lastY']>=0x0;){let _0x205c3d={'x':_0x3d9e76['x'],'y':_0x3d9e76['y'],'dir':_0x3d9e76['dir']};if(_0x1d1c8e['unshift'](_0x205c3d),_0x3d9e76['lastX']===_0x3122ab['x']&&_0x3d9e76['lastY']===_0x3122ab['y'])break;_0x3d9e76=this['mapCell'][_0x3d9e76['lastX']*this['mapHeight']+_0x3d9e76['lastY']];}return _0x1d1c8e['length']>0x0?_0x1d1c8e:[];}return[];}['reopenCell'](_0x3d128d){let _0x169fb8=_0x3d128d['h']+_0x3d128d['g'];_0x3d128d['f']=_0x169fb8;let _0x34ad25=_0x3d128d['next'];if(_0x34ad25&&_0x34ad25['f']>_0x169fb8){do{_0x34ad25=_0x34ad25['next'];}while(_0x34ad25&&_0x34ad25['f']>_0x169fb8);_0x3d128d['prev']&&(_0x3d128d['prev']['next']=_0x3d128d['next']),_0x3d128d['next']&&(_0x3d128d['next']['prev']=_0x3d128d['prev']),_0x34ad25&&(_0x3d128d['next']=_0x34ad25,_0x34ad25['prev']?(_0x3d128d['prev']=_0x34ad25['prev'],_0x34ad25['prev']['next']=_0x3d128d):(_0x3d128d['prev']=this['lastOpenCell'],_0x3d128d['next']=null,this['lastOpenCell']['next']=_0x3d128d,this['lastOpenCell']=_0x3d128d));}}['openCell'](_0x21daf1){_0x21daf1['state']=_0x3a056b['open'];let _0x58414a=_0x21daf1['h']+_0x21daf1['g'];_0x21daf1['f']=_0x58414a;let _0x4bb8b1=this['lastOpenCell'];if(_0x4bb8b1){for(;_0x4bb8b1['f']<_0x58414a;){if(null==_0x4bb8b1['prev'])return _0x4bb8b1['prev']=_0x21daf1,_0x21daf1['prev']=null,void(_0x21daf1['next']=_0x4bb8b1);_0x4bb8b1=_0x4bb8b1['prev'];}_0x21daf1['prev']=_0x4bb8b1,_0x4bb8b1['next']?(_0x21daf1['next']=_0x4bb8b1['next'],_0x4bb8b1['next']['prev']=_0x21daf1,_0x4bb8b1['next']=_0x21daf1):(_0x21daf1['next']=null,_0x4bb8b1['next']=_0x21daf1,this['lastOpenCell']=_0x21daf1);}else this['lastOpenCell']=_0x21daf1,_0x21daf1['prev']=null,_0x21daf1['next']=null;}['closeCell'](_0x47a81f){_0x47a81f['state']==_0x3a056b['open']&&(_0x47a81f['prev']&&(_0x47a81f['prev']['next']=_0x47a81f['next']),_0x47a81f['next']&&(_0x47a81f['next']['prev']=_0x47a81f['prev']),_0x47a81f==this['lastOpenCell']&&(this['lastOpenCell']=_0x47a81f['prev'])),_0x47a81f['state']=_0x3a056b['close'];}['reStartXY'](_0x7c3cc,_0x4a4f29){let _0x39a34b=this['mapCell'][_0x7c3cc*this['mapHeight']+_0x4a4f29];_0x39a34b['lastX']=0x0,_0x39a34b['lastY']=0x0,_0x39a34b['h']=0x0,_0x39a34b['g']=0x0,_0x39a34b['f']=0x0,_0x39a34b['prev']=null,_0x39a34b['next']=null,_0x39a34b['state']=0x0,_0x39a34b['dir']=0x0,this['lastOpenCell']=null,this['markTag']=this['markTag']+0x1;}}class _0x3a056b{static get['none'](){return 0x0;}static get['open'](){return 0x1;}static get['close'](){return 0x2;}constructor(){this['x']=0x0,this['y']=0x0,this['unMove']=!0x1,this['markTag']=0x0,this['lastX']=-0x1,this['lastY']=-0x1,this['h']=0x0,this['g']=0x0,this['f']=0x0,this['prev']=null,this['next']=null,this['dir']=0x0,this['state']=_0x3a056b['none'];}}'undefined'!=typeof window&&(window['OvoAstar4']=_0x533810,window['MapCell']=_0x3a056b,window['graphType']=_0x581a7e),_0x102dfe['exports']&&(_0x102dfe['exports']={'OvoAstar4':_0x533810,'MapCell':_0x3a056b,'graphType':_0x581a7e});},0x389:()=>{window['LeaderBoard']=new class{constructor(){this['STORAGE_KEY']='gameLeaderBoard',this['leaderboardData']=new Map(),this['loadLeaderboardData']();}['loadLeaderboardData'](){try{const _0x2782a1=localStorage['getItem'](this['STORAGE_KEY']);if(_0x2782a1){const _0xe6a476=JSON['parse'](_0x2782a1);for(const [_0x2bb313,_0x52a1fe]of Object['entries'](_0xe6a476))this['leaderboardData']['set'](_0x2bb313,_0x52a1fe);}}catch(_0x286dbd){console['error']('❌\x20排行榜数据加载失败:',_0x286dbd),this['leaderboardData']=new Map();}}['saveLeaderboardData'](){try{const _0x51445a={};for(const [_0x34c255,_0x3be6a5]of this['leaderboardData']['entries']())_0x51445a[_0x34c255]=_0x3be6a5;return localStorage['setItem'](this['STORAGE_KEY'],JSON['stringify'](_0x51445a)),!0x0;}catch(_0x225f6e){return console['error']('❌\x20排行榜数据保存失败:',_0x225f6e),!0x1;}}['getCurrentUserStats'](_0x556b28){if(!_0x556b28)return console['error']('❌\x20GameServer\x20未找到'),{'userId':'guest','currentCoins':0x0,'currentEggLevel':0x0,'userStatus':null,'message':'GameServer\x20未初始化，返回默认数据'};try{const _0x1a65d1=_0x556b28['checkUserStatus']('currentUser');if(!_0x1a65d1)return console['error']('❌\x20用户状态获取失败'),{'userId':'guest','currentCoins':0x0,'currentEggLevel':0x0,'userStatus':null,'message':'用户状态获取失败，返回默认数据'};const _0x5c1d92=_0x556b28['scoreSystem']||{'currentScore':0x0};return{'userId':_0x1a65d1['userId']||'guest','currentCoins':_0x5c1d92['currentScore'],'currentEggLevel':_0x1a65d1['maxUnlockedEggType']||0x0,'userStatus':_0x1a65d1,'message':'用户数据获取成功'};}catch(_0x37650d){return console['error']('❌\x20获取用户数据失败:',_0x37650d),{'userId':'guest','currentCoins':0x0,'currentEggLevel':0x0,'userStatus':null,'message':'发生错误，返回默认数据'};}}['updateUserRecord'](_0x3068e9=null){const _0x1f23f6=window['GameServer']||null,_0x49dcf5=leaderboard['getCurrentUserStats'](_0x1f23f6);_0x49dcf5['userStatus']||console['warn']('⚠️\x20用户数据不可用:\x20'+_0x49dcf5['message']);const _0x3b3c37=_0x3068e9||currentStats['userId'],{currentCoins:_0x5e3df3,currentEggLevel:_0x4a9e14}=currentStats,_0x2cd384=this['leaderboardData']['get'](_0x3b3c37);let _0x13963c=!0x1,_0x37d5e0={'userId':_0x3b3c37,'maxCoins':_0x5e3df3,'maxEggLevel':_0x4a9e14,'lastUpdateTime':Date['now'](),'userName':'用户'+_0x3b3c37['slice'](-0x6)};return _0x2cd384?(_0x5e3df3>_0x2cd384['maxCoins']?_0x13963c=!0x0:_0x37d5e0['maxCoins']=_0x2cd384['maxCoins'],_0x4a9e14>_0x2cd384['maxEggLevel']?_0x13963c=!0x0:_0x37d5e0['maxEggLevel']=_0x2cd384['maxEggLevel'],_0x37d5e0['userName']=_0x2cd384['userName']||_0x37d5e0['userName']):_0x13963c=!0x0,!!_0x13963c&&(this['leaderboardData']['set'](_0x3b3c37,_0x37d5e0),this['saveLeaderboardData'](),!0x0);}['getLeaderboard'](_0x2712c9=0xa){return Array['from'](this['leaderboardData']['values']())['sort']((_0x564034,_0x458f4f)=>_0x458f4f['maxCoins']!==_0x564034['maxCoins']?_0x458f4f['maxCoins']-_0x564034['maxCoins']:_0x458f4f['maxEggLevel']-_0x564034['maxEggLevel'])['slice'](0x0,_0x2712c9)['map']((_0x4b991a,_0x366a6d)=>({'rank':_0x366a6d+0x1,..._0x4b991a}));}['getUserRank'](_0x256f20){const _0x4b29a2=this['leaderboardData']['get'](_0x256f20);if(!_0x4b29a2)return null;const _0x433015=this['getLeaderboard'](0x3e8),_0x20ba9c=_0x433015['find'](_0x20d178=>_0x20d178['userId']===_0x256f20);return _0x20ba9c?{'rank':_0x20ba9c['rank'],'totalUsers':_0x433015['length'],'userRecord':_0x4b29a2}:null;}['getLeaderboardStats'](){const _0x48aebf=this['leaderboardData']['size'],_0x2e7c2a=Array['from'](this['leaderboardData']['values']());return{'totalUsers':_0x48aebf,'maxCoins':Math['max'](..._0x2e7c2a['map'](_0x5d5d03=>_0x5d5d03['maxCoins']),0x0),'maxEggLevel':Math['max'](..._0x2e7c2a['map'](_0x17888c=>_0x17888c['maxEggLevel']),0x0),'avgCoins':_0x48aebf>0x0?Math['round'](_0x2e7c2a['reduce']((_0x5cbce7,_0x2c3fe8)=>_0x5cbce7+_0x2c3fe8['maxCoins'],0x0)/_0x48aebf):0x0};}['clearLeaderboard'](){this['leaderboardData']['clear'](),localStorage['removeItem'](this['STORAGE_KEY']);}['printLeaderboard'](){this['getLeaderboard'](0xa)['forEach'](_0x2c301f=>{}),this['getLeaderboardStats']();}}();},0x38f:(_0x57536b,_0x2c5483,_0x22e51a)=>{'use strict';_0x22e51a['d'](_0x2c5483,{'A':()=>_0x2bd776});var _0x1ede68=_0x1ede68||{};_0x1ede68['findMc']=function(_0x1c2cf4,_0x5d1c05){if(!_0x1c2cf4||!_0x5d1c05)return console['warn']('⚠️\x20findMc:\x20参数无效',{'mc':!!_0x1c2cf4,'name':_0x5d1c05}),null;if(_0x1c2cf4['name']===_0x5d1c05)return _0x1c2cf4;if(_0x1c2cf4['getChildByName']){const _0x4d7e85=_0x1c2cf4['getChildByName'](_0x5d1c05);if(_0x4d7e85)return _0x4d7e85;}if(_0x1c2cf4['children']&&_0x1c2cf4['children']['length']>0x0)for(let _0xe60486 of _0x1c2cf4['children']){if((_0xe60486['name']||'')===_0x5d1c05)return _0xe60486;}if(_0x1c2cf4['children']&&_0x1c2cf4['children']['length']>0x0)for(let _0x5c61a3 of _0x1c2cf4['children']){const _0x5b1bef=_0x5c61a3['constructor']['name']||'';if(_0x5b1bef['toLowerCase']()['includes'](_0x5d1c05['toLowerCase']())||_0x5b1bef===_0x5d1c05)return _0x5c61a3;}if(_0x1c2cf4['children']&&_0x1c2cf4['children']['length']>0x0)for(let _0x1592f3 of _0x1c2cf4['children']){const _0x4f07bd=_0x1ede68['findMc'](_0x1592f3,_0x5d1c05);if(_0x4f07bd)return _0x4f07bd;}return console['log']('❌\x20未找到元件:\x20'+_0x5d1c05),null;},_0x1ede68['_strToUint8']=function(_0x1a55f6){try{return new TextEncoder()['encode'](String(_0x1a55f6));}catch(_0x179301){const _0x415cfa=new Uint8Array(_0x1a55f6['length']);for(let _0x4fcde6=0x0;_0x4fcde6<_0x1a55f6['length'];_0x4fcde6++)_0x415cfa[_0x4fcde6]=_0x1a55f6['charCodeAt'](_0x4fcde6);return _0x415cfa;}},_0x1ede68['_uint8ToStr']=function(_0x4e9442){try{return new TextDecoder()['decode'](_0x4e9442);}catch(_0x389f40){let _0x63be91='';for(let _0x3d6ac2=0x0;_0x3d6ac2<_0x4e9442['length'];_0x3d6ac2++)_0x63be91+=String['fromCharCode'](_0x4e9442[_0x3d6ac2]);return _0x63be91;}},_0x1ede68['_base64Encode']=function(_0x18ec93){let _0x37790b='';for(let _0x22ee05=0x0;_0x22ee05<_0x18ec93['length'];_0x22ee05++)_0x37790b+=String['fromCharCode'](_0x18ec93[_0x22ee05]);return btoa(_0x37790b);},_0x1ede68['_base64Decode']=function(_0x189b98){const _0x4cc69b=atob(String(_0x189b98)),_0x6fa502=new Uint8Array(_0x4cc69b['length']);for(let _0x10cfaf=0x0;_0x10cfaf<_0x4cc69b['length'];_0x10cfaf++)_0x6fa502[_0x10cfaf]=_0x4cc69b['charCodeAt'](_0x10cfaf);return _0x6fa502;},_0x1ede68['_xorBytes']=function(_0x57c911,_0x15088f){const _0xe10bd2=_0x1ede68['_strToUint8'](String(_0x15088f||'k')),_0x20526c=new Uint8Array(_0x57c911['length']);if(!_0xe10bd2||0x0===_0xe10bd2['length'])return _0x57c911;for(let _0x44e164=0x0;_0x44e164<_0x57c911['length'];_0x44e164++)_0x20526c[_0x44e164]=_0x57c911[_0x44e164]^_0xe10bd2[_0x44e164%_0xe10bd2['length']];return _0x20526c;},_0x1ede68['xorEncryptObject']=function(_0x3923cb,_0x1f385c){try{const _0x58587f=JSON['stringify'](_0x3923cb),_0xc6561d=_0x1ede68['_strToUint8'](_0x58587f),_0x47b689=_0x1ede68['_xorBytes'](_0xc6561d,_0x1f385c);return _0x1ede68['_base64Encode'](_0x47b689);}catch(_0x2b3e5c){return console['error']('❌\x20xorEncryptObject\x20失败:',_0x2b3e5c),null;}},_0x1ede68['xorDecryptToObject']=function(_0x56809a,_0x37d262){try{if(!_0x56809a)return null;const _0x3e559c=_0x1ede68['_base64Decode'](_0x56809a),_0x370d5c=_0x1ede68['_xorBytes'](_0x3e559c,_0x37d262),_0x1aaf0b=_0x1ede68['_uint8ToStr'](_0x370d5c);return JSON['parse'](_0x1aaf0b);}catch(_0x5db54a){return console['error']('❌\x20xorDecryptToObject\x20失败:',_0x5db54a),null;}},_0x1ede68['logAvailableChildren']=function(_0x2c761b){console['log']('🔍\x20可用的子元件列表:'),_0x2c761b&&_0x2c761b['children']?_0x2c761b['children']['forEach']((_0x3ae1fc,_0x417a31)=>{const _0x42ffb6=_0x3ae1fc['name']||'unnamed',_0x1047b4=_0x3ae1fc['constructor']['name']||'unknown';console['log']('\x20\x20'+_0x417a31+':\x20name=\x22'+_0x42ffb6+'\x22,\x20constructor=\x22'+_0x1047b4+'\x22'),(_0x42ffb6['includes']('guide')||_0x1047b4['includes']('guide')||_0x42ffb6['includes']('egg')||_0x1047b4['includes']('egg'))&&console['log']('\x20\x20\x20\x20🎯\x20这可能是目标元件！');}):console['log']('\x20\x20❌\x20容器为空或没有子元件');},_0x1ede68['goStop']=function(_0x4e1675,_0x5b7f1a){if(_0x4e1675&&null!=_0x4e1675['visible']&&null!=_0x4e1675['visible']&&null!=_0x4e1675['stop']&&(_0x4e1675['stop']&&_0x4e1675['gotoAndStop'](0x0),_0x4e1675['visible']=_0x5b7f1a||!0x1,_0x4e1675['children']&&_0x4e1675['children']['length']>0x0)){for(var _0x2e0838 in _0x4e1675['children'])_0x4e1675['children'][_0x2e0838]['children']&&_0x4e1675['children'][_0x2e0838]['children']['length']>0x0&&_0x1ede68['goStop'](_0x4e1675['children'][_0x2e0838],_0x5b7f1a);}},_0x1ede68['goPlay']=function(_0x43b19c){null==_0x43b19c['visible']&&null==_0x43b19c['visible']||(_0x43b19c['visible']=!0x0,_0x43b19c['play']()),_0x43b19c['parent']&&_0x43b19c['parent']['play']&&_0x1ede68['goPlay'](_0x43b19c['parent']);},_0x1ede68['toShow']=function(_0x31f93d){!function _0x1b5ced(_0x1cad23){if(_0x1cad23&&null!=_0x1cad23['visible']&&null!=_0x1cad23['visible']&&(_0x1cad23['visible']=!0x0,_0x1cad23['children']&&_0x1cad23['children']['length']>0x0)){for(var _0x2ab3b0 in _0x1cad23['children'])_0x1cad23['children'][_0x2ab3b0]['children']&&_0x1cad23['children'][_0x2ab3b0]['children']['length']>0x0&&_0x1b5ced(_0x1cad23['children'][_0x2ab3b0]);}}(_0x31f93d),function _0xedfcf1(_0xd6759e){_0xd6759e&&null!=_0xd6759e['visible']&&null!=_0xd6759e['visible']&&(_0xd6759e['visible']=!0x0,_0xd6759e['visible']=!0x0,_0xd6759e['parent']&&_0xd6759e['parent']['play']&&_0xedfcf1(_0xd6759e['parent']));}(_0x31f93d);},_0x1ede68['randomWord']=function(_0x51d5ce,_0x5c0cef){for(var _0x5d18c1=[],_0xed2ee9=0x0;_0xed2ee9<_0x51d5ce;_0xed2ee9++)_0x5d18c1['push'](_0xed2ee9);for(var _0x25afec=[],_0x2c3b1a=0x0;_0x2c3b1a<_0x5c0cef;_0x2c3b1a++){var _0x3f2395=_0x5d18c1['length'],_0x2747c0=Math['floor'](Math['random']()*_0x3f2395);_0x25afec['push'](_0x5d18c1['splice'](_0x2747c0,0x1)[0x0]);}return _0x25afec;};var _0x4467c5=[],_0x7355cd=0x0;_0x1ede68['randomWordByTurn']=function(_0x1fbfb3,_0x559cca,_0x1bd40a,_0xf655fd){var _0x23ede8=[];++_0x7355cd>_0xf655fd&&(_0x7355cd=0x1);var _0x890cf3=(_0x7355cd-0x1)*_0x559cca;_0x890cf3>_0x1fbfb3-0x1&&(_0x7355cd=0x1),0x1==_0x7355cd&&(_0x4467c5=_0x1ede68['randomWord'](_0x1fbfb3,_0x1fbfb3));var _0x2ac68b=_0x7355cd*_0x559cca;_0x2ac68b>_0x4467c5['length']&&(_0x2ac68b=_0x4467c5['length']);for(var _0x2c27fb=[],_0x5ad11c=_0x890cf3;_0x5ad11c<_0x2ac68b;_0x5ad11c++)_0x2c27fb['push'](_0x4467c5[_0x5ad11c]);if(_0x2c27fb['length']<_0x559cca){var _0x14f711=_0x1ede68['copyAry'](_0x4467c5)['slice'](0x0,_0x890cf3-0x1);_0x14f711=_0x1ede68['getRandomByNum'](_0x14f711,_0x559cca-_0x2c27fb['length']),_0x2c27fb=_0x2c27fb['concat'](_0x14f711);}for(var _0x4d18a6=0x0;_0x4d18a6<_0x2c27fb['length'];_0x4d18a6++){var _0xd83c4={};_0xd83c4['answer']=_0x2c27fb[_0x4d18a6];var _0x1d6f19=_0x1ede68['getRanNumWithout'](_0x4467c5,_0x1bd40a-0x1,_0xd83c4['answer'])['concat']([_0xd83c4['answer']]);_0x1ede68['randomArray'](_0x1d6f19),_0xd83c4['options']=_0x1d6f19,_0x23ede8['push'](_0xd83c4);}return _0x23ede8;},_0x1ede68['randomWordByTurnNoAnswer']=function(_0x518e0c,_0x269390,_0x238aa9){++_0x7355cd>_0x238aa9&&(_0x7355cd=0x1);var _0x300afe=(_0x7355cd-0x1)*_0x269390;_0x300afe>_0x518e0c-0x1&&(_0x7355cd=0x1),0x1==_0x7355cd&&(_0x4467c5=_0x1ede68['randomWord'](_0x518e0c,_0x518e0c));var _0x570fd2=_0x7355cd*_0x269390;_0x570fd2>_0x4467c5['length']&&(_0x570fd2=_0x4467c5['length']);for(var _0x39d5ee=[],_0x2d0f7f=_0x300afe;_0x2d0f7f<_0x570fd2;_0x2d0f7f++)_0x39d5ee['push'](_0x4467c5[_0x2d0f7f]);if(_0x39d5ee['length']<_0x269390){var _0x439ee6=_0x1ede68['copyAry'](_0x4467c5)['slice'](0x0,_0x300afe-0x1);_0x439ee6=_0x1ede68['getRandomByNum'](_0x439ee6,_0x269390-_0x39d5ee['length']),_0x39d5ee=_0x39d5ee['concat'](_0x439ee6);}return _0x39d5ee;},_0x1ede68['randomArr']=function(_0x4c6d19){var _0x3840eb=[];for(_0x3840eb['push'](_0x4c6d19);;){var _0x4d1772=!0x0;if(_0x3840eb['length']>=0x3)break;var _0x51a76a=Math['floor'](0xa*Math['random']())+0x1;for(var _0x157581 in _0x3840eb)_0x3840eb[_0x157581]==_0x51a76a&&(_0x4d1772=!0x1);_0x4d1772&&_0x3840eb['push'](_0x51a76a);}return _0x3840eb;},_0x1ede68['randomInt']=function(_0x412daa){return Math['floor'](Math['random']()*_0x412daa);},_0x1ede68['getRandom']=function(_0xdf73ef,_0x40cd6a){return Math['floor'](Math['random']()*(_0x40cd6a-_0xdf73ef+0x1))+_0xdf73ef;},_0x1ede68['getMultRandom']=function(_0x4cd0a2,_0x3a2e72,_0xa0b510){if(_0x3a2e72-_0x4cd0a2<_0xa0b510)return[];let _0x49d5ba=[];for(var _0x111320=0x0;_0x111320<_0xa0b510;++_0x111320){let _0x466ade=this['getRandom'](_0x4cd0a2,_0x3a2e72);-0x1!=_0x49d5ba['indexOf'](_0x466ade)?--_0x111320:_0x49d5ba['push'](_0x466ade);}return _0x49d5ba;},_0x1ede68['randomArray']=_0x1ede68['randomAry']=function(_0x4acc50){let _0x5ed815,_0x372d83,_0x596fe7=_0x4acc50['length'];for(;_0x596fe7;)_0x372d83=Math['floor'](Math['random']()*_0x596fe7--),_0x5ed815=_0x4acc50[_0x596fe7],_0x4acc50[_0x596fe7]=_0x4acc50[_0x372d83],_0x4acc50[_0x372d83]=_0x5ed815;},_0x1ede68['addFrameEnd']=function(_0x4ed4b6,_0x285acc,_0xc99d8e){_0x4ed4b6['timeline']['addTween'](createjs['Tween']['get'](_0x4ed4b6)['wait'](_0x4ed4b6['totalFrames']-0x1)['call'](function(){_0xc99d8e?_0x4ed4b6['gotoAndStop'](_0x4ed4b6['totalFrames']-0x2):_0x4ed4b6['gotoAndStop'](0x0),_0x4ed4b6['timeline']['removeTween'](),_0x4ed4b6['removeAllEventListeners'](),_0x285acc&&_0x285acc(_0x4ed4b6);})['wait'](0x1));},_0x1ede68['addPlaySound']=function(_0x10b8d2,_0x4be7de){var _0x546018=createjs['Sound']['play'](_0x10b8d2);_0x546018['name']=_0x10b8d2,_0x4be7de&&_0x546018['on']('complete',function(_0x4f45c4){_0x546018['removeAllEventListeners'](),_0x546018=null,_0x4be7de(_0x4f45c4);});},_0x1ede68['delayTimer']=function(_0x31e3a5,_0x3400c4){createjs['Tween']['get'](stage)['wait'](_0x31e3a5||0x3e8)['call'](function(){createjs['Tween']['removeAllTweens'](),_0x3400c4&&_0x3400c4();});},_0x1ede68['get16To10']=function(_0x4f7a23){var _0x3f6e72=-0x1;switch(_0x4f7a23){case'A':_0x3f6e72=0xa;break;case'B':_0x3f6e72=0xb;break;case'C':_0x3f6e72=0xc;break;case'D':_0x3f6e72=0xd;break;case'E':_0x3f6e72=0xe;break;case'F':_0x3f6e72=0xf;break;case'G':_0x3f6e72=0x10;break;default:_0x3f6e72=Number(_0x4f7a23);}return _0x3f6e72;},_0x1ede68['randomOK']=function(){return Math['random']()>0.5;},_0x1ede68['randomSortArray']=function(_0x3eca1e){for(var _0x6f706a=[];_0x3eca1e['length'];){var _0x77cb7c=parseInt(Math['random']()*_0x3eca1e['length']);_0x6f706a['push'](_0x3eca1e[_0x77cb7c]),_0x3eca1e['splice'](_0x77cb7c,0x1);}return _0x6f706a;},(_0x1ede68['getUniqueRandom']=function(_0x30236c,_0x518ed5,_0x7b8451){for(var _0x27038f=[],_0x53aef8=_0x7b8451||[],_0x5afaaf=_0x30236c;_0x5afaaf<=_0x518ed5;_0x5afaaf++)-0x1==_0x53aef8['indexOf'](_0x5afaaf)&&_0x27038f['push'](_0x5afaaf);return _0x27038f[Math['floor'](Math['random']()*_0x27038f['length'])];},_0x1ede68['getRandomByNum']=function(_0x37969f,_0x36dfa9){if(!_0x37969f||0x0==_0x37969f['length'])return[];let _0x49771e,_0x39b78f=[],_0x52b6e0=[];for(_0x49771e=0x0;_0x49771e<_0x37969f['length'];++_0x49771e)_0x39b78f['push'](_0x49771e);this['randomArray'](_0x39b78f);let _0x5b9278=Math['min'](_0x37969f['length'],_0x36dfa9);for(_0x49771e=0x0;_0x49771e<_0x5b9278;++_0x49771e)_0x52b6e0['push'](_0x37969f[_0x39b78f[_0x49771e]]);return _0x52b6e0;},_0x1ede68['getRanNumWithout']=function(_0x53ca7e,_0x35ae87,_0x58b2d4){let _0x37b238=_0x1ede68['copyAry'](_0x53ca7e),_0x90e1f2=_0x37b238['indexOf'](_0x58b2d4);return-0x1!=_0x90e1f2&&_0x37b238['splice'](_0x90e1f2,0x1),this['getRandomByNum'](_0x37b238,_0x35ae87);},_0x1ede68['copyAry']=function(_0x11e689){let _0x29f49f=[];for(i=0x0;i<_0x11e689['length'];++i)_0x29f49f[i]=_0x11e689[i];return _0x29f49f;},_0x1ede68['shake']=function(_0x37e6dc){if(createjs['Tween']['hasActiveTweens'](_0x37e6dc))return;let _0x2df9bd=_0x37e6dc['x'],_0x1f9311=_0x37e6dc['y'];createjs['Tween']['get'](_0x37e6dc)['to']({'x':_0x37e6dc['x']+0x1e},0x1e)['wait'](0x32)['to']({'x':_0x37e6dc['x']-0x1e},0x1e)['wait'](0x32)['to']({'x':_0x37e6dc['x']+0x14},0x14)['wait'](0x32)['to']({'x':_0x37e6dc['x']-0x14},0x14)['wait'](0x32)['to']({'x':_0x37e6dc['x']+0xa},0xa)['wait'](0x32)['to']({'x':_0x37e6dc['x']-0xa},0xa)['wait'](0x32)['call'](()=>{_0x37e6dc['x']=_0x2df9bd,_0x37e6dc['y']=_0x1f9311,createjs['Tween']['removeTweens'](_0x37e6dc);});},_0x1ede68['__sdklog']=function(..._0x73b500){},_0x1ede68['__sdklog2']=function(..._0x55df58){},_0x1ede68['__sdklog3']=function(..._0x3a975a){});const _0x2bd776=_0x1ede68;}},_0x49c682={};function _0x5210e9(_0x4dda31){var _0xa27b3a=_0x49c682[_0x4dda31];if(void 0x0!==_0xa27b3a)return _0xa27b3a['exports'];var _0x428c53=_0x49c682[_0x4dda31]={'id':_0x4dda31,'loaded':!0x1,'exports':{}};return _0x2273f4[_0x4dda31](_0x428c53,_0x428c53['exports'],_0x5210e9),_0x428c53['loaded']=!0x0,_0x428c53['exports'];}_0x5210e9['d']=(_0x50ee8e,_0x24b5fe)=>{for(var _0x207bdf in _0x24b5fe)_0x5210e9['o'](_0x24b5fe,_0x207bdf)&&!_0x5210e9['o'](_0x50ee8e,_0x207bdf)&&Object['defineProperty'](_0x50ee8e,_0x207bdf,{'enumerable':!0x0,'get':_0x24b5fe[_0x207bdf]});},_0x5210e9['hmd']=_0x14569b=>((_0x14569b=Object['create'](_0x14569b))['children']||(_0x14569b['children']=[]),Object['defineProperty'](_0x14569b,'exports',{'enumerable':!0x0,'set':()=>{throw new Error('ES\x20Modules\x20may\x20not\x20assign\x20module.exports\x20or\x20exports.*,\x20Use\x20ESM\x20export\x20syntax,\x20instead:\x20'+_0x14569b['id']);}}),_0x14569b),_0x5210e9['o']=(_0x3a50e3,_0x1f0856)=>Object['prototype']['hasOwnProperty']['call'](_0x3a50e3,_0x1f0856),_0x5210e9(0x38f),_0x5210e9(0x373),_0x5210e9(0xf),_0x5210e9(0x324),_0x5210e9(0x68),_0x5210e9(0x389),_0x5210e9(0x1b2),_0x5210e9(0x121),_0x5210e9(0x321);})());
+/******/ (() => { // webpackBootstrap
+/******/ 	var __webpack_modules__ = ({
+
+/***/ 15:
+/***/ ((__unused_webpack_module, __unused_webpack___webpack_exports__, __webpack_require__) => {
+
+"use strict";
+/* harmony import */ var _utile_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(911);
+
+/**
+ * 游戏服务器 - 模拟后端服务
+ * 负责游戏数据管理、用户数据存储、算法计算等
+ */
+class GameServer {
+    constructor() {
+        // 服务器状态
+        this.isInitialized = false;
+        this.serverVersion = '1.0.0';
+
+        // 🔥 登录配置
+        this.loginConfig = {
+            forceLoginType: 'null', // 强制登录类型：'wechat', 'google', 'local', 'guest', null(自动检测)
+            enableMockLogin: false, // 是否启用模拟登录
+            mockLoginDelay: 5000, // 模拟登录延迟时间(毫秒)
+            mockUserType: 'old', // 模拟用户类型：'new', 'old', 'random'
+        };
+
+        // 分数系统
+        this.scoreSystem = {
+            currentScore: 0,
+            totalScore: 0,
+            sessionScore: 0,
+            bestScore: 0,
+            synthesisHistory: [] // 合成历史记录
+        };
+
+        // 用户数据缓存
+        this.userDataCache = new Map();
+
+        this.difficulty = 4; //难度
+
+        this.maxUnlockedEggType = 1;
+        // 新用户引导数据
+        this.newUserGuideData = {
+            lv0: [
+                { eggSeat: [0, 10, 11], eggType: [1, 1, 1], pointSeat: [0, 9] },
+                { eggSeat: [14, 3, 18], eggType: [1, 2, 2], pointSeat: [18, 15] },
+
+                { eggSeat: [8, 32, 17], eggType: [2, 3, 3], pointSeat: [32, 16] },
+                { eggSeat: [18, 26, 30], eggType: [4, 2, 3], pointSeat: [-1] },
+                // { eggSeat: [9, 10, 22], eggType: [4, 4, 3], pointSeat: [-1] },
+            ]
+        };
+
+        this.currentUserStatus = null; // 未初始化
+        this.currentGameStatus = null;
+        this.guidestaute = {
+            currentLevel: 0, // 当前等级
+            currentStep: 0, // 当前步骤
+            maxUnlockedEggType: 1, // 最大解锁蛋类型
+            totalScore: 0, // 总分数
+            completedSteps: [] // 完成的步骤列表
+        }
+
+        // 寻路系统
+        this.pathfindingGrid = null;
+
+        // 地图系统
+        this.mapConfig = {
+            rows: 6,
+            cols: 6,
+            cellWidth: 150,
+            cellHeight: 150,
+            totalCells: 36,
+            // 前端渲染需要的配置
+            width: 900,           // gamebox 宽度
+            height: 900,         // gamebox 高度
+            offsetX: 0,           // 棋盘在 gamebox 中的 X 偏移
+            offsetY: 0            // 棋盘在 gamebox 中的 Y 偏移
+        };
+
+        // 地图状态 - 全局唯一的地图数据
+        this.mapState = {
+            cells: {},           // 格子状态 {cellId: {isEmpty: boolean, hasEgg: boolean, eggType: number, piece: null}}
+            occupiedCells: new Set(), // 被占用的格子ID集合
+            emptyCells: new Set(),    // 空闲格子ID集合
+            isInitialized: false
+        };
+
+        // 选择状态管理
+        this.selectionState = {
+            selectedEgg: null,    // 当前选中的蛋 {cellId, eggType}
+            isSelected: false     // 是否有选中状态
+        };
+
+        console.log('🖥️ GameServer 初始化完成');
+
+        // 延迟初始化地图系统，等待 A* 模块加载
+
+        // 生成或加载本地随机混淆 key，优先从 sessionStorage 读取以便同一 tab 内重载时可解密
+        try {
+            const storageKeyName = 'GameServer_crypto_key_v1';
+            let existingKey = null;
+            try { existingKey = sessionStorage.getItem(storageKeyName); } catch (e) { existingKey = null; }
+            if (existingKey) {
+                this._localCryptoKey = existingKey;
+            } else {
+                const rand = Math.floor(Math.random() * Number.MAX_SAFE_INTEGER).toString(36) + Date.now().toString(36);
+                this._localCryptoKey = rand;
+                try { sessionStorage.setItem(storageKeyName, this._localCryptoKey); } catch (e) { /* ignore */ }
+            }
+        } catch (e) {
+            this._localCryptoKey = 'k_default';
+        }
+
+        // 启动时如果 localStorage 中存在明文敏感字段（cardBoosts/scoreSystem/eggs/maxUnlockedEggType），立即迁移为加密字段并删除明文
+        // try {
+        //     const existing = this.loadGameData();
+        //     if (existing && (existing.cardBoosts || existing.scoreSystem || existing.eggs || existing.maxUnlockedEggType)) {
+        //         try { this._persistGameData(existing); } catch (e) {}
+        //     }
+        // } catch (e) {}
+
+        this.initializeMapSystem();
+
+    }
+
+    /**
+     * 将游戏数据写入 localStorage，自动对 cardBoosts 做混淆并删除明文字段
+     * @param {Object} obj - 要持久化的 gameData 对象
+     */
+    _persistGameData(obj) {
+        try {
+            if (!obj) return;
+            // 保存为明文（取消混淆/加密逻辑）
+            // 深拷贝以免修改原对象
+            const copy = JSON.parse(JSON.stringify(obj));
+            if (!copy.saveTime) copy.saveTime = Date.now();
+            try {
+                localStorage.setItem('GameData', JSON.stringify(copy));
+            } catch (e) {
+                // 在某些环境 localStorage 可能失败，尝试用备用键
+                try { localStorage.setItem('GameData_backup', JSON.stringify(copy)); } catch (e) { }
+            }
+        } catch (e) {
+            console.error('❌ _persistGameData failed:', e);
+        }
+    }
+
+    /**
+     * 初始化地图系统（棋盘 + 寻路）
+     */
+    async initializeMapSystem() {
+        // console.log('🗺️ 初始化地图系统...');
+
+        try {
+            // 检查依赖模块
+            this.checkDependencies();
+
+            // 1. 初始化棋盘系统
+            await this.initChessboard();
+
+            // 2. 初始化寻路系统
+            await this.initPathfinding();
+
+            // 3. 标记初始化完成
+            this.mapState.isInitialized = true;
+
+            // console.log('✅ 地图系统初始化完成');
+        } catch (error) {
+            console.error('❌ 地图系统初始化失败:', error);
+
+            // 设置重试机制
+            // console.log('🔄 5秒后重试初始化...');
+            setTimeout(() => {
+                this.initializeMapSystem();
+            }, 5000);
+        }
+    }
+
+    /**
+     * 检查依赖模块
+     */
+    checkDependencies() {
+        // console.log('🔍 检查依赖模块...');
+
+        const dependencies = [
+            { name: 'window.OvoAstar4', value: window.OvoAstar4 },
+            { name: 'window.OvoAstar8', value: window.OvoAstar8 },
+            { name: 'window.graphType', value: window.graphType }
+        ];
+
+        dependencies.forEach(dep => {
+            if (dep.value) {
+                console.log(`✅ ${dep.name} 已加载`);
+            } else {
+                console.warn(`⚠️ ${dep.name} 未加载`);
+            }
+        });
+    }
+
+    /**
+     * 初始化棋盘系统
+     */
+    async initChessboard() {
+        // console.log('♟️ 初始化棋盘系统...');
+
+        const { rows, cols, cellWidth, cellHeight } = this.mapConfig;
+
+        // 初始化所有格子状态
+        for (let row = 0; row < rows; row++) {
+            for (let col = 0; col < cols; col++) {
+                const cellId = this.getCellId(row, col);
+
+                // 计算格子的像素位置
+                const x = col * cellWidth;
+                const y = row * cellHeight;
+                const centerX = x + cellWidth / 2;
+                const centerY = y + cellHeight / 2;
+
+                // 初始化格子数据
+                this.mapState.cells[cellId] = {
+                    id: cellId,
+                    row: row,
+                    col: col,
+                    x: x,
+                    y: y,
+                    centerX: centerX,
+                    centerY: centerY,
+                    isEmpty: true,
+                    hasEgg: false,
+                    eggType: null,
+                    piece: null,
+                    walkable: true,
+                    occupied: false
+                };
+
+                // 添加到空闲格子集合
+                this.mapState.emptyCells.add(cellId);
+            }
+        }
+
+        // console.log(`✅ 棋盘系统初始化完成: ${rows}x${cols} = ${this.mapConfig.totalCells} 个格子`);
+    }
+
+    /**
+     * 初始化寻路系统
+     */
+    async initPathfinding() {
+        // console.log('🗺️ 初始化寻路系统...');
+
+        try {
+            const { rows, cols, cellWidth } = this.mapConfig;
+
+            // 创建网格节点数组（用于 A* 算法）
+            const nodes = [];
+            for (let i = 0; i < rows; i++) {
+                nodes[i] = [];
+                for (let j = 0; j < cols; j++) {
+                    const cellId = this.getCellId(i, j);
+                    const cellData = this.mapState.cells[cellId];
+
+                    nodes[i][j] = {
+                        id: cellId,
+                        row: i,
+                        col: j,
+                        x: cellData.x,
+                        y: cellData.y,
+                        centerX: cellData.centerX,
+                        centerY: cellData.centerY,
+                        type: cellData.hasEgg ? (window.graphType ? window.graphType.wall : 1) : (window.graphType ? window.graphType.open : 0),
+                        walkable: !cellData.hasEgg,
+                        occupied: cellData.hasEgg
+                    };
+                }
+            }
+
+            // 等待 A* 寻路实例加载
+            const astar = await this.waitForAstarModule(4); // 使用4方向寻路
+
+            // 初始化 A* 寻路
+            astar.init(rows, cols, cellWidth, nodes);
+
+            // 保存寻路数据
+            this.pathfindingGrid = {
+                nodes: nodes,
+                rows: rows,
+                cols: cols,
+                cellSize: cellWidth,
+                pathType: 4,
+                astar: astar
+            };
+
+            // console.log('✅ 寻路系统初始化完成');
+        } catch (error) {
+            console.error('❌ 寻路系统初始化失败:', error);
+            throw error;
+        }
+    }
+
+    /**
+     * 获取格子ID（行列转换为ID）
+     * @param {number} row - 行
+     * @param {number} col - 列
+     * @returns {number} 格子ID
+     */
+    getCellId(row, col) {
+        return row * this.mapConfig.cols + col;
+    }
+
+    /**
+     * 获取行列坐标（ID转换为行列）
+     * @param {number} cellId - 格子ID
+     * @returns {Object} {row, col}
+     */
+    getRowCol(cellId) {
+        const row = Math.floor(cellId / this.mapConfig.cols);
+        const col = cellId % this.mapConfig.cols;
+        return { row, col };
+    }
+
+    /**
+     * 初始化服务器
+     */
+    async init() {
+    // console.log('🚀 GameServer 启动中...');
+    // console.log(`🕒 GameServer.init() start @ ${new Date().toISOString()}`);
+        // 🔥 使用新的用户数据初始化流程
+        this.currentUserStatus = await this.initializeUserData();
+
+        this.isInitialized = true;
+        // console.log('✅ GameServer 启动完成');
+    // console.log(`🕒 GameServer.init() end @ ${new Date().toISOString()}`);
+
+        return {
+            success: true,
+            version: this.serverVersion,
+            message: 'GameServer initialized successfully'
+        };
+    }
+
+    /**
+     * 用户数据初始化
+     */
+    async initializeUserData() {
+        // console.log('👤 开始用户数据初始化...');
+
+        // 把 loginType 提升到外层作用域，以便 catch 中也可访问
+        let loginType = null;
+        try {
+            // 1. 检测登录方式
+            loginType = this.detectLoginType();
+            // console.log(`🔍 检测到登录方式: ${loginType}`);
+
+            let isNewUser = null
+            // 2. 🔥 修正：优先加载本地用户数据
+            let userData = this.loadUserDataCache();
+
+            // 3. 🔥 修正：如果没有本地数据，则通过登录方式获取
+            if (!userData) {
+                // console.log('📱 没有本地用户数据，通过登录方式获取...');
+                userData = await this.loadUserDataByLoginType(loginType);
+                isNewUser = true;
+            } else {
+                // console.log('💾 找到本地用户数据，使用本地数据');
+                // 更新最后登录时间
+                isNewUser = userData.isNewUser
+                userData.lastLoginTime = Date.now();
+            }
+
+            // 如果是新用户默认是esay
+            if (isNewUser) {
+                this.difficulty = this.getDifficultyLevel('easy')
+            }
+
+            // 6. 合并最终用户数据
+            const finalUserData = {
+                // 用户身份信息（优先使用登录获取的数据）
+                ...userData,
+
+                // 游戏状态标记
+                isNewUser: isNewUser,
+
+                // 更新时间
+                lastLoginTime: Date.now()
+            };
+
+            // 8. 保存用户身份数据（始终保存）
+            this.saveUserData('currentUser', finalUserData);
+            // console.log(`👤 用户初始化完成: ${isNewUser ? '新用户(需要引导)' : '老用户(恢复数据)'}`);
+
+            // 🔥 初始化 cardBoosts（每次启动都使用代码默认值，不从缓存读取也不保存到缓存）
+            this.cardBoosts = {
+                1: 0.5, // 灰
+                2: 0.5, // 绿
+                3: 0.4, // 蓝
+                4: 0.3, // 紫
+                5: 0.2, // 红
+                6: 0.1, // 黄
+                7: 0.08 // 橙 - 调整为0.08以达到约10%胜率
+            };
+            
+            // 注释掉持久化代码，确保每次启动都使用代码中的默认值
+            // 📊 胜率分析: Level 7权重=0.08 → 预期胜率≈10.5% (目标10%)
+            // try {
+            //     const gd = this.loadGameData() || {};
+            //     gd.cardBoosts = this.cardBoosts;
+            //     gd.saveTime = Date.now();
+            //     this._persistGameData(gd);
+            //     console.log('🔁 初始化并持久化默认 cardBoosts');
+            // } catch (e) { }
+            
+            // console.log('🔁 使用代码默认 cardBoosts 配置 (不从缓存读取)');
+
+            return finalUserData;
+
+        } catch (error) {
+            console.error('❌ 用户数据初始化失败:', error);
+            // 如果登录方式是 wechat，则将错误向上抛出，由前端决定是否降级为游客登录
+            try {
+                if (loginType === 'wechat') {
+                    // console.log('🔁 WeChat 登录失败，向上抛出错误以便前端处理（then/catch）');
+                    throw error;
+                }
+            } catch (e) {
+                // 如果 loginType 不可用或比较出错，继续退回游客
+            }
+            // 非 wechat 模式仍旧回退为游客
+            return await this.createGuestUser();
+        }
+    }
+
+    /**
+     * 加载用户数据缓存
+     */
+    loadUserDataCache() {
+        try {
+            const userData = localStorage.getItem('UserData');
+            if (userData) {
+                const parsedData = JSON.parse(userData);
+                this.userDataCache.set('currentUser', parsedData);
+                // console.log('📂 用户数据缓存加载完成');
+                return parsedData; // 🔥 返回解析后的数据
+            }
+            return null; // 🔥 没有数据时返回null
+        } catch (error) {
+            console.error('❌ 用户数据缓存加载失败:', error);
+            return null; // 🔥 出错时返回null
+        }
+    }
+
+    /**
+     * 🔥 新增：加载游戏数据
+     */
+    loadGameData() {
+        try {
+            const gameData = localStorage.getItem('GameData');
+            if (gameData) {
+                const parsedData = JSON.parse(gameData);
+                // 已禁用混淆/加密功能：不再尝试解密或迁移旧的 encryptedXxx 字段
+                /*
+                // 尝试解密一组可能被混淆的字段
+                const decryptFields = ['CardBoosts', 'ScoreSystem', 'MaxUnlockedEggType', 'Eggs'];
+                let _didAnyDecrypt = false;
+                try {
+                    for (const f of decryptFields) {
+                        const encName = 'encrypted' + f;
+                        const plainName = f.charAt(0).toLowerCase() + f.slice(1);
+                        if (parsedData[encName] && utile && typeof utile.xorDecryptToObject === 'function') {
+                            try {
+                                const dec = utile.xorDecryptToObject(parsedData[encName], this._localCryptoKey);
+                                if (dec !== null && dec !== undefined) {
+                                    parsedData[plainName] = dec;
+                                    _didAnyDecrypt = true;
+                                }
+                            } catch (e) {
+                                // ignore field-level decryption errors
+                            }
+                        }
+                    }
+                } catch (e) { }
+
+                // 如果我们解密出了任意字段并且原始数据仍包含明文，立即覆写存储以移除明文
+                try {
+                    if (_didAnyDecrypt) {
+                        this._persistGameData(parsedData);
+                    }
+                } catch (e) { }
+                */
+                // console.log('📊 游戏数据加载成功');
+                return parsedData;
+            }
+            // console.log('📊 没有游戏数据（新用户）');
+            return null;
+        } catch (error) {
+            console.error('❌ 游戏数据加载失败:', error);
+            return null;
+        }
+    }
+
+
+    /**
+    * 获取游戏数据 - 统一入口
+    * @param {Object} userStatus - 用户状态
+    * @param {string} difficulty - 游戏难度 ('easy', 'normal', 'hard')
+    * @returns {Object} 游戏数据
+    */
+    getGameData(userStatus = null, difficulty = 'normal') {
+        console.log('📊 获取游戏数据...');
+
+        if (userStatus.isNewUser) {
+            return this.getNewUserGuideData();
+        } else {
+            return this.getAlgorithmData(userStatus);
+        }
+    }
+
+    /**
+     * 获取新用户引导数据
+     * @returns {Object} 引导数据
+     */
+    getNewUserGuideData() {
+
+        const userStatus = this.userDataCache.get('currentUser');
+        if (!userStatus) {
+            console.error('❌ 用户状态不存在');
+            return {
+                success: false,
+                isNewUser: true,
+                message: 'User status not found'
+            };
+        }
+
+
+        // console.log(`📖 获取新用户引导数据 - 等级: ${this.guidestaute.currentLevel}, 步骤: ${this.guidestaute.currentStep}`);
+
+        // 检查是否达到引导结束条件
+        const guideSteps = this.newUserGuideData[`lv${this.guidestaute.currentLevel}`];
+        if (!guideSteps || this.guidestaute >= guideSteps.length) {
+            // console.log('🎉 ////////////////新手引导完成，退出引导模式');
+            userStatus.isNewUser = false;
+            this.saveUserData('currentUser', userStatus);
+            return {
+                success: false,
+                isNewUser: false,
+                message: 'New user guide completed'
+            };
+        }
+
+        // 使用 this.guidestaute 获取引导数据
+        const guideData = guideSteps[this.guidestaute.currentStep];
+        if (guideData) {
+            // console.log('📚 新用户引导数据:', guideData);
+
+            // 同步引导数据到地图状态
+            guideData.eggSeat.forEach((cellId, index) => {
+                this.occupyPosition(cellId, guideData.eggType[index], null);
+            });
+
+            return {
+                success: true,
+                isNewUser: true,
+                data: guideData,
+                message: 'New user guide data retrieved successfully'
+            };
+        } else {
+            userStatus.isNewUser = false;
+            this.saveUserData('currentUser', userStatus);
+            console.warn(`⚠️ 未找到新用户引导数据 - 等级: ${userStatus.currentLevel}, 步骤: ${this.guidestaute.currentStep}`);
+            return {
+                success: false,
+                isNewUser: false,
+                data: null,
+                message: 'New user guide data not found'
+            };
+        }
+    }
+
+    getAlgorithmData(userStatus = null) {
+
+        const gameData = this.loadGameData();
+
+        // 检查是否超时
+        if (gameData && gameData.saveTime) {
+            const now = Date.now();
+            const diff = now - gameData.saveTime;
+            if (diff > 1 * 60 * 60 * 1000) { // 超过24小时
+                // console.log('⏰ 超过24小时，重置蛋数据');
+                this.resetGame(); // 重置数据
+                // 重新加载重置后的数据
+                return this.getAlgorithmData(userStatus);
+            }
+        }
+
+        // 🔥 设置全局游戏状态
+        this.currentGameStatus = {
+            // 游戏进度数据
+            eggs: gameData ? gameData.eggs : [],
+            scoreSystem: gameData ? gameData.scoreSystem : this.scoreSystem,
+            difficulty: gameData ? gameData.difficulty : this.difficulty,
+            maxUnlockedEggType: gameData ? gameData.maxUnlockedEggType : 1,
+
+            // 状态标记
+            isInitialized: !!gameData,
+            hasGameData: !!gameData,
+            saveTime: gameData ? gameData.saveTime : Date.now(),
+
+            // 游戏状态
+            isPlaying: false,
+            isPaused: false,
+            isCompleted: false
+        };
+
+        // 检查是否有保存的游戏状态
+        if (gameData && gameData.eggs && gameData.eggs.length > 0) {
+            // console.log('🔄 恢复保存的游戏状态');
+
+            // 🔥 恢复游戏状态到地图
+            this.loadSavedGameState(gameData);
+
+            // console.log('📊 恢复后的地图状态验证:');
+            // const mapInfo = this.getMapStateInfo();
+            // console.log(`  占用格子数: ${mapInfo.occupiedCells}`);
+            // console.log(`  空闲格子数: ${mapInfo.emptyCells}`);
+            // console.log(`  总分数: ${this.scoreSystem ? this.scoreSystem.totalScore : 'N/A'}`);
+
+
+            return {
+                success: true,
+                isNewUser: false,
+                difficulty: this.getDifficultyLevel(gameData.difficulty, true),
+                scoreSystem: gameData.scoreSystem || this.scoreSystem,
+                data: {
+                    eggSeat: gameData.eggs.map(egg => egg.cellId),
+                    eggType: gameData.eggs.map(egg => egg.eggType),
+                    pointSeat: [] // 老用户不需要引导点
+                },
+                unlockData: {
+                    maxUnlockedEggType: gameData.maxUnlockedEggType || 1
+                },
+                message: 'Restored saved game state'
+            };
+        }
+
+        const eggCount = this.difficulty;
+        // 随机生成数据
+        const newEggs = this.generateRandomEggsFromMapState(eggCount);
+
+        return {
+            success: true,
+            isNewUser: false,
+            scoreSystem: this.scoreSystem,
+            difficulty: this.getDifficultyLevel(this.difficulty, true),
+            data: {
+                eggSeat: newEggs.map(egg => egg.cellId),
+                eggType: newEggs.map(egg => egg.eggType),
+                pointSeat: [] // 老用户不需要引导点
+            },
+
+            unlockData: {
+                maxUnlockedEggType: this.maxUnlockedEggType || 1
+            },
+            message: 'Algorithm data generated successfully'
+        };
+
+    }
+
+    /**
+     * 更新游戏难度
+     * @param {string} difficulty - 新的难度 ('easy', 'normal', 'hard')
+     */
+    updateDifficulty(difficulty) {
+        const difficultyLevel = this.getDifficultyLevel(difficulty);
+
+        if (difficultyLevel) {
+            this.difficulty = difficultyLevel;
+            const gameData = this.loadGameData() || {};
+            gameData.difficulty = this.difficulty;
+            gameData.scoreSystem = this.scoreSystem;
+            gameData.maxUnlockedEggType = this.maxUnlockedEggType;
+            gameData.eggs = gameData.eggs || [];
+            gameData.saveTime = Date.now();
+            this._persistGameData(gameData);
+            // console.log(`🎯 游戏难度已更新: ${difficulty} (${difficultyLevel} 个蛋)`);
+        } else {
+            console.warn(`⚠️ 无效的难度: ${difficulty}`);
+        }
+    }
+
+    getDifficulty() {
+        return this.getDifficultyLevel(this.difficulty, true);
+    }
+    /**
+     * 获取难度对应的蛋数量
+     * @param {string} difficulty - 难度等级
+     * @returns {number} 蛋数量
+     */
+    getDifficultyLevel(input, returnKey = false) {
+        const difficultyMap = {
+            'easy': 3,
+            'normal': 4,
+            'hard': 5
+        };
+
+        if (returnKey) {
+            // 传入的是数字，查找对应的 key
+            for (const [key, value] of Object.entries(difficultyMap)) {
+                if (value === input) return key;
+            }
+            return 'normal'; // 默认返回 normal
+        } else {
+            // 传入的是 key，查找对应的 value
+            return difficultyMap[input] || 4; // 默认是 normal 难度
+        }
+    }
+    /**
+     * 重置游戏状态
+     */
+    resetGame() {
+        // console.log('🔄 重置 GameServer 游戏状态...');
+
+        try {
+            // 1. 获取当前的 gameData
+            const gameData = this.loadGameData();
+            const bestScore = gameData?.scoreSystem?.bestScore || 0; // 保留最高分
+
+            // 2. 清空地图状态中的所有蛋数据
+            for (const cellId in this.mapState.cells) {
+                const cell = this.mapState.cells[cellId];
+                if (cell) {
+                    cell.isEmpty = true;
+                    cell.hasEgg = false;
+                    cell.eggType = null;
+                    cell.piece = null;
+                    cell.occupied = false;
+                }
+            }
+
+            // 3. 重置集合状态
+            this.mapState.occupiedCells.clear();
+            this.mapState.emptyCells.clear();
+
+            // 重新填充空闲格子集合
+            for (let cellId = 0; cellId < this.mapConfig.totalCells; cellId++) {
+                this.mapState.emptyCells.add(cellId);
+            }
+
+            // 4. 清除选择状态
+            this.clearSelection();
+
+            // 5. 重置分数系统，但保留最高分
+            if (this.scoreSystem) {
+                this.scoreSystem.currentScore = 0;
+                this.scoreSystem.totalScore = 0;
+                this.scoreSystem.sessionScore = 0;
+                this.scoreSystem.synthesisHistory = [];
+                this.scoreSystem.bestScore = bestScore; // 恢复最高分
+                // console.log(`💰 当前游戏分数系统已重置为0，但保留最高分: ${bestScore}`);
+            }
+
+            // 6. 重置用户解锁蛋等级为0（从蛋1重新开始解锁）
+            this.maxUnlockedEggType = 1;
+            this.difficulty = gameData ? gameData.difficulty : 4; // 恢复之前的难度
+
+            // 7. 重置全局游戏状态
+            if (this.currentGameStatus) {
+                this.currentGameStatus.eggs = [];
+                this.currentGameStatus.totalScore = 0;
+                this.currentGameStatus.maxUnlockedEggType = 1;
+                this.currentGameStatus.hasGameData = false;
+                this.currentGameStatus.isInitialized = false;
+                this.currentGameStatus.saveTime = null;
+            }
+
+            // 8. 保存新的 gameData，保留最高分
+            const newGameData = {
+                eggs: [],
+                scoreSystem: this.scoreSystem,
+                difficulty: this.difficulty,
+                maxUnlockedEggType: this.maxUnlockedEggType,
+                saveTime: Date.now()
+            };
+            this._persistGameData(newGameData);
+
+            // console.log('✅ GameServer 游戏状态重置完成');
+            // console.log(`📊 地图状态 - 空闲: ${this.mapState.emptyCells.size}, 占用: ${this.mapState.occupiedCells.size}`);
+
+            return {
+                success: true,
+                message: 'Game state reset successfully'
+            };
+
+        } catch (error) {
+            console.error('❌ GameServer 游戏状态重置失败:', error);
+            return {
+                success: false,
+                message: error.message
+            };
+        }
+    }
+
+    /**
+     * 保存用户数据
+     * @param {string} userId - 用户ID
+     * @param {Object} userData - 用户数据
+     */
+    saveUserData(userId, userData) {
+        try {
+            // 更新缓存
+            this.userDataCache.set(userId, userData);
+
+            localStorage.setItem('UserData', JSON.stringify(userData));
+            // console.log('💾 用户身份数据已保存:', userData);
+
+            return { success: true, message: 'User data saved successfully' };
+        } catch (error) {
+            console.error('❌ 用户数据保存失败:', error);
+            return { success: false, message: 'Failed to save user data', error: error.message };
+        }
+    }
+
+    /**
+     * 初始化并返回 A* 寻路实例
+     * @param {number} type - 寻路类型 (4: 四方向, 8: 八方向)
+     * @returns {Object} A* 寻路实例
+     */
+    getAstar(type = 4) {
+        // console.log(`🔍 尝试获取 A* 寻路实例，类型: ${type}`);
+
+        if (type === 4) {
+            if (window.OvoAstar4) {
+                // console.log('✅ 找到 OvoAstar4 模块');
+                return window.OvoAstar4.getInstance();
+            } else {
+                console.warn('⚠️ OvoAstar4 模块未加载');
+                return null;
+            }
+        }
+        if (type === 8) {
+            if (window.OvoAstar8) {
+                // console.log('✅ 找到 OvoAstar8 模块');
+                return window.OvoAstar8.getInstance();
+            } else {
+                console.warn('⚠️ OvoAstar8 模块未加载');
+                return null;
+            }
+        }
+        console.warn(`⚠️ 不支持的寻路类型: ${type}`);
+        return null;
+    }
+
+    /**
+     * 等待 A* 模块加载完成
+     * @param {number} type - 寻路类型
+     * @param {number} maxWaitTime - 最大等待时间（毫秒）
+     * @returns {Promise<Object>} A* 寻路实例
+     */
+    async waitForAstarModule(type = 4, maxWaitTime = 5000) {
+        // console.log(`⏳ 等待 A* 模块加载，类型: ${type}`);
+
+        return new Promise((resolve, reject) => {
+            const startTime = Date.now();
+
+            const checkModule = () => {
+                const astar = this.getAstar(type);
+                if (astar) {
+                    // console.log(`✅ A* 模块加载完成，耗时: ${Date.now() - startTime}ms`);
+                    resolve(astar);
+                    return;
+                }
+
+                // 检查是否超时
+                if (Date.now() - startTime > maxWaitTime) {
+                    console.error(`❌ A* 模块加载超时，类型: ${type}`);
+                    reject(new Error(`A* 模块加载超时，类型: ${type}`));
+                    return;
+                }
+
+                // 继续等待
+                setTimeout(checkModule, 100);
+            };
+
+            checkModule();
+        });
+    }
+
+
+    /**
+     * 初始化游戏地图的寻路网格
+     * @param {number} rows - 行数 (默认 6)
+     * @param {number} cols - 列数 (默认 6)
+     * @param {number} cellSize - 格子大小 (默认 150)
+     * @param {number} pathType - 寻路类型 (4: 四方向, 8: 八方向)
+     * @returns {Promise} 返回初始化的网格数据
+     */
+    initPathfindingGrid(rows = 6, cols = 6, cellSize = 150, pathType = 4) {
+        // console.log(`🗺️ 初始化寻路网格: ${rows}x${cols}, 格子大小: ${cellSize}, 寻路类型: ${pathType}方向`);
+
+        return new Promise((resolve, reject) => {
+            try {
+                // 创建网格节点数组
+                const nodes = [];
+
+                // 初始化网格数据
+                for (let i = 0; i < rows; i++) {
+                    nodes[i] = [];
+                    for (let j = 0; j < cols; j++) {
+                        const cellId = i * cols + j;
+                        const cell = {
+                            id: cellId,
+                            row: i,
+                            col: j,
+                            x: j * cellSize,
+                            y: i * cellSize,
+                            centerX: j * cellSize + cellSize / 2,
+                            centerY: i * cellSize + cellSize / 2,
+                            type: window.graphType ? window.graphType.open : 0, // 默认为可通行
+                            walkable: true,
+                            occupied: false // 是否被占用
+                        };
+                        nodes[i][j] = cell;
+                    }
+                }
+
+                // 获取 A* 寻路实例
+                const astar = this.getAstar(pathType);
+                if (!astar) {
+                    throw new Error(`无法获取 A* 寻路实例，类型: ${pathType}`);
+                }
+
+                // 初始化 A* 寻路
+                astar.init(rows, cols, cellSize, nodes);
+
+                // 保存网格数据到服务器
+                this.pathfindingGrid = {
+                    nodes: nodes,
+                    rows: rows,
+                    cols: cols,
+                    cellSize: cellSize,
+                    pathType: pathType,
+                    astar: astar
+                };
+
+                // console.log('✅ 寻路网格初始化完成');
+                resolve({
+                    nodes: nodes,
+                    astar: astar,
+                    config: {
+                        rows: rows,
+                        cols: cols,
+                        cellSize: cellSize,
+                        pathType: pathType
+                    }
+                });
+
+            } catch (error) {
+                console.error('❌ 寻路网格初始化失败:', error);
+                reject(error);
+            }
+        });
+    }
+
+    /**
+     * 更新网格中某个位置的可通行状态
+     * @param {number} row - 行
+     * @param {number} col - 列
+     * @param {boolean} walkable - 是否可通行
+     * @param {boolean} occupied - 是否被占用
+     */
+    updateGridCell(row, col, walkable = true, occupied = false) {
+        if (!this.pathfindingGrid || !this.pathfindingGrid.nodes) {
+            console.warn('⚠️ 寻路网格未初始化');
+            return;
+        }
+
+        const { nodes, rows, cols } = this.pathfindingGrid;
+        if (row >= 0 && row < rows && col >= 0 && col < cols) {
+            const cell = nodes[row][col];
+            cell.walkable = walkable;
+            cell.occupied = occupied;
+            cell.type = walkable ? (window.graphType ? window.graphType.open : 0) : (window.graphType ? window.graphType.wall : 1);
+
+            // console.log(`🔄 更新网格 (${row}, ${col}): 可通行=${walkable}, 占用=${occupied}`);
+        }
+    }
+
+    /**
+     * 寻找路径
+     * @param {Object} start - 起始点 {x, y} 或 {row, col}
+     * @param {Object} end - 终点 {x, y} 或 {row, col}
+     * @returns {Array} 路径数组
+     */
+    findPath(start, end) {
+        if (!this.pathfindingGrid || !this.pathfindingGrid.astar) {
+            console.warn('⚠️ 寻路系统未初始化');
+            return [];
+        }
+
+        const { astar } = this.pathfindingGrid;
+
+        // 转换坐标格式
+        const startPos = start.row !== undefined ? start : this.positionToGrid(start.x, start.y);
+        const endPos = end.row !== undefined ? end : this.positionToGrid(end.x, end.y);
+
+        // console.log(`🔍 寻路: (${startPos.row}, ${startPos.col}) -> (${endPos.row}, ${endPos.col})`);
+
+        const path = astar.search(
+            { x: startPos.row, y: startPos.col },
+            { x: endPos.row, y: endPos.col }
+        );
+
+        // console.log(`📍 找到路径，长度: ${path.length}`);
+        return path;
+    }
+
+    /**
+     * 将像素坐标转换为网格坐标
+     * @param {number} x - 像素 X 坐标
+     * @param {number} y - 像素 Y 坐标
+     * @returns {Object} 网格坐标 {row, col}
+     */
+    positionToGrid(x, y) {
+        if (!this.pathfindingGrid) {
+            return { row: 0, col: 0 };
+        }
+
+        const { cellSize } = this.pathfindingGrid;
+        return {
+            row: Math.floor(y / cellSize),
+            col: Math.floor(x / cellSize)
+        };
+    }
+
+
+
+    /**
+     * 验证蛋移动的有效性
+     */
+    validateEggMove(fromCellId, toCellId) {
+        // 这里可以添加移动规则验证
+        // 比如：是否有蛋、目标是否为空等
+        return {
+            code: 0,
+            message: "移动有效"
+        };
+    }
+
+    /**
+     * 将格子ID转换为行列坐标
+     */
+    cellIdToPosition(cellId) {
+        if (!this.pathfindingGrid) {
+            return { row: 0, col: 0 };
+        }
+
+        const { cols } = this.pathfindingGrid;
+        return {
+            row: Math.floor(cellId / cols),
+            col: cellId % cols
+        };
+    }
+
+
+    /**
+     * 查找合成匹配
+     * @param {number} cellId - 检查的格子ID
+     * @returns {Object} 匹配结果
+     */
+    findSynthesisMatches(cellId) {
+        // 模拟合成逻辑 - 查找相邻的相同类型蛋
+        const matches = [];
+        const visited = new Set();
+        const queue = [cellId];
+        visited.add(cellId);
+
+        // 假设的蛋类型（实际应该从游戏状态获取）
+        const targetEggType = 0; // 这里应该从实际游戏状态获取
+
+        // BFS 查找相邻的相同类型蛋
+        while (queue.length > 0) {
+            const currentCellId = queue.shift();
+            matches.push(currentCellId);
+
+            // 获取相邻格子
+            const adjacentCells = this.getAdjacentCells(currentCellId);
+
+            for (const adjCellId of adjacentCells) {
+                if (!visited.has(adjCellId)) {
+                    // 这里应该检查实际的蛋类型
+                    // 暂时模拟：假设相邻格子有相同类型的蛋
+                    const hasMatchingEgg = Math.random() > 0.7; // 模拟
+
+                    if (hasMatchingEgg) {
+                        visited.add(adjCellId);
+                        queue.push(adjCellId);
+                    }
+                }
+            }
+        }
+
+        return {
+            matches: matches,
+            eggType: targetEggType,
+            newEggType: targetEggType + 1, // 合成后的新类型
+            synthesisPosition: cellId, // 合成位置
+            score: matches.length * 10 // 分数计算
+        };
+    }
+
+    /**
+     * 获取相邻格子
+     * @param {number} cellId - 格子ID
+     * @returns {Array} 相邻格子ID数组
+     */
+    getAdjacentCells(cellId) {
+        if (!this.pathfindingGrid) {
+            return [];
+        }
+
+        const { rows, cols } = this.pathfindingGrid;
+        const pos = this.cellIdToPosition(cellId);
+        const adjacent = [];
+
+        // 四个方向：上、下、左、右
+        const directions = [
+            [-1, 0], [1, 0], [0, -1], [0, 1]
+        ];
+
+        for (const [dRow, dCol] of directions) {
+            const newRow = pos.row + dRow;
+            const newCol = pos.col + dCol;
+
+            if (newRow >= 0 && newRow < rows && newCol >= 0 && newCol < cols) {
+                const adjCellId = newRow * cols + newCol;
+                adjacent.push(adjCellId);
+            }
+        }
+
+        return adjacent;
+    }
+
+
+    /**
+     * 检查蛋合成条件（类似 getMosterClearList）
+     * @param {number} cellId - 检查的格子ID
+     * @param {Object} gameState - 游戏状态
+     * @returns {Promise<Object>} 合成检查结果
+     */
+    checkEggSynthesis(cellId, gameState) {
+        // console.log(`🔍 检查格子 ${cellId} 的蛋合成条件`);
+
+        return new Promise((resolve) => {
+            const synthesisResult = this.findEggMatches(cellId, gameState);
+
+            if (synthesisResult && synthesisResult.matches.length >= 3) {
+                resolve({
+                    code: 0,
+                    matches: synthesisResult.matches,
+                    eggType: synthesisResult.eggType,
+                    newEggType: synthesisResult.newEggType,
+                    synthesisPosition: synthesisResult.synthesisPosition,
+                    score: synthesisResult.score,
+                    message: "找到合成匹配"
+                });
+            } else {
+                resolve({
+                    code: -1,
+                    message: "没有找到合成匹配"
+                });
+            }
+        });
+    }
+
+    /**
+     * 查找蛋匹配（用于合成检测）
+     * @param {number} cellId - 检查的格子ID
+     * @param {Object} gameState - 游戏状态
+     * @returns {Object|null} 匹配结果
+     */
+    findEggMatches(cellId, gameState) {
+        if (!gameState.cells[cellId] || !gameState.cells[cellId].hasEgg) {
+            return null;
+        }
+
+        const targetEggType = gameState.cells[cellId].eggType;
+        const matches = [];
+        const visited = new Set();
+        const queue = [cellId];
+        visited.add(cellId);
+
+        // BFS 查找相邻的相同类型蛋
+        while (queue.length > 0) {
+            const currentCellId = queue.shift();
+            matches.push(currentCellId);
+
+            // 获取相邻格子
+            const adjacentCells = this.getAdjacentCells(currentCellId);
+
+            for (const adjCellId of adjacentCells) {
+                if (!visited.has(adjCellId) &&
+                    gameState.cells[adjCellId] &&
+                    gameState.cells[adjCellId].hasEgg &&
+                    gameState.cells[adjCellId].eggType === targetEggType) {
+
+                    visited.add(adjCellId);
+                    queue.push(adjCellId);
+                }
+            }
+        }
+
+        if (matches.length >= 3) {
+            const newEggType = Math.min(targetEggType + 1, 8);
+            const score = this.calculateSynthesisScore(matches.length, targetEggType, newEggType);
+
+            return {
+                matches: matches,
+                eggType: targetEggType,
+                newEggType: newEggType,
+                synthesisPosition: cellId,  // 合成位置就是目标位置
+                score: score
+            };
+        }
+
+        return null;
+    }
+
+    /**
+     * 计算合成分数
+     * @param {number} eggCount - 参与合成的蛋数量
+     * @param {number} eggType - 原蛋类型（被合成的蛋等级）
+     * @param {number} newEggType - 合成后的新蛋类型
+     * @returns {Object} 分数详情
+     */
+    calculateSynthesisScore(eggCount, eggType, newEggType) {
+        // 🔥 修正：使用原蛋等级（eggType）计算分数，不是新蛋等级
+        const baseScore = Math.min(eggType * 2, 20);
+        const typeMultiplier = eggType;//eggType * 10;
+        const countBonus = Math.round(Math.pow(eggCount - 3, 1.5))//Math.round(Math.pow(eggCount - 3, 1.5) * 10);
+        const levelBonus = Math.pow(eggType, 2)//Math.pow(eggType, 2) * 5;
+        // 新加难度分
+        const totalScore = Math.round(baseScore + typeMultiplier + countBonus + levelBonus) * this.difficulty;
+
+        // console.log(`🧮 合成分数计算 - 原等级${eggType}, 数量${eggCount}:`);
+        // console.log(`  基础分: min(${eggType} × 2, 20) = ${baseScore}`);
+        // console.log(`  类型倍数: ${eggType} × 10 = ${typeMultiplier}`);
+        // console.log(`  数量奖励: (${eggCount} - 3)^1.5 × 10 = ${countBonus}`);
+        // console.log(`  等级奖励: ${eggType}² × 5 = ${levelBonus}`);
+        // console.log(`  总分: ${totalScore}`);
+
+        return {
+            baseScore: baseScore,
+            typeMultiplier: typeMultiplier,
+            countBonus: countBonus,
+            levelBonus: levelBonus,
+            totalScore: totalScore,
+            eggCount: eggCount,
+            fromType: eggType,
+            toType: newEggType
+        };
+    }
+
+    /**
+     * 更新分数系统
+     * @param {Object} scoreDetail - 分数详情
+     * @returns {Object} 更新后的分数状态
+     */
+    updateScoreSystem(scoreDetail) {
+
+
+
+        this.scoreSystem.currentScore += scoreDetail.totalScore;
+        this.scoreSystem.totalScore += scoreDetail.totalScore;
+        this.scoreSystem.sessionScore += scoreDetail.totalScore;
+
+        // 更新历史最高分
+        if (this.scoreSystem.totalScore > this.scoreSystem.bestScore) {
+            this.scoreSystem.bestScore = this.scoreSystem.totalScore;
+            // console.log(`🏆 新的历史最高分: ${this.scoreSystem.bestScore}`);
+        }
+
+        // 记录合成历史
+        this.scoreSystem.synthesisHistory.push({
+            timestamp: Date.now(),
+            scoreDetail: scoreDetail,
+            currentTotal: this.scoreSystem.currentScore
+        });
+
+        // console.log(`📊 分数更新: +${scoreDetail.totalScore}, 当前总分: ${this.scoreSystem.currentScore}`);
+
+        return {
+            currentScore: this.scoreSystem.currentScore,
+            addedScore: scoreDetail.totalScore,
+            scoreDetail: scoreDetail,
+            bestScore: this.scoreSystem.bestScore  // 返回历史最高分
+        };
+    }
+
+    /**s
+     * 获取当前分数状态
+     * @returns {Object} 分数状态
+     */
+    getScoreStatus() {
+        return {
+            currentScore: this.scoreSystem.currentScore,
+            totalScore: this.scoreSystem.totalScore,
+            sessionScore: this.scoreSystem.sessionScore,
+            synthesisCount: this.scoreSystem.synthesisHistory.length,
+            bestScore: this.scoreSystem.bestScore // 返回历史最高分
+        };
+    }
+
+    /**
+     * 获取蛋类型名称
+     * @param {number} eggType - 蛋类型 (1-7)
+     * @returns {string} 蛋类型名称
+     */
+    getEggTypeName(eggType) {
+        const eggNames = {
+            1: '白色', // egg_mc1
+            2: '绿色', // egg_mc2
+            3: '蓝色', // egg_mc3
+            4: '紫色', // egg_mc4
+            5: '红色', // egg_mc5
+            6: '黄色', // egg_mc6
+            7: '橙色'  // egg_mc7
+        };
+        return eggNames[eggType] || '未知';
+    }
+
+
+
+    /**
+     * 计算空位置（从游戏状态获取）
+     * @param {Object} gameState - 可选的游戏状态，如果不提供则返回所有位置
+     * @returns {Array} 空位置数组
+     */
+    calculateEmptyPositions(gameState = null) {
+        const totalPositions = 48; // 8 * 6
+        const emptyPositions = [];
+
+        if (gameState && gameState.cells) {
+            // 从实际游戏状态获取空位置
+            for (let i = 0; i < totalPositions; i++) {
+                const cellState = gameState.cells[i];
+                if (!cellState || !cellState.hasEgg) {
+                    emptyPositions.push(i);
+                }
+            }
+            // console.log(`📍 从游戏状态找到 ${emptyPositions.length} 个空位置`);
+        } else {
+            // 如果没有游戏状态，假设所有位置都是空的
+            for (let i = 0; i < totalPositions; i++) {
+                emptyPositions.push(i);
+            }
+            // console.log(`📍 默认模式：假设所有 ${emptyPositions.length} 个位置都是空的`);
+        }
+
+        return emptyPositions;
+    }
+
+    /**
+     * 从空位置中随机选择指定数量的位置
+     * @param {Array} emptyPositions - 空位置数组
+     * @param {number} count - 需要选择的数量
+     * @returns {Array} 选中的位置
+     */
+    selectRandomPositions(emptyPositions, count) {
+        const selected = [];
+        const available = [...emptyPositions]; // 复制数组
+
+        for (let i = 0; i < count && available.length > 0; i++) {
+            const randomIndex = Math.floor(Math.random() * available.length);
+            const selectedPosition = available.splice(randomIndex, 1)[0];
+            selected.push(selectedPosition);
+        }
+
+        // console.log(`🎲 随机选择位置: [${selected}]`);
+        return selected;
+    }
+
+    /**
+     * 获取可用的蛋类型（基于解锁等级）
+     * @param {number} maxUnlockedEggType - 最高解锁等级
+     * @returns {Array} 可用蛋类型数组
+     */
+    getAvailableEggTypes(maxUnlockedEggType) {
+        const availableTypes = [];
+        for (let i = 1; i <= Math.min(maxUnlockedEggType, 8); i++) {
+            availableTypes.push(i);
+        }
+        // console.log(`🎯 可用蛋类型: [${availableTypes.join(', ')}] (解锁到: ${maxUnlockedEggType})`);
+        return availableTypes;
+    }
+
+    /**
+     * 从可用类型中随机选择蛋类型
+     * @param {Array} availableTypes - 可用蛋类型数组
+     * @param {number} count - 需要的数量
+     * @returns {Array} 随机选择的蛋类型
+     */
+    selectRandomEggTypes(availableTypes, count) {
+        const selectedTypes = [];
+
+        // 处理 value===1 的强制包含类型（去重、按类型id升序）。
+        // 如果强制类型数量 >= count，则直接返回前 count 个强制类型。
+        try {
+            // 解释：cardBoosts 的语义为：0 = 不参与，0~1 = 权重比例，1 = 最高权重（参与但不强制占位）
+            // 不从缓存读取，直接使用实例中已初始化的cardBoosts
+            this.cardBoosts = this.cardBoosts || {};
+            const DEFAULT_WEIGHT = 0.5; // 未配置时的中性权重，可调整
+
+            // 构建类型-权重池（跳过权重为0的类型）
+            const pool = [];
+            for (const t of availableTypes) {
+                let v = Number(this.cardBoosts[t]);
+                if (!isFinite(v)) v = DEFAULT_WEIGHT;
+                v = Math.max(0, Math.min(1, v));
+                if (v > 0) pool.push({ type: t, weight: v });
+            }
+
+            // 如果池为空，则退化为等概率选择（包含所有 availableTypes）
+            if (pool.length === 0) {
+                const fallback = [];
+                for (let i = 0; i < count; i++) {
+                    fallback.push(availableTypes[Math.floor(Math.random() * availableTypes.length)]);
+                }
+                // console.log('ℹ️ 所有权重为0，回退到等概率选择:', fallback);
+                return fallback;
+            }
+
+            // 带权重的不放回抽样（每次选中后移除该类型，避免重复）
+            const take = Math.min(count, pool.length);
+            for (let k = 0; k < take; k++) {
+                const total = pool.reduce((s, p) => s + p.weight, 0);
+                let r = Math.random() * total;
+                let idx = 0;
+                for (; idx < pool.length; idx++) {
+                    r -= pool[idx].weight;
+                    if (r <= 0) break;
+                }
+                if (idx >= pool.length) idx = pool.length - 1;
+                selectedTypes.push(pool[idx].type);
+                pool.splice(idx, 1);
+            }
+
+            // 如果仍不足 count（pool 被耗尽），用可用类型等概率补足
+            while (selectedTypes.length < count) {
+                selectedTypes.push(availableTypes[Math.floor(Math.random() * availableTypes.length)]);
+            }
+
+            // console.log(`🎲 带权重选择蛋类型: [${selectedTypes.join(', ')}] (可用范围: [${availableTypes.join(', ')}])`);
+            return selectedTypes;
+        } catch (e) {
+            console.error('❌ selectRandomEggTypes 失败，回退到等概率选择:', e);
+            // 兜底等概率选择
+            const fallback = [];
+            const pool = [...availableTypes];
+            for (let i = 0; i < count; i++) {
+                fallback.push(pool[Math.floor(Math.random() * pool.length)]);
+            }
+            return fallback;
+        }
+    }
+
+    /**
+     * 根据权重生成随机蛋类型
+     * @param {Array} availableTypes - 可用蛋类型数组
+     * @returns {number} 选中的蛋类型
+     */
+    generateWeightedRandomEggType(availableTypes) {
+        if (availableTypes.length === 0) return 1;
+        if (availableTypes.length === 1) return availableTypes[0];
+
+        // 算法1
+        // 权重分别为：
+
+        // 1号蛋： (5-1+1)×10 = 50
+        // 2号蛋： (5-2+1)×10 = 40
+        // 3号蛋： (5-3+1)×10 = 30
+        // 4号蛋： (5-4+1)×10 = 20
+        // 5号蛋： (5-5+1)×10 = 10
+        // 总权重：50+40+30+20+10 = 150
+
+        // 概率分别为：
+
+        // 1号蛋：50/150 = 33.3%
+        // 2号蛋：40/150 = 26.7%
+        // 3号蛋：30/150 = 20%
+        // 4号蛋：20/150 = 13.3%
+        // 5号蛋：10/150 = 6.7%
+        // // 为每个可用类型分配权重（低级蛋权重更高）
+        // const weights = [];
+        // const maxType = Math.max(...availableTypes);
+
+        // for (const eggType of availableTypes) {
+        //     // 权重计算：最高级的权重最低，最低级的权重最高
+        //     const weight = Math.max(1, (maxType - eggType + 1) * 10);
+        //     weights.push(weight);
+        // }
+
+        // // 根据权重随机选择
+        // const totalWeight = weights.reduce((sum, weight) => sum + weight, 0);
+        // let random = Math.random() * totalWeight;
+
+        // for (let i = 0; i < availableTypes.length; i++) {
+        //     random -= weights[i];
+        //     if (random <= 0) {
+        //         // console.log(`🎯 权重选择: 类型${availableTypes[i]} (权重${weights[i]}/${totalWeight})`);
+        //         return availableTypes[i];
+        //     }
+        // }
+
+        // 算法2
+        // 以7种蛋为例，权重如下（可根据实际解锁数量调整）
+        // const customWeights = {
+        //     1: 40,
+        //     2: 35,
+        //     3: 25,
+        //     4: 23,
+        //     5: 1,   
+        //     6: 1,
+        //     7: 1
+        // };
+
+        // const weights = availableTypes.map(type => customWeights[type] || 1);
+
+        // const totalWeight = weights.reduce((sum, w) => sum + w, 0);
+        // let random = Math.random() * totalWeight;
+
+        // for (let i = 0; i < availableTypes.length; i++) {
+        //     random -= weights[i];
+        //     if (random <= 0) {
+        //         return availableTypes[i];
+        //     }
+        // }
+
+        // // 兜底返回最低级
+        // return availableTypes[0];
+
+
+        // 算法3：使用 this.cardBoosts 作为基础权重（initializeUserData 时已设置默认值），
+        // 并将 cardBoosts 的值视作 base 权重，抽卡时会在此基础上累加额外 boost。
+        // 使用 this.cardBoosts 的 0..1 数值作为权重（0 = 永不出现，1 = 保证出现）。
+        // 不从缓存读取，直接使用实例中已初始化的cardBoosts
+        this.cardBoosts = this.cardBoosts || {};
+
+        // 构建权重数组，语义：0 = 不参与，0..1 = 权重，1 = 最大权重（参与但不强制）
+        const DEFAULT_WEIGHT = 0.5;
+        const weights = [];
+        const types = [];
+        for (const type of availableTypes) {
+            let w = Number(this.cardBoosts[type]);
+            if (!isFinite(w)) w = DEFAULT_WEIGHT;
+            w = Math.max(0, Math.min(1, w));
+            if (w <= 0) continue; // 不参与抽取
+            weights.push(w);
+            types.push(type);
+        }
+
+        // 如果没有任何参与类型，则回退到等概率选择包含所有 availableTypes
+        if (weights.length === 0) {
+            const idx = Math.floor(Math.random() * availableTypes.length);
+            return availableTypes[idx];
+        }
+
+        const totalWeight = weights.reduce((s, x) => s + x, 0);
+        if (totalWeight <= 0) return types[0] || availableTypes[0];
+
+        let random = Math.random() * totalWeight;
+        for (let i = 0; i < weights.length; i++) {
+            random -= weights[i];
+            if (random <= 0) return types[i];
+        }
+
+        return types[types.length - 1] || availableTypes[0];
+
+        // 算法3测试方法
+        // 在浏览器控制台输出
+        // const gs = window.GameServer;
+        // const pool = gs.getAvailableEggTypes(gs.maxUnlockedEggType);
+        // const counts = {};
+        // for (let i=0;i<5000;i++){
+        // const arr = gs.selectRandomEggTypes(pool, 3); // 取3个
+        // arr.forEach(t => counts[t] = (counts[t]||0)+1);
+        // }
+        // console.log(counts);
+    }
+
+
+    /**
+     * 处理蛋合成成功事件
+     * @param {string} userId - 用户ID
+     * @param {number} synthesizedEggType - 合成的蛋等级
+     * @param {number} eggCount - 合成的蛋数量
+     */
+    onEggSynthesisSuccess(userId, synthesizedEggType, eggCount) {
+        let newEggType = synthesizedEggType;
+        // console.log(`🎊 用户 ${userId} 成功合成了 ${this.getEggTypeName(synthesizedEggType)} 蛋`);
+
+        // 更新最高解锁等级
+        // 🔥 修正：从gameData获取当前解锁等级
+        // const gameData = this.loadGameData();
+        const currentMax = this.maxUnlockedEggType || 1;
+
+        // console.log(`🔍 当前解锁等级检查: ${currentMax} vs 新等级: ${newEggType}`);
+
+        if (newEggType > currentMax) {
+            {
+                this.maxUnlockedEggType = newEggType;
+
+            }
+
+            // console.log(`🎉 用户 ${userId} 解锁了新蛋等级: ${newEggType} (${this.getEggTypeName(newEggType)})`);
+            // console.log(`📈 解锁进度: ${currentMax} -> ${newEggType}`);
+        } 
+        // else {
+        //     console.log(`📊 用户 ${userId} 当前最高解锁等级: ${currentMax}, 合成等级: ${newEggType} (无需更新)`);
+        // }
+
+        // 可以在这里添加其他奖励逻辑
+        // 比如：经验值、成就、分数等
+    }
+
+    /**
+     * 将网格坐标转换为像素坐标
+     * @param {number} row - 行
+     * @param {number} col - 列
+     * @returns {Object} 像素坐标 {x, y, centerX, centerY}
+     */
+    gridToPosition(row, col) {
+        if (!this.pathfindingGrid) {
+            return { x: 0, y: 0, centerX: 0, centerY: 0 };
+        }
+
+        const { cellSize } = this.pathfindingGrid;
+        return {
+            x: col * cellSize,
+            y: row * cellSize,
+            centerX: col * cellSize + cellSize / 2,
+            centerY: row * cellSize + cellSize / 2
+        };
+    }
+
+    /**
+     * 从地图状态获取空位置
+     * @returns {Array} 空位置数组
+     */
+    getEmptyPositionsFromMap() {
+        const emptyPositions = Array.from(this.mapState.emptyCells);
+        // console.log(`📍 从地图状态获取空位置: ${emptyPositions.length} 个`);
+        return emptyPositions;
+    }
+
+    /**
+     * 为蛋预留位置（在地图状态中标记）
+     * @param {Array} positions - 位置数组
+     * @param {Array} eggTypes - 蛋类型数组
+     */
+    reservePositionsForEggs(positions, eggTypes) {
+        // console.log(`📌 预留蛋位置: [${positions}]`);
+
+        for (let i = 0; i < positions.length; i++) {
+            const cellId = positions[i];
+            const eggType = eggTypes[i];
+
+            if (this.mapState.cells[cellId]) {
+                // 更新格子状态
+                this.mapState.cells[cellId].isEmpty = false;
+                this.mapState.cells[cellId].hasEgg = true;
+                this.mapState.cells[cellId].eggType = eggType;
+                this.mapState.cells[cellId].occupied = true;
+
+                // 更新集合
+                this.mapState.emptyCells.delete(cellId);
+                this.mapState.occupiedCells.add(cellId);
+
+                // console.log(`📌 预留格子 ${cellId}: 蛋类型 ${eggType}`);
+            }
+        }
+    }
+
+    /**
+     * 释放位置（移除蛋后调用）
+     * @param {number} cellId - 格子ID
+     */
+    releasePosition(cellId) {
+        if (this.mapState.cells[cellId]) {
+            // 更新格子状态
+            this.mapState.cells[cellId].isEmpty = true;
+            this.mapState.cells[cellId].hasEgg = false;
+            this.mapState.cells[cellId].eggType = null;
+            this.mapState.cells[cellId].piece = null;
+            this.mapState.cells[cellId].occupied = false;
+
+            // 更新集合
+            this.mapState.occupiedCells.delete(cellId);
+            this.mapState.emptyCells.add(cellId);
+
+            // console.log(`🗑️ 释放格子 ${cellId}`);
+        }
+    }
+
+    /**
+     * 占用位置（放置蛋后调用）
+     * @param {number} cellId - 格子ID
+     * @param {number} eggType - 蛋类型
+     * @param {Object} piece - 蛋元件（可选）
+     */
+    occupyPosition(cellId, eggType, piece = null) {
+        if (this.mapState.cells[cellId]) {
+            // 更新格子状态
+            this.mapState.cells[cellId].isEmpty = false;
+            this.mapState.cells[cellId].hasEgg = true;
+            this.mapState.cells[cellId].eggType = eggType;
+            this.mapState.cells[cellId].piece = piece;
+            this.mapState.cells[cellId].occupied = true;
+
+            // 更新集合
+            this.mapState.emptyCells.delete(cellId);
+            this.mapState.occupiedCells.add(cellId);
+
+            // console.log(`📍 占用格子 ${cellId}: 蛋类型 ${eggType}`);
+        }
+    }
+
+    /**
+     * 保存当前游戏状态到localStorage
+     */
+    saveCurrentGameState() {
+        if (this.currentUserStatus?.isNewUser) {
+            console.log('🆕 新用户，不保存游戏状态');
+            return;
+        }
+        try {
+            // 收集当前地图中的蛋信息
+            const currentEggs = [];
+            for (const [cellId, cellData] of Object.entries(this.mapState.cells)) {
+                if (cellData.hasEgg && cellData.eggType !== null) {
+                    currentEggs.push({
+                        cellId: parseInt(cellId),
+                        eggType: cellData.eggType
+                    });
+                }
+            }
+
+
+            const gameState = {
+                eggs: currentEggs,
+                scoreSystem: this.scoreSystem, // 只保存总分数
+                difficulty: this.difficulty || 4,
+                maxUnlockedEggType: this.maxUnlockedEggType || 1,
+                // 注释掉保存 cardBoosts，确保不保存到缓存
+                // cardBoosts: this.cardBoosts || {},
+                saveTime: Date.now()
+            };
+
+            // 注释掉禁用加密的 cardBoosts 保存
+            // try {
+            //     gameState.cardBoosts = this.cardBoosts || {};
+            // } catch (e) {}
+            this._persistGameData(gameState);
+
+            // console.log(`💾 游戏状态已保存: ${currentEggs.length}个蛋, 总分数${gameState.totalScore}`);
+
+        } catch (error) {
+            console.error('❌ 保存游戏状态失败:', error);
+        }
+    }
+
+    /**
+     * 将抽卡结果写入 cardBoosts（并持久化）
+     * @param {number|string} cardType - 卡牌/蛋 类型
+     * @param {number} amount - 增量（默认为 1）
+     */
+    applyCardBoost(cardType, amount = 0) {
+        try {
+            if (cardType === undefined || cardType === null) return;
+            const key = String(cardType);
+            if (!this.cardBoosts) this.cardBoosts = {};
+            const cur = Number(this.cardBoosts[key]) || 0;
+            // amount is expected to be a decimal in 0..1
+            let delta = Number(amount || 0);
+            if (!isFinite(delta)) delta = 0;
+            let next = cur + delta;
+            // 上限为 1
+            const MAX_BOOST = 1;
+            next = Math.max(0, Math.min(MAX_BOOST, next));
+            // 保留两位小数，避免浮点数尾数过长
+            this.cardBoosts[key] = Number(next.toFixed(2));
+            
+            // 注释掉持久化代码，确保不保存到缓存
+            // 立即持久化：优先直接写入 GameData.cardBoosts（避免新手引导期间 saveCurrentGameState 被阻止）
+            // try {
+            //     const gd = this.loadGameData() || {};
+            //     gd.cardBoosts = this.cardBoosts;
+            //     // 禁用混淆：保持 cardBoosts 明文
+            //     try { gd.cardBoosts = this.cardBoosts; } catch (e) {}
+            //     gd.saveTime = Date.now();
+            //     this._persistGameData(gd);
+            // } catch (e) {
+            //     // 兜底尝试 saveCurrentGameState（老逻辑）
+            //     try { this.saveCurrentGameState(); } catch (e2) { /* ignore */ }
+            // }
+            
+            console.log(`🔔 applyCardBoost: type=${key}, +${delta} -> ${next} (不保存到缓存)`);
+            // console.log(`🔔 applyCardBoost: type=${key}, +${delta} -> ${next}`);
+            return this.cardBoosts;
+        } catch (e) {
+            console.error('❌ applyCardBoost 失败:', e);
+            return null;
+        }
+    }
+
+    /**
+   * 从游戏数据恢复游戏状态
+   * @param {Object} gameData - 游戏数据对象
+   */
+    loadSavedGameState(gameData) {
+        try {
+            // 🔥 修正：检查 eggs 而不是 currentEggs
+            if (!gameData || !gameData.eggs) {
+                console.log('📝 没有需要恢复的游戏状态');
+                return null;
+            }
+
+            // console.log(`🔄 恢复游戏状态: ${gameData.eggs.length}个蛋`);
+
+            // 恢复地图中的蛋
+            for (const eggData of gameData.eggs) {
+                this.occupyPositionSilently(eggData.cellId, eggData.eggType);
+            }
+
+            // 🔥 恢复分数系统
+            if (gameData.scoreSystem) {
+                this.scoreSystem = gameData.scoreSystem;
+                // console.log(`💰 分数系统已恢复: 总分${this.scoreSystem.totalScore}`);
+            }
+
+            // 🔥 恢复难度设置
+            if (gameData.difficulty !== undefined) {
+                this.difficulty = gameData.difficulty;
+                // console.log(`🎯 难度已恢复: ${this.difficulty}`);
+            }
+
+            // 🔥 恢复用户解锁等级
+            if (gameData.maxUnlockedEggType !== undefined) {
+                this.maxUnlockedEggType = gameData.maxUnlockedEggType;
+                // console.log(`🏆 解锁等级已恢复: ${gameData.maxUnlockedEggType}`);
+
+            }
+
+            // 🔥 注释掉恢复 cardBoosts 的代码，确保每次启动都使用代码默认值
+            // if (gameData.cardBoosts !== undefined) {
+            //     // 恢复并规范化为两位小数
+            //     this.cardBoosts = gameData.cardBoosts || {};
+            //     try {
+            //         Object.keys(this.cardBoosts).forEach(k => {
+            //             const v = Number(this.cardBoosts[k]) || 0;
+            //             this.cardBoosts[k] = Number(v.toFixed(2));
+            //         });
+            //     } catch (e) {
+            //         // ignore
+            //     }
+            //     // console.log('🔁 cardBoosts 已恢复并规范化:', this.cardBoosts);
+            // } else {
+            //     this.cardBoosts = this.cardBoosts || {};
+            // }
+            
+            // console.log('🔁 跳过 cardBoosts 恢复，使用代码默认值');
+
+            // console.log('✅ 游戏状态恢复完成');
+            return gameData;
+
+        } catch (error) {
+            console.error('❌ 恢复游戏状态失败:', error);
+            return null;
+        }
+    }
+
+    /**
+     * 静默占用位置（恢复时使用，不触发保存）
+     */
+    occupyPositionSilently(cellId, eggType) {
+        if (this.mapState.cells[cellId]) {
+            this.mapState.cells[cellId].isEmpty = false;
+            this.mapState.cells[cellId].hasEgg = true;
+            this.mapState.cells[cellId].eggType = eggType;
+            this.mapState.cells[cellId].piece = null;
+            this.mapState.cells[cellId].occupied = true;
+
+            this.mapState.emptyCells.delete(cellId);
+            this.mapState.occupiedCells.add(cellId);
+        }
+    }
+
+    /**
+     * 获取地图状态信息
+     * @returns {Object} 地图状态信息
+     */
+    getMapStateInfo() {
+        return {
+            totalCells: this.mapConfig.totalCells,
+            emptyCells: this.mapState.emptyCells.size,
+            occupiedCells: this.mapState.occupiedCells.size,
+            isInitialized: this.mapState.isInitialized,
+            config: this.mapConfig
+        };
+    }
+
+
+    /**
+     * 处理蛋点击逻辑
+     * @param {number} cellId - 点击的格子ID
+     * @returns {Object} 操作结果
+     */
+    processEggClick(cellId) {
+        // console.log(`🖱️ 处理蛋点击: 格子${cellId}`);
+
+        this.printMapState();
+
+        // 检查格子是否存在
+        if (!this.mapState.cells[cellId]) {
+            return {
+                code: -1,
+                message: "无效的格子位置",
+                cellId: cellId
+            };
+        }
+
+        const cell = this.mapState.cells[cellId];
+
+        // 情况0：点击空位置 + 有选中蛋 → 尝试移动
+        if ((cell.isEmpty || !cell.hasEgg) && this.selectionState.isSelected) {
+            // console.log(`🚶 尝试移动蛋到空位置: ${this.selectionState.selectedEgg.cellId} -> ${cellId}`);
+
+            // 调用移动处理逻辑
+            const moveResult = this.processEggMove(this.selectionState.selectedEgg.cellId, cellId);
+
+            if (moveResult.code === 0) {
+                // 移动成功，清除选中状态
+                this.clearSelection();
+
+                return {
+                    code: 0,
+                    step: 2,  // 步骤2：移动蛋
+                    guideData: moveResult.guideData, // 添加引导数据
+                    fromCellId: moveResult.fromCellId,
+                    toCellId: moveResult.toCellId,
+                    path: moveResult.path,
+                    eggType: moveResult.eggType,
+                    positionsToDelete: moveResult.positionsToDelete, // 添加需要删除的位置
+                    synthesis: moveResult.synthesis,  // 添加合成数据
+                    newEggs: moveResult.newEggs,      // 添加新蛋数据
+                    isVictory: moveResult.isVictory,
+                    isFailure: moveResult.isFailure,
+                    message: "点击空位置，移动蛋"
+                };
+            } else {
+                // 移动失败
+                return {
+                    code: -1,
+                    step: 0,  // 步骤0：错误或无效操作
+                    message: moveResult.message || "无法移动到该位置",
+                    cellId: cellId
+                };
+            }
+        }
+
+        // 情况-1：点击空位置 + 没有选中蛋
+        if (cell.isEmpty || !cell.hasEgg) {
+            // console.log(`📍 点击了空位置: 格子${cellId}`);
+            return {
+                code: -1,
+                step: 0,  // 步骤0：错误或无效操作
+                message: "位置为空",
+                cellId: cellId
+            };
+        }
+
+        // 情况2：选择新蛋（当前没有选中任何蛋）
+        if (!this.selectionState.isSelected) {
+            // console.log(`🎯 选择新蛋: 格子${cellId}, 类型${cell.eggType}`);
+
+            this.selectionState.selectedEgg = {
+                cellId: cellId,
+                eggType: cell.eggType
+            };
+            this.selectionState.isSelected = true;
+
+            return {
+                code: 0,
+                step: 1,  // 步骤1：选择蛋
+                cellId: cellId,
+                eggType: cell.eggType,
+                message: "选择蛋"
+            };
+        }
+
+        // 情况3：取消选择（点击当前选中的蛋）
+        if (this.selectionState.selectedEgg.cellId === cellId) {
+            // console.log(`🔄 取消选择: 格子${cellId}`);
+
+            this.selectionState.selectedEgg = null;
+            this.selectionState.isSelected = false;
+
+            return {
+                code: 0,
+                step: 3,  // 步骤3：取消选择
+                cellId: cellId,
+                message: "取消选择"
+            };
+        }
+
+        // 情况4：切换选择（点击其他蛋）
+        const oldCellId = this.selectionState.selectedEgg.cellId;
+        // console.log(`🔄 切换选择: ${oldCellId} -> ${cellId}`);
+
+        this.selectionState.selectedEgg = {
+            cellId: cellId,
+            eggType: cell.eggType
+        };
+
+        return {
+            code: 0,
+            step: 4,  // 步骤4：切换选择
+            oldCellId: oldCellId,
+            newCellId: cellId,
+            eggType: cell.eggType,
+            message: "切换选择"
+        };
+    }
+
+    /**
+     * 获取当前选择状态
+     * @returns {Object} 选择状态信息
+     */
+    getSelectionState() {
+        return {
+            isSelected: this.selectionState.isSelected,
+            selectedEgg: this.selectionState.selectedEgg
+        };
+    }
+
+    /**
+     * 清除选择状态
+     */
+    clearSelection() {
+        // console.log('🔄 清除选择状态');
+        this.selectionState.selectedEgg = null;
+        this.selectionState.isSelected = false;
+    }
+
+
+    currNum = 0;
+    /**
+     * 处理蛋移动
+     * @param {number} fromCellId - 起始格子ID
+     * @param {number} toCellId - 目标格子ID
+     * @returns {Object} 移动结果
+     */
+    processEggMove(fromCellId, toCellId) {
+        // console.log(`🚶 处理蛋移动: ${fromCellId} -> ${toCellId}`);
+
+        // 1. 验证起始位置
+        const fromCell = this.mapState.cells[fromCellId];
+        if (!fromCell || fromCell.isEmpty || !fromCell.hasEgg) {
+            return {
+                code: -1,
+                message: "起始位置没有蛋"
+            };
+        }
+
+        // 2. 验证目标位置
+        const toCell = this.mapState.cells[toCellId];
+        if (!toCell || !toCell.isEmpty || toCell.hasEgg) {
+            return {
+                code: -1,
+                message: "目标位置不可用"
+            };
+        }
+
+        // 3. 寻找移动路径
+        const path = this.findMovePath(fromCellId, toCellId);
+        if (!path || path.length === 0) {
+            return {
+                code: -1,
+                message: "无法找到移动路径"
+            };
+        }
+
+        // 4. 执行移动（更新地图状态）
+        const eggType = fromCell.eggType;
+        const piece = fromCell.piece;
+
+        // 清空起始位置
+        this.releasePosition(fromCellId);
+
+        // 占用目标位置
+        this.occupyPosition(toCellId, eggType, piece);
+
+
+        // 5. 检查移动后是否可以合成
+        const synthesisResult = this.findEggMatches(toCellId, { cells: this.mapState.cells });
+
+        let positionsToDelete = [fromCellId]; // 默认只删除起始位置
+        let synthesisData = { canSynthesize: false };
+        if (synthesisResult && synthesisResult.matches.length >= 3) {
+            synthesisData = {
+                canSynthesize: true,
+                matches: synthesisResult.matches,
+                eggType: synthesisResult.eggType,
+                newEggType: synthesisResult.newEggType,
+                synthesisPosition: toCellId,  // 合成位置就是移动的目标位置
+                score: synthesisResult.score
+
+            };
+
+            // 如果可以合成，需要删除所有参与合成的位置（除了目标位置）
+            positionsToDelete = synthesisResult.matches.filter(cellId => cellId !== toCellId);
+
+            // 添加起始位置（如果不在合成列表中）
+            if (!positionsToDelete.includes(fromCellId)) {
+                positionsToDelete.push(fromCellId);
+            }
+
+            // console.log(`🗑️ 合成时需要删除的位置: [${positionsToDelete}]`);
+
+
+            // 如果可以合成，先处理合成逻辑（移除旧蛋，更新地图状态）
+            this.processSynthesisResult(synthesisResult, toCellId);
+        }
+
+        // const newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
+        // 加入新用户判定
+        let newEggsResult;
+        if (this.currentUserStatus.isNewUser) {
+            // console.log('🆕 当前用户是新用户，调用引导数据');
+
+            this.guidestaute.currentStep += 1;
+            const guideData = this.getNewUserGuideData();
+            if (guideData.success) {
+                newEggsResult = guideData.data.eggSeat.map((cellId, index) => ({
+                    cellId: cellId,
+                    eggType: guideData.data.eggType[index]
+                }));
+
+                // 🔥 修复：同时返回新的引导指示位置
+                return {
+                    code: 0,
+                    fromCellId: fromCellId,
+                    toCellId: toCellId,
+                    path: path,
+                    eggType: eggType,
+                    positionsToDelete: positionsToDelete,
+                    synthesis: synthesisData,
+                    newEggs: newEggsResult,
+                    // 🔥 添加引导数据，包含新的指示位置
+                    guideData: {
+                        isNewUser: true,
+                        pointSeat: guideData.data.pointSeat,
+                        currentStep: guideData.step,
+                        currentLevel: guideData.level
+                    },
+                    message: "移动处理完成"
+                };
+            } else if (!guideData.isNewUser) {
+                // 引导完成的情况
+                // console.log('🎉 引导完成，切换到老用户模式');
+
+                newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
+
+            } else {
+                console.warn('⚠️ 未找到引导数据，使用随机生成数据');
+                newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
+            }
+        } else {
+            // console.log('🎮 当前用户是老用户，使用随机生成数据');
+            newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
+        }
+
+        // this.currNum++;
+        // if(this.currNum > 4){
+        //     // 测试胜利
+        //     // console.log(`当前用户的合成次数：${this.currNum}`);
+        //     return {
+        //             code: 0,
+        //             fromCellId: fromCellId,
+        //             toCellId: toCellId,
+        //             path: path,
+        //             eggType: eggType,
+        //             positionsToDelete: positionsToDelete,
+        //             synthesis: synthesisData,
+        //             newEggs: [],
+        //             isVictory: true,
+        //             reason: 'max_egg_level_reached',
+        //             message: "恭喜！您合成了最高等级的蛋！"
+        //         };
+        // }
+
+
+        // 测试失败
+        // return {
+        //         code: 0,
+        //         fromCellId: fromCellId,
+        //         toCellId: toCellId,
+        //         path: path,
+        //         eggType: eggType,
+        //         positionsToDelete: positionsToDelete,
+        //         synthesis: synthesisData,
+        //         newEggs: newEggsResult,
+        //         isFailure: true,
+        //         reason: 'map_full',
+        //         message: '地图已满，游戏结束！'
+        //     };
+
+        // 旧的胜利条件
+        // if (synthesisData.canSynthesize && synthesisData.newEggType > 7) {
+        //     console.log('🏆 达成胜利条件：合成最高等级蛋！');
+        //     return {
+        //         code: 0,
+        //         fromCellId: fromCellId,
+        //         toCellId: toCellId,
+        //         path: path,
+        //         eggType: eggType,
+        //         positionsToDelete: positionsToDelete,
+        //         synthesis: synthesisData,
+        //         newEggs: newEggsResult,
+        //         isVictory: true,
+        //         reason: 'max_egg_level_reached',
+        //         message: "恭喜！您合成了最高等级的蛋！"
+        //     };
+        // }
+        // 6. 检查胜利条件
+        if (synthesisData.canSynthesize && synthesisData.newEggType > 7) {
+            // console.log('🏆 达成胜利条件：合成最高等级蛋！');
+            // 将返回的参与合成位置改为地图上所有有蛋的位置，便于前端清除/收集所有蛋
+            const allEggPositions = [];
+            try {
+                // 优先使用 mapState.occupiedCells（性能优），兜底遍历 cells
+                if (this.mapState && this.mapState.occupiedCells && this.mapState.occupiedCells.size > 0) {
+                    allEggPositions.push(...Array.from(this.mapState.occupiedCells));
+                } else if (this.mapState && this.mapState.cells) {
+                    for (const [cid, cell] of Object.entries(this.mapState.cells)) {
+                        if (cell && cell.hasEgg) allEggPositions.push(Number(cid));
+                    }
+                }
+            } catch (e) {
+                // ignore errors and fallback to positionsToDelete
+                console.error('⚠️ 获取所有蛋位置失败，使用默认参与位置', e);
+            }
+
+            // 将地图上所有蛋位置追加到原始参与合成的位置后面（去重）
+            const mergedPositions = Array.isArray(positionsToDelete) ? positionsToDelete.slice() : [];
+            try {
+                const seen = new Set(mergedPositions.map(p => Number(p)));
+                for (const p of allEggPositions) {
+                    const n = Number(p);
+                    if (!seen.has(n)) {
+                        mergedPositions.push(n);
+                        seen.add(n);
+                    }
+                }
+            } catch (e) {
+                console.error('⚠️ 合并全图蛋位置失败，使用原参与位置', e);
+            }
+
+            return {
+                code: 0,
+                fromCellId: fromCellId,
+                toCellId: toCellId,
+                path: path,
+                eggType: eggType,
+                // 重要：返回的 positionsToDelete 现在包含原参与合成的位置，随后追加地图上所有蛋的位置
+                positionsToDelete: mergedPositions,
+                synthesis: synthesisData,
+                newEggs: [],//newEggsResult,
+                isVictory: true,
+                reason: 'max_egg_level_reached',
+                message: "恭喜！您合成了最高等级的蛋！"
+            };
+        }
+
+
+
+        // 7. 检查地图是否已满（失败条件）
+        if (this.mapState.emptyCells.size === 0) {
+            console.warn('💀 地图已满，游戏结束');
+
+            return {
+                code: 0,
+                fromCellId: fromCellId,
+                toCellId: toCellId,
+                path: path,
+                eggType: eggType,
+                positionsToDelete: positionsToDelete,
+                synthesis: synthesisData,
+                newEggs: newEggsResult,
+                isFailure: true,
+                reason: 'map_full',
+                message: '地图已满，游戏结束！'
+            };
+        }
+
+        // 操作完成后保存游戏状态
+
+        this.saveCurrentGameState();
+
+        // console.log(`✅ 蛋移动处理完成: ${fromCellId} -> ${toCellId}`);
+
+        return {
+            code: 0,
+            fromCellId: fromCellId,
+            toCellId: toCellId,
+            path: path,
+            eggType: eggType,
+            positionsToDelete: positionsToDelete, // 返回需要删除的位置列表
+            synthesis: synthesisData,
+            newEggs: newEggsResult,
+            message: "移动处理完成"
+        };
+    }
+
+    /**
+     * 处理合成结果（更新地图状态）
+     * @param {Object} synthesisResult - 合成结果
+     * @param {number} targetCellId - 移动的目标位置（合成位置）
+     */
+    processSynthesisResult(synthesisResult, targetCellId) {
+        // console.log('🎬 处理合成结果，更新地图状态...');
+
+        // 移除被合成的蛋（除了目标位置）
+        for (const cellId of synthesisResult.matches) {
+            if (cellId !== targetCellId) {
+                this.releasePosition(cellId);
+                // console.log(`🗑️ 移除合成位置: ${cellId}`);
+            }
+        }
+
+        // 更新目标位置的蛋类型为合成后的新类型
+        const targetCell = this.mapState.cells[targetCellId];
+        if (targetCell) {
+            targetCell.eggType = synthesisResult.newEggType;
+            // console.log(`🥚 目标位置 ${targetCellId} 更新为 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋`);
+        }
+
+        // 🔥 修正：使用已有的分数数据，不要重复计算
+        const scoreDetail = synthesisResult.score;
+        const scoreUpdate = this.updateScoreSystem(scoreDetail);
+
+        // 将分数信息添加到合成结果中
+        synthesisResult.scoreDetail = scoreDetail;
+        synthesisResult.scoreUpdate = scoreUpdate;
+
+        // 合成成功后更新解锁等级
+        this.onEggSynthesisSuccess('currentUser', synthesisResult.newEggType, synthesisResult.matches.length);
+
+        // 异步更新排行榜数据
+        if (!this.currentUserStatus.isNewUser) {
+            // console.log('🆕 新用户，跳过排行榜更新');
+            this.updateLeaderboardAsync();
+        }
+
+        // console.log(`✅ 合成处理完成，生成 ${this.getEggTypeName(synthesisResult.newEggType)} 蛋，获得 ${scoreDetail.totalScore} 分`);
+    }
+
+
+    /**
+     * 异步更新排行榜数据
+     */
+    updateLeaderboardAsync() {
+        // 异步执行，不阻塞主流程
+        // setTimeout(() => {
+        //     try {
+        //         if (window.LeaderBoard) {
+        //             console.log('📊 异步更新排行榜数据...');
+        //             // const updateResult = window.LeaderBoard.updateUserRecord('currentUser');
+
+        //             if (updateResult) {
+        //                 utitle.__sdklog3('排行榜数据更新成功');
+        //             } else {
+        //                 console.log('📊 排行榜数据无变化');
+        //             }
+        //         } else {
+        //             console.warn('⚠️ LeaderBoard 模块未找到');
+        //         }
+        //     } catch (error) {
+        //         console.error('❌ 异步更新排行榜失败:', error);
+        //     }
+        // }, 0);
+    }
+
+
+    /**
+     * 从地图状态生成随机蛋
+     * @param {number} count - 生成数量
+     * @returns {Array} 生成的蛋数据
+     */
+    generateRandomEggsFromMapState(count = 3) {
+        // console.log(`🎲 从地图状态生成 ${count} 个随机蛋...`);
+
+        // 从地图状态获取空闲位置
+        const emptyCells = Array.from(this.mapState.emptyCells);
+
+        if (emptyCells.length < count) {
+            console.warn(`⚠️ 空闲位置不足，需要 ${count} 个，只有 ${emptyCells.length} 个`);
+            count = emptyCells.length;
+        }
+
+        // 获取用户解锁状态
+        const maxUnlockedEggType = this.maxUnlockedEggType;
+
+        // console.log(`🏆 用户当前最高解锁等级: ${maxUnlockedEggType}`);
+
+        // 获取可用蛋类型并随机选择
+        const availableTypes = this.getAvailableEggTypes(maxUnlockedEggType);//
+        const selectedTypes = this.selectRandomEggTypes(availableTypes, count);
+
+        // 随机选择位置
+        const selectedPositions = this.selectRandomPositions(emptyCells, count);
+
+        // 立即更新后端地图状态
+        for (let i = 0; i < selectedPositions.length; i++) {
+            const cellId = selectedPositions[i];
+            const eggType = selectedTypes[i];
+
+            this.occupyPosition(cellId, eggType, null); // piece为null，等前端创建后再关联
+        }
+
+        // 返回生成的蛋数据
+        const newEggs = selectedPositions.map((cellId, index) => ({
+            cellId: cellId,
+            eggType: selectedTypes[index]
+        }));
+
+        // console.log('🗺️ 当前地图蛋状态:');
+        const existingEggs = [];
+        Object.keys(this.mapState.cells).forEach(cellId => {
+            const cell = this.mapState.cells[cellId];
+            if (cell.hasEgg) {
+                existingEggs.push({
+                    cellId: parseInt(cellId),
+                    eggType: cell.eggType,
+                    hasPiece: !!cell.piece
+                });
+                // console.log(`  格子${cellId}: 蛋类型${cell.eggType} ${this.getEggTypeName(cell.eggType)} ${cell.piece ? '(有前端元件)' : '(无前端元件)'}`);
+            }
+        });
+
+        // utile.__sdklog3(`📊 地图统计: 总共${existingEggs.length}个蛋, 空闲格子${this.mapState.emptyCells.size}个, 占用格子${this.mapState.occupiedCells.size}个`);
+        return newEggs;
+    }
+
+
+    /**
+     * 寻找移动路径
+     * @param {number} fromCellId - 起始格子ID
+     * @param {number} toCellId - 目标格子ID
+     * @returns {Array} 路径数组
+     */
+    findMovePath(fromCellId, toCellId) {
+        // console.log(`🔍 寻找移动路径: ${fromCellId} -> ${toCellId}`);
+
+        // 更新寻路网格状态（同步当前地图状态）
+        this.updatePathfindingGrid();
+
+        // 转换为行列坐标
+        const fromPos = this.getCellPosition(fromCellId);
+        const toPos = this.getCellPosition(toCellId);
+
+        try {
+            // 使用寻路系统查找路径
+            const path = this.findPath(fromPos, toPos);
+
+            if (path && path.length > 0) {
+                // console.log(`📍 找到路径，步数: ${path.length}`);
+                return path;
+            } else {
+                console.log('❌ 未找到可行路径');
+                return [];
+            }
+        } catch (error) {
+            console.error('❌ 寻路失败:', error);
+            return [];
+        }
+    }
+
+
+    /**
+     * 更新寻路网格状态
+     */
+    updatePathfindingGrid() {
+        if (!this.pathfindingGrid || !this.pathfindingGrid.nodes) {
+            console.warn('⚠️ 寻路网格未初始化');
+            return;
+        }
+
+        const { nodes, rows, cols } = this.pathfindingGrid;
+
+        // 遍历所有格子，更新可通行状态
+        for (let i = 0; i < rows; i++) {
+            for (let j = 0; j < cols; j++) {
+                const cellId = this.getCellId(i, j);
+                const cellData = this.mapState.cells[cellId];
+                const node = nodes[i][j];
+
+                // 根据地图状态更新节点
+                node.walkable = !cellData.hasEgg;
+                node.occupied = cellData.hasEgg;
+                node.type = cellData.hasEgg ? (window.graphType ? window.graphType.wall : 1) : (window.graphType ? window.graphType.open : 0);
+            }
+        }
+
+        // console.log('🔄 寻路网格状态已更新');
+    }
+    /**
+     * 根据格子ID获取位置坐标
+     * @param {number} cellId - 格子ID
+     * @returns {Object} 位置坐标 {row, col}
+     */
+    getCellPosition(cellId) {
+        const row = Math.floor(cellId / this.mapConfig.cols);
+        const col = cellId % this.mapConfig.cols;
+        return { row: row, col: col };
+    }
+
+
+    /**
+     * 打印当前地图状态（调试用）
+     */
+    printMapState() {
+        // console.log('🗺️ 当前后端地图状态:');
+
+        const occupiedCells = [];
+        for (const [cellId, cellData] of Object.entries(this.mapState.cells)) {
+            if (!cellData.isEmpty && cellData.hasEgg) {
+                occupiedCells.push({
+                    cellId: parseInt(cellId),
+                    eggType: cellData.eggType,
+                    hasEgg: cellData.hasEgg,
+                    occupied: cellData.occupied
+                });
+                // utile.__sdklog3(`  格子${cellId}: 蛋类型${cellData.eggType} ${this.getEggTypeName(cellData.eggType)}`);
+            }
+        }
+
+        // console.log(`📊 后端地图统计: 总共${occupiedCells.length}个蛋`);
+        return occupiedCells;
+    }
+
+
+
+    /**
+     * 设置登录配置
+     * @param {Object} config - 登录配置
+     */
+    setLoginConfig(config) {
+        this.loginConfig = { ...this.loginConfig, ...config };
+        // console.log('🔧 登录配置已更新:', this.loginConfig);
+    }
+
+    /**
+     * 检测登录方式
+     */
+    detectLoginType() {
+        // 🔥 如果强制指定了登录类型，直接返回
+        if (this.loginConfig.forceLoginType) {
+            // console.log(`🎯 强制使用登录方式: ${this.loginConfig.forceLoginType}`);
+            return this.loginConfig.forceLoginType;
+        }
+
+        // 🔥 模拟登录检测
+        if (this.loginConfig.enableMockLogin) {
+            // 检查URL参数
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('mock_wechat') === 'true') {
+                // console.log('🔍 URL参数强制微信模拟');
+                return 'wechat';
+            }
+
+            // 随机模拟微信环境
+            if (Math.random() < this.loginConfig.mockWechatProbability) {
+                // console.log('🔍 随机模拟微信环境');
+                return 'wechat';
+            }
+        }
+
+        // 检查是否有微信环境
+        if (window.wx && window.wx.miniProgram) {
+            return 'wechat';
+        }
+
+        // 检查是否有Google登录
+        if (window.gapi && window.gapi.auth2) {
+            return 'google';
+        }
+
+        // 检查本地是否有用户数据
+        const localData = localStorage.getItem('gameUserData');
+        if (localData) {
+            return 'local';
+        }
+
+        // 默认游客模式
+        return 'guest';
+    }
+
+
+    /**
+     * 根据登录方式加载用户数据
+     */
+    async loadUserDataByLoginType(loginType) {
+        switch (loginType) {
+            case 'wechat':
+                return await this.loadWechatUserData();
+            case 'google':
+                return await this.loadGoogleUserData();
+            case 'local':
+                return await this.loadLocalUserData();
+            case 'guest':
+            default:
+                return await this.createGuestUser();
+        }
+    }
+
+    /**
+     * 加载微信用户数据
+     */
+    async loadWechatUserData() {
+        // console.log('🔐 加载微信用户数据...');
+
+        try {
+            // 🔥 支持配置的模拟登录延迟
+            const delay = this.loginConfig.mockLoginDelay || 1000;
+           
+            await new Promise(resolve => setTimeout(resolve, delay));
+
+            // 测试用：注释掉正常返回，强制模拟登录失败以便前端走 catch -> 游客流程
+            console.warn('⚠️ 强制模拟微信登录失败（测试用），将抛出错误以便前端处理');
+            throw new Error('模拟微信登录失败（测试）');
+
+            // 模拟微信用户信息
+            // removed by dead control flow
+{}
+
+            // 模拟50%概率是老用户
+            // removed by dead control flow
+{}
+
+            // removed by dead control flow
+{}
+        } catch (error) {
+            console.error('❌ 微信登录失败:', error);
+            // 不在此处回退为游客，向上抛出错误由调用方决定是否降级到游客登录
+            throw new Error('WeChat login failed: ' + (error && error.message ? error.message : String(error)));
+        }
+    }
+
+    /**
+ * 加载Google用户数据
+ */
+    async loadGoogleUserData() {
+        // console.log('🔐 加载Google用户数据...');
+
+        try {
+            // 获取Google用户信息
+            const userInfo = await this.getGoogleUserInfo();
+
+            // 尝试从云存档加载
+            const cloudData = await this.loadFromGoogleCloud(userInfo.id);
+
+            if (cloudData) {
+                // console.log('☁️ 从Google云存档恢复数据');
+                return {
+                    ...cloudData,
+                    loginType: 'google',
+                    userInfo: userInfo,
+                    lastLoginTime: Date.now()
+                };
+            } else {
+                // console.log('👶 Google新用户，创建初始数据');
+                return this.createNewUser('google', userInfo);
+            }
+        } catch (error) {
+            console.error('❌ Google登录失败，使用游客模式:', error);
+            return await this.createGuestUser();
+        }
+    }
+
+    /**
+     * 加载本地用户数据
+     */
+    async loadLocalUserData() {
+        // console.log('💾 加载本地用户数据...');
+
+        try {
+            const userData = localStorage.getItem('gameUserData');
+            if (userData) {
+                const parsedData = JSON.parse(userData);
+                // console.log('📂 本地数据加载成功');
+                return {
+                    ...parsedData,
+                    loginType: parsedData.loginType || 'local',
+                    lastLoginTime: Date.now()
+                };
+            }
+        } catch (error) {
+            console.error('❌ 本地数据解析失败:', error);
+        }
+
+        return await this.createGuestUser();
+    }
+
+    /**
+     * 创建游客用户
+     */
+    async createGuestUser() {
+        // console.log('👤 创建游客用户...');
+
+        // 🔥 支持模拟登录延迟
+        if (this.loginConfig.mockLoginDelay && this.loginConfig.mockLoginDelay > 0) {
+            // console.log(`⏳ 模拟游客登录延迟 ${this.loginConfig.mockLoginDelay / 1000} 秒...`);
+            await new Promise(resolve => setTimeout(resolve, this.loginConfig.mockLoginDelay));
+        }
+
+        const guestId = 'guest_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+
+        return this.createNewUser('guest', { id: guestId, name: 'vidar' });
+    }
+
+    /**
+     * 创建新用户数据
+     */
+    createNewUser(loginType, userInfo) {
+        return {
+            userId: userInfo.id || userInfo.openid || 'guest_' + Date.now(),
+            loginType: loginType,
+            userInfo: userInfo,
+            // 🔥 只包含用户身份信息，不包含游戏数据
+            createTime: Date.now(),
+            lastLoginTime: Date.now(),
+            fromCloud: false
+        };
+    }
+
+
+}
+
+// 创建全局 GameServer 实例
+window.GameServer = new GameServer();
+
+/***/ }),
+
+/***/ 104:
+/***/ (() => {
+
+/**
+ * 引导功能模块
+ * 负责游戏引导的交互逻辑
+ */
+// console.log('📁 GuideLine.js 开始加载...');
+
+class GuideLine {
+    constructor() {
+        this.engine = null;
+        this.stage = null;
+        this.exportRoot = null;
+        this.gamebox = null;
+        this.loadedSounds = null;
+        this.gameData = null;
+
+        // 引导相关
+        this.guideGesture = null;
+        this.pointSeats = [];
+        this.currentPointIndex = 0;
+        this.waitingForClick = false;
+        this.expectedClickCellId = null;
+        this.onGuideCompleteCallback = null;
+        this.getCellDataCallback = null;
+    }
+
+    /**
+     * 初始化引导模块
+     * @param {Object} gameData - 游戏数据对象
+     * @param {Function} onComplete - 引导完成回调
+     * @param {Function} getCellData - 获取格子数据的回调
+     */
+    init(gameData, onComplete, getCellData) {
+        // console.log('🎮 GuideLine 初始化...');
+        
+        this.engine = gameData.engine;
+        this.stage = gameData.stage;
+        this.exportRoot = gameData.exportRoot;
+        this.gamebox = gameData.gamebox;
+        this.loadedSounds = gameData.loadedSounds;
+        this.gameData = gameData.gameData;
+        this.onGuideCompleteCallback = onComplete;
+        this.getCellDataCallback = getCellData;
+    }
+
+    
+
+    /**
+     * 显示指示位置（不创建指示圈，仅记录位置）
+     */
+    showPointSeats(pointSeat) {
+        if (!pointSeat || pointSeat.length === 0) {
+            // console.log('📍 没有指示位置');
+            this.pointSeats = [];
+            return;
+        }
+
+        // 保存有效的指示位置
+        this.pointSeats = pointSeat.filter(seat => seat >= 0);
+        this.currentPointIndex = 0; // 当前指示位置索引
+
+        // console.log(`📍 记录了 ${this.pointSeats.length} 个指示位置:`, this.pointSeats);
+    }
+
+    /**
+     * 初始化引导手势
+     */
+    initGuideGesture() {
+        // console.log('👆 初始化引导手势...');
+
+        // 检查用户类型，决定是否需要引导
+        const shouldShowGuide = this.shouldShowGuideForUser();
+
+        if (!shouldShowGuide) {
+            // console.log('👤 老用户无需引导，跳过引导功能');
+            return;
+        }
+
+        // 查找场景中的引导手势元件
+        this.findGuideGesture();
+
+        // 如果找到引导手势且有指示位置，开始引导流程
+        if (this.guideGesture && this.pointSeats && this.pointSeats.length > 0) {
+            this.startGuideProcess();
+        } else {
+            console.log('📍 没有引导手势或指示位置，跳过引导');
+        }
+    }
+
+    /**
+     * 判断是否需要为当前用户显示引导
+     * @returns {boolean} 是否需要显示引导
+     */
+    shouldShowGuideForUser() {
+        // 从游戏数据中获取用户状态
+        if (this.gameData && this.gameData.isNewUser !== undefined) {
+            const isNewUser = this.gameData.isNewUser;
+            // console.log(`🔍 用户类型检查: ${isNewUser ? '新用户' : '老用户'}`);
+            return isNewUser;
+        }
+
+        // 如果没有用户数据，默认显示引导（安全起见）
+        // console.log('⚠️ 无法确定用户类型，默认显示引导');
+        return true;
+    }
+
+    /**
+     * 查找引导手势元件
+     */
+    findGuideGesture() {
+        // console.log('🔍 查找引导手势元件 guide_mc...');
+
+        // 使用 utile 工具类查找元件
+        this.guideGesture = utile.findMc(this.exportRoot, 'guide_mc');
+
+        if (this.guideGesture) {
+            // console.log('✅ 找到引导手势元件 guide_mc:', this.guideGesture);
+            // 初始时隐藏引导手势
+            this.guideGesture.visible = false;
+        } else {
+            console.warn('⚠️ 未找到引导手势元件 guide_mc');
+            // 打印可用的子元件名称用于调试
+            // console.log('📋 打印可用元件列表以便调试:');
+            utile.logAvailableChildren(this.exportRoot);
+        }
+    }
+
+    /**
+     * 移动引导手势到目标位置
+     */
+    moveGuideGestureToTarget() {
+        if (!this.guideGesture) {
+            // console.log('📍 没有引导手势，跳过引导');
+            return;
+        }
+
+        if (!this.pointSeats || this.pointSeats.length === 0) {
+            // console.log('📍 没有有效的指示位置，隐藏引导手势');
+            this.guideGesture.visible = false;
+            return;
+        }
+
+        // 移动到当前指示位置
+        this.moveGuideToCurrentPoint();
+    }
+
+    /**
+     * 移动引导手势到当前指示点
+     */
+    moveGuideToCurrentPoint() {
+        if (this.currentPointIndex >= this.pointSeats.length) {
+            // console.log('🎉 所有指示点都已完成，隐藏引导手势');
+            this.hideGuideGesture();
+            this.completeGuideProcess();
+            return;
+        }
+
+        const targetCellId = this.pointSeats[this.currentPointIndex];
+        const cellData = this.getCellDataCallback ? this.getCellDataCallback(targetCellId) : null;
+
+        if (cellData) {
+            // console.log(`👆 移动引导手势到格子 ${targetCellId} (${cellData.centerX}, ${cellData.centerY}) - 第 ${this.currentPointIndex + 1} 个指示点`);
+
+            // 计算引导手势的正确位置
+            const guidePosition = this.calculateGuidePosition(cellData);
+
+            // console.log(`📍 引导手势坐标调整: 格子坐标(${cellData.centerX}, ${cellData.centerY}) -> 引导坐标(${guidePosition.x}, ${guidePosition.y})`);
+
+            // 设置引导手势位置
+            this.guideGesture.x = guidePosition.x;
+            this.guideGesture.y = guidePosition.y;
+            this.guideGesture.visible = true;
+
+            // 添加动画效果
+            this.animateGuideGesture();
+
+            // 设置等待点击状态
+            this.waitingForClick = true;
+            this.expectedClickCellId = targetCellId;
+
+            // console.log(`⏳ 等待用户点击格子 ${targetCellId}`);
+        } else {
+            console.warn(`⚠️ 格子 ${targetCellId} 数据不存在`);
+        }
+    }
+
+    /**
+     * 计算引导手势的正确位置
+     */
+    calculateGuidePosition(cellData) {
+        if (!this.guideGesture || !this.gamebox) {
+            // 如果没有 gamebox 或引导手势，直接使用格子坐标
+            return { x: cellData.centerX, y: cellData.centerY };
+        }
+
+        // 检查引导手势的父容器
+        const guideParent = this.guideGesture.parent;
+        // console.log(`🔍 引导手势父容器:`, guideParent?.constructor?.name || 'unknown');
+        // console.log(`🔍 gamebox 容器:`, this.gamebox?.constructor?.name || 'unknown');
+
+        // 如果引导手势在 exportRoot 中，而格子坐标是相对于 gamebox 的
+        if (guideParent === this.exportRoot && this.gamebox !== this.exportRoot) {
+            // 需要将 gamebox 相对坐标转换为 exportRoot 绝对坐标
+            const gameboxX = this.gamebox.x || 0;
+            const gameboxY = this.gamebox.y || 0;
+
+            // console.log(`📐 坐标转换: gamebox偏移(${gameboxX}, ${gameboxY})`);
+
+            return {
+                x: cellData.centerX + gameboxX,
+                y: cellData.centerY + gameboxY
+            };
+        }
+
+        // 如果引导手势和格子在同一个坐标系中，直接使用格子坐标
+        return { x: cellData.centerX, y: cellData.centerY };
+    }
+
+    /**
+     * 引导手势动画
+     */
+    animateGuideGesture() {
+        if (!this.guideGesture) return;
+
+        // console.log('✨ 启动引导手势动画');
+
+        // 停止之前的动画
+        createjs.Tween.removeTweens(this.guideGesture);
+
+        // 创建点击动画：缩放 + 透明度变化
+        createjs.Tween.get(this.guideGesture, { loop: true })
+            .to({ scaleX: 1.2, scaleY: 1.2, alpha: 0.8 }, 600, createjs.Ease.sineInOut)
+            .to({ scaleX: 1.0, scaleY: 1.0, alpha: 1.0 }, 600, createjs.Ease.sineInOut)
+            .wait(500);
+    }
+
+    /**
+     * 隐藏引导手势
+     */
+    hideGuideGesture() {
+        if (this.guideGesture) {
+            // console.log('👆 隐藏引导手势');
+            createjs.Tween.removeTweens(this.guideGesture);
+            this.guideGesture.visible = false;
+        }
+    }
+
+    /**
+     * 显示引导手势
+     */
+    showGuideGesture() {
+        if (this.guideGesture) {
+            // console.log('👆 显示引导手势');
+            this.guideGesture.visible = true;
+            this.animateGuideGesture();
+        }
+    }
+
+    /**
+     * 重置引导状态
+     */
+    resetGuideState() {
+        // console.log('🔄 重置引导状态');
+        this.currentPointIndex = 0;
+        this.waitingForClick = false;
+        this.expectedClickCellId = null;
+
+        if (this.guideGesture) {
+            createjs.Tween.removeTweens(this.guideGesture);
+            this.guideGesture.visible = false;
+        }
+    }
+
+    /**
+     * 开始引导流程
+     */
+    startGuideProcess() {
+        // console.log('🎯 开始引导流程');
+        this.resetGuideState();
+        this.moveGuideToCurrentPoint();
+    }
+
+    /**
+     * 完成引导流程
+     */
+    completeGuideProcess() {
+        // console.log('🎊 引导流程完成！');
+
+        // 重置所有引导相关状态
+        this.resetGuideState();
+
+        // 引导完成回调
+        if (this.onGuideCompleteCallback) {
+            this.onGuideCompleteCallback();
+        }
+
+        // console.log('💡 现在你可以点击蛋选中它，然后点击空格子移动蛋进行合成！');
+    }
+
+    /**
+     * 引导点击成功处理
+     */
+    onGuideClickSuccess(cellId) {
+        // console.log(`🎯 引导点击成功: 格子 ${cellId}`);
+
+        // 取消等待状态
+        this.waitingForClick = false;
+        this.expectedClickCellId = null;
+
+        // 移动到下一个指示点
+        this.currentPointIndex++;
+
+        // 延迟一下再移动到下一个位置，让用户看到反馈
+        setTimeout(() => {
+            this.moveGuideToCurrentPoint();
+        }, 500);
+    }
+
+    /**
+     * 检查是否在等待引导点击
+     */
+    isWaitingForGuideClick(cellId) {
+        return this.waitingForClick && this.expectedClickCellId === cellId;
+    }
+}
+
+// 创建全局实例
+window.GuideLine = new GuideLine();
+// console.log('✅ GuideLine 模块加载完成');
+
+/***/ }),
+
+/***/ 289:
+/***/ ((__unused_webpack_module, __unused_webpack___webpack_exports__, __webpack_require__) => {
+
+"use strict";
+/* harmony import */ var _utile_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(911);
+
+// import tracker from './tracker.js'; // Removed - now using window.gtag directly
+/**
+ * 游戏场景管理器
+ * 负责游戏的主要逻辑和交互
+ */
+// console.log('📁 GameScense.js 开始加载...');
+class GameScense {
+    constructor() {
+        this.engine = null;
+        this.stage = null;
+        this.exportRoot = null;
+        this.canvas = null;
+        // this.config = null;
+        this.loadedSounds = null;
+        this.loadedImages = null;
+
+        // 游戏场景元件
+        this.gamebox = null;
+        this.tipsPanel = null; // 提示面板
+        this.showFps = false; // 是否显示FPS
+
+        // 游戏运行状态
+        this.gameRunState = 'init'; // init, playing, paused, ended
+        this.isInitialized = false;
+
+        this.selectedDifficulty = 'easy';
+
+        // 游戏数据相关
+        this.gameData = null;
+        this.userStatus = null;
+
+        // 引导相关
+        this.guideGesture = null;
+        this.guidePoints = []; // 引导点列表
+        this.pointSeats = [];
+        this.currentPointIndex = 0;
+        this.waitingForClick = false;
+        this.expectedClickCellId = null;
+
+        // 开始选择
+        this.startMc = null;
+
+        // 奖励
+        this.cardGame = null;
+        this.cardGameReady = false;
+
+        // 元件移动相关
+        this.selectedPiece = null;        // 当前选中的元件
+        this.selectedCellId = null;       // 选中元件所在的格子ID
+        this.isWaitingForTarget = false;  // 是否等待选择目标位置
+        this.selectionIndicator = null; // 选中指示器
+
+        // 游戏数据状态
+        this.gameDataState = {
+            cells: {},           // 格子状态 {cellId: {hasEgg: boolean, eggType: number, piece: object}}
+            selectedEgg: null,   // 当前选中的蛋 {cellId, eggType, isSelected}
+            score: 0,           // 当前分数
+            isProcessing: false // 是否正在处理操作
+        };
+
+
+    }
+
+    /**
+     * 初始化UI元件
+     */
+    async initUIElements() {
+        console.log('🎨 初始化UI元件...');
+
+        try {
+            // 验证 exportRoot
+            if (!this.exportRoot || !this.exportRoot.children) {
+                console.warn('⚠️ exportRoot 仍然无效，跳过UI初始化');
+                return;
+            }
+
+            this.gamebox = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, 'gamebox');
+
+            // 初始化失败和胜利界面（隐藏状态）
+
+            // 添加点击事件监听
+            if (this.gamebox && !this.gamebox.hasEventListener("click")) {
+                this.gamebox.on('click', this.onGameboxClick, this);
+            }
+
+            const mc_start_over = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, 'mc_start_over');
+            if (mc_start_over) {
+                mc_start_over.visible = false; // 初始隐藏重新开始界面
+                const btn_yes = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(mc_start_over, 'btn_yes');
+
+                btn_yes.on('click', (event) => {
+                    // console.log('🔄 重新开始界面点击重新开始按钮');
+                    event.stopPropagation();
+                    this.engine.playSound('select_wawa');
+                    // 调用插页广告
+                    ovo.showInterstitialAd(() => {
+                        // 广告关闭后的回调
+                        this.showPanel(mc_start_over, false, () => {
+
+                            // increment restart confirmation count for guest users
+                            try {
+                                const key = 'guest_restart_confirm_count';
+                                let count = parseInt(localStorage.getItem(key) || '0', 10) || 0;
+                                count += 1;
+                                localStorage.setItem(key, String(count));
+                                // emit tracking event using ovo method
+                                if (typeof window.ovo !== 'undefined' && typeof window.ovo.dotSelectContent === 'function') {
+                                    window.ovo.dotSelectContent('game_action', 'restart_confirm');
+                                }
+                            } catch (e) {
+                                // ignore storage/tracker errors
+                            }
+
+                            this.resetGame(false);
+                        });
+                    });
+                });
+                const btn_no = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(mc_start_over, 'btn_no');
+
+                btn_no.on('click', (event) => {
+                    // console.log('🔄 重新开始界面点击不再重新开始按钮');
+                    event.stopPropagation();
+                    this.engine.playSound('select_wawa');
+                    // 调用插页广告
+                    ovo.showInterstitialAd(() => {
+
+                        mc_start_over.visible = false; // 隐藏重新开始界面
+                    });
+                });
+            }
+
+            // 查找并绑定重新开始按钮
+            const btnRestart = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, 'btn_restart');
+            if (btnRestart) {
+
+                btnRestart.on('click', (event) => {
+                    console.log('🔄 点击重新开始按钮 (btn_restart)');
+                    event.stopPropagation();
+                    this.engine.playSound('select_wawa');
+                    this.showPanel(mc_start_over, true);
+
+                });
+                // console.log('✅ btn_restart 按钮事件已绑定');
+            }
+
+            const failureMc = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, 'mc_failure');
+            if (failureMc) {
+                failureMc.visible = false; // 初始隐藏失败界面
+
+                // 查找屏蔽层
+                const blockLayer = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(failureMc, 'blockLayer');
+                if (blockLayer) {
+                    blockLayer.mouseEnabled = true;
+
+                    // 绑定屏蔽层点击事件
+                    if (!blockLayer.hasEventListener("click")) {
+                        blockLayer.on('click', function (event) {
+                            // console.log('🛡️ 失败界面屏蔽层拦截了点击事件');
+                            event.stopImmediatePropagation();
+                            event.stopPropagation();
+                            event.preventDefault();
+                            return false;
+                        });
+                    }
+                }
+
+                // 查找重新开始按钮 (btnagain)
+                const btnAgain = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(failureMc, 'btn_tryagain');
+                // utile.goStop(btnAgain, true)
+                btnAgain.gotoAndStop(0);
+
+                if (btnAgain && !btnAgain.hasEventListener("click")) {
+
+                    // 绑定重新开始按钮事件
+                    btnAgain.on('click', (event) => {
+                        // console.log('🔄 失败界面点击重新开始按钮');
+                        event.stopPropagation();
+
+                        // 调用插页广告
+                        ovo.showInterstitialAd(() => {
+                            // 广告关闭后的回调
+                            this.failureHandler(false);
+                        });
+                    });
+
+                    // 确保按钮在屏蔽层之上
+                    if (blockLayer) {
+                        failureMc.setChildIndex(btnAgain, failureMc.children.length - 1);
+                    }
+
+                    // console.log('✅ 失败界面重新开始按钮事件已绑定');
+                }
+            }
+
+            const victoryMc = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, 'mc_victory');
+            if (victoryMc) {
+                victoryMc.visible = false; // 初始隐藏胜利界面
+                // 查找屏蔽层
+                const blockLayer = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(victoryMc, 'blockLayer');
+                if (blockLayer) {
+                    blockLayer.mouseEnabled = true;
+
+                    // 绑定屏蔽层点击事件
+                    if (!blockLayer.hasEventListener("click")) {
+                        blockLayer.on('click', function (event) {
+                            // console.log('🛡️ 胜利界面屏蔽层拦截了点击事件');
+                            event.stopImmediatePropagation();
+                            event.stopPropagation();
+                            event.preventDefault();
+                            return false;
+                        });
+                    }
+                }
+
+                // 查找重新开始按钮 (btnagain)
+                const btnAgain = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(victoryMc, 'btn_playagain');
+                if (btnAgain && !btnAgain.hasEventListener("click")) {
+
+                    // 绑定重新开始按钮事件
+                    btnAgain.on('click', (event) => {
+                        // console.log('🔄 胜利界面点击重新开始按钮');
+                        event.stopPropagation();
+
+                        // 调用插页广告
+                        ovo.showInterstitialAd(() => {
+                            // 广告关闭后的回调
+                            this.victoryHandler(false);
+                        });
+                    });
+
+                    // 确保按钮在屏蔽层之上
+                    if (blockLayer) {
+                        victoryMc.setChildIndex(btnAgain, victoryMc.children.length - 1);
+                    }
+
+                    // console.log('✅ 胜利界面重新开始按钮事件已绑定');
+                }
+            }
+
+
+            /**
+             * 设置界面
+             */
+
+            const settingsMc = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, 'mc_settings');
+            if (settingsMc) {
+                settingsMc.visible = false; // 初始隐藏设置界面
+                const btnSetting = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, 'btn_setting');
+
+                if (btnSetting) {
+                    // 绑定设置按钮事件
+                    btnSetting.on('click', () => {
+                        event.stopPropagation();
+                        this.engine.playSound("select_wawa")
+                        
+                        this.showPanel(settingsMc, true, () => {
+                            // console.log('✅ 设置界面显示完成');
+                            this.selectedDifficulty = window.GameServer.getDifficulty();
+
+                            this.selectDifficulty(this.selectedDifficulty, this.difficultyMap); // 更新按钮状态
+                        });
+                    });
+                    // console.log('✅ btn_setting 按钮事件已绑定');
+                }
+
+                const btn_clos_setting = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(settingsMc, 'btn_clos_setting');
+
+                btn_clos_setting.on('click', () => {
+                    this.engine.playSound("select_wawa")
+                    this.showPanel(settingsMc, false, () => {
+                        console.log('🔧 设置界面已关闭');
+                    });
+                });
+
+
+                const isMusicEnabled = (localStorage.getItem('musicEnabled') === null) ||
+                    localStorage.getItem('musicEnabled') === 'true';
+                const isSoundEnabled = (localStorage.getItem('soundEnabled') === null) ||
+                    localStorage.getItem('soundEnabled') === 'true';
+                const isVibrationEnabled = (localStorage.getItem('vibrationEnabled') === null) ||
+                    localStorage.getItem('vibrationEnabled') === 'true';
+
+
+                // 音乐
+                const btn_bg = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(settingsMc, 'mc_sound_bg');
+                if (btn_bg) {
+                    // 约定：帧0 = 开启图标，帧1 = 关闭图标
+                    btn_bg.gotoAndStop(isMusicEnabled ? 0 : 1);
+
+                    btn_bg.removeAllEventListeners('click');
+                    btn_bg.on('click', () => {
+                        const current = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true';
+                        const next = !current;
+                        btn_bg.gotoAndStop(next ? 0 : 1);
+                        if (this.engine) {
+                            this.engine.setMusicEnabled(next);
+                        } else {
+                            localStorage.setItem('musicEnabled', next ? 'true' : 'false');
+                        }
+                        console.log(`🎵 音乐状态已切换 -> ${next ? 'ON' : 'OFF'}`);
+                    });
+                }
+
+                const btn_eff = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(settingsMc, 'mc_sound_eff');
+                if (btn_eff) {
+                    btn_eff.gotoAndStop(isSoundEnabled ? 0 : 1);
+                    btn_eff.removeAllEventListeners('click');
+                    btn_eff.on('click', () => {
+                        const current = localStorage.getItem('soundEnabled') === null || localStorage.getItem('soundEnabled') === 'true';
+                        const next = !current;
+                        btn_eff.gotoAndStop(next ? 0 : 1);
+                        if (this.engine) {
+                            this.engine.setSoundEnabled(next);
+                        } else {
+                            localStorage.setItem('soundEnabled', next ? 'true' : 'false');
+                        }
+                        console.log(`🔊 音效状态已切换 -> ${next ? 'ON' : 'OFF'}`);
+                    });
+                }
+
+                // 震动
+                const btn_vibra = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(settingsMc, 'mc_vibra');
+                if (btn_vibra) {
+                    btn_vibra.gotoAndStop(isVibrationEnabled ? 0 : 1);
+                    btn_vibra.removeAllEventListeners('click');
+                    btn_vibra.on('click', () => {
+                        const current = localStorage.getItem('vibrationEnabled') === null || localStorage.getItem('vibrationEnabled') === 'true';
+                        const next = !current;
+                        btn_vibra.gotoAndStop(next ? 0 : 1);
+                        localStorage.setItem('vibrationEnabled', next ? 'true' : 'false');
+                        console.log(`📳 震动状态已切换 -> ${next ? 'ON' : 'OFF'}`);
+                    });
+                }
+
+
+            }
+
+
+            const btn_easy = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(settingsMc, 'mc_diff_easy');
+            const btn_nolrmal = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(settingsMc, 'mc_diff_normal');
+            const btn_hard = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(settingsMc, 'mc_diff_hard');
+
+            let btns = [btn_easy, btn_nolrmal, btn_hard];
+            this.difficultyMap = {
+                easy: btn_easy,
+                normal: btn_nolrmal,
+                hard: btn_hard
+            };
+
+            for (let i = 0; i < btns.length; i++) {
+                const btn = btns[i];
+                btn.on('click', () => {
+                    // console.log(`🔧 切换难度到 ${btn.name}`);
+                    this.selectedDifficulty = btn.name.replace('mc_diff_', '');
+
+                    if (this.userStatus.isNewUser) {
+                        this.tips('🚫 新手引导模式下无法切换难度');
+                        return;
+                    }
+
+                    this.selectDifficulty(this.selectedDifficulty, this.difficultyMap); // 更新按钮状态
+
+                    // 同步难度到后端
+                    if (window.GameServer) {
+                        window.GameServer.updateDifficulty(this.selectedDifficulty);
+                        console.log(`🔄 难度已同步到后端: ${this.selectedDifficulty}`);
+                    } else {
+                        console.warn('⚠️ 后端 GameServer 未初始化');
+                    }
+                });
+            }
+
+            this.showFps = localStorage.getItem('fpsNum') === "60" || 60; // 默认60FPS
+
+            // const btn_fps = utile.findMc(settingsMc, 'mc_fps');
+            // btn_fps.on('click', () => {
+            //     // console.log('🔧 切换FPS显示状态');
+            //     this.showFps = !this.showFps;
+            //     btn_fps.gotoAndStop(this.showFps ? 0 : 1); // 播放/停止状态
+            //     localStorage.setItem('fpsNum', this.showFps ? "60" : "30"); // 保存到本地存储
+            // });
+
+            const blockLayer = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(settingsMc, 'blockLayer');
+            if (blockLayer) {
+                blockLayer.mouseEnabled = true;
+
+                // 绑定屏蔽层点击事件
+                if (!blockLayer.hasEventListener("click")) {
+                    blockLayer.on('click', function (event) {
+                        // console.log('🛡️ 设置界面屏蔽层拦截了点击事件');
+                        event.stopImmediatePropagation();
+                        event.stopPropagation();
+                        event.preventDefault();
+                        return false;
+                    });
+                }
+            }
+
+            // 初始化解锁动画元件
+            this.initUnlockAnimations();
+
+            // const cardReward = utile.findMc(failureMc, 'mc_card_reward');
+            // if (cardReward) {
+            //     cardReward.visible = false;
+            //     cardReward.gotoAndStop && cardReward.gotoAndStop(0);
+            //     // console.log('🎴 抽卡面板已默认隐藏');
+            // }
+
+
+            this.exportRoot.visible = true;
+
+            // console.log('✅ UI元件初始化完成');
+        } catch (error) {
+            console.error('❌ UI元件初始化失败:', error);
+        }
+    }
+
+    // 惰性初始化抽卡
+    async ensureCardGame() {
+        if (this.cardGameReady) return;
+        if (typeof window.CardGame !== 'function') {
+            console.warn('⚠️ CardGame 类尚未加载');
+            return;
+        }
+        this.cardGame = new window.CardGame();
+        try {
+            await this.cardGame.init({
+                stage: this.stage,
+                exportRoot: this.exportRoot,
+                engine: this.engine,
+                scene: this, // 传入gamescense实例，让CardGame可以调用failureHandler和tips方法
+                loadedSounds: this.loadedSounds
+            });
+            this.cardGameReady = true;
+            // console.log('✅ CardGame 初始化完成');
+        } catch (e) {
+            console.error('❌ CardGame 初始化失败:', e);
+        }
+    }
+
+    // 打开抽卡面板（胜利/失败后调用）
+    async openCardRewardPanel(delay = 800) {
+        await this.ensureCardGame();
+        if (!this.cardGame || !this.cardGame.card_reward_Mc) {
+            console.warn('⚠️ 抽卡面板不可用');
+            return;
+        }
+        setTimeout(() => {
+            this.cardGame.card_reward_Mc.visible = true;
+            this.cardGame.card_reward_Mc.gotoAndStop && this.cardGame.card_reward_Mc.gotoAndStop(0);
+            // console.log('🎴 抽卡面板已显示，等待玩家点击 GO');
+        }, delay);
+    }
+
+    // 关闭抽卡面板
+    closeCardRewardPanel() {
+        if (!this.cardGame || !this.cardGame.card_reward_Mc) return;
+        const panel = this.cardGame.card_reward_Mc;
+        if (!panel.visible) return;
+
+        createjs.Tween.removeTweens(panel);
+        createjs.Tween.get(panel)
+            .to({ scaleX: 1.05, scaleY: 1.05 }, 100)
+            .to({ scaleX: 0.2, scaleY: 0.2, alpha: 0 }, 180, createjs.Ease.quadIn)
+            .call(() => {
+                panel.visible = false;
+                panel.alpha = 1;
+                panel.scaleX = panel.scaleY = 1;
+                // 复位 GO 按钮状态
+                if (this.cardGame.goButton) {
+                    this.cardGame.goButton.mouseEnabled = true;
+                }
+                // console.log('🎴 抽卡面板已关闭');
+            });
+    }
+    /**
+     * 初始化游戏场景
+     * @param {Object} sysData - 系统数据对象
+     */
+    async init(sysData) {
+
+        // 初始化UI
+        try {
+
+            // console.log('🎮 GameScense 初始化开始...');
+
+            // 保存游戏数据
+            this.engine = sysData.engine;
+            this.stage = sysData.stage;
+            this.exportRoot = sysData.exportRoot;
+            this.canvas = sysData.canvas;
+            this.config = sysData.config;
+            this.loadedSounds = sysData.loadedSounds;
+            this.loadedImages = sysData.loadedImages;
+
+            this.difficultySelectionEnabled = false; //难度
+
+            this.maxUnlockedLevel = 1; // 初始只解锁等级1
+            this.isProcessingClick = false; // 防抖标识
+            this.clickDebounceTime = 300; // 防抖时间（毫秒）
+
+            // 初始化游戏系统
+            await this.initUIElements();
+            await this.initGameSystems();
+            this.initTipsPanel();
+            // this.startBackgroundMusic();
+            // this.playUnlockedAnimations(this.userStatus);
+
+            // 保存用户数据和游戏配置
+            this.userStatus = sysData.userStatus;
+
+
+            // console.log('👤 接收到用户状态:', this.userStatus);
+            // console.log('🎯 接收到游戏配置:', this.gameData);
+
+
+            const isNewUser = this.userStatus?.isNewUser;
+            // console.log(`👤 用户类型检查: ${isNewUser ? '新用户' : '老用户'}`);
+
+            if (isNewUser) {
+                //     // 🔥 新用户：直接使用默认中等难度，不显示选择界面
+                //     console.log('👶 新用户跳过难度选择，使用默认中等难度');
+
+                this.waitingForClick = true;
+                // 初始化引导系统
+                this.initGuideGesture();
+
+            }
+
+            const gameConfig = await window.GameServer.getGameData(
+                this.userStatus,
+                this.selectedDifficulty
+            );
+            this.gameData = gameConfig;
+            // console.log('🎯 获取到游戏配置:', gameConfig);
+
+            // 验证游戏数据
+            // this.verifyGameData();
+
+            // 处理初始化后的逻辑
+            setTimeout(() => {
+                this.generateUserEggs();
+
+                // 测试奖励
+                // this.openCardRewardPanel(800);
+            }, 1000);
+
+            this.isInitialized = true;
+            // console.log('✅ GameScense 初始化完成');
+
+        } catch (error) {
+            console.error('❌ GameScense 初始化失败:', error);
+        }
+    }
+
+
+    /**
+     * 为用户生成蛋（使用服务器返回的数据）
+     */
+    async generateUserEggs() {
+        // console.log('🥚 生成蛋...');
+
+        try {
+
+            // 从游戏数据中获取蛋配置
+            if (this.gameData && this.gameData.data) {
+
+                const { eggSeat, eggType, pointSeat } = this.gameData.data;
+
+                // 🔥 处理分数恢复
+                if (this.gameData.scoreSystem) {
+                    // console.log('💰 恢复分数数据:', this.gameData.scoreSystem);
+                    this.updateScoreDisplayDirectly(this.gameData.scoreSystem);
+
+                }
+
+                this.playUnlockedAnimations(this.gameData.unlockData)
+
+                this.selectedDifficulty = this.gameData.difficulty;
+
+                if (this.userStatus.isNewUser) {
+                    if (pointSeat.length > 0) {
+                        this.expectedClickCellId = pointSeat[0];
+                        setTimeout(() => {
+
+                            this.moveGuideGestureToCell(pointSeat[0]);
+                        }, 500);
+                    }
+
+                }
+                if (eggSeat && eggType && eggSeat.length === eggType.length) {
+                    // console.log(`📊 使用服务器数据生成蛋: 位置[${eggSeat}], 类型[${eggType}]`);
+
+                    this.playLongbossAnimation();
+
+                    // 同时创建所有蛋
+                    const createEggPromises = eggSeat.map((cellId, index) =>
+                        this.createEggAtPosition(cellId, eggType[index])
+                    );
+
+                    await Promise.all(createEggPromises);
+
+                    // utile.__sdklog(`✅ 成功为生成 ${eggSeat.length} 个蛋`, this.chessboard);
+                }
+            }
+        } catch (error) {
+            console.error('❌ 蛋生成失败:', error);
+
+        }
+    }
+
+    /**
+     * 锁定游戏交互
+     * @param {string} reason - 锁定原因
+     */
+    lockGameInteraction(reason = '处理中') {
+        this.isGameLocked = true;
+        this.lockReason = reason;
+        // console.log(`🔒 游戏交互已锁定: ${reason}`);
+    }
+
+    /**
+     * 解锁游戏交互
+     */
+    unlockGameInteraction() {
+        const previousReason = this.lockReason;
+        this.isGameLocked = false;
+        this.lockReason = '';
+        // console.log(`🔓 游戏交互已解锁，之前锁定原因: ${previousReason}`);
+    }
+
+
+    /**
+     * 检查游戏是否可以交互
+     * @returns {boolean} 是否可以交互
+     */
+    canInteract() {
+        if (this.isGameLocked) {
+            // console.log(`⛔ 游戏交互被锁定: ${this.lockReason}`);
+            return false;
+        }
+
+        if (this.isProcessingClick) {
+            // console.log('⛔ 正在处理点击，请稍候');
+            return false;
+        }
+
+        return true;
+    }
+
+
+    /**
+     * 初始化游戏系统
+     */
+    async initGameSystems() {
+        // console.log('🎯 初始化游戏系统...');
+
+        try {
+            // 1. 从 GameServer 获取地图配置
+            await this.initMapFromServer();
+
+            // 2. 获取游戏场景中的 gamebox 元件
+            // this.getGamebox();
+
+            // 3. 初始化游戏元素
+            this.initGoldDisplay();
+
+            // 4. 设置事件监听
+            // this.setupEventListeners();
+
+
+
+            // console.log('✅ 游戏系统初始化完成');
+
+        } catch (error) {
+            console.error('❌ 游戏系统初始化失败:', error);
+        }
+    }
+
+    /**
+     * 从 GameServer 初始化地图配置
+     */
+    async initMapFromServer() {
+        // console.log('🗺️ 从 GameServer 获取地图配置...');
+
+        try {
+            // 等待 GameServer 地图系统初始化完成
+            if (!window.GameServer.mapState.isInitialized) {
+                // console.log('⏳ 等待 GameServer 地图系统初始化...');
+                // 可以添加轮询或事件监听来等待初始化完成
+                await this.waitForMapInitialization();
+            }
+
+            // 获取地图配置
+            const mapInfo = window.GameServer.getMapStateInfo();
+            // console.log('📊 地图配置信息:', mapInfo);
+
+            // 使用后端完整配置
+            this.chessboard = {
+                // 基础配置
+                rows: mapInfo.config.rows,
+                cols: mapInfo.config.cols,
+                cellWidth: mapInfo.config.cellWidth,
+                cellHeight: mapInfo.config.cellHeight,
+                totalCells: mapInfo.config.totalCells,
+
+                // 渲染配置
+                width: mapInfo.config.width,
+                height: mapInfo.config.height,
+                offsetX: mapInfo.config.offsetX,
+                offsetY: mapInfo.config.offsetY,
+
+                // 前端渲染管理
+                pieces: new Map()
+            };
+
+            // console.log(`✅ 地图配置获取完成: ${this.chessboard.rows}x${this.chessboard.cols}`);
+
+        } catch (error) {
+            console.error('❌ 地图配置获取失败:', error);
+            // 使用默认配置（与后端保持一致）
+            this.chessboard = {
+                rows: 6,
+                cols: 6,
+                cellWidth: 150,
+                cellHeight: 150,
+                totalCells: 36,
+                width: 900,
+                height: 900,
+                offsetX: 0,
+                offsetY: 0,
+                pieces: new Map()
+            };
+        }
+    }
+
+    /**
+     * 等待地图初始化完成
+     */
+    async waitForMapInitialization() {
+        return new Promise((resolve) => {
+            const checkInterval = setInterval(() => {
+                if (window.GameServer && window.GameServer.mapState.isInitialized) {
+                    clearInterval(checkInterval);
+                    resolve();
+                }
+            }, 100); // 每100ms检查一次
+
+            // 设置超时
+            setTimeout(() => {
+                clearInterval(checkInterval);
+                console.warn('⚠️ 等待地图初始化超时');
+                resolve();
+            }, 5000); // 5秒超时
+        });
+    }
+
+
+    /**
+     * 移动元件到指定位置（带寻路动画）
+     * @param {Object} piece - 要移动的元件
+     * @param {number} fromCellId - 起始格子ID
+     * @param {number} toCellId - 目标格子ID
+     * @param {Function} onComplete - 移动完成回调
+     */
+    moveElementWithPathfinding(piece, fromCellId, toCellId, onComplete) {
+        // console.log(`🚶 开始寻路移动: ${fromCellId} -> ${toCellId}`);
+
+        // 寻找路径
+        const pathCellIds = this.findMovePath(fromCellId, toCellId);
+
+        if (pathCellIds.length === 0) {
+            console.warn('⚠️ 无法找到移动路径');
+            if (onComplete) onComplete(false);
+            return;
+        }
+
+        // 执行路径动画
+        this.animateAlongPath(piece, pathCellIds, onComplete);
+    }
+
+    /**
+     * 沿路径执行动画
+     * @param {Object} piece - 要移动的元件
+     * @param {Array} pathCellIds - 路径格子ID数组
+     * @param {Function} onComplete - 完成回调
+     */
+    animateAlongPath(piece, pathCellIds, onComplete) {
+        if (!piece || pathCellIds.length === 0) {
+            if (onComplete) onComplete(false);
+            return;
+        }
+
+        let currentIndex = 0;
+        const moveSpeed = 100; // 每步移动时间(毫秒)
+
+        const moveToNextCell = () => {
+            // 播放点击音效
+
+            if (currentIndex >= pathCellIds.length) {
+                // console.log('✅ 路径移动完成');
+                if (onComplete) onComplete(true);
+                return;
+            }
+
+            const cellId = pathCellIds[currentIndex];
+            const cellData = this.getCellData(cellId);
+
+            if (cellData) {
+                // console.log(`🚶 移动到格子 ${cellId} (${cellData.centerX}, ${cellData.centerY})`);
+                if (this.engine && this.loadedSounds.has('popo')) {
+                    this.engine.playSound('popo');
+                }
+                // 使用 CreateJS Tween 进行平滑移动
+                createjs.Tween.get(piece)
+                    .to({
+                        x: cellData.centerX,
+                        y: cellData.centerY,
+                        scaleX: 1.1,
+                        scaleY: 1.1,
+                    }, moveSpeed, createjs.Ease.quadOut)
+                    .to({
+                        scaleX: 1,
+                        scaleY: 1,
+                    }, moveSpeed, createjs.Ease.quadOut)
+                    .call(() => {
+
+                        currentIndex++;
+                        moveToNextCell();
+                    });
+            } else {
+                console.error(`❌ 格子 ${cellId} 数据不存在`);
+                if (onComplete) onComplete(false);
+            }
+        };
+
+        moveToNextCell();
+    }
+
+    /**
+     * 根据行列获取格子ID
+     */
+    getCellId(row, col) {
+        return row * this.chessboard.cols + col;
+    }
+
+    /**
+     * 根据格子ID获取行列
+     */
+    getRowCol(cellId) {
+        const row = Math.floor(cellId / this.chessboard.cols);
+        const col = cellId % this.chessboard.cols;
+        return { row, col };
+    }
+
+    /**
+     * 根据鼠标位置获取格子ID
+     */
+    getCellIdFromPosition(x, y) {
+        // console.log(`🔍 计算格子位置: 点击坐标(${x}, ${y})`);
+
+        // 获取偏移量（如果没有设置则为0）
+        const offsetX = this.chessboard.offsetX || 0;
+        const offsetY = this.chessboard.offsetY || 0;
+
+        // 转换为相对于棋盘的坐标
+        const localX = x - offsetX;
+        const localY = y - offsetY;
+
+        // console.log(`📐 转换后坐标: (${localX}, ${localY}), 偏移量: (${offsetX}, ${offsetY})`);
+        // console.log(`📏 格子尺寸: ${this.chessboard.cellWidth} x ${this.chessboard.cellHeight}`);
+
+        // 计算行列
+        const col = Math.floor(localX / this.chessboard.cellWidth);
+        const row = Math.floor(localY / this.chessboard.cellHeight);
+
+        // console.log(`🎯 计算得到: 行${row}, 列${col}`);
+
+        // 检查是否在有效范围内
+        if (col >= 0 && col < this.chessboard.cols &&
+            row >= 0 && row < this.chessboard.rows) {
+            const cellId = this.getCellId(row, col);
+            // console.log(`✅ 有效格子ID: ${cellId}`);
+            return cellId;
+        }
+
+        console.log(`❌ 超出范围: 行${row}(0-${this.chessboard.rows - 1}), 列${col}(0-${this.chessboard.cols - 1})`);
+        return -1; // 无效位置
+    }
+
+    /**
+     * 根据格子ID计算位置（纯计算，不依赖数据）
+     */
+    getCellPosition(cellId) {
+        const { row, col } = this.getRowCol(cellId);
+        const x = col * this.chessboard.cellWidth;
+        const y = row * this.chessboard.cellHeight;
+        return {
+            x: x,
+            y: y,
+            centerX: x + this.chessboard.cellWidth / 2,
+            centerY: y + this.chessboard.cellHeight / 2
+        };
+    }
+
+
+
+    /**
+     * 获取格子数据（从 GameServer）
+     */
+    getCellData(cellId) {
+        // 从 GameServer 获取格子数据
+        if (window.GameServer && window.GameServer.mapState && window.GameServer.mapState.cells) {
+            const serverCellData = window.GameServer.mapState.cells[cellId];
+            if (serverCellData) {
+                return {
+                    id: serverCellData.id,
+                    row: serverCellData.row,
+                    col: serverCellData.col,
+                    x: serverCellData.x,
+                    y: serverCellData.y,
+                    centerX: serverCellData.centerX,
+                    centerY: serverCellData.centerY,
+                    isEmpty: serverCellData.isEmpty,
+                    hasEgg: serverCellData.hasEgg,
+                    eggType: serverCellData.eggType,
+                    piece: serverCellData.piece,
+                    walkable: serverCellData.walkable,
+                    occupied: serverCellData.occupied
+                };
+            }
+        }
+
+        console.warn(`⚠️ 无法从 GameServer 获取格子 ${cellId} 的数据`);
+        return null;
+    }
+
+
+    /**
+     * 🔥直接更新分数显示（不带动画）
+     */
+    updateScoreDisplayDirectly(dataScore) {
+        try {
+            const goldMc = this.exportRoot.mc_gold;
+            if (goldMc && goldMc.text) {
+                goldMc.text.text = "score: " + dataScore.totalScore;
+
+            }
+
+            const high_score = this.exportRoot.mc_high_score;
+            if (high_score && high_score.text) {
+                high_score.text.text = "best: " + dataScore.bestScore;
+            }
+        } catch (error) {
+            console.error('❌ 更新分数显示失败:', error);
+        }
+    }
+
+    /**
+     * 验证接收到的游戏数据
+     */
+    // verifyGameData() {
+    //     console.log('🔍 验证游戏数据...');
+    //     console.log('📊 完整的 gameData:', JSON.stringify(this.gameData, null, 2));
+    //     console.log('👤 完整的 userStatus:', JSON.stringify(this.userStatus, null, 2));
+
+    //     if (this.gameData && this.gameData.data) {
+    //         const { eggSeat, eggType, pointSeat } = this.gameData.data;
+    //         console.log('🔍 解析出的数据:');
+    //         console.log('  eggSeat:', eggSeat);
+    //         console.log('  eggType:', eggType);
+    //         console.log('  pointSeat:', pointSeat);
+
+    //         // 验证数据类型和长度
+    //         if (Array.isArray(eggSeat) && Array.isArray(eggType)) {
+    //             console.log(`✅ 数据验证通过: ${eggSeat.length} 个蛋位置, ${eggType.length} 个蛋类型`);
+
+    //             // 检查每个蛋的详细信息
+    //             for (let i = 0; i < Math.min(eggSeat.length, eggType.length); i++) {
+    //                 console.log(`  蛋 ${i + 1}: 位置=${eggSeat[i]}, 类型=${eggType[i]}`);
+    //             }
+    //         } else {
+    //             console.error('❌ 数据格式错误: eggSeat 或 eggType 不是数组');
+    //         }
+    //     } else {
+    //         console.error('❌ 没有有效的游戏数据');
+    //     }
+    // }
+
+
+    /**
+     * 从 exportRoot 获取蛋元件
+     */
+    getEggFromFlygame(type) {
+        // console.log(`🔍 从 exportRoot 获取类型 ${type} 的蛋元件...`);
+
+        const eggName = `egg_mc${type}`;
+
+        try {
+            // 使用 utile 工具类查找蛋元件
+            const egg = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, eggName);
+
+            if (egg) {
+                // console.log(`✅ 使用 utile.findMc 找到蛋元件: ${eggName}`);
+
+                // 克隆元件以避免多次使用同一个实例
+                const clonedEgg = egg.clone ? egg.clone() : this.cloneDisplayObject(egg);
+                return clonedEgg;
+            }
+
+            console.warn(`⚠️ 在 exportRoot 中未找到蛋元件: ${eggName}`);
+            this.logAvailableEggs();
+
+            return null;
+
+        } catch (error) {
+            console.error(`❌ 从 exportRoot 获取蛋元件失败: ${eggName}`, error);
+            return null;
+        }
+    }
+
+    /**
+     * 克隆显示对象（简单实现）
+     */
+    cloneDisplayObject(original) {
+        try {
+            // 如果有 clone 方法，直接使用
+            if (original.clone) {
+                return original.clone();
+            }
+
+            // 尝试创建新实例
+            if (original.constructor) {
+                const cloned = new original.constructor();
+
+                // 复制基本属性
+                cloned.x = original.x;
+                cloned.y = original.y;
+                cloned.scaleX = original.scaleX;
+                cloned.scaleY = original.scaleY;
+                cloned.rotation = original.rotation;
+                cloned.alpha = original.alpha;
+                cloned.visible = original.visible;
+
+                return cloned;
+            }
+
+            console.warn('⚠️ 无法克隆元件，返回原始元件');
+            return original;
+
+        } catch (error) {
+            console.error('❌ 克隆元件失败:', error);
+            return original;
+        }
+    }
+
+    /**
+     * 打印 exportRoot 中可用的蛋元件
+     */
+    logAvailableEggs() {
+        console.log('🥚 查找可用的蛋元件:');
+        _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.logAvailableChildren(this.exportRoot);
+    }
+
+
+
+    /**
+     * 显示指示位置（不创建指示圈，仅记录位置）
+     */
+    showPointSeats(pointSeat) {
+        if (!pointSeat || pointSeat.length === 0) {
+            console.log('📍 没有指示位置');
+            this.pointSeats = [];
+            return;
+        }
+
+        // 保存有效的指示位置
+        this.pointSeats = pointSeat.filter(seat => seat >= 0);
+        this.currentPointIndex = 0; // 当前指示位置索引
+
+        console.log(`📍 记录了 ${this.pointSeats.length} 个指示位置:`, this.pointSeats);
+    }
+
+
+
+
+
+    /**
+     * 递归查找子元件
+     */
+    findChildByName(parent, targetName) {
+        if (!parent || !parent.children) return null;
+
+        for (let child of parent.children) {
+            // 检查当前子元件
+            if (child.name === targetName) {
+                return child;
+            }
+
+            // 递归检查子元件的子元件
+            const found = this.findChildByName(child, targetName);
+            if (found) {
+                return found;
+            }
+        }
+
+        return null;
+    }
+
+
+
+
+    /**
+     * 重新开始当前关卡
+     */
+    restartCurrentLevel() {
+        if (!this.gameData) {
+            console.error('❌ 没有当前关卡数据');
+            return false;
+        }
+
+        console.log(`🔄 重新开始关卡 - 等级: ${this.gameData.level}, 步骤: ${this.gameData.step}`);
+
+        // 重新初始化棋盘
+        this.initGameBoard();
+
+        return true;
+    }
+
+    /**
+     * 获取游戏场景中的 gamebox 元件
+     */
+    getGamebox() {
+        console.log('🔍 查找 gamebox 元件...');
+
+        if (!this.exportRoot) {
+            throw new Error('exportRoot 未找到');
+        }
+
+        // 使用 utile.findMc 统一查找元件
+
+
+        if (this.gamebox) {
+            console.log('✅ 使用 utile.findMc 找到 gamebox:', this.gamebox);
+            console.log(`📐 gamebox 位置: (${this.gamebox.x || 0}, ${this.gamebox.y || 0})`);
+            console.log(`📏 gamebox 尺寸: ${this.gamebox.getBounds ? this.gamebox.getBounds() : 'unknown'}`);
+            return;
+        }
+
+        this.gamebox = this.exportRoot;
+    }
+
+    /**
+     * 格式化数字显示
+     * @param {number} num - 数字
+     * @returns {string} 格式化后的字符串
+     */
+    formatNumber(num) {
+        if (num < 1000) return num.toString();
+        if (num < 1000000) return (num / 1000).toFixed(num >= 10000 ? 0 : 1) + 'k';
+        if (num < 1000000000) return (num / 1000000).toFixed(1) + 'm';
+        return (num / 1000000000).toFixed(1) + 'b';
+    }
+
+    /**
+     * 初始化金币显示
+     */
+    initGoldDisplay() {
+        console.log('💰 初始化金币显示...');
+
+        try {
+            // 获取金币显示元件
+            const goldMc = this.exportRoot.mc_gold;
+            if (goldMc && goldMc.text) {
+                // 设置初始金币为0
+                const totalScore = this.userStatus && this.userStatus.currentScore || 0;
+
+                // 设置金币显示
+                goldMc.text.text = "score: 0";
+            } else {
+                console.warn('⚠️ 未找到 mc_gold 或其 text 属性');
+            }
+
+            const high_score = this.exportRoot.mc_high_score;
+            if (high_score && high_score.text) {
+                // 设置初始最高分为0
+                const bestScore = this.userStatus && this.userStatus.bestScore || 0;
+
+                // 设置最高分显示
+                high_score.text.text = "best: 0";
+            }
+            else {
+                console.warn('⚠️ 未找到 mc_high_score 或其 text 属性');
+            }
+        } catch (error) {
+            console.error('❌ 初始化金币显示失败:', error);
+        }
+    }
+
+
+    /**
+    * gamebox 点击事件处理
+    */
+    onGameboxClick(event) {
+        // console.log('🖱️ gamebox 被点击:', event);
+
+        // 获取点击位置相对于 gamebox 的坐标
+        const localX = event.localX || event.stageX;
+        const localY = event.localY || event.stageY;
+
+        // console.log(`📍 点击坐标: (${localX}, ${localY})`);
+
+        // 检查是否点击了蛋元件
+        if (event.currentTarget.name !== this.gamebox.name) {
+            // console.log('🥚 点击了蛋元件，忽略gamebox事件');
+            return;
+        }
+
+        // 获取被点击的格子ID
+        const cellId = this.getCellIdFromPosition(localX, localY);
+
+        if (cellId >= 0) {
+            const { row, col } = this.getRowCol(cellId);
+            // console.log(`🎯 点击格子 ${cellId} (行:${row}, 列:${col})`);
+
+            // 处理格子点击逻辑
+            this.handleCellClick(cellId);
+        } else {
+            // console.log('🖱️ 点击了棋盘外区域');
+        }
+
+        // 播放点击音效
+        // if (this.engine && this.loadedSounds.has('open')) {
+        //     this.engine.playSound('open');
+        // }
+    }
+
+    /**
+     * 检查是否在引导模式
+     */
+    isInGuideMode() {
+        return this.gameData && this.userStatus.isNewUser && this.waitingForClick;
+    }
+
+    /**
+     * 检查引导阶段是否允许点击该位置
+     */
+    isGuideClickAllowed(cellId) {
+        // 如果正在等待引导点击，只允许点击预期位置
+        if (this.waitingForClick && this.expectedClickCellId !== null) {
+            return cellId === this.expectedClickCellId;
+        }
+        return false;
+    }
+
+    /**
+    * 引导点击成功处理
+    */
+    onGuideClickSuccess(cellId) {
+        console.log(`🎯 引导点击成功: 格子 ${cellId}`);
+
+        // 取消当前等待状态
+        this.waitingForClick = false;
+        this.expectedClickCellId = null;
+
+        // 移动到下一个引导位置
+        this.moveToNextGuidePoint();
+    }
+
+    /**
+     * 移动到下一个引导点
+     */
+    moveToNextGuidePoint() {
+        if (!this.gameData?.data?.pointSeat) {
+            console.log('📍 没有引导点数据');
+            return;
+        }
+
+        const { pointSeat } = this.gameData.data;
+        this.currentPointIndex = (this.currentPointIndex || 0) + 1;
+
+        if (this.currentPointIndex >= pointSeat.length) {
+            console.log('🎉 所有引导点都已完成');
+            this.completeGuide();
+            return;
+        }
+
+        const nextCellId = pointSeat[this.currentPointIndex];
+        if (nextCellId >= 0) {
+            console.log(`👉 移动引导手势到下一个位置: ${nextCellId}`);
+            this.expectedClickCellId = nextCellId;
+            this.waitingForClick = true;
+            this.moveGuideGestureToCell(nextCellId);
+        } else {
+            console.log('🎉 引导完成（遇到-1标记）');
+            this.completeGuide();
+        }
+    }
+
+    /**
+     * 处理格子点击（蛋选择交互）
+     */
+    async handleCellClick(cellId) {
+        // console.log(`🖱️ 处理格子点击: ${cellId}`);
+        try {
+            // 检查是否可以交互
+            if (!this.canInteract()) {
+                return;
+            }
+
+            if (this.userStatus?.isNewUser) {
+
+                // 🔥 检查是否在引导阶段，如果是则只允许点击引导位置
+                if (this.isInGuideMode()) {
+                    if (!this.isGuideClickAllowed(cellId)) {
+                        console.log(`🚫 引导阶段：只能点击引导指示位置，当前点击格子${cellId}被忽略`);
+                        return;
+                    }
+                    console.log(`✅ 引导阶段：允许点击引导位置${cellId}`);
+                }
+
+                // 检查是否在等待引导点击
+                if (this.waitingForClick && this.expectedClickCellId === cellId) {
+                    // console.log(`✅ 用户正确点击了引导位置 ${cellId}`);
+                    this.onGuideClickSuccess(cellId);
+
+                }
+            }
+
+
+
+            // 设置防抖标识
+            this.isProcessingClick = true;
+
+
+            // 调用 GameServer 处理点击逻辑
+
+            const result = window.GameServer.processEggClick(cellId);
+            // console.log('🎮 点击处理结果:', result);
+
+            // 根据返回结果执行相应操作
+            if (result.code === -1) {
+                // 错误或无效操作
+                await this.handleStep0(result);
+            } else if (result.code === 0) {
+                // 根据步骤执行相应操作
+                switch (result.step) {
+                    case 1:
+                        await this.handleStep1(result);
+                        break;
+                    case 2:
+                        // this.lockGameInteraction('蛋移动中');
+                        await this.handleStep2(result);
+                        break;
+                    case 3:
+                        await this.handleStep3(result);
+                        break;
+                    case 4:
+                        await this.handleStep4(result);
+                        break;
+                    default:
+                        console.warn('⚠️ 未知的步骤:', result.step);
+                }
+            }
+        } catch (error) {
+            console.error('❌ 处理点击失败:', error);
+        } finally {
+            // 延迟重置防抖标识
+            setTimeout(() => {
+                this.isProcessingClick = false;
+                // console.log('🔓 防抖解除，可以处理下一次点击');
+            }, this.clickDebounceTime);
+        }
+    }
+
+
+
+    /**
+     * 处理步骤0：错误或无效操作
+     */
+    async handleStep0(result) {
+        console.log('⚠️ 无效操作:', result.message);
+        // 可以添加错误提示UI
+    }
+
+    /**
+     * 处理步骤1：选择蛋
+     */
+    async handleStep1(result) {
+        // console.log(`🎯 选择蛋: 格子 ${result.cellId}, 类型 ${result.eggType}`);
+
+        this.engine.playSound('select_jiji');
+        // 更新游戏状态
+        this.gameDataState.selectedEgg = {
+            cellId: result.cellId,
+            eggType: result.eggType,
+            isSelected: true
+        };
+
+        // 添加选中效果
+        const cellData = this.getCellData(result.cellId);
+        if (cellData && !cellData.isEmpty) {
+            const piece = this.chessboard.pieces.get(result.cellId);  // 直接从前端获取
+            this.addSelectionEffect(piece);
+            this.selectedPiece = piece;
+            this.selectedCellId = result.cellId;
+        }
+    }
+
+    /**
+     * 处理步骤2：移动蛋
+     */
+    async handleStep2(result) {
+        // console.log(`🚶 移动蛋: ${result.fromCellId} -> ${result.toCellId}`);
+
+        // 🔥 检查游戏胜利和失败
+        const isVictory = result.isVictory || false;
+        const isFailure = result.isFailure || false;
+
+        // 直接从前端获取蛋元件，不依赖后端数据
+        const piece = this.chessboard.pieces.get(result.fromCellId);
+
+        if (!piece) {
+            console.error('❌ 前端找不到蛋元件:', result.fromCellId);
+            return;
+        }
+
+        // 移除选中效果
+        this.removeSelectionEffect(piece);
+
+        // 执行移动动画
+        this.executeEggMovement(piece, result.fromCellId, result.toCellId, result.path, result.synthesis.canSynthesize)
+            .then(() => {
+                // console.log('✅ 蛋移动完成，开始同步映射关系');
+
+                // 检查是否有合成
+                if (result.synthesis && result.synthesis.canSynthesize) {
+
+                    // utile.__sdklog('合成数据详情:', result.synthesis);
+                    return this.executeSynthesisAnimation(result.synthesis, result.positionsToDelete);
+                } else {
+                    this.chessboard.pieces.set(result.toCellId, piece);
+
+                    // utile.__sdklog(`📍 更新目标位置映射: 格子${result.toCellId}`);
+                }
+                return Promise.resolve();
+            })
+            .then(() => {
+
+                // 🔥 处理引导数据更新
+                if (result.guideData) {
+                    if (result.guideData.isNewUser && result.guideData.pointSeat) {
+
+                        this.gameData.data.pointSeat = result.guideData.pointSeat;
+                        this.gameData.step = result.guideData.currentStep;
+                        this.gameData.level = result.guideData.currentLevel;
+
+                        // 更新引导指示位置
+                        const { pointSeat } = result.guideData;
+                        if (pointSeat.length > 0 && pointSeat[0] >= 0) {
+                            // console.log(`👉 后端返回新的引导位置: ${pointSeat[0]}`);
+                            this.expectedClickCellId = pointSeat[0];
+                            this.waitingForClick = true;
+
+                            // 延迟显示引导手势
+                            setTimeout(() => {
+                                this.moveGuideGestureToCell(pointSeat[0]);
+                            }, 500);
+                        } else {
+                            // console.log('🎉 引导完成（遇到-1标记）');
+                            this.waitingForClick = false;
+                            this.expectedClickCellId = null;
+                            this.completeGuide(false);
+                        }
+                    } else if (result.guideData.completed) {
+                        // console.log('🎉 引导流程完成');
+                        this.completeGuide(false);
+                    }
+                }
+
+                // 如果有新蛋数据，创建新蛋
+                if (result.newEggs && result.newEggs.length > 0) {
+                    // console.log('🥚 创建新蛋');
+                    // 播放龙boss动画
+                    this.playLongbossAnimation();
+                    const createEggPromises = result.newEggs.map(eggData =>
+                        this.createEggAtPosition(eggData.cellId, eggData.eggType)
+                    );
+
+                    return Promise.all(createEggPromises);
+                }
+                return Promise.resolve();
+            })
+            .then(() => {
+                // 打印当前前端映射状态
+                // this.printCurrentPiecesMapping();
+
+                // 清除选中状态
+                this.gameDataState.selectedEgg = null;
+                this.selectedPiece = null;
+                this.selectedCellId = null;
+                if (isVictory) {
+                    // 优先使用合成后创建的新蛋（位于 synthesis.synthesisPosition），如果不存在则回退到原始 piece
+                    const synthPos = result.synthesis && result.synthesis.synthesisPosition;
+                    let targetPiece = null;
+                    if (typeof synthPos === 'number') {
+                        targetPiece = this.chessboard.pieces.get(synthPos) || null;
+                    }
+                    if (!targetPiece) {
+                        targetPiece = piece; // fallback
+                    }
+
+                    // console.log('🏆 合成动画完成，显示胜利界面，移动目标元件:', targetPiece && (targetPiece.cellId || 'unknown'));
+
+                    const targetContainer = this.gamebox || this.exportRoot;
+
+                    // 如果 targetPiece 不在 targetContainer 下，先把它转换到 targetContainer（保持视觉位置不变）
+                    if (targetPiece && targetPiece.parent !== targetContainer) {
+                        const parent = targetPiece.parent || this.exportRoot;
+                        const globalX = (targetPiece.x || 0) + (parent.x || 0);
+                        const globalY = (targetPiece.y || 0) + (parent.y || 0);
+
+                        // 将 targetPiece 添加到 targetContainer，并把位置调整为相对于 targetContainer
+                        try {
+                            targetContainer.addChild(targetPiece);
+                        } catch (e) {
+                            // 如果添加失败，仍然继续尝试使用当前 parent 坐标
+                        }
+                        targetPiece.x = globalX - (targetContainer.x || 0);
+                        targetPiece.y = globalY - (targetContainer.y || 0);
+                    }
+
+                    // 计算 targetContainer 的中点作为目标位置
+                    const b = (typeof targetContainer.getBounds === 'function') ? targetContainer.getBounds() : null;
+                    const centerX = b && b.width ? b.width / 2 : (this.mapConfig?.width || 900) / 2;
+                    const centerY = b && b.height ? b.height / 2 : (this.mapConfig?.height || 900) / 2;
+
+                    if (targetPiece) {
+                        createjs.Tween.get(targetPiece)
+                            .to({ x: centerX, y: centerY }, 500, createjs.Ease.quadOut)
+                            .call(() => {
+                                try { targetPiece.visible = false; } catch (e) { }
+                                const maskName = `mc_egg_mask${8}`;
+                                const maskMc = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, maskName);
+                                // 直接使用最终的中心坐标，不做额外偏移计算
+                                if (maskMc) {
+
+                                    // 先把 targetContainer 的中心点转换到全局坐标
+                                    let globalPt = { x: centerX, y: centerY };
+                                    if (targetContainer && typeof targetContainer.localToGlobal === 'function') {
+                                        globalPt = targetContainer.localToGlobal(centerX, centerY);
+                                    }
+
+                                    // 将全局坐标转换为 maskMc 父容器的本地坐标
+                                    const maskParent = maskMc.parent || this.exportRoot;
+                                    let localPt = { x: globalPt.x, y: globalPt.y };
+                                    if (maskParent && typeof maskParent.globalToLocal === 'function') {
+                                        localPt = maskParent.globalToLocal(globalPt.x, globalPt.y);
+                                    } else if (this.stage && typeof this.stage.globalToLocal === 'function') {
+                                        localPt = this.stage.globalToLocal(globalPt.x, globalPt.y);
+                                    } else {
+                                        // 退化方案：减去父容器偏移
+                                        localPt = { x: globalPt.x - (maskParent.x || 0), y: globalPt.y - (maskParent.y || 0) };
+                                    }
+
+                                    maskMc.x = localPt.x;
+                                    maskMc.y = localPt.y;
+                                    maskMc.alpha = 1;
+
+
+                                    maskMc.play();
+                                    _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.addFrameEnd(maskMc, () => {
+
+                                        createjs.Tween.get(maskMc)
+                                            .to({ scaleX: 1.5, scaleY: 1.5, alpha: 0 }, 500)
+                                            .call(() => {
+
+                                                this.victoryHandler(true);
+                                            })
+                                    }, true);
+                                }
+                            });
+                    }
+
+                }
+                if (isFailure) {
+                    // console.log('💀 游戏失败，显示失败界面');
+
+                    setTimeout(() => {
+                        this.failureHandler(true);
+                    }, 1000);
+                }
+                // console.log('✅ 所有步骤执行完成');
+                return Promise.resolve();
+
+            })
+            .catch((error) => {
+                console.error('❌ 执行过程中出现错误:', error);
+                return Promise.resolve();
+            }).finally(() => {
+                // 🔥 重要：无论成功还是失败，都要解锁游戏交互
+                // this.unlockGameInteraction();
+            });
+
+    }
+
+    /**
+     * 处理步骤3：取消选择
+     */
+    async handleStep3(result) {
+        // console.log(`🔄 取消选择: 格子 ${result.cellId}`);
+        this.engine.playSound('select_jiji');
+        // 移除选中效果
+        if (this.selectedPiece) {
+            this.removeSelectionEffect(this.selectedPiece);
+        }
+
+        // 清除选中状态
+        this.gameDataState.selectedEgg = null;
+        this.selectedPiece = null;
+        this.selectedCellId = null;
+    }
+
+    /**
+     * 处理步骤4：切换选择
+     */
+    async handleStep4(result) {
+        // console.log(`🔄 切换选择: ${result.oldCellId} -> ${result.newCellId}`);
+        this.engine.playSound('select_jiji');
+        // 移除旧选中效果
+        if (this.selectedPiece) {
+            this.removeSelectionEffect(this.selectedPiece);
+        }
+
+        // 直接从前端映射获取新蛋元件
+        const newPiece = this.chessboard.pieces.get(result.newCellId);
+        if (newPiece) {
+            // console.log(`✅ 找到新选择的蛋: 格子${result.newCellId}, 类型${newPiece.eggType}`);
+
+            // 添加选中效果
+            this.addSelectionEffect(newPiece);
+            this.selectedPiece = newPiece;
+            this.selectedCellId = result.newCellId;
+
+            // 更新游戏状态
+            this.gameDataState.selectedEgg = {
+                cellId: result.newCellId,
+                eggType: newPiece.eggType,
+                isSelected: true
+            };
+        } else {
+            console.error(`❌ 前端映射中找不到格子${result.newCellId}的蛋元件`);
+            // console.log('🔍 当前前端映射状态:');
+            this.printCurrentPiecesMapping();
+
+            // 清除选中状态
+            this.selectedPiece = null;
+            this.selectedCellId = null;
+            this.gameDataState.selectedEgg = null;
+        }
+    }
+
+    /**
+     * 执行蛋移动动画
+     * @param {Object} piece - 蛋元件
+     * @param {number} fromCellId - 起始格子ID
+     * @param {number} toCellId - 目标格子ID
+     * @param {Array} path - 移动路径
+     */
+    async executeEggMovement(piece, fromCellId, toCellId, path, isclear) {
+        // console.log(`🚶 执行蛋移动动画: ${fromCellId} -> ${toCellId}`);
+        // console.log('🔍 原始路径数据:', path);
+
+        // 修正路径转换：A* 返回的是 {x: row, y: col} 格式
+        const pathCellIds = path.map(step => this.getCellId(step.x, step.y));
+        // console.log('🔍 转换后的路径格子ID:', pathCellIds);
+
+        return new Promise((resolve) => {
+            // 只更新映射关系，不移除元件
+            if (!isclear) {
+                this.chessboard.pieces.delete(fromCellId);
+            }
+            // 执行路径动画
+            this.animateAlongPath(piece, pathCellIds, (success) => {
+                // console.log('🔍 动画完成，成功:', success);
+
+
+                if (!isclear) {
+
+                    this.chessboard.pieces.set(toCellId, piece);
+                    piece.cellId = toCellId; // 更新元件的cellId属性
+                    // console.log(`📍 添加目标位置映射: 格子${toCellId}`);
+                }
+
+                // console.log('✅ 蛋移动完成');
+                resolve();
+            });
+        });
+    }
+
+
+    /**
+ * 执行合成动画
+ * @param {Object} synthesisData - 合成数据
+ */
+    async executeSynthesisAnimation(synthesisData, positionsToDelete) {
+        // console.log('🎬 开始执行合成动画...');
+
+        const { matches, eggType, newEggType, synthesisPosition, score } = synthesisData;
+
+        // score 就是 scoreDetail
+        const scoreDetail = score;
+
+        // console.log('🔍 使用score作为scoreDetail:', scoreDetail);
+
+        // 🎯 合成开始时触发震动（如果开启）
+        const isVibrationEnabled = localStorage.getItem('vibrationEnabled') === null ||
+            localStorage.getItem('vibrationEnabled') === 'true';
+        if (isVibrationEnabled && typeof window.ovo !== 'undefined' && typeof window.ovo.vibrate === 'function') {
+            console.log('📳 合成蛋，触发振动反馈');
+            window.ovo.vibrate([200, 100, 200]); // 振动模式：200ms 振动，100ms 暂停，200ms 振动
+        } else if (!isVibrationEnabled) {
+            console.log('🔕 震动已关闭，跳过振动反馈');
+        } else {
+            console.log('⚠️ 振动功能不可用，跳过振动反馈');
+        }
+
+        // 收集所有参与合成的蛋元件（包括目标位置）
+        const allEggsToSynthesize = [];
+        for (const cellId of positionsToDelete) {
+            const piece = this.chessboard.pieces.get(cellId);
+            if (piece) {
+                allEggsToSynthesize.push({
+                    cellId: cellId,
+                    piece: piece,
+                    isTarget: cellId === synthesisPosition
+                });
+                // console.log(`🥚 找到参与合成的蛋: 格子${cellId} ${cellId === synthesisPosition ? '(目标位置)' : ''}, 元件名称: ${piece.name || 'unnamed'}, 元件ID: ${piece.id || 'no-id'}`);
+            } else {
+                console.warn(`⚠️ 格子 ${cellId} 没有找到对应的蛋元件`);
+            }
+        }
+
+        // utile.__sdklog2(`🔍 总共 ${allEggsToSynthesize.length} 个蛋参与合成`);
+
+        // 执行蛋收集动画
+        await this.playEggCollectionAnimation(allEggsToSynthesize, synthesisPosition);
+
+        // 延迟后创建合成蛋
+        await this.createSynthesizedEgg(synthesisPosition, newEggType);
+
+        // 更新分数显示并等待完成
+        // utile.__sdklog2('🔍 准备更新分数，scoreDetail:', scoreDetail);
+        if (scoreDetail && scoreDetail.totalScore) {
+            // 显示浮动分数在合成位置
+            this.showFloatingScore(scoreDetail.totalScore, synthesisPosition);
+            this.updateScoreDisplay(scoreDetail.totalScore);
+            // console.log('💰 分数更新动画完成，准备创建新蛋');
+        } else {
+            console.warn('⚠️ scoreDetail 数据缺失:', scoreDetail);
+        }
+        // 检查是否解锁了新等级（简单检查）
+        if (newEggType > this.maxUnlockedLevel) {
+            // console.log(`🎉 解锁新等级: ${this.maxUnlockedLevel} -> ${newEggType}`);
+
+            this.engine.playSound('hecheng_open');
+
+            // 播放解锁动画
+            await this.playUnlockAnimation(newEggType);
+
+            // 更新前端记录的最高等级
+            this.maxUnlockedLevel = newEggType;
+
+            // console.log(`🎊 恭喜解锁 ${this.getEggTypeName(newEggType)} 蛋！`);
+        }
+
+        // console.log(`✅ 合成完成！${window.GameServer.getEggTypeName(eggType)} -> ${window.GameServer.getEggTypeName(newEggType)}`);
+
+        // 返回完成标识
+        return { completed: true };
+    }
+
+
+    /**
+     * 播放蛋收集动画
+     * @param {Array} eggs - 所有参与合成的蛋数组
+     * @param {number} targetCellId - 目标位置
+     */
+    async playEggCollectionAnimation(eggs, targetCellId) {
+        const targetPosition = this.getCellPosition(targetCellId);
+        if (!targetPosition) {
+            console.error(`❌ 无法获取目标位置 ${targetCellId} 的坐标`);
+            return;
+        }
+
+        // console.log(`🎯 合成目标位置 ${targetCellId}: (${targetPosition.centerX}, ${targetPosition.centerY})`);
+        // console.log(`🔍 要处理的蛋数量: ${eggs.length}`);
+
+        const promises = [];
+        // 播放合成音乐
+        if (this.engine && this.loadedSounds.has('goodmin')) {
+            this.engine.playSound('goodmin');
+        }
+        for (const eggData of eggs) {
+            if (eggData.piece) {
+                // console.log(`🔍 处理格子 ${eggData.cellId} 的蛋，元件名称: ${eggData.piece.name || 'unnamed'}`);
+                eggData.piece.setChildIndex(100);
+                if (eggData.isTarget) {
+                    // 目标位置的蛋：直接删除
+                    // console.log(`🎯 目标位置蛋 ${eggData.cellId} 直接删除`);
+
+                    // 确保从父容器中移除
+                    if (eggData.piece.parent) {
+                        eggData.piece.parent.removeChild(eggData.piece);
+                        // utile.__sdklog3(`🗑️ 从父容器移除格子 ${eggData.cellId} 的蛋`);
+                    }
+
+                    // 从映射中删除
+                    this.chessboard.pieces.delete(eggData.cellId);
+                    // console.log(`🗑️ 删除目标位置蛋映射: 格子${eggData.cellId}`);
+                } else {
+                    // 非目标位置的蛋：移动到目标位置后删除
+                    // console.log(`🚶 蛋从格子 ${eggData.cellId} 移动到目标位置 ${targetCellId}`);
+
+                    const promise = new Promise((resolve) => {
+                        createjs.Tween.get(eggData.piece)
+                            .to({
+                                x: targetPosition.centerX,
+                                y: targetPosition.centerY,
+                                scaleX: 0.8,
+                                scaleY: 0.8,
+                                alpha: 0.8
+                            }, 300, createjs.Ease.quadInOut)
+                            .call(() => {
+                                // console.log(`🚶 格子 ${eggData.cellId} 的蛋移动完成`);
+
+                                // 确保从父容器中移除
+                                if (eggData.piece.parent) {
+                                    eggData.piece.parent.removeChild(eggData.piece);
+                                }
+
+                                this.chessboard.pieces.delete(eggData.cellId);
+                                // utile.__sdklog3(`🗑️ 删除移动后的蛋: 格子${eggData.cellId}`);
+                                resolve();
+                            });
+                    });
+
+                    promises.push(promise);
+                }
+            }
+        }
+
+        // 等待所有移动动画完成
+        await Promise.all(promises);
+
+
+        // utile.__sdklog2('📦 蛋收集动画完成，所有参与合成的蛋已删除');
+    }
+
+    /**
+ * 创建合成后的新蛋
+ * @param {number} cellId - 合成位置
+ * @param {number} newEggType - 新蛋类型
+ */
+    async createSynthesizedEgg(cellId, newEggType) {
+        // console.log(`🥚 在格子 ${cellId} 创建类型 ${newEggType} 的合成蛋 (egg_mc${newEggType})`);
+
+        // 获取正确的位置坐标
+        const position = this.getCellPosition(cellId);
+        if (!position) {
+            console.error(`❌ 无法获取格子 ${cellId} 的位置坐标`);
+            return;
+        }
+
+        // utile.__sdklog(`📍 合成蛋位置: 格子${cellId} -> (${position.centerX}, ${position.centerY})`);
+
+        // 创建新蛋
+        const newEgg = this.getEggFromFlygame(newEggType);
+        if (newEgg) {
+            newEgg.eggType = newEggType;
+            newEgg.cellId = cellId;
+
+            // 设置正确位置
+            newEgg.x = position.centerX;
+            newEgg.y = position.centerY;
+
+            // 添加到 gamebox
+            this.gamebox.addChild(newEgg);
+
+            // 更新映射
+            this.chessboard.pieces.set(cellId, newEgg);
+
+            // 播放合成特效
+            await this.playSynthesisEffect(newEgg);
+
+            // 显示合成信息
+            this.showSynthesisInfo(newEggType);
+
+            // console.log(`✅ 成功创建 ${this.getEggTypeName(newEggType)} 蛋 (egg_mc${newEggType})`);
+        }
+    }
+
+
+    /**
+     * 在指定位置创建蛋
+     * @param {number} cellId - 格子ID
+     * @param {number} eggType - 蛋类型
+     */
+    async createEggAtPosition(cellId, eggType) {
+
+
+        // console.log(`🥚 创建蛋: 格子${cellId}, 类型${eggType}`);
+
+        // 获取目标位置
+        const targetPosition = this.getCellPosition(cellId);
+        if (!targetPosition) {
+            console.error(`❌ 无法获取格子 ${cellId} 的位置坐标`);
+            return;
+        }
+
+        // 获取源蛋元件的初始位置（egg_mc[n]）
+        const sourceEggName = `egg_mc${eggType}`;
+        const sourceEgg = this.exportRoot[sourceEggName];
+
+        if (!sourceEgg) {
+            console.error(`❌ 找不到源蛋元件: ${sourceEggName}`);
+            return;
+        }
+
+        // 将源蛋位置转换为gamebox坐标系
+        const gameboxX = this.gamebox.x || 0;
+        const gameboxY = this.gamebox.y || 0;
+
+        const sourcePositionInGamebox = {
+            x: sourceEgg.x - gameboxX,
+            y: sourceEgg.y - gameboxY
+        };
+
+        // console.log(`📍 源蛋位置: ${sourceEggName} 舞台坐标(${sourceEgg.x}, ${sourceEgg.y})`);
+        // console.log(`📍 gamebox偏移: (${gameboxX}, ${gameboxY})`);
+        // console.log(`📍 转换后gamebox坐标: (${sourcePositionInGamebox.x}, ${sourcePositionInGamebox.y})`);
+
+        // 创建新蛋元件
+        const newEgg = this.getEggFromFlygame(eggType);
+        if (!newEgg) {
+            console.error(`❌ 无法创建蛋元件: egg_mc${eggType}`);
+            return;
+        }
+
+        // 设置新蛋的初始状态（在gamebox坐标系中）
+        newEgg.eggType = eggType;
+        newEgg.cellId = cellId;
+        newEgg.x = sourcePositionInGamebox.x;
+        newEgg.y = sourcePositionInGamebox.y;
+        // newEgg.scaleX = 0.1;
+        // newEgg.scaleY = 0.1;
+        newEgg.alpha = 1;
+
+        // 添加到 gamebox
+        this.gamebox.addChild(newEgg);
+        this.engine.playSound("longhou_min")
+        // console.log(`🚀 开始飞行动画: (${sourcePositionInGamebox.x}, ${sourcePositionInGamebox.y}) -> (${targetPosition.centerX}, ${targetPosition.centerY})`);
+
+        // 执行飞行动画
+        return new Promise((resolve) => {
+            createjs.Tween.get(newEgg)
+                // 第一阶段：闪烁出现效果 500ms
+                // .to({ alpha: 0 }, 100, createjs.Ease.quadInOut)
+                // .to({ alpha: 1 }, 100, createjs.Ease.quadInOut)
+                // .to({ alpha: 0 }, 100, createjs.Ease.quadInOut)
+                // .to({ alpha: 1 }, 100, createjs.Ease.quadInOut)
+                // .to({ alpha: 0 }, 50, createjs.Ease.quadInOut)
+                // .to({ alpha: 1 }, 50, createjs.Ease.quadInOut)
+                // 第二阶段：快速飞入到目标位置
+                .to({
+                    x: targetPosition.centerX,
+                    y: targetPosition.centerY,
+                    scaleX: 1.0,
+                    scaleY: 1.0
+                }, 300, createjs.Ease.quadOut)
+                .call(() => {
+                    // console.log(`✅ 蛋飞行完成: 格子${cellId}`);
+
+                    // 维护前端映射
+                    this.chessboard.pieces.set(cellId, newEgg);
+
+                    // console.log(`📍 添加新蛋到映射: 格子${cellId}`);
+                    resolve();
+                });
+        });
+    }
+
+
+    playLongbossAnimation() {
+        // console.log('🐉 播放龙boss动画');
+
+        try {
+            const longboss = this.exportRoot.mc_longboss;
+            if (longboss) {
+                // 重置到第一帧并播放
+                longboss.gotoAndPlay(0);
+                // console.log('✅ 龙boss动画开始播放');
+
+                // 监听播放完成
+                _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.addFrameEnd(longboss, function () {
+                    longboss.gotoAndStop(0);
+                    // console.log('✅ 龙boss动画播放完成，停止在第0帧');
+                });
+            } else {
+                console.warn('⚠️ 未找到 mc_longboss 元件');
+            }
+        } catch (error) {
+            console.error('❌ 播放龙boss动画失败:', error);
+        }
+    }
+
+    /**
+        * 移动元件到指定位置（纯渲染操作）
+        */
+    moveElementToPosition(piece, cellId) {
+        if (!piece) {
+            console.error(`❌ 元件为空，无法移动到格子 ${cellId}`);
+            return false;
+        }
+
+        const position = this.getCellPosition(cellId);
+        piece.x = position.centerX;
+        piece.y = position.centerY;
+        piece.cellId = cellId;
+
+        // 更新本地映射
+        // this.chessboard.pieces.set(cellId, piece);
+
+        // console.log(`📍 移动元件到格子 ${cellId}`);
+        return true;
+    }
+
+    /**
+     * 播放蛋出现动画
+     * @param {Object} egg - 蛋元件
+     */
+    playEggAppearAnimation(egg) {
+        egg.scaleX = 0;
+        egg.scaleY = 0;
+        egg.alpha = 0;
+
+        createjs.Tween.get(egg)
+            .to({ scaleX: 1, scaleY: 1, alpha: 1 }, 300, createjs.Ease.backOut);
+    }
+
+
+
+    /**
+     * 选中指定格子的元件
+     */
+    selectPieceAtCell(cellId) {
+        const cellData = this.getCellData(cellId);
+
+        if (!cellData || cellData.isEmpty) {
+            console.warn(`⚠️ 格子 ${cellId} 没有元件可选中`);
+            return;
+        }
+
+        // 选中元件
+        this.selectedPiece = cellData.piece;
+        this.selectedCellId = cellId;
+        this.isWaitingForTarget = true;
+
+        // console.log(`✅ 选中了格子 ${cellId} 的元件:`, this.selectedPiece.constructor.name);
+
+        // 添加选中效果
+        this.addSelectionEffect(this.selectedPiece);
+    }
+
+
+
+    /**
+     * 添加选中效果
+     */
+    addSelectionEffect(piece) {
+        if (!piece) return;
+
+        // 如果已有选中指示器，先移除
+        // 如果已有选中指示器，则复用并移动到新元件所在位置，
+        // 同时确保旧元件的 tween 被移除并为新元件创建 tween
+        if (this.selectionIndicator) {
+            try {
+                // 如果指示器不在同一父容器，移动到目标元件的父容器
+                if (this.selectionIndicator.parent !== piece.parent) {
+                    if (this.selectionIndicator.parent) {
+                        this.selectionIndicator.parent.removeChild(this.selectionIndicator);
+                    }
+                    if (piece.parent) {
+                        piece.parent.addChild(this.selectionIndicator);
+                    } else {
+                        // 兜底到 gamebox
+                        this.gamebox.addChild(this.selectionIndicator);
+                    }
+                }
+
+                this.selectionIndicator.visible = true;
+                this.selectionIndicator.x = piece.x;
+                this.selectionIndicator.y = piece.y;
+
+                // 清理上一个选中元件的动画与状态
+                if (this.selectedPiece && this.selectedPiece !== piece) {
+                    try {
+                        createjs.Tween.removeTweens(this.selectedPiece);
+                        this.selectedPiece.scaleX = this.selectedPiece.scaleY = 1;
+                    } catch (e) {
+                        // ignore
+                    }
+                }
+
+                // 确保新元件没有残留的 tween，然后添加缩放 tween
+                createjs.Tween.removeTweens(piece);
+                createjs.Tween.get(piece, { loop: true })
+                    .to({ scaleX: 1.05, scaleY: 1.05 }, 300)
+                    .to({ scaleX: 1, scaleY: 1 }, 300);
+
+                this.selectedPiece = piece;
+                // console.log('✨ 复用选中指示器并为新元件添加选中效果');
+            } catch (err) {
+                console.error('❌ 复用选中指示器失败:', err);
+            }
+
+            return;
+        }
+
+        // 为元件添加缩放 tween
+        createjs.Tween.get(piece, { loop: true })
+            .to({ scaleX: 1.05, scaleY: 1.05 }, 300)
+            .to({ scaleX: 1.0, scaleY: 1.0 }, 300)
+
+        // 创建新的选中指示器
+        const indicator = new createjs.Shape();
+        indicator.graphics.setStrokeStyle(12).beginStroke('#ffffffff').drawCircle(0, 0, 60);
+        indicator.x = piece.x;
+        indicator.y = piece.y;
+        indicator.name = 'selectionIndicator';
+
+        // 添加到与元件相同的父容器以保证层级和坐标一致
+        if (piece.parent) {
+            piece.parent.addChild(indicator);
+        } else {
+            this.gamebox.addChild(indicator);
+        }
+
+        // 添加闪烁动画
+        createjs.Tween.get(indicator, { loop: true })
+            .to({ alpha: 0, scaleX: 1.0, scaleY: 1.2 }, 300)
+            .to({ alpha: 1, scaleX: 0.4, scaleY: 0.6 }, 300);
+
+        // 记录全局唯一指示器
+        this.selectionIndicator = indicator;
+
+        // 记录当前选中元件
+        this.selectedPiece = piece;
+
+        // console.log('✨ 添加了选中效果');
+    }
+
+    /**
+     * 移除选中效果
+     */
+    removeSelectionEffect(piece) {
+        if (this.selectionIndicator) {
+            // 隐藏并移除指示器
+            try {
+                this.selectionIndicator.visible = false;
+                if (this.selectionIndicator.parent) {
+                    this.selectionIndicator.parent.removeChild(this.selectionIndicator);
+                }
+            } catch (e) {
+                // ignore
+            }
+            this.selectionIndicator = null;
+        }
+
+        // 移除元件的 tween 并复位缩放
+        try {
+            if (piece) {
+                createjs.Tween.removeTweens(piece);
+                piece.scaleX = piece.scaleY = 1;
+            }
+        } catch (e) {
+            // ignore
+        }
+        this.selectedPiece = null;
+    }
+
+    /**
+     * 清除选中状态
+     */
+    clearSelection() {
+        if (this.selectedPiece) {
+            this.removeSelectionEffect(this.selectedPiece);
+
+        }
+
+        this.selectedPiece = null;
+        this.selectedCellId = null;
+        this.isWaitingForTarget = false;
+
+        // console.log('🔄 清除了选中状态');
+    }
+
+
+    /**
+     * 获取蛋类型名称
+     * @param {number} eggType - 蛋类型
+     * @returns {string} 蛋类型名称
+     */
+    getEggTypeName(eggType) {
+        const eggNames = {
+            0: '白色',
+            1: '绿色',
+            2: '蓝色',
+            3: '紫色',
+            4: '红色',
+            5: '黄色',
+            6: '橙色'
+        };
+        return eggNames[eggType] || '未知';
+    }
+
+    /**
+     * 显示合成信息
+     * @param {number} newEggType - 新蛋类型
+     */
+    showSynthesisInfo(newEggType) {
+        const eggName = this.getEggTypeName(newEggType);
+        // console.log(`🎊 合成成功！获得 ${eggName} 蛋 (egg_mc${newEggType})`);
+
+        // 这里可以添加UI提示
+        // this.showFloatingText(`合成 ${eggName} 蛋！`, cellData.centerX, cellData.centerY);
+    }
+
+    /**
+  * 添加合成特效
+  * @param {Object} piece - 蛋元件
+  */
+    addSynthesisEffect(piece) {
+        if (!piece) {
+            console.warn('⚠️ 蛋元件为空，无法添加合成特效');
+            return;
+        }
+
+        // 创建发光效果
+        const glowEffect = new createjs.Shape();
+        glowEffect.graphics.beginRadialGradientFill(
+            ['rgba(255, 215, 0, 0.8)', 'rgba(255, 215, 0, 0)'],
+            [0, 1],
+            piece.x, piece.y, 0,
+            piece.x, piece.y, 100
+        ).drawCircle(piece.x, piece.y, 100);
+
+        this.gamebox.addChild(glowEffect);
+
+        // 闪烁动画
+        createjs.Tween.get(glowEffect)
+            .to({ alpha: 0 }, 1000)
+            .call(() => {
+                this.gamebox.removeChild(glowEffect);
+            });
+    }
+
+    /**
+     * 播放合成特效
+     * @param {Object} newEgg - 新蛋元件
+     */
+    playSynthesisEffect(newEgg) {
+        new Promise((resolve) => {
+            // 缩放弹出效果
+            newEgg.scaleX = 0.1;
+            newEgg.scaleY = 0.1;
+
+            createjs.Tween.get(newEgg)
+                .to({ scaleX: 1.2, scaleY: 1.2 }, 300, createjs.Ease.backOut)
+                .to({ scaleX: 1, scaleY: 1 }, 200, createjs.Ease.backIn)
+                .call(() => {
+                    // console.log('✨ 合成特效播放完成');
+                    resolve();
+                });
+
+            // 添加粒子效果
+            this.addSynthesisEffect(newEgg);
+        });
+    }
+
+    /**
+    * 更新分数显示（支持格式化数字）
+    * @param {number} addedScore - 新增分数
+    */
+    updateScoreDisplay(addedScore) {
+        return new Promise((resolve) => {
+            try {
+                // 获取金币显示元件
+                const goldMc = this.exportRoot.mc_gold;
+                if (goldMc && goldMc.text) {
+                    // 解析当前显示的分数（去除k/m/b后缀）
+                    const currentScore = this.parseFormattedNumber(goldMc.text.text.replace('score:', '').trim());
+                    const targetScore = currentScore + addedScore;
+
+
+                    // 创建数字递增动画
+                    const animationData = { score: currentScore };
+
+                    createjs.Tween.get(animationData)
+                        .to({ score: targetScore }, 500, createjs.Ease.quadOut)
+                        .addEventListener("change", () => {
+                            // 实时更新显示的分数（格式化）
+                            goldMc.text.text = "score: " + Math.floor(animationData.score);
+                        })
+                        .call(() => {
+                            // 确保最终分数正确
+                            goldMc.text.text = "score: " + targetScore;
+
+                            resolve();
+                        });
+                } else {
+                    console.warn('⚠️ 未找到 mc_gold 或其 text 属性');
+                    resolve();
+                }
+            } catch (error) {
+                console.error('❌ 更新分数显示失败:', error);
+                resolve();
+            }
+        });
+    }
+
+    /**
+     * 显示浮动分数文本
+     * @param {number} score - 获得的分数
+     * @param {number} cellId - 合成位置的格子ID（可选）
+     */
+    showFloatingScore(score, cellId = null) {
+        try {
+            // console.log(`✨ 显示浮动分数: +${score}`);
+
+            // 创建文本对象
+            // const floatingText = new createjs.Text(`+${score}`, "bold 42px Arial", "#FFD700");
+            // floatingText.textAlign = "center";
+            // floatingText.textBaseline = "middle";
+
+            // 确定显示位置
+            if (cellId !== null) {
+                // 在合成位置显示
+                const position = this.getCellPosition(cellId);
+                if (position) {
+                    // floatingText.x = position.centerX;
+                    // floatingText.y = position.centerY - 40; // 稍微向上偏移
+                    // console.log(`📍 在合成位置显示浮动分数: 格子${cellId} (${floatingText.x}, ${floatingText.y})`);
+                    this.tips(`+${score}`, { x: position.centerX, y: position.centerY }, "bold 42px Arial", "#FFD700", 1)
+                } else {
+                    console.warn(`⚠️ 无法获取格子 ${cellId} 的位置，使用默认位置`);
+                    // this.setDefaultFloatingPosition(floatingText);
+                }
+            } else {
+                // 使用默认位置（金币附近）
+                // this.setDefaultFloatingPosition(floatingText);
+            }
+
+            // 添加到 gamebox（因为合成位置是相对于 gamebox 的）
+
+            // this.gamebox.addChild(floatingText);
+            // this.gamebox.setChildIndex(floatingText, 99)
+
+
+            // 创建浮动动画：向上移动并淡出
+
+
+        } catch (error) {
+            console.error('❌ 显示浮动分数失败:', error);
+        }
+    }
+
+    /**
+     * 设置浮动分数的默认位置
+     * @param {Object} floatingText - 浮动文本对象
+     */
+    setDefaultFloatingPosition(floatingText) {
+        const goldMc = this.exportRoot.mc_gold;
+        if (goldMc) {
+            // 需要将金币位置转换为 gamebox 坐标系
+            const gameboxX = this.gamebox.x || 0;
+            const gameboxY = this.gamebox.y || 0;
+
+            floatingText.x = goldMc.x - gameboxX + 50;
+            floatingText.y = goldMc.y - gameboxY;
+            // console.log(`📍 使用金币附近位置: (${floatingText.x}, ${floatingText.y})`);
+        } else {
+            // 完全默认位置
+            floatingText.x = 600;
+            floatingText.y = 100;
+            // console.log(`📍 使用完全默认位置: (${floatingText.x}, ${floatingText.y})`);
+        }
+    }
+
+    /**
+     * 解析格式化的数字字符串为实际数值
+     * @param {string} formattedStr - 格式化的字符串（如 "1.2k", "3.5m"）
+     * @returns {number} 实际数值
+     */
+    parseFormattedNumber(formattedStr) {
+        if (!formattedStr || formattedStr === '0') return 0;
+
+        const str = formattedStr.toLowerCase();
+        const num = parseFloat(str);
+
+        if (str.includes('k')) {
+            return Math.floor(num * 1000);
+        } else if (str.includes('m')) {
+            return Math.floor(num * 1000000);
+        } else if (str.includes('b')) {
+            return Math.floor(num * 1000000000);
+        } else {
+            return Math.floor(num);
+        }
+    }
+
+
+    /**
+     * 获取 gamebox 元件
+     */
+    getGameboxElement() {
+        return this.gamebox;
+    }
+
+
+    /**
+     * 打印当前前端蛋映射状态
+     */
+    printCurrentPiecesMapping() {
+        // console.log('🗺️ 当前前端蛋映射状态:');
+        const mappingArray = [];
+
+        this.chessboard.pieces.forEach((piece, cellId) => {
+            mappingArray.push({
+                cellId: parseInt(cellId),
+                eggType: piece.eggType,
+                elementName: piece.name || 'unnamed',
+                elementId: piece.id || 'no-id'
+            });
+            // console.log(`  格子${cellId}: 蛋类型${piece.eggType} ${this.getEggTypeName(piece.eggType)}, 元件名称: ${piece.name || 'unnamed'}`);
+        });
+
+        // console.log(`📊 前端映射统计: 总共${mappingArray.length}个蛋元件`);
+
+        // 对比后端状态
+        if (window.GameServer) {
+            const backendInfo = window.GameServer.getMapStateInfo();
+            console.log(`🔍 后端vs前端对比: 后端${backendInfo.occupiedCells}个蛋 vs 前端${mappingArray.length}个元件`);
+
+            if (backendInfo.occupiedCells !== mappingArray.length) {
+                console.warn('⚠️ 后端蛋数量与前端元件数量不匹配！');
+            }
+        }
+
+        return mappingArray;
+    }
+
+    /**
+     * 初始化提示文本面板
+     */
+    initTipsPanel() {
+        // console.log('🎨 初始化提示文本面板...');
+
+        const tipsMc = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, 'mc_tips');
+        if (!tipsMc) {
+            console.warn('⚠️ 未找到 mc_tips 元件');
+            return;
+        }
+
+        this.tipsPanel = tipsMc; // 保存引用
+        // console.log('✅ 提示文本面板初始化完成');
+    }
+
+    /**
+     * 显示提示文本
+     * @param {string} message - 要显示的提示内容
+     */
+    tips(message, pos = null, _textStyle = "bold 28px Arial", _color = "#FFFFFF", acting = null) {
+        if (!this.tipsPanel) {
+            console.warn('⚠️ 提示文本面板未初始化');
+            return;
+        }
+
+        // console.log(`💬 显示提示文本: ${message}`);
+        let style = _textStyle;
+        let color = _color;
+        // 创建文本对象
+        const text = new createjs.Text(message, style, color);
+        text.textAlign = "center";
+        text.textBaseline = "middle";
+        text.lineWidth = 600;
+
+        // 设置文本位置到面板正中
+        if (pos) {
+            try {
+                // pos is specified in gamebox local coordinates. Convert to global then to tipsPanel local.
+                if (this.gamebox && typeof this.gamebox.localToGlobal === 'function' && this.tipsPanel && typeof this.tipsPanel.globalToLocal === 'function') {
+                    const globalPt = this.gamebox.localToGlobal(pos.x, pos.y);
+                    const localPt = this.tipsPanel.globalToLocal(globalPt.x, globalPt.y);
+                    text.x = localPt.x;
+                    text.y = localPt.y;
+                } else if (this.tipsPanel && typeof this.tipsPanel.globalToLocal === 'function') {
+                    // If gamebox not available, assume pos is already global
+                    const localPt = this.tipsPanel.globalToLocal(pos.x, pos.y);
+                    text.x = localPt.x;
+                    text.y = localPt.y;
+                } else {
+                    // Fallback: place relative to scene
+                    text.x = pos.x || (this.config.scene.width / 2);
+                    text.y = pos.y || (this.config.scene.height / 2 - 100);
+                }
+            } catch (e) {
+                console.warn('tips: position conversion failed, using fallback', e);
+                text.x = this.config.scene.width / 2;
+                text.y = this.config.scene.height / 2 - 100;
+            }
+        } else {
+            text.x = this.config.scene.width / 2;
+            text.y = this.config.scene.height / 2 - 100;
+        }
+
+        // 清空面板并添加新文本
+        // this.tipsPanel.removeAllChildren();
+        this.tipsPanel.addChild(text);
+
+        // 显示面板
+        // this.tipsPanel.visible = true;
+        if (acting == 1) {
+            const initialY = text.y;
+            createjs.Tween.get(text)
+                .to({
+                    y: initialY - 80,
+                    alpha: 0.8,
+                    scaleX: 1.2,
+                    scaleY: 1.2
+                }, 400, createjs.Ease.quadOut)
+                .to({
+                    y: initialY - 120,
+                    alpha: 0,
+                    scaleX: 1.0,
+                    scaleY: 1.0
+                }, 800, createjs.Ease.quadIn)
+                .call(() => {
+                    // 动画完成后移除文本
+                    this.gamebox.removeChild(text);
+                    // console.log(`✅ 浮动分数文本已移除: +${score}`);
+                });
+        } else {
+
+            // 创建动画：显示2秒后消失
+            createjs.Tween.get(text)
+                .to({ alpha: 1 }, 200) // 渐入效果
+                .wait(2000)            // 显示2秒
+                .to({ alpha: 0 }, 300) // 渐出效果
+                .call(() => {
+                    if (text.parent) {
+                        text.parent.removeChild(text); // 从面板中移除文本
+                        // console.log('✅ 提示文本已消失');
+                    }
+                });
+        }
+    }
+
+
+    /**
+     * 根据难度选择对应的按钮并更新状态
+     * @param {string} difficulty - 难度 ('easy', 'normal', 'hard')
+     * @param {Object} difficultyMap - 难度与按钮的映射关系
+     */
+    selectDifficulty(difficulty, difficultyMap) {
+
+        const selectedButton = difficultyMap[difficulty];
+        if (selectedButton) {
+            // 更新按钮状态
+            for (const btn in difficultyMap) {
+                const button = difficultyMap[btn];
+                button.gotoAndStop(button === selectedButton ? 1 : 0); // 播放状态或停止状态
+            }
+            // console.log(`✅ 难度选择成功: ${difficulty}`);
+        } else {
+            console.warn(`⚠️ 未找到对应难度的按钮: ${difficulty}`);
+        }
+    }
+
+
+    /**
+     * 失败界面控制器
+     * @param {boolean} show - true显示，false隐藏
+     */
+    failureHandler(show) {
+        // console.log(`💀 ${show ? '显示' : '隐藏'}失败界面...`);
+
+        const panelUI = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, 'mc_failure');
+        if (!panelUI) {
+            console.warn('⚠️ 未找到 mc_failure 元件');
+            return;
+        }
+
+        if (show) {
+
+            this.engine.playSound('wrong2');
+            const btnAgain = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(panelUI, 'btn_tryagain');
+            btnAgain.alpha = 0;
+            // const angin_x = btnAgain.x;
+            const angin_y = btnAgain.y;
+
+            btnAgain.y = angin_y + 300;
+            this.showPanel(panelUI, true, async () => {
+                if (this.gameData) {
+                    this.gameData.scoreSystem = await window.GameServer.getScoreStatus();
+                    panelUI.mc_ranking.mc_best.text.text = "" + this.gameData.scoreSystem.bestScore;
+                    panelUI.mc_ranking.mc_score.text.text = "" + this.gameData.scoreSystem.currentScore;
+                }
+
+                this.openCardRewardPanel(100);
+
+                createjs.Tween.get(btnAgain)
+                    .wait(3000)
+                    .to({
+                        y: angin_y,
+                        alpha: 1
+                    }, 300, createjs.Ease.backOut)
+
+            });
+
+            try {
+                // report failure event using ovo method
+                const bestScore = this.gameData && this.gameData.scoreSystem ? this.gameData.scoreSystem.bestScore : null;
+                if (typeof window.ovo !== 'undefined' && typeof window.ovo.dotGameOver === 'function') {
+                    window.ovo.dotGameOver(bestScore || 0, 1, 'game_over');
+                }
+
+                // 隐藏banner广告
+                if (typeof window.ovo !== 'undefined' && typeof window.ovo.hideBannerAd === 'function') {
+                    window.ovo.hideBannerAd(() => {
+                        console.log('📢 Banner ad hidden on game failure');
+                    });
+                }
+            } catch (e) { }
+
+            // console.log('✅ 失败界面显示完成');
+        } else {
+            this.closeCardRewardPanel()
+            this.engine.playSound('select_jiji');
+            this.showPanel(panelUI, false, () => {
+                // console.log('✅ 失败界面隐藏动画完成');
+
+                // 重新开始游戏
+                this.onRestartGame();
+            });
+        }
+    }
+
+    /**
+     * 关闭失败面板
+     */
+    showPanel(panelMc, isTF = true, callback) {
+        // console.log('💀 关闭失败面板...');
+
+
+        if (!panelMc) {
+            console.warn('⚠️ 未找到 panelMc 元件');
+            return;
+        }
+
+        panelMc.visible = true;
+        panelMc.alpha = 1;
+        // panelMc.scaleX = panelMc.scaleY = 0.8;
+
+        if (isTF) {
+            // 显示失败界面动画
+            createjs.Tween.get(panelMc)
+                // 第一阶段：快速弹出到1.1倍大小
+                .to({
+                    scaleX: 1.05,
+                    scaleY: 1.05
+                }, 200, createjs.Ease.backOut)
+                // 第二阶段：回弹到正常大小
+                .to({
+                    scaleX: 1.0,
+                    scaleY: 1.0
+                }, 200, createjs.Ease.backIn)
+                .call(() => {
+                    // console.log('✅ 面板伸缩动画完成');
+
+                    callback && callback();
+                });
+        } else {
+            // 播放关闭动画
+            createjs.Tween.get(panelMc)
+                .to({
+                    scaleX: 1.05,
+                    scaleY: 1.05
+                }, 200, createjs.Ease.backOut)
+                .to({
+                    scaleX: 0.1,
+                    scaleY: 0.1,
+                    alpha: 0
+                }, 200, createjs.Ease.backIn)
+                .call(() => {
+
+                    panelMc.visible = false;
+
+                    callback && callback();
+
+                    // console.log('✅ 面板关闭完成');
+                });
+        }
+
+
+    }
+
+    /**
+     * 胜利界面控制器
+     * @param {boolean} show - true显示，false隐藏
+     */
+    victoryHandler(show) {
+        // console.log(`🏆 ${show ? '显示' : '隐藏'}胜利界面...`);
+
+        const panelUI = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, 'mc_victory');
+        if (!panelUI) {
+            console.warn('⚠️ 未找到 mc_victory 元件');
+            return;
+        }
+
+        if (show) {
+
+            this.engine.playSound('win');
+
+            this.showPanel(panelUI, true, async () => {
+                if (this.gameData) {
+                    this.gameData.scoreSystem = await window.GameServer.getScoreStatus();
+                    panelUI.mc_ranking.mc_best.text.text = "" + this.gameData.scoreSystem.bestScore;
+                    panelUI.mc_ranking.mc_score.text.text = "" + this.gameData.scoreSystem.currentScore;
+                }
+                // this.openCardRewardPanel();
+            })
+            try {
+                // report victory event using ovo method
+                const bestScore = this.gameData && this.gameData.scoreSystem ? this.gameData.scoreSystem.bestScore : null;
+                if (typeof window.ovo !== 'undefined' && typeof window.ovo.dotGameWin === 'function') {
+                    window.ovo.dotGameWin(bestScore || 0, 1, 0);
+                }
+
+                // 隐藏banner广告
+                if (typeof window.ovo !== 'undefined' && typeof window.ovo.hideBannerAd === 'function') {
+                    window.ovo.hideBannerAd(() => {
+                        console.log('📢 Banner ad hidden on game victory');
+                    });
+                }
+            } catch (e) { }
+            // console.log('✅ 胜利界面显示完成');
+        } else {
+            this.closeCardRewardPanel()
+            this.showPanel(panelUI, false, () => {
+                // console.log('✅ 胜利界面隐藏动画完成');
+                // 重新开始游戏
+                this.onRestartGame();
+            })
+
+        }
+    }
+
+    /**
+     * 检查目标是否是指定元件或其子元件
+     */
+    isTargetOrChild(event, parent) {
+        if (!event || !parent) return false;
+
+        // 优先检查 currentTarget（事件绑定的元件）
+        if (event.currentTarget === parent) {
+            return true;
+        }
+
+        // 检查 currentTarget 的名称
+        if (event.currentTarget && event.currentTarget.name === parent.name) {
+            return true;
+        }
+
+        // 回退到原来的逻辑检查 target
+        let current = event.target;
+        while (current) {
+            if (current === parent) {
+                return true;
+            }
+            current = current.parent;
+        }
+
+        return false;
+    }
+
+    /**
+     * 关闭胜利面板
+     */
+    closeVictoryPanel() {
+        // console.log('🏆 关闭胜利面板...');
+
+        const victoryMc = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, 'mc_victory');
+        if (!victoryMc) {
+            console.warn('⚠️ 未找到 mc_victory 元件');
+            return;
+        }
+
+        // 播放关闭动画
+        createjs.Tween.get(victoryMc)
+            .to({
+                scaleX: 0.1,
+                scaleY: 0.1,
+            }, 300, createjs.Ease.backIn)
+            .call(() => {
+                // 隐藏胜利界面
+                this.victoryHandler(false);
+
+                // 重新开始游戏
+                this.onRestartGame();
+
+                // console.log('✅ 胜利面板关闭完成');
+            });
+    }
+
+    /**
+     * 重新开始游戏
+     */
+    onRestartGame() {
+        // console.log('🔄 重新开始游戏...');
+
+        // 隐藏失败界面（会自动移除事件注册）
+        // this.hideFailure();
+        if (!this.userStatus.isNewUser) {
+
+            // 重置游戏状态
+            this.resetGame();
+            // console.log('✅ 游戏重新开始');
+        } else {
+            this.tips('In tutorial mode, the game cannot be restarted. Please complete the current task.');
+        }
+
+    }
+
+    /**
+     * 重置游戏
+     */
+    async resetGame() {
+        // console.log('🔄 重置游戏状态...');
+
+        try {
+            // 1. 清理前端蛋元件和状态
+            this.clearAllEggs();
+            this.clearSelection();
+
+            // 2. 重置前端游戏状态
+            this.gameRunState = 'init';
+            this.gameDataState = {
+                selectedEgg: null
+            };
+
+            // 🎯 重置banner广告标志，允许重新开始后再次显示
+            if (typeof window.ovo !== 'undefined') {
+                window.ovo.bannerShown = false;
+                console.log('📢 Banner ad flag reset for game restart');
+            }
+
+            // 3. 重置金币显示为0
+            this.resetGoldDisplay(false);
+            // 3. 停止所有动画
+            createjs.Tween.removeAllTweens();
+
+            // 4. 重置后端地图数据和游戏状态
+            if (window.GameServer) {
+                const resetResult = window.GameServer.resetGame();
+
+                if (resetResult.success) {
+                    // console.log('✅ 后端清理成功，开始重新请求游戏数据');
+
+                    // 5. 重新请求游戏数据
+                    // await this.loadGameDataByDifficulty(this.selectedDifficulty || 'normal');
+                    const gameConfig = await window.GameServer.getGameData(
+                        this.userStatus//,
+                        // this.selectedDifficulty
+                    );
+                    this.gameData = gameConfig;
+                    // 6. 验证游戏数据
+                    // this.verifyGameData();
+                    // 重置所有解锁动画到初始状态
+                    this.resetUnlockAnimations();
+
+                    // 7. 执行生成蛋的动作
+                    setTimeout(() => {
+                        this.generateUserEggs();
+                    }, 500);
+
+                    // 🎯 游戏重新开始30秒后显示banner广告
+                    setTimeout(() => {
+                        if (typeof window.ovo !== 'undefined' && typeof window.ovo.showBannerAd === 'function') {
+                            window.ovo.showBannerAd(() => {
+                                console.log('📢 Banner ad shown 30s after game restart');
+                            });
+                        }
+                    }, 30000); // 30秒 = 30000毫秒
+
+                    // console.log('✅ 游戏重置完成');
+                } else {
+                    console.error('❌ 后端清理失败:', resetResult.message);
+                }
+            } else {
+                console.error('❌ GameServer 未找到');
+            }
+
+        } catch (error) {
+            console.error('❌ 游戏重置失败:', error);
+        }
+    }
+
+    /**
+    * 重置金币显示
+    */
+    resetGoldDisplay(reBestScore = true) {
+        // console.log('💰 重置金币显示为0...');
+
+        try {
+            // 获取金币显示元件
+            const goldMc = this.exportRoot.mc_gold;
+            if (goldMc && goldMc.text) {
+                // 重置金币显示为0
+                goldMc.text.text = "score: 0";
+                // console.log('✅ 金币显示已重置为0');
+            } else {
+                console.warn('⚠️ 未找到 mc_gold 或其 text 属性');
+            }
+
+
+            const high_scoreMc = this.exportRoot.mc_high_score;
+            if (high_scoreMc && high_scoreMc.text && reBestScore) {
+                // 重置最佳显示为0
+                high_scoreMc.text.text = "best: 0";
+                // console.log('✅ 最佳显示已重置为0');
+            }
+        } catch (error) {
+            console.error('❌ 重置金币显示失败:', error);
+        }
+    }
+
+    /**
+    * 清理所有蛋元件
+    */
+    clearAllEggs() {
+        // console.log('🧹 清理所有蛋元件...');
+
+        if (this.chessboard && this.chessboard.pieces) {
+            // 移除所有蛋元件
+            this.chessboard.pieces.forEach((piece, cellId) => {
+                if (piece && piece.parent) {
+                    piece.parent.removeChild(piece);
+                }
+            });
+
+            // 清空映射
+            this.chessboard.pieces.clear();
+            // console.log('✅ 所有蛋元件已清理');
+        }
+    }
+
+    /**
+     * 初始化解锁动画元件
+     */
+    initUnlockAnimations() {
+        // console.log('🎭 初始化解锁动画元件...');
+
+        this.unlockAnimations = new Map();
+
+        // 获取 mc_egg_mask1~6 元件
+        for (let i = 1; i <= 7; i++) {
+            const maskName = `mc_egg_mask${i}`;
+            const maskMc = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, maskName);
+
+            if (maskMc) {
+                this.unlockAnimations.set(i + 1, maskMc); // 等级2~7对应mask1~6
+                // console.log(`✅ 找到解锁动画元件: ${maskName} -> 等级${i + 1}`);
+
+
+            } else {
+                console.warn(`⚠️ 未找到解锁动画元件: ${maskName}`);
+            }
+        }
+
+        // console.log(`📊 解锁动画元件初始化完成，共找到 ${this.unlockAnimations.size} 个`);
+    }
+
+
+    /**
+     * 播放解锁动画
+     * @param {number} unlockedLevel - 解锁的等级 (2~8)
+     */
+    async playUnlockAnimation(unlockedLevel) {
+        // console.log(`🎉 播放解锁动画: 等级 ${unlockedLevel}`);
+        new Promise((resolve) => {
+            const maskMc = this.unlockAnimations.get(unlockedLevel);
+            if (!maskMc) {
+                console.warn(`⚠️ 未找到等级 ${unlockedLevel} 对应的解锁动画元件`);
+                // resolve immediately so callers don't hang
+                return resolve();
+            }
+
+            try {
+                // 显示并播放动画
+                maskMc.visible = true;
+                maskMc.gotoAndPlay(0);
+
+                // console.log(`✨ 开始播放解锁动画: mc_egg_mask${unlockedLevel - 1} (等级${unlockedLevel})`);
+
+
+                _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.addFrameEnd(maskMc, () => {
+                    // finish();
+                    if (unlockedLevel === 7) {
+                        maskMc.visible = false;
+                        const maskMc8 = this.unlockAnimations.get(8);
+                        _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.addFrameEnd(maskMc8, null, true);
+                        maskMc8.play();
+
+                    }
+                    resolve();
+                }, true);
+
+
+            } catch (error) {
+                console.error(`❌ 播放解锁动画失败: 等级${unlockedLevel}`, error);
+                resolve();
+            }
+        });
+    }
+
+
+    /**
+     * 播放用户已解锁等级的动画
+     */
+    playUnlockedAnimations(gameStatus = null) {
+        // console.log('🎭 播放用户已解锁等级的动画...');
+
+        // 获取用户当前最高解锁等级
+
+        this.maxUnlockedLevel = gameStatus ? (gameStatus.maxUnlockedEggType || 0) : 0;
+
+        // console.log(`🏆 用户最高解锁等级: ${this.maxUnlockedLevel}`);
+
+        // 播放对应等级的解锁动画 (等级2~7对应mask1~6)
+        for (let level = 2; level <= Math.min(this.maxUnlockedLevel, 8); level++) {
+            setTimeout(() => {
+
+                const maskMc = this.unlockAnimations.get(level);
+                if (maskMc) {
+                    // console.log(`✨ 播放已解锁动画: 等级${level}`);
+
+                    // 显示并播放动画
+                    maskMc.visible = true;
+                    maskMc.gotoAndPlay(0);
+
+                    // 监听播放完成
+                    _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.addFrameEnd(maskMc, () => {
+                        // console.log(`✅ 等级${level}解锁动画播放完成`);
+                    }, true);
+                }
+            }, 100 * level);
+        }
+
+        if (this.maxUnlockedLevel <= 1) {
+            console.log('📝 用户尚未解锁高级蛋类型，无需播放解锁动画');
+        }
+    }
+
+    /**
+     * 重置所有解锁动画到初始状态
+     */
+    resetUnlockAnimations() {
+        // console.log('🔄 重置所有解锁动画到初始状态...');
+
+        if (!this.unlockAnimations) {
+            console.warn('⚠️ 解锁动画元件未初始化');
+            return;
+        }
+
+        // 重置所有解锁动画到第0帧
+        this.unlockAnimations.forEach((maskMc, level) => {
+            if (maskMc) {
+                maskMc.gotoAndStop(0);
+                maskMc.visible = true; // 确保可见但停在第0帧
+                // console.log(`🔄 重置等级${level}解锁动画到第0帧`);
+            }
+        });
+
+        // console.log('✅ 所有解锁动画已重置到初始状态');
+    }
+
+    /**
+     * 初始化新手引导元件
+     */
+    initGuideGesture() {
+        const guideMc = _utile_js__WEBPACK_IMPORTED_MODULE_0__/* ["default"] */ .A.findMc(this.exportRoot, 'guide_mc');
+        if (!guideMc) {
+            console.warn('⚠️ 未找到 guide_mc 元件');
+            return;
+        }
+        this.guideGesture = guideMc;
+        this.guidePoints = [guideMc.x, guideMc.y]; // 初始化引导点
+        guideMc.visible = true;
+        guideMc.gotoAndPlay(0);
+        console.log('✅ guide_mc 已赋值给 guideGesture 并开始播放');
+
+    }
+
+    /**
+     * 移动引导手势到指定格子
+     * @param {number} cellId - 目标格子ID
+     */
+    moveGuideGestureToCell(cellId) {
+        if (!this.guideGesture) {
+            console.warn('⚠️ guideGesture 未初始化');
+            return;
+        }
+
+        // 🔥 使用 getCellData 获取完整的格子数据
+        const cellData = this.getCellData(cellId);
+        if (!cellData) {
+            console.warn(`⚠️ 无法获取格子 ${cellId} 的数据`);
+            return;
+        }
+
+        // 🔥 使用 GuideLine 模块的坐标计算逻辑
+        const guidePosition = this.calculateGuidePosition(cellData);
+
+        // 使用动画移动
+        createjs.Tween.get(this.guideGesture)
+            .to({ x: guidePosition.x, y: guidePosition.y }, 600, createjs.Ease.quadOut);
+        // console.log(`👉 引导手势移动到格子${cellId} (${guidePosition.x}, ${guidePosition.y})`);
+    }
+
+
+    /**
+     * 完成引导
+     */
+    completeGuide(show = true) {
+
+
+        this.guideGesture.visible = true;
+        createjs.Tween.get(this.guideGesture)
+            .to({ x: this.guidePoints[0], y: this.guidePoints[1] }, 400, createjs.Ease.quadOut);
+        // 隐藏引导手势
+        if (this.guideGesture && !show) {
+            // console.log('🎊 引导流程完成！');
+            // console.log('💡 现在可以自由点击蛋进行游戏了！');
+            this.guideGesture.gotoAndStop(0);
+            this.guideGesture.visible = false;
+            // report tutorial completion using ovo method
+            try {
+                if (typeof window.ovo !== 'undefined' && typeof window.ovo.dotTutorialComplete === 'function') {
+                    window.ovo.dotTutorialComplete();
+                }
+            } catch (e) { }
+        }
+
+        // 重置引导状态
+        this.waitingForClick = false;
+        this.expectedClickCellId = null;
+        this.currentPointIndex = 0;
+
+
+
+    }
+
+    /**
+     * 计算引导手势的正确位置（从 GuideLine 模块复制）
+     */
+    calculateGuidePosition(cellData) {
+        if (!this.guideGesture || !this.gamebox) {
+            return { x: cellData.centerX, y: cellData.centerY };
+        }
+
+        const guideParent = this.guideGesture.parent;
+
+        if (guideParent === this.exportRoot && this.gamebox !== this.exportRoot) {
+            const gameboxX = this.gamebox.x || 0;
+            const gameboxY = this.gamebox.y || 0;
+
+            return {
+                x: cellData.centerX + gameboxX,
+                y: cellData.centerY + gameboxY
+            };
+        }
+
+        return { x: cellData.centerX, y: cellData.centerY };
+    }
+}
+
+
+
+
+// 直接创建全局对象，避免类名冲突
+// console.log('🏗️ 创建 GameScense 实例...');
+window.GameScense = new GameScense();
+// console.log('✅ GameScense 实例创建完成:', window.GameScense);
+// console.log('🔍 GameScense.init 方法:', typeof window.GameScense.init);
+
+/***/ }),
+
+/***/ 296:
+/***/ ((module, __unused_webpack___webpack_exports__, __webpack_require__) => {
+
+"use strict";
+/* module decorator */ module = __webpack_require__.hmd(module);
+
+
+// GameDistribution Ad SDK for GameDistribution platform
+// Only initializes if platform is set to "gamedistribution"
+
+// Define gd_ad object with ad methods
+const gd_ad = {
+    // Initialize GameDistribution Ad SDK
+    init: function() {
+        // Only initialize if platform is gamedistribution
+        if (window.Platform !== "gamedistribution") {
+            console.log('[gd_ad] Platform is not gamedistribution, skipping initialization');
+            return;
+        }
+
+        console.log('[gd_ad] Initializing for GameDistribution platform');
+
+        // Initialize GA4
+        this.initGA4();
+
+        // Load GameDistribution SDK
+        this.loadGameDistributionSDK();
+
+        // Set up gtag wrapper
+        this.setupGtagWrapper();
+
+        // Attach methods to window
+        this.attachToWindow();
+    },
+
+    // Initialize Google Analytics 4
+    initGA4: function() {
+        try {
+            if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+                const gameConfig = {
+                    gameid: "GameDistribution_97433fde06bb45aeb80c380ace3ece7f",
+                    dev_name: "Dragon Egg"
+                };
+
+                const script = document.createElement("script");
+                script.async = true;
+                script.src = "https://www.googletagmanager.com/gtag/js?id=G-PM5MNMLL3R";
+                script.setAttribute("crossorigin", "anonymous");
+
+                script.onload = () => {
+                    // Set consent configuration
+                    window.gtag("consent", "default", {
+                        ad_storage: "granted",
+                        ad_user_data: "granted",
+                        ad_personalization: "granted",
+                        analytics_storage: "granted"
+                    });
+
+                    // Initialize gtag
+                    window.gtag("js", new Date());
+                    window.gtag("set", "cookie_flags", "SameSite=None;Secure");
+                    window.gtag("config", "G-PM5MNMLL3R", {
+                        game_id: gameConfig.gameid,
+                        dev_name: gameConfig.dev_name
+                    });
+
+                    console.log('✅ gtag.js loaded with consent and game config');
+                };
+
+                script.onerror = function (err) {
+                    console.warn('⚠️ gtag.js failed to load', err);
+                };
+
+                // Initialize dataLayer
+                window.dataLayer = window.dataLayer || [];
+
+                document.getElementsByTagName("head")[0].appendChild(script);
+            }
+        } catch (e) {
+            console.error('[gd_ad] GA4 initialization failed', e);
+        }
+    },
+
+    // Load GameDistribution SDK
+    loadGameDistributionSDK: function() {
+        return new Promise((resolve, reject) => {
+            if (typeof window.gdsdk !== 'undefined') {
+                console.log('[gd_ad] GameDistribution SDK already loaded');
+                resolve();
+                return;
+            }
+
+            // Set up GD options
+            window.GD_OPTIONS = {
+                debug: true,
+                gameId: "1726345e0eb4405a8bc8f20d14f33993",
+                onEvent: function(e) {
+                    switch (e.name) {
+                        case "SDK_GAME_START":
+                            break;
+                        case "SDK_GAME_PAUSE":
+                            break;
+                        case "SDK_GDPR_TRACKING":
+                        case "SDK_GDPR_TARGETING":
+                            break;
+                        case "SDK_READY":
+                            if (typeof window.gdsdk !== 'undefined') {
+                                window.gdsdk.preloadAd();
+                            }
+                            break;
+                    }
+                }
+            };
+
+            const script = document.createElement("script");
+            script.src = "https://html5.api.gamedistribution.com/main.min.js";
+            script.onload = () => {
+                console.log('[gd_ad] GameDistribution SDK loaded successfully');
+                resolve();
+            };
+            script.onerror = (error) => {
+                console.error('[gd_ad] Failed to load GameDistribution SDK', error);
+                reject(error);
+            };
+
+            document.getElementsByTagName("head")[0].appendChild(script);
+        });
+    },
+
+    // Set up enhanced gtag wrapper
+    setupGtagWrapper: function() {
+        let gamePlayTimeIntervalSet = false;
+
+        window.gtag = function () {
+            let args = [...arguments];
+            let eventAction = args[1];
+            let eventParams = args[2];
+
+            // Allow specific gtag commands and events
+            const allowedCommands = ["set", "js", "config", "consent"];
+            const allowedGameEvents = ["game_start", "level_start", "level_end"];
+            const allowedSdkEvents = [
+                "ad_impression", "ad_click", "ad_error", "earn_virtual_currency",
+                "select_content", "game_play_time", "tutorial_complete",
+                "game_reward_open", "game_interstitialad_open",
+                "game_reward_dismissed", "game_interstitialad",
+                "game_reward", "game_reward_viewed", "game_interstitialad_viewed",
+                "click_ad"
+            ];
+
+            // Filter events: allow commands, game events, or SDK events with send: "sdk"
+            if (allowedCommands.includes(args[0]) ||
+                allowedGameEvents.includes(eventAction) ||
+                (allowedSdkEvents.includes(eventAction) && eventParams && eventParams.send === "sdk")) {
+
+                // Log filtered events
+                if (typeof window.__sdklog3 === 'function') {
+                    window.__sdklog3('gtag_filtered', arguments);
+                }
+
+                // Push to dataLayer
+                try {
+                    if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+                        window.dataLayer.push(arguments);
+                    }
+                } catch (e) {
+                    console.log("dataLayer error:", e);
+                }
+            }
+
+            // Set up automatic game_play_time interval on first level_start
+            if (eventAction === "level_start" && !gamePlayTimeIntervalSet) {
+                gamePlayTimeIntervalSet = true;
+                setInterval(function () {
+                    if (typeof window.gtag === 'function') {
+                        window.gtag("event", "game_play_time", {
+                            send: "sdk"
+                        });
+                    }
+                }, 30000); // 30 seconds
+
+                console.log('🕒 Automatic game_play_time interval started (30s)');
+            }
+        };
+    },
+
+    // Attach methods to window
+    attachToWindow: function() {
+        window.showInterstitialAd = this.showInterstitialAd;
+        window.showRewardedAd = this.showRewardedAd;
+        window.showBannerAd = this.showBannerAd;
+        window.hideBannerAd = this.hideBannerAd;
+    },
+
+    // Interstitial Ad
+    showInterstitialAd: function (callback, opts) {
+        opts = opts || {};
+        try {
+            console.log('[gd_ad] showInterstitialAd invoked');
+            // GA event: ad_impression
+            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                window.gtag('event', 'ad_impression', {
+                    ad_platform: 'gamedistribution',
+                    ad_source: 'interstitial',
+                    ad_format: 'display',
+                    platform: window.Platform || 'unknown',
+                    send: 'sdk'
+                });
+            }
+        } catch (e) {}
+
+        if (typeof window.gdsdk !== 'undefined' && typeof window.gdsdk.showAd === 'function') {
+            try {
+                window.gdsdk.showAd().then(() => {
+                    try {
+                        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                            window.gtag('event', 'ad_click', {
+                                ad_platform: 'gamedistribution',
+                                ad_source: 'interstitial',
+                                platform: window.Platform || 'unknown',
+                                send: 'sdk'
+                            });
+                        }
+                    } catch (e) {}
+                    if (typeof callback === 'function') callback(true);
+                }).catch((error) => {
+                    try {
+                        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                            window.gtag('event', 'ad_error', {
+                                ad_platform: 'gamedistribution',
+                                ad_source: 'interstitial',
+                                error_reason: 'closed_or_failed',
+                                platform: window.Platform || 'unknown',
+                                send: 'sdk'
+                            });
+                        }
+                    } catch (e) {}
+                    if (typeof callback === 'function') callback(false);
+                });
+            } catch (e) {
+                console.error('[gd_ad] showInterstitialAd failed', e);
+                if (typeof callback === 'function') callback(false);
+            }
+        } else {
+            console.warn('[gd_ad] gdsdk.showAd not available');
+            // GA event: ad_error
+            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                window.gtag('event', 'ad_error', {
+                    ad_platform: 'gamedistribution',
+                    ad_source: 'interstitial',
+                    error_reason: 'not_available',
+                    platform: window.Platform || 'unknown',
+                    send: 'sdk'
+                });
+            }
+            if (typeof callback === 'function') callback(false);
+        }
+    },
+
+    // Rewarded Ad
+    showRewardedAd: function (callback, opts) {
+        opts = opts || {};
+        try {
+            console.log('[gd_ad] showRewardedAd invoked');
+            // GA event: ad_impression
+            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                window.gtag('event', 'ad_impression', {
+                    ad_platform: 'gamedistribution',
+                    ad_source: 'rewarded',
+                    ad_format: 'video',
+                    platform: window.Platform || 'unknown',
+                    send: 'sdk'
+                });
+            }
+        } catch (e) {}
+
+        if (typeof window.gdsdk !== 'undefined' && typeof window.gdsdk.showAd === 'function') {
+            try {
+                window.gdsdk.showAd('rewarded').then(() => {
+                    try {
+                        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                            window.gtag('event', 'earn_virtual_currency', {
+                                virtual_currency_name: 'reward',
+                                value: 1,
+                                ad_platform: 'gamedistribution',
+                                platform: window.Platform || 'unknown',
+                                send: 'sdk'
+                            });
+                        }
+                    } catch (e) {}
+                    if (typeof callback === 'function') callback(true);
+                }).catch((error) => {
+                    try {
+                        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                            window.gtag('event', 'ad_error', {
+                                ad_platform: 'gamedistribution',
+                                ad_source: 'rewarded',
+                                error_reason: 'closed_or_failed',
+                                platform: window.Platform || 'unknown',
+                                send: 'sdk'
+                            });
+                        }
+                    } catch (e) {}
+                    if (typeof callback === 'function') callback(false);
+                });
+            } catch (e) {
+                console.error('[gd_ad] showRewardedAd failed', e);
+                if (typeof callback === 'function') callback(false);
+            }
+        } else {
+            console.warn('[gd_ad] gdsdk.showAd not available');
+            // GA event: ad_error
+            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                window.gtag('event', 'ad_error', {
+                    ad_platform: 'gamedistribution',
+                    ad_source: 'rewarded',
+                    error_reason: 'not_available',
+                    platform: window.Platform || 'unknown',
+                    send: 'sdk'
+                });
+            }
+            if (typeof callback === 'function') callback(false);
+        }
+    },
+
+    // Banner Ad
+    showBannerAd: function (callback, opts) {
+        opts = opts || {};
+        try {
+            console.log('[gd_ad] showBannerAd invoked');
+            // GA event: ad_impression
+            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                window.gtag('event', 'ad_impression', {
+                    ad_platform: 'gamedistribution',
+                    ad_source: 'banner',
+                    ad_format: 'display',
+                    platform: window.Platform || 'unknown',
+                    send: 'sdk'
+                });
+            }
+        } catch (e) {}
+
+        if (typeof window.gdsdk !== 'undefined' && typeof window.gdsdk.showAd === 'function') {
+            try {
+                window.gdsdk.showAd('banner').then(() => {
+                    try {
+                        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                            window.gtag('event', 'ad_click', {
+                                ad_platform: 'gamedistribution',
+                                ad_source: 'banner',
+                                platform: window.Platform || 'unknown',
+                                send: 'sdk'
+                            });
+                        }
+                    } catch (e) {}
+                    if (typeof callback === 'function') callback(true);
+                }).catch((error) => {
+                    try {
+                        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                            window.gtag('event', 'ad_error', {
+                                ad_platform: 'gamedistribution',
+                                ad_source: 'banner',
+                                error_reason: 'closed_or_failed',
+                                platform: window.Platform || 'unknown',
+                                send: 'sdk'
+                            });
+                        }
+                    } catch (e) {}
+                    if (typeof callback === 'function') callback(false);
+                });
+            } catch (e) {
+                console.error('[gd_ad] showBannerAd failed', e);
+                if (typeof callback === 'function') callback(false);
+            }
+        } else {
+            console.warn('[gd_ad] gdsdk.showAd not available');
+            // GA event: ad_error
+            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                window.gtag('event', 'ad_error', {
+                    ad_platform: 'gamedistribution',
+                    ad_source: 'banner',
+                    error_reason: 'not_available',
+                    platform: window.Platform || 'unknown',
+                    send: 'sdk'
+                });
+            }
+            if (typeof callback === 'function') callback(false);
+        }
+    },
+
+    hideBannerAd: function (callback) {
+        try {
+            console.log('[gd_ad] hideBannerAd invoked');
+        } catch (e) {}
+
+        if (typeof window.gdsdk !== 'undefined' && typeof window.gdsdk.hideAd === 'function') {
+            try {
+                window.gdsdk.hideAd('banner');
+                if (typeof callback === 'function') callback(true);
+            } catch (e) {
+                console.error('[gd_ad] hideBannerAd failed', e);
+                if (typeof callback === 'function') callback(false);
+            }
+        } else {
+            console.warn('[gd_ad] gdsdk.hideAd not available');
+            if (typeof callback === 'function') callback(false);
+        }
+    }
+};
+
+// Initialize the SDK
+gd_ad.init();
+
+// Export for module systems
+if ( true && module.exports) {
+    module.exports = gd_ad;
+}
+/* unused harmony default export */ var __WEBPACK_DEFAULT_EXPORT__ = ((/* unused pure expression or super */ null && (gd_ad)));
+
+/***/ }),
+
+/***/ 434:
+/***/ (() => {
+
+/**
+ * 难度选择模块
+ * 负责游戏难度选择的交互逻辑
+ */
+// console.log('📁 SelectLine.js 开始加载...');
+
+class SelectLine {
+    constructor() {
+        this.engine = null;
+        this.stage = null;
+        this.exportRoot = null;
+        this.loadedSounds = null;
+
+        // 难度选择相关
+        this.startMc = null;
+        this.selectedDifficulty = null;
+        this.onDifficultyCallback = null;
+    }
+
+    /**
+ * 获取难度对应的等级参数
+ * @param {string} difficulty - 难度等级 ('easy', 'normal', 'hard')
+ * @returns {number} 难度等级数值
+ */
+    getDifficultyLevel(difficulty) {
+        const difficultyMap = {
+            'easy': 3,    // 简单：3个蛋
+            'normal': 4,  // 中等：4个蛋
+            'hard': 5     // 困难：5个蛋
+        };
+
+        return difficultyMap[difficulty] || 4; // 默认中等难度
+    }
+
+    /**
+     * 初始化难度选择模块
+     * @param {Object} gameData - 游戏数据对象
+     * @param {Function} callback - 难度选择完成回调
+     */
+    init(gameData, callback) {
+        // console.log('🎮 SelectLine 初始化...');
+
+        this.engine = gameData.engine;
+        this.stage = gameData.stage;
+        this.exportRoot = gameData.exportRoot;
+        this.loadedSounds = gameData.loadedSounds;
+        this.onDifficultyCallback = callback;
+
+        this.selectDifficulty();
+    }
+
+    /**
+ * 隐藏选择难度UI
+ */
+    hideDifficultyUI() {
+        // console.log('🙈 隐藏选择难度UI...');
+
+        const selectMc = utile.findMc(this.exportRoot, 'mc_select');
+        if (selectMc) {
+            selectMc.visible = false;
+            // console.log('✅ 已隐藏 mc_select');
+        } else {
+            // console.log('⚠️ 未找到 mc_select 元件');
+        }
+    }
+    /**
+     * 显示难度选择界面
+     */
+    selectDifficulty() {
+        // console.log('🎮 选择游戏难度...');
+        this.startMc = utile.findMc(this.exportRoot, 'mc_select');
+
+        if (this.startMc) {
+            // console.log('✅ 找到难度选择界面');
+            this.startMc.visible = true;
+
+            const btnEasy = utile.findMc(this.startMc, 'btn_e');
+            const btnNormal = utile.findMc(this.startMc, 'btn_n');
+            const btnHard = utile.findMc(this.startMc, 'btn_h');
+
+            this.stage.on('click', (event) => {
+                const target = event.target;
+                // console.log('🎯 舞台点击事件，目标:', target);
+
+                const clickedButton = this.findButtonContainer(target, [btnEasy, btnNormal, btnHard]);
+
+                if (clickedButton === btnEasy) {
+                    // console.log('🟢 检测到简单难度按钮点击');
+                    this.onDifficultySelected('easy');
+                } else if (clickedButton === btnNormal) {
+                    // console.log('🟡 检测到普通难度按钮点击');
+                    this.onDifficultySelected('normal');
+                } else if (clickedButton === btnHard) {
+                    // console.log('🔴 检测到困难难度按钮点击');
+                    this.onDifficultySelected('hard');
+                }
+            });
+
+            [btnEasy, btnNormal, btnHard].forEach(btn => {
+                if (btn) {
+                    btn.mouseEnabled = true;
+                    btn.cursor = "pointer";
+                }
+            });
+        } else {
+            console.warn('⚠️ 未找到难度选择界面，使用默认难度');
+            this.onDifficultySelected('normal');
+        }
+    }
+
+    /**
+     * 查找按钮容器
+     */
+    findButtonContainer(target, buttons) {
+        let current = target;
+
+        for (let i = 0; i < 5 && current; i++) {
+            for (const button of buttons) {
+                if (current === button) {
+                    // console.log(`✅ 找到按钮容器: ${button.name} (向上${i}层)`);
+                    return button;
+                }
+            }
+            current = current.parent;
+        }
+        return null;
+    }
+
+    /**
+     * 获取目标对象的路径（调试用）
+     */
+    getTargetPath(target) {
+        const path = [];
+        let current = target;
+
+        for (let i = 0; i < 5 && current; i++) {
+            const name = current.name || current.constructor.name;
+            path.push(name);
+            current = current.parent;
+        }
+        return path.join(' -> ');
+    }
+
+    /**
+     * 处理难度选择
+     */
+    onDifficultySelected(difficulty) {
+        // console.log(`🎯 用户选择难度: ${difficulty}`);
+
+        // 播放点击音效
+        if (this.engine && this.loadedSounds.has('popo')) {
+            this.engine.playSound('popo');
+        }
+
+        // 隐藏难度选择界面
+        if (this.startMc) {
+            this.startMc.visible = false;
+        }
+
+        this.selectedDifficulty = difficulty;
+
+        // 调用回调函数，通知游戏场景难度选择完成
+        if (this.onDifficultyCallback) {
+            this.onDifficultyCallback(difficulty);
+        }
+    }
+
+    /**
+     * 获取选择的难度
+     */
+    getSelectedDifficulty() {
+        return this.selectedDifficulty;
+    }
+
+
+    selectDifficulty() {
+        // console.log('🎮 选择游戏难度...');
+        this.startMc = utile.findMc(this.exportRoot, 'mc_select');
+
+        if (this.startMc) {
+            // console.log('✅ 找到难度选择界面');
+
+            // 显示难度选择界面
+            this.startMc.visible = true;
+
+            // 查找三个难度按钮
+            const btnEasy = utile.findMc(this.startMc, 'btn_e');
+            const btnNormal = utile.findMc(this.startMc, 'btn_n');
+            const btnHard = utile.findMc(this.startMc, 'btn_h');
+
+            this.stage.on('click', (event) => {
+                const target = event.target;
+                // console.log('🎯 舞台点击事件，目标:', target);
+                // console.log('🎯 目标名称:', target.name);
+                // console.log('🎯 目标父级:', target.parent);
+
+                // 向上查找按钮容器
+                const clickedButton = this.findButtonContainer(target, [btnEasy, btnNormal, btnHard]);
+
+                if (clickedButton === btnEasy) {
+                    // console.log('🟢 检测到简单难度按钮点击');
+                    this.onDifficultySelected('easy');
+                } else if (clickedButton === btnNormal) {
+                    // console.log('🟡 检测到普通难度按钮点击');
+                    this.onDifficultySelected('normal');
+                } else if (clickedButton === btnHard) {
+                    // console.log('🔴 检测到困难难度按钮点击');
+                    this.onDifficultySelected('hard');
+                } else {
+                    // console.log('🎯 点击了其他区域，目标路径:', this.getTargetPath(target));
+                }
+            });
+            // 设置按钮样式
+            [btnEasy, btnNormal, btnHard].forEach(btn => {
+                if (btn) {
+                    btn.mouseEnabled = true;
+                    btn.cursor = "pointer";
+                }
+            });
+        } else {
+            console.warn('⚠️ 未找到难度选择界面，跳过难度选择');
+            this.onDifficultySelected('normal');
+        }
+
+
+    }
+    /**
+     * 查找按钮容器
+     * @param {Object} target - 点击的目标对象
+     * @param {Array} buttons - 按钮数组
+     * @returns {Object|null} 找到的按钮容器
+     */
+    findButtonContainer(target, buttons) {
+        let current = target;
+
+        // 向上遍历父级，最多查找5层
+        for (let i = 0; i < 5 && current; i++) {
+            // 检查当前对象是否是按钮之一
+            for (const button of buttons) {
+                if (current === button) {
+                    // console.log(`✅ 找到按钮容器: ${button.name} (向上${i}层)`);
+                    return button;
+                }
+            }
+            current = current.parent;
+        }
+
+        return null;
+    }
+    /**
+     * 获取目标对象的路径（用于调试）
+     * @param {Object} target - 目标对象
+     * @returns {string} 路径字符串
+     */
+    getTargetPath(target) {
+        const path = [];
+        let current = target;
+
+        for (let i = 0; i < 5 && current; i++) {
+            const name = current.name || current.constructor.name;
+            path.push(name);
+            current = current.parent;
+        }
+
+        return path.join(' -> ');
+    }
+
+    // 辅助方法：检查target是否是parent的子元素
+    isChildOf(target, parent) {
+        if (!target || !parent) return false;
+        let current = target.parent;
+        while (current) {
+            if (current === parent) return true;
+            current = current.parent;
+        }
+        return false;
+    }
+
+    /**
+ * 处理难度选择
+ * @param {string} difficulty - 选择的难度 ('easy', 'normal', 'hard')
+ */
+    onDifficultySelected(difficulty) {
+        // console.log(`🎯 用户选择难度: ${difficulty}`);
+
+        // 播放点击音效
+        if (this.engine && this.loadedSounds.has('popo')) {
+            this.engine.playSound('popo');
+        }
+
+        // 隐藏难度选择界面
+        if (this.startMc) {
+            this.startMc.visible = false;
+        }
+
+        // 保存选择的难度
+        this.selectedDifficulty = difficulty;
+
+        // 根据难度设置游戏参数
+        // this.applyDifficultySettings(difficulty);
+
+        // 继续游戏初始化流程
+        // this.continueInitialization();
+    }
+}
+
+// 创建全局实例
+window.SelectLine = new SelectLine();
+// console.log('✅ SelectLine 模块加载完成');
+
+/***/ }),
+
+/***/ 604:
+/***/ ((module, __unused_webpack___webpack_exports__, __webpack_require__) => {
+
+"use strict";
+/* module decorator */ module = __webpack_require__.hmd(module);
+// import androidAd;
+
+
+if (typeof window !== 'undefined') window.ovo = window.ovo || {};
+const ovo = (typeof window !== 'undefined') ? window.ovo : {};
+
+// Banner广告标志，确保只显示一次
+ovo.bannerShown = false;
+
+// 插页广告冷却时间控制
+ovo.lastInterstitialAdTime = 0;
+ovo.interstitialAdCooldown = 30000; // 30秒冷却时间
+
+// 激励广告冷却时间控制
+ovo.lastRewardedAdTime = 0;
+ovo.rewardedAdCooldown = 30000; // 30秒冷却时间
+
+// 广告冷却时间管理方法
+ovo.getInterstitialAdCooldownRemaining = function() {
+    const now = Date.now();
+    const timeSinceLastAd = now - ovo.lastInterstitialAdTime;
+    return Math.max(0, ovo.interstitialAdCooldown - timeSinceLastAd);
+};
+
+ovo.getRewardedAdCooldownRemaining = function() {
+    const now = Date.now();
+    const timeSinceLastAd = now - ovo.lastRewardedAdTime;
+    return Math.max(0, ovo.rewardedAdCooldown - timeSinceLastAd);
+};
+
+ovo.resetInterstitialAdCooldown = function() {
+    ovo.lastInterstitialAdTime = 0;
+    try { console.log('[ovosdk] Interstitial ad cooldown reset'); } catch (e) { }
+};
+
+ovo.resetRewardedAdCooldown = function() {
+    ovo.lastRewardedAdTime = 0;
+    try { console.log('[ovosdk] Rewarded ad cooldown reset'); } catch (e) { }
+};
+
+ovo.pauseAudioForAd = () => {
+    try {
+        if (window.__GAME_ENGINE_INSTANCE__ && typeof window.__GAME_ENGINE_INSTANCE__.pauseAudio === 'function') {
+            window.__GAME_ENGINE_INSTANCE__.pauseAudio();
+            window.__adPausedBySdk__ = 'engine';
+            return;
+        }
+        if (typeof createjs !== 'undefined' && createjs.Sound && typeof createjs.Sound.setMute === 'function') {
+            window.__adUserMusicEnabled__ = (localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true');
+            createjs.Sound.setMute(true);
+            window.__adPausedBySdk__ = 'soundjs';
+            return;
+        }
+    } catch (e) { try { window.__sdklog2('pauseAudioForAd error', e); } catch (e) { } }
+};
+
+ovo.resumeAudioAfterAd = () => {
+    try {
+        if (window.__adPausedBySdk__ === 'engine') {
+            if (window.__GAME_ENGINE_INSTANCE__ && typeof window.__GAME_ENGINE_INSTANCE__.resumeAudio === 'function') {
+                window.__GAME_ENGINE_INSTANCE__.resumeAudio();
+            }
+            window.__adPausedBySdk__ = null;
+            return;
+        }
+        if (window.__adPausedBySdk__ === 'soundjs') {
+            const shouldUnmute = (localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true');
+            if (shouldUnmute) {
+                if (typeof createjs !== 'undefined' && createjs.Sound && typeof createjs.Sound.setMute === 'function') {
+                    createjs.Sound.setMute(false);
+                }
+            }
+            window.__adPausedBySdk__ = null;
+            return;
+        }
+    } catch (e) { try { window.__sdklog2('resumeAudioAfterAd error', e); } catch (e) { } }
+};
+
+// 游戏暂停和恢复方法
+ovo.pauseGame = () => {
+    try {
+        // 暂停CreateJS Ticker
+        if (typeof createjs !== 'undefined' && createjs.Ticker) {
+            createjs.Ticker.paused = true;
+            window.__gamePausedBySdk__ = true;
+            try { console.log('[ovosdk] Game paused via Ticker'); } catch (e) { }
+        }
+        
+        // 如果有游戏引擎实例，也暂停它
+        if (window.__GAME_ENGINE_INSTANCE__ && typeof window.__GAME_ENGINE_INSTANCE__.pause === 'function') {
+            window.__GAME_ENGINE_INSTANCE__.pause();
+        }
+    } catch (e) { try { window.__sdklog2('pauseGame error', e); } catch (e) { } }
+};
+
+ovo.resumeGame = () => {
+    try {
+        // 恢复CreateJS Ticker
+        if (typeof createjs !== 'undefined' && createjs.Ticker) {
+            createjs.Ticker.paused = false;
+            window.__gamePausedBySdk__ = false;
+            try { console.log('[ovosdk] Game resumed via Ticker'); } catch (e) { }
+        }
+        
+        // 如果有游戏引擎实例，也恢复它
+        if (window.__GAME_ENGINE_INSTANCE__ && typeof window.__GAME_ENGINE_INSTANCE__.resume === 'function') {
+            window.__GAME_ENGINE_INSTANCE__.resume();
+        }
+    } catch (e) { try { window.__sdklog2('resumeGame error', e); } catch (e) { } }
+};
+
+// 振动功能
+ovo.vibrate = function(pattern) {
+    try {
+        console.log('[ovosdk] vibrate invoked, pattern:', pattern);
+        
+        // 默认振动模式：短振动
+        if (!pattern) {
+            pattern = [100]; // 100ms 振动
+        }
+        
+        // 优先使用 Android 原生振动
+        if (typeof window.Android !== 'undefined' && typeof window.Android.vibrate === 'function') {
+            try {
+                if (Array.isArray(pattern)) {
+                    // 如果是数组，转换为字符串传递给 Android
+                    window.Android.vibrate(pattern.join(','));
+                } else {
+                    window.Android.vibrate(String(pattern));
+                }
+                return true;
+            } catch (e) {
+                console.warn('[ovosdk] Android.vibrate failed, falling back to navigator', e);
+            }
+        }
+        
+        // 回退到 Web Vibration API
+        if (typeof navigator !== 'undefined' && typeof navigator.vibrate === 'function') {
+            navigator.vibrate(pattern);
+            return true;
+        }
+        
+        console.log('[ovosdk] Vibration not supported on this platform');
+        return false;
+    } catch (e) {
+        try { console.log('[ovosdk] vibrate error:', e); } catch (e) { }
+        return false;
+    }
+};
+
+// Banner广告方法
+ovo.showBannerAd = function (callback, opts) {
+    opts = opts || {};
+    try { console.log('[ovosdk] showBannerAd invoked, Platform=', window.Platform); } catch (e) { }
+
+    // 检查是否已经显示过banner
+    if (ovo.bannerShown) {
+        try { console.log('[ovosdk] Banner already shown, skipping'); } catch (e) { }
+        if (typeof callback === 'function') callback(false);
+        return;
+    }
+
+    if (typeof window.showBannerAd === 'function') {
+        window.showBannerAd(function (result) {
+            if (result) {
+                ovo.bannerShown = true; // 设置标志，表示已显示
+            }
+            if (typeof callback === 'function') callback(result);
+        }, opts);
+    } else {
+        try { console.log('[ovosdk] no banner ad bridge available'); } catch (e) { }
+        if (typeof callback === 'function') callback(false);
+    }
+};
+
+ovo.hideBannerAd = function (callback, opts) {
+    opts = opts || {};
+    try { console.log('[ovosdk] hideBannerAd invoked, Platform=', window.Platform); } catch (e) { }
+
+    if (typeof window.hideBannerAd === 'function') {
+        window.hideBannerAd(function (result) {
+            if (result) {
+                ovo.bannerShown = false; // 重置标志
+            }
+            if (typeof callback === 'function') callback(result);
+        }, opts);
+    } else {
+        try { console.log('[ovosdk] no banner ad bridge available'); } catch (e) { }
+        if (typeof callback === 'function') callback(false);
+    }
+};
+
+// 游戏事件上报方法
+ovo.dotScore = function (score, level) {
+    try {
+        console.log('[ovosdk] dotScore:', score, 'level:', level);
+
+        // GA4 event
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+            window.gtag('event', 'score_update', {
+                score: score,
+                level: level || 'unknown',
+                platform: window.Platform || 'unknown',
+                send: 'sdk'
+            });
+        }
+    } catch (e) { try { window.__sdklog2('dotScore error', e); } catch (e) { } }
+};
+
+ovo.dotLevel = function (level, score) {
+    try {
+        console.log('[ovosdk] dotLevel:', level, 'score:', score);
+
+        // GA4 event
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+            window.gtag('event', 'level_up', {
+                level: level,
+                score: score || 0,
+                platform: window.Platform || 'unknown',
+                send: 'sdk'
+            });
+        }
+    } catch (e) { try { window.__sdklog2('dotLevel error', e); } catch (e) { } }
+};
+
+ovo.dotGameOver = function (score, level, reason) {
+    try {
+        console.log('[ovosdk] gameOver - score:', score, 'level:', level, 'reason:', reason);
+
+        // GA4 event
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+            window.gtag('event', 'level_end', {
+                level: level || 1,
+                score: score || 0,
+                success: false,
+                reason: reason || 'game_over',
+                platform: window.Platform || 'unknown',
+                send: 'sdk'
+            });
+        }
+    } catch (e) { try { window.__sdklog2('gameOver error', e); } catch (e) { } }
+};
+
+ovo.dotGameWin = function (score, level, timeSpent) {
+    try {
+        console.log('[ovosdk] dotGameWin - score:', score, 'level:', level, 'time:', timeSpent);
+
+        // GA4 event
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+            window.gtag('event', 'level_end', {
+                level: level || 1,
+                score: score || 0,
+                success: true,
+                time_spent: timeSpent || 0,
+                platform: window.Platform || 'unknown',
+                send: 'sdk'
+            });
+        }
+    } catch (e) { try { window.__sdklog2('gameWin error', e); } catch (e) { } }
+};
+
+// 游戏开始事件
+ovo.dotGameStart = function (levelName, character) {
+    try {
+        console.log('[ovosdk] dotGameStart - level:', levelName, 'character:', character);
+
+        // GA4 event
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+            window.gtag('event', 'level_start', {
+                level_name: levelName || 'main_game',
+                character: character || 'player',
+                platform: window.Platform || 'unknown',
+                send: 'sdk'
+            });
+        }
+    } catch (e) { try { window.__sdklog2('dotGameStart error', e); } catch (e) { } }
+};
+
+// 游戏内容选择事件
+ovo.dotSelectContent = function (contentType, contentId) {
+    try {
+        console.log('[ovosdk] dotSelectContent - type:', contentType, 'id:', contentId);
+
+        // GA4 event
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+            window.gtag('event', 'select_content', {
+                content_type: contentType || 'game_action',
+                content_id: contentId || 'unknown',
+                platform: window.Platform || 'unknown',
+                send: 'sdk'
+            });
+        }
+    } catch (e) { try { window.__sdklog2('dotSelectContent error', e); } catch (e) { } }
+};
+
+// 引导完成事件
+ovo.dotTutorialComplete = function () {
+    try {
+        console.log('[ovosdk] dotTutorialComplete');
+
+        // GA4 event
+        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+            window.gtag('event', 'tutorial_complete', {
+                platform: window.Platform || 'unknown',
+                send: 'sdk'
+            });
+        }
+    } catch (e) { try { window.__sdklog2('dotTutorialComplete error', e); } catch (e) { } }
+};
+
+ovo.timeAd = 30000;
+
+ovo.showInterstitialAd = function (callback, opts) {
+    opts = opts || {};
+    const timeoutMs = (opts && opts.timeoutMs) || 8000;
+    const force = opts.force || false; // 新增：强制显示参数
+    try { console.log('[ovosdk] showInterstitialAd invoked, Platform=', window.Platform); } catch (e) { }
+    
+    // 检查冷却时间（除非强制显示）
+    if (!force) {
+        const now = Date.now();
+        const timeSinceLastAd = now - ovo.lastInterstitialAdTime;
+        
+        if (timeSinceLastAd < ovo.interstitialAdCooldown) {
+            const remainingTime = Math.ceil((ovo.interstitialAdCooldown - timeSinceLastAd) / 1000);
+            try { 
+                console.log(`[ovosdk] Interstitial ad on cooldown. ${remainingTime} seconds remaining.`); 
+            } catch (e) { }
+            
+            // 直接调用回调，表示广告未显示
+            if (typeof callback === 'function') callback(false);
+            return;
+        }
+    }
+    
+    // 暂停声音和游戏
+    ovo.pauseAudioForAd();
+    ovo.pauseGame();
+
+    if (typeof window.showInterstitialAd === 'function') {
+        window.showInterstitialAd(function (result) {
+            // 更新最后调用时间
+            if (result) {
+                ovo.lastInterstitialAdTime = Date.now();
+            }
+            ovo.resumeAudioAfterAd();
+            ovo.resumeGame();
+            if (typeof callback === 'function') callback(result);
+        }, { timeoutMs: timeoutMs });
+    } else {
+        // No native or web ad available — call callback immediately (no ad shown)
+        try { console.log('[ovosdk] no ad bridge available, invoking callback immediately'); } catch (e) { }
+        ovo.resumeAudioAfterAd();
+        ovo.resumeGame();
+        if (typeof callback === 'function') callback(false);
+    }
+};
+
+ovo.showRewardedAd = function (callback, opts) {
+    opts = opts || {};
+    const timeoutMs = (opts && opts.timeoutMs) || 8000;
+    const force = opts.force || false; // 新增：强制显示参数
+
+    try { console.log('[ovosdk] showRewardedAd invoked, Platform=', window.Platform); } catch (e) { }
+    
+    // 检查冷却时间（除非强制显示）
+    if (!force) {
+        const now = Date.now();
+        const timeSinceLastAd = now - ovo.lastRewardedAdTime;
+        
+        if (timeSinceLastAd < ovo.rewardedAdCooldown) {
+            const remainingTime = Math.ceil((ovo.rewardedAdCooldown - timeSinceLastAd) / 1000);
+            try { 
+                console.log(`[ovosdk] Rewarded ad on cooldown. ${remainingTime} seconds remaining.`); 
+            } catch (e) { }
+            
+            // 直接调用回调，表示广告未显示
+            if (typeof callback === 'function') callback(false);
+            return;
+        }
+    }
+    
+    // 暂停声音和游戏
+    ovo.pauseAudioForAd();
+    ovo.pauseGame();
+
+    if (typeof window.showRewardedAd === 'function') {
+        window.showRewardedAd(function (result) {
+            // 更新最后调用时间
+            if (result) {
+                ovo.lastRewardedAdTime = Date.now();
+            }
+            ovo.resumeAudioAfterAd();
+            ovo.resumeGame();
+            if (typeof callback === 'function') callback(result);
+        }, { timeoutMs: timeoutMs });
+    } else {
+        // No native or web ad available — call callback immediately (no ad shown)
+        try { console.log('[ovosdk] no ad bridge available, invoking callback immediately'); } catch (e) { }
+        ovo.resumeAudioAfterAd();
+        ovo.resumeGame();
+        if (typeof callback === 'function') callback(false);
+    }
+};
+// Export for module imports
+if ( true && module.exports) {
+    module.exports = ovo;
+}
+/* unused harmony default export */ var __WEBPACK_DEFAULT_EXPORT__ = ((/* unused pure expression or super */ null && (ovo)));
+
+/***/ }),
+
+/***/ 801:
+/***/ ((__unused_webpack_module, __unused_webpack___webpack_exports__, __webpack_require__) => {
+
+"use strict";
+
+// EXTERNAL MODULE: ./src/utile.js
+var utile = __webpack_require__(911);
+// EXTERNAL MODULE: ./src/ovosdk.js
+var ovosdk = __webpack_require__(604);
+// EXTERNAL MODULE: ./adsdk/android_ad.js
+var android_ad = __webpack_require__(864);
+// EXTERNAL MODULE: ./adsdk/gd_ad.js
+var gd_ad = __webpack_require__(296);
+;// ./src/config.js
+
+// 先设置全局平台变量，确保在导入广告模块前可用
+window.Platform = "googleplay";
+
+
+
+
+
+// window.Platform = "gamedistribution";
+// window.Platform = "default";
+
+const config = {
+    "scene": {
+        "width": 1080,
+        "height": 1920,
+        "orientation": "portrait",
+        "backgroundColor": "#ffffff",
+        "fps": 30
+    },
+    "compositions": {
+        "loading": {
+            "id": "12AB51DFDAB942FF88C62B7BF520AB4C",
+            "src": "resan/vendor-animate.js",
+            "description": "Loading screen composition"
+        },
+        "game": {
+            "id": "994179DFE830400BA68CFA701D2BB3AB",
+            "src": "resan/vendor-animate.js",
+            "description": "Main game composition"
+        }
+    },
+    "gameconfig": {
+
+        "sounds": [
+            { "id": "bgm", "src": "assets/sound/bgm.mp3", "type": "sound" },
+            { "id": "popo", "src": "assets/sound/popo.mp3", "type": "sound" },
+            { "id": "goodmin", "src": "assets/sound/goodmin.mp3", "type": "sound" },
+            { "id": "click", "src": "assets/sound/click.mp3", "type": "sound" },
+            { "id": "win", "src": "assets/sound/win.mp3", "type": "sound" },
+            { "id": "wrong", "src": "assets/sound/wrong.mp3", "type": "sound" },
+            { "id": "open", "src": "assets/sound/open.mp3", "type": "sound" },
+            { "id": "longhou_min", "src": "assets/sound/longhou_min.mp3", "type": "sound" },
+            { "id": "select_wawa", "src": "assets/sound/select_wawa.mp3", "type": "sound" },
+            { "id": "select_jiji", "src": "assets/sound/select_jiji.mp3", "type": "sound" },
+            { "id": "hecheng_open", "src": "assets/sound/hecheng_open.mp3", "type": "sound" },
+            { "id": "wrong2", "src": "assets/sound/wrong2.mp3", "type": "sound" },
+            { "id": "card", "src": "assets/sound/card.mp3", "type": "sound" }
+        ],
+        "images": [
+            { "id": "bg", "src": "assets/image/background.jpg", "type": "image" },
+            { "id": "logo", "src": "assets/image/logo.png", "type": "image" }
+        ]
+    }
+}
+
+/* harmony default export */ const src_config = (config);
+
+window.__sdklog2 = function (...args) {
+    if (typeof process !== 'undefined' && process.env && "production" === 'production') return; // 生产环境不输出
+    const formatParam = (arg) => {
+        if (typeof arg === 'string') return `'${arg}'`;
+        if (typeof arg === 'object') return JSON.stringify(arg);
+        return String(arg);
+    };
+
+    const params = args.map(formatParam).join(' ');
+
+    console.log(
+        `%c ***CPSDK***: ${params}`,
+        'background: linear-gradient(to right, #8e44ad, #ba43ff); ' +
+        'color: white; ' +
+        'padding: 5px 15px; ' +
+        'border-radius: 5px; ' +
+        'font-weight: bold; ' +
+        'text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);'
+
+    );
+};
+
+window.__sdklog3 = function (...args) {
+    if (true) return; // 生产环境不输出
+    // removed by dead control flow
+{}
+
+    // removed by dead control flow
+{}
+
+    // removed by dead control flow
+{}
+}
+
+
+
+
+;// ./src/init.js
+// ...existing code...
+
+
+
+// 兼容旧脚本对 window.utile 的依赖
+if (typeof window !== 'undefined') {
+    window.utile = utile/* default */.A;
+    window.__GAME_ENGINE_STARTED__ = window.__GAME_ENGINE_STARTED__ || false;
+}
+/**
+ * 小游戏引擎初始化器
+ */
+class GameEngine {
+    constructor() {
+        this.config = null;
+        this.gameContainer = null;
+        this.animationContainer = null;
+        this.canvas = null;
+        this.stage = null;
+        this.loadingProgress = null;
+        this.currentProgress = 0;
+        this.loadingCompleteLogged = false; // 防止重复显示"Loading complete!"消息
+
+        // 游戏相关变量
+        this.publicRoot = null;
+        this.exportRoot = null;
+        this.mainComp = null;
+        this.pubComp = null;
+        this.mainLib = null;
+        this.pubLib = null;
+        this.pubSound = [];
+        this.soundArr = [];
+        this.imgArr = [];
+        this.gl_mc = null;
+        this.gl_loadBar = null;
+        this.template = null;
+        this.mainCode = null;
+        this.mainName = null;
+        this.config_data = {};
+        this.soundInitialized = false;
+        this.loadedSounds = new Map();
+        this.loadedImages = new Map();
+        this.soundStatus = {};
+        this.__resourcesLoading__ = false;
+        this.__sceneSwitching__ = false;
+        this.bgmInstance = null;
+        this._bgmNext = null;
+        this._bgmTicker = null;
+        this._bgmCrossfadeMs = 50;   // 提前 80ms 交叠，按需微调 50~120
+        this._bgmOffsetMs = 0;       // 如音频前端有静默可设置偏移起点
+        this._bgmDurMs = null;       // 如已知“有效循环时长”，可设置；否则用实例 duration
+        this.activeSFX = new Set();  // 仅保存需要恢复的短音效实例 id
+
+    }
+
+    // Wait for critical assets to be ready: preloaded images and non-bgm sounds.
+    // Returns when all assets are present or when timeoutMs elapses.
+    ensureAllAssetsReady(timeoutMs = 10000) {
+        const start = Date.now();
+        const checkInterval = 250;
+
+        const hasImage = (id) => {
+            try {
+                if (!this.loadedImages) return false;
+                // support either Map or plain object
+                if (this.loadedImages instanceof Map) {
+                    return !!this.loadedImages.get(id);
+                }
+                return !!this.loadedImages[id];
+            } catch (e) {
+                return false;
+            }
+        };
+
+        const hasSound = (id) => {
+            try {
+                // CreateJS Sound stores registrations in createjs.Sound._masterPlayPropsHash or registry; feature-detect
+                if (!window.createjs || !window.createjs.Sound) return false;
+                // soundJS exposes .registerSound calls but no official query; use internal registry if available
+                const reg = window.createjs.Sound._soundInstances || window.createjs.Sound._idHash || window.createjs.Sound._namedSounds;
+                if (!reg) return true; // can't verify, assume ready
+                return !!reg[id] || !!window.createjs.Sound._idHash && !!window.createjs.Sound._idHash[id];
+            } catch (e) {
+                return true; // be permissive on error
+            }
+        };
+
+        return new Promise((resolve) => {
+            console.log('ensureAllAssetsReady: start, timeoutMs=', timeoutMs, 'sceneManifest=', !!this.sceneManifest);
+            const check = () => {
+                // Determine critical images from the currently selected scene manifest if available
+                let imagesOk = true;
+                if (this.sceneManifest && Array.isArray(this.sceneManifest.images)) {
+                    for (const img of this.sceneManifest.images) {
+                        if (!hasImage(img.id) && !hasImage(img.src)) {
+                            imagesOk = false;
+                            break;
+                        }
+                    }
+                }
+
+                // Determine critical sounds (non-bgm) from manifest
+                let soundsOk = true;
+                if (this.sceneManifest && Array.isArray(this.sceneManifest.sounds)) {
+                    for (const s of this.sceneManifest.sounds) {
+                        if (s.id === 'bgm') continue;
+                        if (!hasSound(s.id) && !hasSound(s.src)) {
+                            soundsOk = false;
+                            break;
+                        }
+                    }
+                }
+
+                const elapsed = Date.now() - start;
+                if (imagesOk && soundsOk) {
+                    console.log('ensureAllAssetsReady: all critical assets ready after', elapsed, 'ms');
+                    return resolve(true);
+                }
+
+                if (elapsed >= timeoutMs) {
+                    console.warn('ensureAllAssetsReady: timeout after', elapsed, 'ms — proceeding anyway');
+                    return resolve(false);
+                }
+
+                setTimeout(check, checkInterval);
+            };
+
+            check();
+        });
+    }
+
+    async init() {
+
+        if (window.__GAME_ENGINE_STARTED__) {
+            console.warn('⚠️ GameEngine 已启动，跳过重复初始化');
+            return;
+        }
+        window.__GAME_ENGINE_STARTED__ = true;
+        // console.log('Game Engine Starting...');
+
+        // 并行执行：加载配置 + 预加载关键库文件
+
+        await this.loadConfig();
+        this.applyConfig();
+
+        // 开始加载游戏资源
+        // 必须先创建loading舞台与元件
+        await this.loadPreloader();
+        // 这里显式启动并等待游戏资源加载（唯一入口）
+        await this.startGameConfigLoading();
+
+        // 添加用户交互检测
+        this.setupAutoplayHandler();
+        // 不在这里隐藏加载界面，等登录完成后再隐藏
+        // this.hideBasicLoading();
+        // 添加焦点事件监听
+        this.setupFocusBlurHandler();
+    }
+
+
+    pauseAudio() {
+        // 只暂停，不改变 soundEnabled / musicEnabled
+        if (this.bgmInstance && this.bgmInstance.playState === createjs.Sound.PLAY_SUCCEEDED && !this.bgmInstance.paused) {
+            try {
+                if (typeof this.bgmInstance.pause === 'function') {
+                    this.bgmInstance.pause();
+                } else if (typeof this.bgmInstance.setPaused === 'function') {
+                    this.bgmInstance.setPaused(true);
+                } else if ('paused' in this.bgmInstance) {
+                    this.bgmInstance.paused = true;
+                } else {
+                    // 无直接 pause 接口时，尽量保持实例存在，不强制 stop（避免永久中断）
+                    try {
+                        if (this.bgmInstance && typeof this.bgmInstance.setPaused === 'function') {
+                            this.bgmInstance.setPaused(true);
+                        } else if (this.bgmInstance && 'paused' in this.bgmInstance) {
+                            this.bgmInstance.paused = true;
+                        }
+                    } catch (e) {
+                        // 如果无法 pause，避免调用 stop 导致实例被置空，改为记录状态仅用于恢复时重新 play
+                        this.soundStatus['bgm'] = false;
+                    }
+                }
+            } catch (e) {
+                console.warn('暂停 BGM 失败, 采用 stop 回退', e);
+                this.stopSound('bgm');
+            }
+        }
+        // 恢复时才需要的记录：把当前在播放且已记录的 sfx 暂停
+        this._pausedSFX = [];
+        this.activeSFX.forEach(id => {
+            const inst = createjs.Sound._instances && createjs.Sound._instances[id]; // 若你未修改 SoundJS 内部，可跳过
+            // 简化：直接用 stop，不做位置恢复；如果想保留位置改 setPaused(true)
+            try {
+                createjs.Sound.stop(id);
+                this._pausedSFX.push(id); // 标记可重启
+            } catch (e) { }
+        });
+    }
+
+    resumeAudio() {
+        // 恢复 BGM（尊重用户是否关闭音乐）
+        const musicOn = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true';
+        if (musicOn) {
+            if (this.bgmInstance) {
+                try {
+                    if (this.bgmInstance.paused) {
+                        if (typeof this.bgmInstance.resume === 'function') {
+                            this.bgmInstance.resume();
+                        } else if (typeof this.bgmInstance.play === 'function' && typeof this.bgmInstance.setPaused !== 'function') {
+                            // 某些实现 pause()/play() 配对
+                            this.bgmInstance.play();
+                        } else if (typeof this.bgmInstance.setPaused === 'function') {
+                            this.bgmInstance.setPaused(false);
+                        } else if ('paused' in this.bgmInstance) {
+                            this.bgmInstance.paused = false;
+                        } else {
+                            // 回退方案：重新播放
+                            this.playSound('bgm', { loop: -1, volume: 0.4 });
+                        }
+                        this.soundStatus['bgm'] = true;
+                    }
+                } catch (e) {
+                    console.warn('恢复 BGM 失败，重新播放回退', e);
+                    this.playSound('bgm', { loop: -1, volume: 0.4 });
+                }
+            } else if (!this.soundStatus['bgm']) {
+                this.playSound('bgm', { loop: -1, volume: 0.4 });
+            }
+        }
+        // 恢复需要的循环短音效
+        const soundOn = localStorage.getItem('soundEnabled') === null || localStorage.getItem('soundEnabled') === 'true';
+        if (soundOn && Array.isArray(this._pausedSFX)) {
+            this._pausedSFX.forEach(id => this.playSound(id, { loop: -1, volume: 1 }));
+        }
+        this._pausedSFX = null;
+    }
+
+    setupFocusBlurHandler() {
+        const pauseGame = () => {
+            // console.log('🛑 页面失去焦点，暂停');
+            // createjs.Ticker.paused = true;
+            this.pauseAudio();
+        };
+        const resumeGame = () => {
+            // console.log('▶️ 页面获得焦点，恢复');
+            // createjs.Ticker.paused = false;
+            this.resumeAudio();
+        };
+        window.addEventListener('blur', pauseGame);
+        window.addEventListener('focus', resumeGame);
+        // console.log('🎮 焦点事件监听已添加');
+    }
+
+    getLoadingCompositionId() {
+        // 现在使用 HTML 加载条，不再需要 Adobe Animate loading composition
+        // console.log('使用 HTML 加载条，不需要 loading composition ID');
+        return null;
+    }
+
+    getGameCompositionId() {
+        // 从配置文件获取游戏组合ID
+        if (this.config && this.config.compositions && this.config.compositions.game) {
+            const gameId = this.config.compositions.game.id;
+            // console.log('从配置文件获取game组合ID:', gameId);
+            return gameId;
+        }
+
+        // 回退到硬编码ID
+        console.warn('无法从配置获取游戏组合ID，使用默认值');
+        return "994179DFE830400BA68CFA701D2BB3AB";
+    }
+
+
+    applyStageTransform() {
+        if (!this.stage) return;
+
+        // 应用变换到 stage
+        this.stage.rotation = this.stageRotation;
+        this.stage.x = this.stageX;
+        this.stage.y = this.stageY;
+        this.stage.scaleX = this.stageScale;
+        this.stage.scaleY = this.stageScale;
+
+        // 更新 stage
+        this.stage.update();
+
+        // console.log(`Stage transform applied: rotation=${this.stageRotation}, x=${this.stageX}, y=${this.stageY}, scale=${this.stageScale}`);
+    }
+
+    async loadConfig() {
+        try {
+            // 优先从 manifest.json 加载配置
+            // const response = await fetch('./manifest.json');
+            // if (response.ok) {
+            //     this.config = await response.json();
+                // console.log('Config loaded from manifest.json:', this.config);
+            // } else {
+                // 回退到模块化 config
+                this.config = src_config || {};
+                // console.log('Config loaded from config.js (fallback):', this.config);
+            // }
+
+            // 兼容 manifest.json 中的 initial 字段，优先使用 config.initial，其次尝试 config.gameconfig.initial
+            const initialList = this.config.initial || (this.config.gameconfig && this.config.gameconfig.initial) || null;
+            if (initialList && Array.isArray(initialList)) {
+                // console.log('开始加载 initial 资源:', initialList);
+                for (const resource of initialList) {
+                    await this.loadScript(resource);
+                }
+                // console.log('✅ initial 资源加载完成');
+            }
+        } catch (error) {
+            console.error('Failed to load config:', error);
+            // 最终回退到模块化 config
+            this.config = src_config || {};
+            // console.log('Using fallback config.js due to error');
+        }
+    }
+
+    /**
+     * 检测是否为PC设备
+     * @returns {boolean} 是否为PC设备
+     */
+    isPCDevice() {
+        // 方法1：检测用户代理字符串
+        const userAgent = navigator.userAgent.toLowerCase();
+        const mobileKeywords = [
+            'android', 'iphone', 'ipad', 'ipod', 'blackberry',
+            'windows phone', 'mobile', 'tablet', 'webos', 'opera mini'
+        ];
+
+        const isMobileUA = mobileKeywords.some(keyword => userAgent.includes(keyword));
+
+        // 方法2：检测触摸支持（辅助判断）
+        const hasTouchSupport = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+
+        // 方法3：检测屏幕尺寸（辅助判断）
+        const screenWidth = window.screen.width;
+        const screenHeight = window.screen.height;
+        const minScreenSize = Math.min(screenWidth, screenHeight);
+        const maxScreenSize = Math.max(screenWidth, screenHeight);
+
+        // PC端通常屏幕较大，且宽高比不会太极端
+        const isLargeScreen = minScreenSize >= 768 && maxScreenSize >= 1024;
+
+        // 综合判断：不是移动设备UA 且 (屏幕较大 或 无触摸支持)
+        const isPCDevice = !isMobileUA && (isLargeScreen || !hasTouchSupport);
+
+        // console.log('🔍 设备检测详情:', {
+        //     userAgent: userAgent,
+        //     isMobileUA: isMobileUA,
+        //     hasTouchSupport: hasTouchSupport,
+        //     screenSize: `${screenWidth}x${screenHeight}`,
+        //     isLargeScreen: isLargeScreen,
+        //     finalResult: isPCDevice ? 'PC' : 'Mobile'
+        // });
+
+        return isPCDevice;
+    }
+
+    applyConfig() {
+
+        this.gameContainer = document.getElementById('game-container');
+        this.animationContainer = document.getElementById('animation_container');
+        this.canvas = document.getElementById('canvas');
+        
+        // 设置Canvas willReadFrequently属性以优化getImageData性能
+        if (this.canvas) {
+            this.canvas.setAttribute('willReadFrequently', 'true');
+        }
+        
+        this.loadingProgress = document.querySelector('.loading-progress');
+
+        // 移除之前的事件监听器，避免重复
+        window.removeEventListener('resize', this.resizeHandler);
+
+
+        this.resizeHandler = () => {
+            if (!this.designWidth || !this.designHeight) return;
+
+            // 获取容器尺寸（逻辑像素）
+            const stageWidth = this.gameContainer.clientWidth;
+            const stageHeight = this.gameContainer.clientHeight;
+
+            // 高分屏支持
+            this.dpr = window.devicePixelRatio || 1;
+            const enableHiDPI = (localStorage.getItem('hiDPI') || 'true') === 'true';
+            const effectiveDpr = enableHiDPI ? this.dpr : 1;
+
+            // Canvas 视觉尺寸
+            this.canvas.style.width = stageWidth + 'px';
+            this.canvas.style.height = stageHeight + 'px';
+            // Canvas 实际像素尺寸
+            this.canvas.width = Math.round(stageWidth * effectiveDpr);
+            this.canvas.height = Math.round(stageHeight * effectiveDpr);
+
+
+
+            // 根据配置的设计尺寸进行适配
+            const designWidth = this.designWidth;
+            const designHeight = this.designHeight;
+
+            // 检测是否为PC端
+            const isPCDevice = this.isPCDevice();
+            // console.log(`🖥️ 设备类型检测: ${isPCDevice ? 'PC端' : '移动端'}`);
+
+
+            // 判断当前屏幕是否为竖屏
+            const isScreenPortrait = stageWidth < stageHeight;
+            // 判断设计尺寸是否为竖屏
+            const isDesignPortrait = designWidth < designHeight;
+
+            if (isPCDevice) {
+                this.baseStageScale = Math.min(stageWidth / designWidth, stageHeight / designHeight);
+                this.stageRotation = 0;
+                this.stageX = (stageWidth - designWidth * this.baseStageScale) / 2;
+                this.stageY = (stageHeight - designHeight * this.baseStageScale) / 2;
+            } else {
+                if (isScreenPortrait === isDesignPortrait) {
+                    this.baseStageScale = Math.min(stageWidth / designWidth, stageHeight / designHeight);
+                    this.stageRotation = 0;
+                    this.stageX = stageWidth / 2 - designWidth * this.baseStageScale / 2;
+                    this.stageY = stageHeight / 2 - designHeight * this.baseStageScale / 2;
+                } else {
+                    this.baseStageScale = Math.min(stageWidth / designHeight, stageHeight / designWidth);
+                    this.stageRotation = 90;
+                    this.stageX = designHeight * this.baseStageScale + stageWidth / 2 - designHeight * this.baseStageScale / 2;
+                    this.stageY = stageHeight / 2 - designWidth * this.baseStageScale / 2;
+                }
+            }
+
+            // 综合 DPR 的真实缩放
+            this.stageScale = this.baseStageScale * effectiveDpr;
+            this.stageX = Math.round(this.stageX * effectiveDpr);
+            this.stageY = Math.round(this.stageY * effectiveDpr);
+
+            this.applyStageTransform();
+            this.updateImageSmoothing();
+        }
+
+
+        // 添加事件监听
+        window.addEventListener('resize', this.resizeHandler);
+
+        const { width = 1920, height = 1080, orientation = 'landscape', backgroundColor = '#CED1D3' } = this.config.scene || {};
+
+        // 保存设计尺寸
+        this.designWidth = width;
+        this.designHeight = height;
+        this.orientation = orientation;
+
+        // 应用场景尺寸
+        // this.animationContainer.style.backgroundColor = backgroundColor;
+
+        // 设置canvas初始尺寸
+        const initDpr = window.devicePixelRatio || 1;
+        this.canvas.width = width * initDpr;
+        this.canvas.height = height * initDpr;
+        this.canvas.style.width = width + 'px';
+        this.canvas.style.height = height + 'px';
+        
+        // 确保willReadFrequently属性已设置
+        if (this.canvas) {
+            this.canvas.setAttribute('willReadFrequently', 'true');
+        }
+
+        // 应用方向设置
+        if (orientation === 'portrait') {
+            this.animationContainer.classList.add('portrait');
+        } else {
+            this.animationContainer.classList.remove('portrait');
+        }
+
+        // console.log(`Scene configured: ${width}x${height}, ${orientation}`);
+
+        // 重新调整大小
+        this.resizeHandler();
+    }
+
+    async loadGameResources() {
+
+        const initialScripts = Array.isArray(this.config.initial) ? this.config.initial : [];
+        const gameScripts = Array.isArray(this.config.game) ? this.config.game : [];
+        const scripts = [...initialScripts, ...gameScripts];
+
+
+        const sounds = this.config.gameconfig.sounds || [];
+        const images = this.config.gameconfig.images || [];
+
+        // 将背景音乐资源优先加载
+        const bgmResource = sounds.find(sound => sound.id === 'bgm');
+        const otherSounds = sounds.filter(sound => sound.id !== 'bgm');
+        const prioritizedSounds = bgmResource ? [bgmResource, ...otherSounds] : otherSounds;
+
+        const total = scripts.length + prioritizedSounds.length + images.length;
+        let loaded = 0;
+
+        // console.log(`开始并行加载 ${total} 个资源...`);
+
+        // 并行加载所有资源
+        const loadPromises = [
+            ...scripts.map(async (script) => {
+                await this.loadScript(script);
+                loaded++;
+                this.updateLoadingProgress((loaded / total) * 100);
+            }),
+            ...prioritizedSounds.map(async (sound) => {
+                await this.loadSound(sound.id, sound.src);
+                loaded++;
+                this.updateLoadingProgress((loaded / total) * 100);
+            }),
+            ...images.map(async (image) => {
+                await this.loadImage(image.id, image.src);
+                loaded++;
+                this.updateLoadingProgress((loaded / total) * 100);
+            })
+        ];
+        // 等待所有脚本加载完成
+        await Promise.all(loadPromises);
+        // console.log('所有脚本加载完成');
+    }
+
+
+    async loadPreloader() {
+        return new Promise((resolve) => {
+            // console.log('使用 HTML 加载条，跳过 Adobe Animate loading composition');
+
+            // 直接初始化 CreateJS 舞台，不需要加载 loading composition
+            this.stage = new createjs.Stage(this.canvas);
+            this.stage.snapToPixelEnabled = true;
+            createjs.Ticker.framerate = this.config.scene?.fps || 30;
+            createjs.Ticker.addEventListener("tick", this.stageUpdateHandler.bind(this));
+
+            // 应用舞台变换设置
+            this.applyStageTransform();
+
+            // 直接完成，使用 HTML 加载条显示进度
+            resolve();
+        });
+    }
+
+    updateImageSmoothing() {
+        try {
+            const smooth = (localStorage.getItem('imageSmooth') || 'true') === 'true';
+            const ctx = this.canvas.getContext('2d');
+            if (ctx) ctx.imageSmoothingEnabled = smooth;
+        } catch (e) { }
+    }
+
+    // Convert screen client coordinates (e.g. touch/mouse) to design coordinates
+    screenToDesign(clientX, clientY) {
+        if (!this.canvas || !this.designWidth || !this.designHeight) return { x: clientX, y: clientY };
+        const rect = this.canvas.getBoundingClientRect();
+        // normalized to 0..1 in visual canvas
+        const nx = (clientX - rect.left) / rect.width;
+        const ny = (clientY - rect.top) / rect.height;
+        // map to design coordinates
+        const designX = nx * this.designWidth;
+        const designY = ny * this.designHeight;
+        return { x: designX, y: designY };
+    }
+
+
+
+    async startGameConfigLoading() {
+
+        if (this.__resourcesLoading__) {
+            console.warn('⚠️ 资源加载已在进行或完成，跳过重复调用');
+            return;
+        }
+        this.__resourcesLoading__ = true;
+        try {
+            // console.log('🚀 开始加载游戏资源...');
+
+            // 获取游戏配置
+            const gameConfig = this.config.gameconfig || {};
+            const scripts = gameConfig.scripts || [];
+            const sounds = gameConfig.sounds || [];
+            const images = gameConfig.images || [];
+
+            // 计算总资源数量
+            const totalResources = scripts.length + sounds.length + images.length;
+
+            if (totalResources === 0) {
+                // console.log('没有游戏资源需要加载，直接切换场景');
+                this.updateLoadingProgress(1.0);
+                // setTimeout(() => {
+                // }, 300);
+                this.switchToGameScene();
+                return;
+            }
+
+            let loadedResources = 0;
+
+            // 显示初始进度
+            this.updateLoadingProgress(0);
+            this.loadingCompleteLogged = false; // 重置完成标志
+
+            //. 优先加载图片资源（背景和Logo）
+            console.log('🖼️ 优先加载UI资源...');
+            for (const imageConfig of images) {
+                try {
+                    await this.loadResource(imageConfig, loadedResources, totalResources);
+                    loadedResources++;
+
+                    // 🔥 图片加载完成后立即应用到UI
+                    if (imageConfig.id === 'bg' || imageConfig.id === 'logo') {
+                        // this.applyLoadingAssets();
+                    }
+                } catch (error) {
+                    console.warn(`⚠️ 图片加载失败: ${imageConfig.src}`, error.message);
+                    loadedResources++;
+                }
+            }
+
+            // 加载脚本文件
+            // console.log('📜 阶段1: 加载脚本文件...');
+            for (const scriptConfig of scripts) {
+                try {
+                    await this.loadResource(scriptConfig, loadedResources, totalResources);
+                } catch (error) {
+                    console.error(`💥 脚本加载失败，但继续加载其他资源: ${scriptConfig.src}`, error);
+                }
+                loadedResources++;
+            }
+
+            // 加载声音文件
+            // console.log('🎵 阶段2: 加载声音文件...');
+            for (const soundConfig of sounds) {
+                try {
+                    await this.loadResource(soundConfig, loadedResources, totalResources);
+                } catch (error) {
+                    // 声音加载失败已经在 loadResource 中处理，这里不应该到达
+                    console.error(`声音加载异常: ${soundConfig.src}`, error);
+                }
+                loadedResources++;
+            }
+
+            createjs.Sound.muted = false; // 关闭状态静音
+            // 资源全部加载后尝试自动播放 BGM（如果允许并且浏览器未拦截）
+            this.tryAutoStartBGM();
+            // utile.__sdklog2('🎉 所有游戏资源加载完成！');
+
+            // 确保显示100%进度
+            this.updateLoadingProgress(1.0);
+
+            this.loadedHandler();
+
+        } catch (error) {
+            console.error('游戏资源加载失败:', error);
+            // 即使失败也尝试切换场景
+        }
+    }
+
+    loadedHandler() {
+        console.log('🎮 资源加载完成，开始用户登录流程');
+
+        // Update HTML loading text but keep it visible
+        const loadingText = document.querySelector('.loading-text');
+        if (loadingText) {
+            loadingText.textContent = 'Fetching user data...';
+            try {
+                // inject a small stylesheet once to enlarge and blink the loading text
+                if (!document.getElementById('sdk-loading-text-style')) {
+                    const style = document.createElement('style');
+                    style.id = 'sdk-loading-text-style';
+                    style.textContent = "@keyframes sdk-blink{0%,100%{opacity:1}50%{opacity:0.15}}.sdk-loading-blink{animation:sdk-blink 1s linear infinite}.sdk-loading-large{font-size:22px !important;font-weight:600 !important;}";
+                    document.head.appendChild(style);
+                }
+                loadingText.classList.add('sdk-loading-blink', 'sdk-loading-large');
+            } catch (e) { }
+        }
+
+        // 重置进度条到 90%，为登录流程留出空间
+        this.updateLoadingProgress(0.9);
+
+        // 启动计时器（可选）
+        this.startUserDataTimer();
+
+        // 启动游戏逻辑（包含登录）
+        this.startGameLogic();
+    }
+
+    /**
+     * 启动用户数据加载计时器
+     */
+    startUserDataTimer() {
+        this.userDataStartTime = Date.now();
+        this.userDataTimerInterval = setInterval(() => {
+            const elapsed = Math.floor((Date.now() - this.userDataStartTime) / 1000);
+
+            const loadingText = document.querySelector('.loading-text');
+
+            if (loadingText) {
+                // show warning after 10s
+                if (elapsed > 10) {
+                    loadingText.textContent = `Network is slow, please wait... (${elapsed}s)`;
+                    loadingText.style.color = '#FF6B6B';
+                }
+                // show error after 20s
+                else if (elapsed > 20) {
+                    loadingText.textContent = `Loading timed out, please try again... (${elapsed}s)`;
+                    loadingText.style.color = '#FF0000';
+                }
+                else {
+                    loadingText.textContent = `Fetching user data... (${elapsed}s)`;
+                }
+            }
+
+        }, 1000);
+    }
+
+    /**
+     * 登录完成处理
+     */
+    onLoginComplete() {
+    // console.log('✅ User login complete');
+
+        // 停止计时器
+        if (this.userDataTimerInterval) {
+            clearInterval(this.userDataTimerInterval);
+            this.userDataTimerInterval = null;
+        }
+
+        // 重置加载完成标志，确保可以显示新的完成消息
+        this.loadingCompleteLogged = false;
+
+        // 更新进度条到 100%
+        this.updateLoadingProgress(1.0);
+
+        // 更新 HTML 界面显示，提示用户点击进入游戏
+        const loadingText = document.querySelector('.loading-text');
+
+        // Determine platform behavior:
+        // - If platform is empty, default, or googleplay -> auto-enter
+        // - Otherwise require explicit click-to-enter and show an interstitial first
+        const platform = (typeof window !== 'undefined' && window.Platform) ? String(window.Platform).toLowerCase() : '';
+
+        if (!platform || platform === 'default' || platform === 'googleplay') {
+            // Default/platform not provided, or Google Play -> proceed immediately
+            if (loadingText) {
+                loadingText.textContent = 'Entering...';
+                loadingText.style.color = '#FFFFFF';
+            }
+            this.switchToGameScene();
+            return;
+        }
+
+        // For other platforms (like gamedistribution), require explicit click-to-enter
+        if (platform) {
+            if (loadingText) {
+                loadingText.textContent = 'Top to enter game';
+                loadingText.style.color = '#00FF00';
+            }
+
+            const preloadContainer = document.getElementById('preload_container') || document.querySelector('.loading-container') || document.body;
+            const enterHandler = () => {
+                try {
+                    if (loadingText) {
+                        loadingText.textContent = 'Entering...';
+                        loadingText.style.color = '#FFFFFF';
+                    }
+                    if (preloadContainer) preloadContainer.style.cursor = 'default';
+                } catch (e) { }
+                try { if (preloadContainer) preloadContainer.removeEventListener('click', enterHandler); } catch (e) { }
+
+                try { console.log('[init] enterHandler click detected, Platform=', window.Platform); } catch (e) { }
+
+                // report click-to-enter using ovo method
+                try {
+                    if (typeof window.ovo !== 'undefined' && typeof window.ovo.dotSelectContent === 'function') {
+                        window.ovo.dotSelectContent('game_action', 'enter_game_click');
+                    }
+                } catch (e) { }
+
+                // Show an interstitial ad first (provider-agnostic wrapper in ovosdk.js
+                // will route to GameDistribution or Android native as appropriate).
+                try {
+                    // Diagnostic: prefer explicit window.ovo access to avoid ReferenceError
+                    try { console.log('[init] window.ovo =', window.ovo); } catch (e) { }
+
+                    // For other platforms, show interstitial ad
+                    if (typeof window !== 'undefined' && window.ovo && typeof window.ovo.showInterstitialAd === 'function') {
+                        console.log('[init] calling window.ovo.showInterstitialAd()');
+                        window.ovo.showInterstitialAd(() => {
+                            try { console.log('[init] showInterstitialAd callback — switching to game scene'); } catch (e) { }
+                            try { this.switchToGameScene(); } catch (e) { console.warn('switchToGameScene failed after ad', e); }
+                        });
+                        return;
+                    } else {
+                        try { console.log('[init] ovo.showInterstitialAd not available (will fallback)'); } catch (e) { }
+                    }
+                } catch (e) {
+                    try { window.__sdklog2 && window.__sdklog2('window.preloadAd error', e); } catch (e) { }
+                    // try { this.switchToGameScene(); } catch (e) { console.warn('switchToGameScene failed after ad', e); }
+                }
+
+                // Fallback: no ad API, enter immediately
+                // this.switchToGameScene();
+            };
+
+            try {
+                if (preloadContainer) {
+                    preloadContainer.style.cursor = 'pointer';
+                    preloadContainer.addEventListener('click', enterHandler, { once: true });
+                } else {
+                    // Fallback: no container found, proceed immediately
+                    this.switchToGameScene();
+                }
+            } catch (e) {
+                console.warn('Failed to attach click-to-enter handler, auto-entering', e);
+                this.switchToGameScene();
+            }
+        } else {
+            // Non-GD platforms: proceed immediately
+            if (loadingText) {
+                loadingText.textContent = 'Entering...';
+                loadingText.style.color = '#FFFFFF';
+            }
+            this.switchToGameScene();
+        }
+    }
+
+    async startGameLogic() {
+        // console.log('🎮 启动游戏逻辑...');
+
+        // 强制使用微信登录
+        //  window.GameServer.setLoginConfig({
+        //     forceLoginType: 'wechat',
+        //     enableMockLogin: true,
+        //     mockLoginDelay: 5000
+        // });
+
+        // // 强制使用游客模式
+        window.GameServer.setLoginConfig({
+            forceLoginType: 'guest',
+            mockLoginDelay: 500
+        })
+        // 为了避免长时间卡住，设置一个 10s 的前端超时作为兜底
+        const FRONTEND_TIMEOUT_MS = 10000;
+
+        const initPromise = (async () => {
+            // console.log(`🕒 calling GameServer.init() @ ${new Date().toISOString()}`);
+            const res = await window.GameServer.init();
+            // console.log(`🕒 GameServer.init() returned @ ${new Date().toISOString()}`);
+            return res;
+        })();
+
+        const timeoutPromise = new Promise((_, reject) => {
+            setTimeout(() => reject(new Error('FRONTEND_TIMEOUT')),
+                FRONTEND_TIMEOUT_MS);
+        });
+
+        try {
+            // 等待要么 init 成功，要么超时/失败
+            const serverResult = await Promise.race([initPromise, timeoutPromise]);
+
+            // 如果成功，进入登录完成流程
+            if (serverResult?.success) {
+                this.onLoginComplete();
+                return;
+            }
+        } catch (err) {
+            console.warn('🟠 GameServer.init() failed or timed out:', err && err.message ? err.message : err);
+        }
+
+        // 到这里表示后端 init() 要么 reject（例如 wechat 抛出），要么前端超时
+        // 作为兜底，立刻调用游客登录逻辑，并继续进入游戏
+        try {
+            console.log('➡️ 触发游客登录回退流程');
+            const guest = await window.GameServer.createGuestUser();
+            // 保存为当前用户并继续
+            window.GameServer.saveUserData('currentUser', guest);
+            window.GameServer.currentUserStatus = guest;
+            this.onLoginComplete();
+        } catch (e) {
+            console.error('❌ 游客登录回退失败:', e);
+        }
+
+    }
+
+
+    updateLoadingProgress(progress) {
+        // 更新 HTML 加载条
+        if (this.loadingProgress) {
+            // 确保进度在0-1之间
+            progress = Math.max(0, Math.min(1, progress));
+
+            const percentage = Math.round(progress * 100);
+            this.loadingProgress.style.width = `${percentage}%`;
+
+            // console.log(`📊 HTML Loading progress: ${percentage}%`);
+
+            // 如果达到100%，显示完成信息
+            if (progress >= 1.0) {
+                console.log('🎯 Loading complete!');
+            }
+        }
+    }
+
+    async switchToGameScene() {
+        if (this.__sceneSwitching__) {
+            console.warn('⚠️ 场景切换已在进行，跳过重复调用');
+            return;
+        }
+        this.__sceneSwitching__ = true;
+        // console.log('🔄 切换到GameScene...');
+        try {
+            // 🔥 第一步：先加载GameScene（保持loading界面显示）
+            // console.log('📦 预加载GameScene资源...');
+            await this.preloadGameScene();
+
+            // Ensure critical assets (scene images and non-bgm sounds) are ready before hiding loading
+            await this.ensureAllAssetsReady(10000);
+            // Hide the HTML loading overlay now that scene resources are preloaded
+            this.hideBasicLoading();
+
+            // 🔥 第二步：GameScene准备完成后，开始切换动画
+            // console.log('✅ GameScene准备完成，开始切换动画');
+            await this.performSceneTransition();
+
+            // 🔥 第三步：清理loading场景
+            this.cleanupLoadingScene();
+
+            // 🔥 第四步：激活GameScene
+            await this.activateGameScene();
+
+            // console.log('🎉 场景切换完成！');
+
+        } catch (error) {
+            console.error('❌ 场景切换失败:', error);
+            // 失败时也要清理loading场景，避免卡住
+            this.cleanupLoadingScene();
+        }
+    }
+
+    /**
+     * 预加载GameScene资源
+     */
+    async preloadGameScene() {
+        return new Promise((resolve, reject) => {
+            // 动态获取游戏组合ID
+            const gameCompositionId = this.getGameCompositionId();
+            // console.log('🎮 预加载游戏组合ID:', gameCompositionId);
+
+            const comp = AdobeAn.getComposition(gameCompositionId);
+            const lib = comp.getLibrary();
+
+            // 检查是否有manifest需要加载
+            // keep the manifest so other helpers (ensureAllAssetsReady) can inspect critical assets
+            this.sceneManifest = lib.properties.manifest || [];
+
+            if (lib.properties.manifest && lib.properties.manifest.length > 0) {
+                const loader = new createjs.LoadQueue(false);
+                let loadedCount = 0;
+                const totalCount = lib.properties.manifest.length;
+
+                loader.addEventListener("fileload", (evt) => {
+                    loadedCount++;
+                    const progress = loadedCount / totalCount;
+
+                    // 🔥 更新loading进度条显示预加载进度
+                    this.updateLoadingProgress(0.8 + progress * 0.2); // 80%-100%
+
+                    const images = comp.getImages();
+                    if (evt && evt.item.type === "image") {
+                        images[evt.item.id] = evt.result;
+                        // also record into engine-level loadedImages map for readiness checks
+                        try {
+                            if (!this.loadedImages) this.loadedImages = new Map();
+                            if (this.loadedImages instanceof Map) {
+                                this.loadedImages.set(evt.item.id, evt.result);
+                                // also try to set by src key for flexibility
+                                if (evt.item && evt.item.src) this.loadedImages.set(evt.item.src, evt.result);
+                            } else {
+                                this.loadedImages[evt.item.id] = evt.result;
+                                if (evt.item && evt.item.src) this.loadedImages[evt.item.src] = evt.result;
+                            }
+                        } catch (e) {
+                            // non-fatal
+                        }
+                    }
+
+                    // console.log(`📦 GameScene资源加载: ${loadedCount}/${totalCount}`);
+                });
+
+                loader.addEventListener("complete", () => {
+                    loader.removeAllEventListeners();
+
+                    const ss = comp.getSpriteSheet();
+                    const ssMetadata = lib.ssMetadata;
+
+                    try {
+                        for (let i = 0; i < ssMetadata.length; i++) {
+                            const name = ssMetadata[i].name;
+                            const img = loader.getResult(name);
+                            if (!img) {
+                                console.warn('⚠️ SpriteSheet image missing for', name, '— loader result is null');
+                            }
+                            ss[name] = new createjs.SpriteSheet({
+                                "images": [img],
+                                "frames": ssMetadata[i].frames
+                            });
+                        }
+
+                        // create exportRoot inside try/catch — missing images can throw inside Animate lib
+                        let exportRoot = null;
+                        try {
+                            exportRoot = new lib.flygame();
+                        } catch (e) {
+                            console.error('❌ exportRoot creation failed:', e);
+                            // still set preloadedGameScene so caller can inspect, but do not reject to avoid hard failure
+                            this.preloadedGameScene = { comp: comp, lib: lib, exportRoot: null };
+                            return resolve();
+                        }
+
+                        // 🔥 预创建GameScene对象（但不添加到舞台）
+                        this.preloadedGameScene = {
+                            comp: comp,
+                            lib: lib,
+                            exportRoot: exportRoot
+                        };
+
+                        // console.log('✅ GameScene资源预加载完成');
+                        resolve();
+                    } catch (ex) {
+                        console.error('❌ Error during GameScene sprite setup:', ex);
+                        this.preloadedGameScene = { comp: comp, lib: lib, exportRoot: null };
+                        resolve();
+                    }
+                });
+
+                loader.addEventListener("error", (evt) => {
+                    console.error('❌ GameScene资源加载失败:', evt);
+                    reject(new Error(`GameScene资源加载失败: ${evt.item && evt.item.src}`));
+                });
+
+                // 设置超时
+                setTimeout(() => {
+                    if (loadedCount < totalCount) {
+                        console.warn('⚠️ GameScene加载超时，强制继续');
+                        loader.removeAllEventListeners();
+                        resolve();
+                    }
+                }, 10000); // 10秒超时
+
+                    // 关键：将 images/ 重定向到 resan/images/
+                    const remappedManifest = lib.properties.manifest.map(item => ({
+                        ...item,
+                        src: item.src && item.src.startsWith('images/') ? `resan/${item.src}` : item.src,
+                    }));
+
+                    // 保存 manifest 供 ensureAllAssetsReady 检查
+                    this.sceneManifest = remappedManifest;
+
+                    // 当 CreateJS loader 加载图片时，也把图片放入 this.loadedImages 和 window.gameImages
+                    // 这样全局的就绪检查可以检测到由 CreateJS 直接加载的图片
+                    loader.addEventListener("fileload", (evt) => {
+                        try {
+                            if (evt && evt.item && evt.item.type === 'image') {
+                                const id = evt.item.id;
+                                // 保持向后兼容的全局缓存
+                                if (!this.loadedImages) this.loadedImages = new Map();
+                                this.loadedImages.set(id, evt.result);
+                                if (!window.gameImages) window.gameImages = {};
+                                window.gameImages[id] = evt.result;
+                            }
+                        } catch (e) {
+                            console.warn('预加载场景时缓存图片失败', e);
+                        }
+                    });
+
+                    // console.log('📦 preloadGameScene: loading manifest items=', remappedManifest.length);
+                    loader.loadManifest(remappedManifest);
+            } else {
+                // 没有manifest时直接创建
+                // console.log('📦 GameScene无manifest，直接创建');
+                const lib = comp.getLibrary();
+                this.preloadedGameScene = {
+                    comp: comp,
+                    lib: lib,
+                    exportRoot: new lib.flygame()
+                };
+                resolve();
+            }
+        });
+    }
+
+    /**
+     * 执行场景切换动画
+     */
+    async performSceneTransition() {
+        return new Promise((resolve) => {
+            if (!this.gl_mc) {
+                resolve();
+                return;
+            }
+
+            // console.log('🎭 执行loading淡出动画');
+
+            // loading场景淡出动画
+            createjs.Tween.get(this.gl_mc)
+                .to({ alpha: 0 }, 500, createjs.Ease.quadOut)
+                .call(() => {
+                    // console.log('✅ Loading淡出完成');
+                    resolve();
+                });
+        });
+    }
+
+    /**
+     * 清理loading场景
+     */
+    cleanupLoadingScene() {
+        // console.log('🧹 清理loading场景');
+
+        // 删除 loading 场景
+        if (this.gl_mc) {
+            this.stage.removeChild(this.gl_mc);
+            this.gl_mc = null;
+            this.gl_loadBar = null;
+        }
+
+        // 清空舞台
+        this.stage.removeAllChildren();
+    }
+
+    /**
+     * 激活GameScene
+     */
+    async activateGameScene() {
+        // console.log('🚀 激活GameScene');
+
+        if (!this.preloadedGameScene) {
+            console.error('❌ 预加载的GameScene不存在');
+            return;
+        }
+
+
+
+        // this.stopAllMovieClips(this.exportRoot);
+
+        // 🔥 添加预加载的GameScene到舞台
+        if (!this.preloadedGameScene.exportRoot) {
+            console.error('❌ activateGameScene: exportRoot is null — preload likely failed or timed out. Aborting activation.');
+            return;
+        }
+
+        this.exportRoot = this.preloadedGameScene.exportRoot;
+
+        for (var k in this.exportRoot.children) {
+            utile/* default */.A.goStop(this.exportRoot.children[k], true);
+        }
+        this.exportRoot.visible = false;
+        this.stage.addChild(this.exportRoot);
+
+
+
+        // 获取用户状态
+        const userStatus = window.GameServer.currentUserStatus;
+        // utile.__sdklog2('📊 用户状态:', userStatus);
+
+        const gameData = {
+            engine: this,
+            stage: this.stage,
+            exportRoot: this.exportRoot,
+            canvas: this.canvas,
+            config: this.config,
+            loadedSounds: this.loadedSounds,
+            loadedImages: this.loadedImages,
+            userStatus: userStatus
+        };
+
+        if (window.GameScense) {
+            window.GameScense.init(gameData);
+        }
+
+        // 🎯 启动游戏时长统计和发送游戏开始事件
+        try {
+            // 发送标准 GA4 游戏开始事件 
+            if (typeof window.ovo !== 'undefined' && typeof window.ovo.dotGameStart === 'function') {
+                window.ovo.dotGameStart('main_game', 'player');
+                console.log('🎮 level_start 事件已发送');
+            }
+
+            // 🎯 游戏开始30秒后显示banner广告
+            setTimeout(() => {
+                if (typeof window.ovo !== 'undefined' && typeof window.ovo.showBannerAd === 'function') {
+                    window.ovo.showBannerAd(() => {
+                        console.log('📢 Banner ad shown 30s after game start');
+                    });
+                }
+            }, 30000); // 30秒 = 30000毫秒
+
+        } catch (e) {
+            console.warn('⚠️ 发送游戏开始事件失败', e);
+        }
+
+        this.preloadedGameScene = null;
+        // 清理预加载数据
+    }
+
+
+    /**
+     * 更新loading进度（支持更精细的进度控制）
+     */
+    updateLoadingProgress(progress) {
+        // 更新 HTML 加载条
+        if (this.loadingProgress) {
+            // 确保进度在0-1之间
+            progress = Math.max(0, Math.min(1, progress));
+
+            const percentage = Math.round(progress * 100);
+            this.loadingProgress.style.width = `${percentage}%`;
+
+            // console.log(`📊 HTML Loading progress: ${percentage}%`);
+
+            // 如果达到100%，显示完成信息（只显示一次）
+            if (progress >= 1.0 && !this.loadingCompleteLogged) {
+                console.log('🎯 Loading complete!');
+                this.loadingCompleteLogged = true;
+            }
+        }
+    }
+
+    testAudioPlayback(callback) {
+        if (this.pubSound.length === 0) {
+            callback();
+            return;
+        }
+
+        let loadedNum = 0;
+        const testSound = (id) => {
+            createjs.Sound.play(id);
+            setTimeout(() => {
+                createjs.Sound.stop();
+                loadedNum++;
+                this.goPlayFrameEnd(this.gl_loadBar, 50 + loadedNum);
+                this.pubSound.shift();
+
+                if (this.pubSound.length === 0) {
+                    createjs.Sound.muted = false;
+                    callback();
+                } else {
+                    testSound(this.pubSound[0]);
+                }
+            }, 100);
+        };
+
+        testSound(this.pubSound[0]);
+    }
+
+    stageUpdateHandler() {
+        if (this.stage) {
+            this.stage.update();
+        }
+    }
+
+    updateProgress(percent) {
+        this.currentProgress = percent;
+        this.loadingProgress.style.width = percent + '%';
+    }
+
+    goPlayFrameEnd(target, num) {
+        if (target) {
+            target.gotoAndStop(num - 2);
+        }
+    }
+
+    /**
+     * 隐藏基本加载界面
+     */
+    hideBasicLoading() {
+        // console.log('🎯 基本资源加载完成，隐藏HTML加载界面');
+        const preloadContainer = document.getElementById('preload_container');
+        if (preloadContainer) {
+            preloadContainer.style.opacity = '0';
+            setTimeout(() => {
+                preloadContainer.style.display = 'none';
+            }, 500);
+        }
+    }
+
+    // 声音管理方法
+    playSound(id, options = {}) {
+        if (!this.soundInitialized) {
+            console.warn(`🎵 SoundJS 未初始化，无法播放声音: ${id}`);
+            return null;
+        }
+
+
+        const isMusicEnabled = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true'; // 默认开启音乐
+        const isSoundEnabled = localStorage.getItem('soundEnabled') === null || localStorage.getItem('soundEnabled') === 'true'; // 默认开启音效
+
+
+
+        if (id === 'bgm') {
+            return this.playBGM({ volume: (typeof options.volume === 'number') ? options.volume : 0.4 });
+        }
+
+        if (id !== 'bgm' && !isSoundEnabled) {
+            console.warn(`🎵 音效已被禁用: ${id}`);
+            return null;
+        }
+
+        if (this.loadedSounds.has(id)) {
+
+            try {
+
+                const instance = createjs.Sound.play(id, options);
+                if (instance) {
+
+                    if (instance.playState === createjs.Sound.PLAY_SUCCEEDED) {
+                        // console.log(`🎵 声音正在播放: ${id}`);
+                        this.soundStatus[id] = true;
+                    } else if (instance.playState === createjs.Sound.PLAY_FAILED) {
+                        // console.error(`🎵 声音播放失败: ${id}`);
+                        this.soundStatus[id] = false;
+                    }
+                    return instance;
+                } else {
+                    this.soundStatus[id] = false;
+                    console.warn(`🎵 声音播放失败: ${id}`);
+                    return null;
+                }
+
+            } catch (error) {
+                console.error(`🎵 声音播放异常: ${id}`, error);
+                return null;
+            }
+        } else {
+            console.warn(`🎵 声音未加载或加载失败: ${id}`);
+            return null;
+        }
+    }
+
+    stopSound(id) {
+        if (!this.soundInitialized) {
+            console.warn(`🎵 SoundJS 未初始化，无法停止声音: ${id}`);
+            return;
+        }
+
+        try {
+            createjs.Sound.stop(id);
+            this.soundStatus[id] = false; // 重置播放状态标记
+            if (id === 'bgm') {
+                this.bgmInstance = null;
+            }
+            console.log(`🎵 停止声音: ${id}`);
+        } catch (error) {
+            console.error(`🎵 停止声音异常: ${id}`, error);
+        }
+    }
+
+    /**
+     * 背景音乐是否在播放
+     */
+    isBGMPlaying() {
+        return !!this.soundStatus['bgm'];
+    }
+
+
+
+    setBGMLoopWindow(startOffsetMs = 0, loopDurationMs = null, crossfadeMs = 80) {
+        this._bgmOffsetMs = Math.max(0, startOffsetMs);
+        this._bgmDurMs = loopDurationMs != null ? Math.max(100, loopDurationMs) : null;
+        this._bgmCrossfadeMs = Math.max(0, crossfadeMs);
+    }
+
+    playBGM(opts = { volume: 0.5 }) {
+        const musicEnabled = (localStorage.getItem('musicEnabled') === null) ||
+            localStorage.getItem('musicEnabled') === 'true';
+        if (!musicEnabled) return;
+
+        // 若已在播，直接返回
+        if (this.bgmInstance && this.bgmInstance.playState === createjs.Sound.PLAY_SUCCEEDED) return;
+
+        // 使用简单无限循环播放（保持旧行为，避免分段切换逻辑导致中断）
+        try {
+            const vol = opts.volume != null ? opts.volume : 0.5;
+            const inst = createjs.Sound.play('bgm', { loop: -1, volume: vol, offset: this._bgmOffsetMs || 0 });
+            if (inst && inst.playState === createjs.Sound.PLAY_SUCCEEDED) {
+                this.bgmInstance = inst;
+                this.soundStatus && (this.soundStatus['bgm'] = true);
+            }
+        } catch (e) {
+            console.warn('⚠️ playBGM fallback failed', e);
+        }
+    }
+
+    stopBGM() {
+        if (this._bgmTicker) {
+            createjs.Ticker.off('tick', this._bgmTicker);
+            this._bgmTicker = null;
+        }
+        try { this.bgmInstance && this.bgmInstance.stop && this.bgmInstance.stop(); } catch (e) { }
+        try { this._bgmNext && this._bgmNext.stop && this._bgmNext.stop(); } catch (e) { }
+        this.bgmInstance = null;
+        this._bgmNext = null;
+        this.soundStatus && (this.soundStatus['bgm'] = false);
+    }
+
+
+    _startBgmSegment(volume = 0.5) {
+        try {
+            const props = {
+                loop: 0,              // 非循环，靠监视+兜底
+                volume,
+                offset: this._bgmOffsetMs || 0
+            };
+            if (this._bgmDurMs != null) props.duration = this._bgmDurMs;
+
+            const inst = createjs.Sound.play('bgm', props);
+            if (inst && inst.playState === createjs.Sound.PLAY_SUCCEEDED) {
+                this.bgmInstance = inst;
+                this.soundStatus && (this.soundStatus['bgm'] = true);
+
+                // 兜底：如果没能在尾部提前预启下一段，当前段 complete 时立刻起下一段，避免长时间静音
+                inst.on('complete', () => {
+                    this.soundStatus['bgm'] = false;
+                    // 若 _bgmNext 还没准备好，则直接起下一段
+                    if (!this._bgmNext) {
+                        this._startBgmSegment(volume);
+                    }
+                });
+                inst.on('failed', () => { this.soundStatus['bgm'] = false; });
+                inst.on('interrupted', () => { this.soundStatus['bgm'] = false; });
+            }
+        } catch (e) {
+            console.warn('⚠️ BGM 段播放失败', e);
+        }
+    }
+
+    _beginBgmMonitor() {
+        if (this._bgmTicker) return;
+
+        this._bgmTicker = () => {
+            const cur = this.bgmInstance;
+            if (!cur) return;
+
+            const total = (this._bgmDurMs != null) ? this._bgmDurMs : (cur.duration || 0);
+            const pos = cur.position || 0;
+
+            // 临近尾部：提前启动下一段并淡入
+            if (total && total - pos <= this._bgmCrossfadeMs) {
+                // 如果还没有预启动
+                if (!this._bgmNext) {
+                    try {
+                        this._bgmNext = createjs.Sound.play('bgm', {
+                            loop: 0,
+                            offset: this._bgmOffsetMs || 0,
+                            volume: 0
+                        });
+
+                    } catch (e) { }
+                }
+
+                // 到了尾声：淡出旧实例并切换引用
+                if (total - pos <= 10) {
+                    try { cur.stop(); } catch (e) { }
+                    this.bgmInstance = this._bgmNext || this.bgmInstance;
+                    this._bgmNext = null;
+                }
+            }
+        };
+        createjs.Ticker.on('tick', this._bgmTicker);
+    }
+
+
+    /**
+     * 设置音乐总开关，并立即生效
+     * @param {boolean} enabled 
+     */
+    setMusicEnabled(enabled) {
+        localStorage.setItem('musicEnabled', enabled ? 'true' : 'false');
+        if (!enabled) {
+            this.stopBGM();
+        } else {
+            this.playBGM({ loop: -1, volume: 0.4 });
+        }
+    }
+
+    /**
+     * 设置音效总开关，仅记录（播放时读取）
+     * @param {boolean} enabled 
+     */
+    setSoundEnabled(enabled) {
+        localStorage.setItem('soundEnabled', enabled ? 'true' : 'false');
+        if (!enabled) {
+            // 立即停止所有非 BGM 音效（可选，这里简单 stop 全部）
+            try { createjs.Sound.stop(); } catch (e) { }
+        }
+    }
+
+    setSoundVolume(volume) {
+        if (!this.soundInitialized) {
+            console.warn(`🎵 SoundJS 未初始化，无法设置音量`);
+            return;
+        }
+
+        try {
+            const clampedVolume = Math.max(0, Math.min(1, volume));
+            createjs.Sound.volume = clampedVolume;
+            // console.log(`🎵 设置音量: ${clampedVolume}`);
+        } catch (error) {
+            console.error(`🎵 设置音量异常:`, error);
+        }
+    }
+
+    /**
+     * 检查指定音效是否正在播放
+     * @param {string} soundName - 音效名称
+     * @returns {boolean} 是否正在播放
+     */
+    isSoundPlaying(soundName) {
+        return !!this.soundStatus[soundName];
+
+    }
+
+    setupAutoplayHandler() {
+        // 已经有 BGM 在播放则不需要再绑定
+        // if (this.isSoundPlaying && this.isSoundPlaying('bgm')) {
+        //     return;
+        // }
+        // if (this.__autoPlayBound__) {
+        //     return; // 避免重复绑定
+        // }
+        // this.__autoPlayBound__ = true;
+        // const enableAudio = () => {
+        //     if (!this.audioEnabled) {
+        //         console.log('🎵 用户交互检测到，启用音频');
+        //         this.audioEnabled = true;
+        //         // 仅此处解锁并播放 BGM
+        //         createjs.Sound.muted = false;
+        //         // 避免短时间重复点击多次触发
+        //         if (!this.isSoundPlaying('bgm')) {
+        //             this.playSound('bgm', { loop: -1, volume: 1, userTriggered: true });
+        //         }
+        //     }
+        //     document.removeEventListener('click', enableAudio);
+        //     document.removeEventListener('touchstart', enableAudio);
+        //     document.removeEventListener('keydown', enableAudio);
+        // };
+        // document.addEventListener('click', enableAudio);
+        // document.addEventListener('touchstart', enableAudio);
+        // document.addEventListener('keydown', enableAudio);
+
+        if (this.isSoundPlaying && this.isSoundPlaying('bgm')) return;
+        if (this.__autoPlayBound__) return;
+        this.__autoPlayBound__ = true;
+
+        const enableAudio = () => {
+            if (!this.audioEnabled) {
+                this.audioEnabled = true;
+                createjs.Sound.muted = false;
+                if (!this.isSoundPlaying('bgm')) {
+                    // 改为调用分段交叠播放
+                    this.playBGM({ volume: 0.4 });
+                }
+            }
+            document.removeEventListener('click', enableAudio);
+            document.removeEventListener('touchstart', enableAudio);
+            document.removeEventListener('keydown', enableAudio);
+        };
+        document.addEventListener('click', enableAudio);
+        document.addEventListener('touchstart', enableAudio);
+        document.addEventListener('keydown', enableAudio);
+    }
+
+    /**
+     * 尝试自动播放背景音乐（无需用户点击）。
+     * 若被浏览器策略阻止，则保留后续点击触发逻辑。
+     */
+    tryAutoStartBGM() {
+        // 已播放或用户关闭音乐则跳过
+        const isMusicEnabled = localStorage.getItem('musicEnabled') === null || localStorage.getItem('musicEnabled') === 'true';
+        if (!isMusicEnabled) return;
+        if (this.isSoundPlaying && this.isSoundPlaying('bgm')) return;
+
+        // 有些浏览器需要先创建 AudioContext
+        try {
+            if (createjs.Sound && createjs.Sound.activePlugin && createjs.Sound.activePlugin.context) {
+                const ctx = createjs.Sound.activePlugin.context;
+                // 不能直接 resume（可能被策略限制），但可以检测状态
+            }
+        } catch (e) { }
+
+        const instance = this.playSound('bgm', { loop: -1, volume: 0.4, autoAttempt: true });
+        // 如果成功，并且 WebAudio context 处于 running 状态，则视为无需用户交互
+        let contextRunning = true;
+        try {
+            const ctx = createjs.Sound.activePlugin && createjs.Sound.activePlugin.context;
+            if (ctx && ctx.state !== 'running') contextRunning = false;
+        } catch (e) { }
+
+        if (instance && instance.playState === createjs.Sound.PLAY_SUCCEEDED && contextRunning) {
+            // console.log('✅ 自动播放 BGM 成功（无需用户点击）');
+            this.audioEnabled = true;
+            // 如果已经绑定了交互监听可以移除（谨慎：只有我们自己绑定的）
+            if (this.__autoPlayBound__) {
+                document.removeEventListener('click', this.__autoPlayClickHandler__);
+                document.removeEventListener('touchstart', this.__autoPlayClickHandler__);
+                document.removeEventListener('keydown', this.__autoPlayClickHandler__);
+            }
+        } else {
+            console.log('⚠️ 自动播放 BGM 失败或被阻止，等待用户点击');
+        }
+    }
+
+    // 图片管理方法
+    getImage(id) {
+        if (this.loadedImages.has(id)) {
+            return this.loadedImages.get(id);
+        } else {
+            console.warn(`🖼️ 图片未找到: ${id}`);
+            return null;
+        }
+    }
+
+    async loadCoreGameFiles() {
+
+        const gameConfig = this.config.gameconfig;
+        // console.log('🔍 gameConfig:', gameConfig);
+
+        // 将 gameconfig 转换为 preloadjs 期望的数组格式
+        const mainJson = [];
+
+        if (gameConfig && gameConfig.scripts) {
+            mainJson.push(...gameConfig.scripts);
+        }
+        if (gameConfig && gameConfig.sounds) {
+            mainJson.push(...gameConfig.sounds);
+        }
+        if (gameConfig && gameConfig.images) {
+            mainJson.push(...gameConfig.images);
+        }
+
+        // console.log('📦 准备加载的资源清单:', mainJson);
+
+        if (mainJson.length === 0) {
+            console.log('⚠️ 没有资源需要加载，直接完成');
+            return Promise.resolve();
+        }
+
+        return new Promise((resolve) => {
+            const loader = new createjs.LoadQueue(false);
+
+            loader.on("fileload", (evt) => {
+                const item = evt.item;
+                const id = item.id;
+                const result = evt.result;
+
+                switch (item.type) {
+                    case createjs.Types.JAVASCRIPT:
+                        if (id === this.compName) {
+                            this.pubComp = AdobeAn.getComposition(this.commCode);
+                            this.pubLib = this.pubComp.getLibrary();
+                        }
+                        if (id === this.mainName) {
+                            this.mainComp = AdobeAn.getComposition(this.mainCode);
+                            this.mainLib = this.mainComp.getLibrary();
+                        }
+                        break;
+
+                    case createjs.Types.JSON:
+                        if (id === "resdata_" + this.mainName) {
+                            this.soundArr = [];
+                            this.imgArr = [];
+                            for (const k in result) {
+                                if (result[k].soundData) {
+                                    const route = result[k].route || "";
+                                    this.soundArr.push({
+                                        "id": result[k].soundid,
+                                        "src": "sounds/" + route + result[k].soundData + ".mp3"
+                                    });
+                                }
+                                if (result[k].imgData) {
+                                    const image = result[k].image || "";
+                                    this.imgArr.push({
+                                        "id": result[k].imgid,
+                                        "src": "images/" + image + result[k].imgData
+                                    });
+                                }
+                            }
+                        }
+                        break;
+                }
+            });
+
+            loader.on("complete", () => {
+                this.goPlayFrameEnd(this.gl_loadBar, 10);
+                resolve();
+            });
+
+            loader.loadManifest(mainJson);
+        });
+    }
+
+    loadScript(src) {
+        return new Promise((resolve, reject) => {
+            // 检查脚本是否已经加载过
+            if (this.loadedScripts && this.loadedScripts.has(src)) {
+                // console.log(`脚本已缓存: ${src}`);
+                resolve();
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.async = false;
+            script.src = src;
+            script.onload = () => {
+                // 标记为已加载
+                if (!this.loadedScripts) this.loadedScripts = new Set();
+                this.loadedScripts.add(src);
+
+                script.remove();
+                resolve();
+            };
+            script.onerror = (error) => {
+                console.error(`脚本加载失败: ${src}`, error);
+                reject(error);
+            };
+            document.body.appendChild(script);
+        });
+    }
+
+    async loadImageResources() {
+        if (this.imgArr.length === 0) return;
+
+        return new Promise((resolve) => {
+            const loader = new createjs.LoadQueue(false);
+
+            loader.on("fileload", (evt) => {
+                const item = evt.item;
+                const id = item.id;
+
+                // 处理公共组件图片
+                if (this.pubComp && id === this.imgArr[0].id) {
+                    const images = this.pubComp.getImages();
+                    if (evt && evt.item.type === "image") {
+                        images[evt.item.id] = evt.result;
+                    }
+
+                    const ss = this.pubComp.getSpriteSheet();
+                    const lib = this.pubComp.getLibrary();
+                    const ssMetadata = lib.ssMetadata;
+
+                    for (let i = 0; i < ssMetadata.length; i++) {
+                        ss[ssMetadata[i].name] = new createjs.SpriteSheet({
+                            "images": [loader.getResult(ssMetadata[i].name)],
+                            "frames": ssMetadata[i].frames
+                        });
+                    }
+                }
+
+                // 处理主游戏组件图片
+                if (this.mainComp) {
+                    const main_lib = this.mainComp.getLibrary();
+                    const main_ss = this.mainComp.getSpriteSheet();
+                    const main_ssMetadata = main_lib.ssMetadata;
+
+                    for (const k in main_lib.properties.manifest) {
+                        const images = this.mainComp.getImages();
+
+                        if (id === main_lib.properties.manifest[k].id) {
+                            if (evt && evt.item.type === "image") {
+                                images[evt.item.id] = evt.result;
+                            }
+
+                            for (let i = 0; i < main_ssMetadata.length; i++) {
+                                if (id === main_ssMetadata[i].name) {
+                                    main_ss[main_ssMetadata[i].name] = new createjs.SpriteSheet({
+                                        "images": [loader.getResult(main_ssMetadata[i].name)],
+                                        "frames": main_ssMetadata[i].frames
+                                    });
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+
+            loader.on("complete", () => {
+                this.goPlayFrameEnd(this.gl_loadBar, 100);
+                setTimeout(() => {
+                    this.stage.removeAllChildren();
+                    resolve();
+                }, 500);
+            });
+
+            loader.loadManifest(this.imgArr);
+        });
+    }
+
+    async loadResource(resourceConfig, currentIndex, totalResources) {
+        const { id, src, type } = resourceConfig;
+
+        // console.log(`📦 正在加载 ${type}: ${src}`);
+        if (type === 'sound' && this.loadedSounds.has(id)) {
+            // console.log(`🎵 声音已加载，跳过: ${id}`);
+            return;
+        }
+
+        try {
+            switch (type) {
+                case 'script':
+                    // 脚本加载失败会抛出异常，阻止游戏运行
+                    await this.loadScript(src);
+                    // console.log(`✅ 脚本加载完成: ${src}`);
+                    break;
+
+                case 'sound':
+                    // For background music (bgm) we don't want to block the entire
+                    // preload process on its load. Start bgm loading in background
+                    // (fire-and-forget) so the progress bar and other resources
+                    // continue. Other sounds remain blocking to ensure critical
+                    // SFX are ready.
+                    try {
+                        if (id === 'bgm') {
+                            // start loading but don't await
+                            this.loadSound(id, src).catch(err => {
+                                console.warn(`⚠️ bgm background load failed: ${src}`, err && err.message ? err.message : err);
+                            });
+                        } else {
+                            await this.loadSound(id, src);
+                        }
+                        // console.log(`✅ 声音加载完成 (or started): ${src}`);
+                    } catch (soundError) {
+                        console.warn(`⚠️ 声音加载失败，但不影响游戏运行: ${src}`, soundError && soundError.message ? soundError.message : soundError);
+                    }
+                    break;
+
+                case 'image':
+                    // 图片加载失败不阻止游戏运行
+                    try {
+                        await this.loadImage(id, src);
+                        // console.log(`✅ 图片加载完成: ${src}`);
+                    } catch (imageError) {
+                        console.warn(`⚠️ 图片加载失败，但不影响游戏运行: ${src}`, imageError.message);
+                    }
+                    break;
+
+                default:
+                    console.warn(`未知的资源类型: ${type}`);
+                    break;
+            }
+
+        } catch (error) {
+            // 只有脚本加载失败才会到这里，这种情况下需要记录严重错误
+            console.error(`❌ 关键资源加载失败: ${src}`, error);
+            throw error; // 重新抛出脚本加载错误
+        }
+
+        // 更新进度条
+        const progress = (currentIndex + 1) / totalResources;
+        this.updateLoadingProgress(progress);
+
+        // console.log(`📊 加载进度: ${currentIndex + 1}/${totalResources} (${Math.round(progress * 100)}%)`);
+
+        // 每个资源加载完成后稍微延迟，让进度条动画更平滑
+        await new Promise(resolve => setTimeout(resolve, 150));
+    }
+
+    async loadSound(id, src) {
+        return new Promise((resolve, reject) => {
+            if (!this.soundInitialized) {
+                try {
+                    createjs.Sound.registerPlugins([createjs.WebAudioPlugin]);//
+                    createjs.Sound.alternateExtensions = ["mp3", "ogg"];
+                    createjs.Sound.muted = true; // 初始状态静音
+                    this.soundInitialized = true;
+                } catch (error) {
+                    console.error('🎵 SoundJS 初始化失败:', error);
+                    reject(new Error(`SoundJS initialization failed: ${error.message}`));
+                    return;
+                }
+            }
+
+            const timeout = setTimeout(() => {
+                console.warn(`🎵 声音加载超时: ${id} (${src})`);
+                reject(new Error(`Sound load timeout: ${src}`));
+            }, 10000);
+
+            const onFileLoad = (event) => {
+                if (event.id === id) {
+                    clearTimeout(timeout);
+                    createjs.Sound.removeEventListener("fileload", onFileLoad);
+                    createjs.Sound.removeEventListener("fileerror", onFileError);
+                    this.loadedSounds.set(id, src);
+                    // createjs.Sound.play(id, { volume: 0 });
+                    resolve();
+                }
+            };
+
+            const onFileError = (event) => {
+                if (event.id === id) {
+                    clearTimeout(timeout);
+                    createjs.Sound.removeEventListener("fileload", onFileLoad);
+                    createjs.Sound.removeEventListener("fileerror", onFileError);
+                    console.error(`🎵 声音文件加载失败: ${id}`, event);
+                    reject(new Error(`Sound load failed: ${src} - ${event.message || 'Unknown error'}`));
+                }
+            };
+
+            createjs.Sound.addEventListener("fileload", onFileLoad);
+            createjs.Sound.addEventListener("fileerror", onFileError);
+
+            try {
+                createjs.Sound.registerSound(src, id);
+            } catch (error) {
+                clearTimeout(timeout);
+                createjs.Sound.removeEventListener("fileload", onFileLoad);
+                createjs.Sound.removeEventListener("fileerror", onFileError);
+                reject(new Error(`Failed to register sound: ${src} - ${error.message}`));
+            }
+        });
+    }
+
+
+    async loadImage(id, src) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+
+            // 设置超时机制（15秒）
+            const timeout = setTimeout(() => {
+                console.warn(`🖼️ 图片加载超时: ${id} (${src})`);
+                reject(new Error(`Image load timeout: ${src}`));
+            }, 15000);
+
+            img.onload = () => {
+                clearTimeout(timeout);
+
+                // 将图片存储到实例变量中
+                this.loadedImages.set(id, img);
+
+                // 同时存储到全局对象中供游戏使用（向后兼容）
+                if (!window.gameImages) window.gameImages = {};
+                window.gameImages[id] = img;
+
+                // console.log(`🖼️ 图片加载成功: ${id} (${img.width}x${img.height})`);
+                resolve(img);
+            };
+
+            img.onerror = (error) => {
+                clearTimeout(timeout);
+                console.error(`🖼️ 图片加载失败: ${id}`, error);
+                reject(new Error(`Image load failed: ${src} - ${error.message || 'Unknown error'}`));
+            };
+
+            // 设置跨域属性（如果需要）
+            img.crossOrigin = 'anonymous';
+            img.src = src;
+        });
+    }
+}
+
+// 页面加载完成后启动引擎
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.__GAME_ENGINE_INSTANCE__) {
+        console.warn('⚠️ 引擎实例已存在，跳过创建');
+        return;
+    }
+    const engine = new GameEngine();
+    engine.init().catch(error => {
+        console.error('Game engine failed to start:', error);
+    });
+});
+
+/***/ }),
+
+/***/ 804:
+/***/ (() => {
+
+/**
+ * 抽卡游戏类
+ */
+class CardGame {
+    constructor() {
+        this.stage = null;
+        this.exportRoot = null;
+        this.engine = null;
+        this.scene = null; // gamescense实例引用
+        this.loadedSounds = null;
+
+        // 游戏状态
+        this.isDrawing = false;
+        this.playerScore = 0;
+        this.drawCost = 100;
+
+        // UI元件引用
+        this.goButton = null;
+        this.cardContainer = null;
+        this.scoreDisplay = null;
+        this.block = null;
+
+        // console.log('🎴 CardGame 初始化完成');
+
+        // 卡牌配置
+        this.cardConfig = {
+            0: { name: '锤子', eggid: 7, rarity: 'hammer', probability: 0 },//+100
+            1: { name: '黄金龙', eggid: 6, rarity: 'legendary', probability: 70 },//+30
+            2: { name: '红龙', eggid: 5, rarity: 'legendary', probability: 80 },//+20
+            3: { name: '紫龙', eggid: 4, rarity: 'legendary', probability: 50 },//+50
+            4: { name: '黑龙', eggid: 0, rarity: 'evildragon', probability: 100 },//+0
+            5: { name: '灰龙', eggid: 1, rarity: 'common', probability: 90 },//+10
+            6: { name: '绿龙', eggid: 2, rarity: 'rare', probability: 40 },//+60
+            7: { name: '蓝龙', eggid: 3, rarity: 'epic', probability: 20 },//80
+        };
+
+        // UI元件
+        this.cardContainer = null;
+        this.cardSlots = [];
+        this.goButton = null;
+        this.scoreDisplay = null;
+
+        console.log('🎴 CardGame 初始化完成');
+    }
+    /**
+     * 初始化抽卡游戏
+     */
+    async init(gameData) {
+        console.log('🎴 抽卡游戏初始化开始...');
+
+        this.stage = gameData.stage;
+        this.exportRoot = gameData.exportRoot;
+        this.engine = gameData.engine;
+        this.scene = gameData.scene; // 保存gamescense实例引用
+        this.loadedSounds = gameData.loadedSounds;
+
+        // 获取玩家积分
+        this.playerScore = this.getPlayerScore();
+
+        // 查找 mc_victory 元件
+        const failureMc = utile.findMc(this.exportRoot, 'mc_failure');
+        this.card_reward_Mc = utile.findMc(failureMc, 'mc_card_reward');
+        if (!this.card_reward_Mc) {
+            console.error('❌ 未找到 mc_card_reward 元件');
+            return;
+        }
+
+        this.block = utile.findMc(this.card_reward_Mc, 'mc_card_container');
+        if (this.block) {
+            this.block.mouseEnabled = true;
+
+            // 绑定屏蔽层点击事件
+            if (!this.block.hasEventListener("click")) {
+                this.block.on('click', function (event) {
+                    console.log('🛡️ 胜利界面屏蔽层拦截了点击事件');
+                    event.stopImmediatePropagation();
+                    event.stopPropagation();
+                    event.preventDefault();
+                    return false;
+                });
+            }
+        }
+
+        // 卡牌容器
+        this.cardContainer = utile.findMc(this.card_reward_Mc, 'mc_card_container');
+        if (!this.cardContainer) {
+            console.warn('⚠️ 未找到 mc_card_container，动画逻辑将退化');
+        }
+
+        // GO 按钮
+        this.goButton = utile.findMc(this.card_reward_Mc, 'btn_go');
+        if (!this.goButton) {
+            console.error('❌ 未找到 btn_go');
+            return;
+        }
+
+        this.goButton.play();
+        // 初始化积分显示
+        // this.initScoreDisplay();
+
+        // 绑定事件
+        this.bindEvents();
+
+        console.log('✅ 抽卡游戏初始化完成');
+        console.log(`📽️ mc_card_container 总帧数: ${this.cardContainer.totalFrames}`);
+    }
+
+    // 新增：等待音效播放结束
+    playSoundWait(id) {
+        if (!this.engine || !this.loadedSounds || !this.loadedSounds.has(id)) {
+            return Promise.resolve();
+        }
+        return new Promise(resolve => {
+            try {
+                const inst = this.engine.playSound(id);
+                if (!inst || !inst.on) return resolve();
+                const done = () => resolve();
+                inst.on('complete', done);
+                inst.on('failed', done);
+                inst.on('interrupted', done);
+            } catch (e) {
+                resolve();
+            }
+        });
+    }
+
+    /**
+     * 初始化积分显示
+     */
+    initScoreDisplay() {
+        // 查找现有的积分显示元件
+        const scoreContainer = utile.findMc(this.cardContainer, 'mc_score');
+        if (scoreContainer) {
+            this.scoreDisplay = utile.findMc(scoreContainer, 'text_score');
+            if (this.scoreDisplay) {
+                this.updateScoreDisplay();
+                console.log('💰 积分显示初始化完成');
+            } else {
+                console.error('❌ 未找到 text_score 元件');
+            }
+        } else {
+            console.error('❌ 未找到 mc_score 元件');
+        }
+    }
+
+    /**
+     * 绑定事件
+     */
+    bindEvents() {
+        console.log('🔗 绑定抽卡事件...');
+
+        // 延迟绑定，确保在屏蔽层事件之后
+        setTimeout(() => {
+            // 移除可能存在的旧事件
+            this.goButton.removeAllEventListeners('click');
+
+            // 绑定新的点击事件
+            this.goButton.on('click', (event) => {
+                console.log('🎯 GO按钮被点击');
+                event.stopImmediatePropagation(); // 阻止事件继续传播到屏蔽层
+
+                ovo.showRewardedAd(() => {
+                     this.startCardDraw();
+                })
+                
+            });
+
+            // 设置按钮可点击
+            this.goButton.cursor = 'pointer';
+            this.goButton.mouseEnabled = true;
+
+            console.log('✅ GO按钮事件绑定完成');
+        }, 100);
+    }
+
+    /**
+     * 开始抽卡
+     */
+    async startCardDraw() {
+        this.goButton.stop();
+        if (!this.cardContainer || this.isDrawing) return;
+        this.isDrawing = true;
+        if (this.goButton) this.goButton.mouseEnabled = false;
+
+        try {
+            const result = this.getCardByProbability();
+            // 将抽卡结果写回服务端概率池（记录 boost），默认增量为1
+            try {
+                if (window.GameServer && typeof window.GameServer.applyCardBoost === 'function') {
+                    // 使用 n = (100 - probability) / 100 作为小数增量
+                    const prob = Number(result.probability) || 0;
+                    const n = Math.max(0, Math.min(1, (100 - prob) / 1000));
+                    if(n!==0){
+                        window.GameServer.applyCardBoost(result.eggid, n);
+                    }
+                }
+            } catch (e) { }
+            // 随机圈数（可调 5~8 / 6~9）
+            const rotations = 9 + Math.floor(Math.random() * 4); // 6~9
+            await this.spinToResultSimple(result, {
+                rotations,
+                framesPerTick: 1,   // 每 tick 前进帧数(提高=更快)
+                loopSound: true
+            });
+            this.playSound('cardReveal');
+            // this.showMessage(`恭喜获得: ${result.name}`);
+            this.showRewardedAd(result);
+        } catch (e) {
+            console.error('❌ 抽卡失败:', e);
+        } finally {
+            this.isDrawing = false;
+            if (this.goButton) this.goButton.mouseEnabled = true;
+        }
+    }
+
+    /**
+   * 简单恒速旋转：按固定帧步长推进；开始播放音效，结束立即停止
+   * @param {Object} cardResult
+   * @param {Object} opts { rotations, framesPerTick, loopSound }
+   */
+    spinToResultSimple(cardResult, opts = {}) {
+        return new Promise(resolve => {
+            const mc = this.cardContainer;
+            if (!mc || !mc.totalFrames) return resolve();
+
+            const totalFrames = mc.totalFrames;
+            const startFrame = mc.currentFrame || 0;
+            const targetFrame = this.getFrameByCardId(cardResult.id);
+
+            const rotations = Math.max(1, opts.rotations || 6);
+            const framesPerTick = Math.max(1, opts.framesPerTick || 6);
+
+            // 计算需要前进的总帧数（保证正向）
+            const forwardDelta = ((targetFrame - startFrame) + totalFrames) % totalFrames;
+            const totalAdvance = rotations * totalFrames + forwardDelta;
+
+            let advanced = 0;
+            let spinSoundInstance = null;
+
+            // 播放旋转音效（持续到结束）
+            if (opts.loopSound && this.engine && this.loadedSounds && this.loadedSounds.has('card')) {
+                try {
+                    spinSoundInstance = this.engine.playSound('card', { loop: -1, volume: 1 });
+                } catch (e) { }
+            }
+
+            mc.gotoAndStop(startFrame);
+
+            let finished = false;
+            const finish = () => {
+                this.goButton.play();
+                if (finished) return;
+                finished = true;
+                try {
+                    mc.gotoAndStop(targetFrame);
+                    if (spinSoundInstance) spinSoundInstance.stop && spinSoundInstance.stop();
+
+                } catch (e) { }
+                createjs.Ticker.off('tick', tickHandler);
+                resolve();
+            };
+
+            const tickHandler = () => {
+                if (finished) return;
+                const remain = totalAdvance - advanced;
+                if (remain <= 0) {
+                    finish();
+                    return;
+                }
+                const step = remain < framesPerTick ? remain : framesPerTick;
+                advanced += step;
+                const frame = (startFrame + advanced) % totalFrames;
+                mc.gotoAndStop(frame);
+                if (advanced >= totalAdvance) finish();
+            };
+
+            createjs.Ticker.on('tick', tickHandler);
+            // 兜底（极少数情况下防止意外不结束）
+            setTimeout(() => finish(), 30000);
+        });
+    }
+
+    /**
+  * 播放卡牌动画
+  */
+    /**
+       * 播放卡牌动画缓慢停止 + 等待音效(card.mp3)结束后才显示结果
+       * @param {string} soundId
+       */
+    async playCardAnimation(soundId = 'card') {
+        // console.log('🎬 播放卡牌动画并等待音效结束...');
+        return new Promise(async (resolve) => {
+            if (!this.cardContainer) {
+                console.error('❌ cardContainer 为空');
+                return resolve();
+            }
+
+            this.cardContainer.gotoAndStop(0);
+
+            const totalFrames = this.cardContainer.totalFrames;
+            let currentFrame = 0;
+            let phase = 'slow';
+            let spinning = true;
+            let soundFinished = false;
+
+            // 启动音效并等待
+            this.playSoundWait(soundId).then(() => {
+                soundFinished = true;
+            }).catch(() => { soundFinished = true; });
+
+            const slowSpeed = 100; // 前 30% 慢速
+            const fastSpeed = 30;  // 中段快速
+            const extraSpinFastSpeed = 40; // 等待音效时的额外旋转速度
+
+            // const tickSpin = () => {
+            //     if (!spinning) return;
+
+            //     // 选择当前速度
+            //     if (phase === 'slow') {
+            //         this.cardContainer.gotoAndStop(currentFrame % totalFrames);
+            //         currentFrame++;
+            //         if (currentFrame >= totalFrames * 0.3) {
+            //             phase = 'fast';
+            //         }
+            //         setTimeout(tickSpin, slowSpeed);
+            //     } else if (phase === 'fast') {
+            //         this.cardContainer.gotoAndStop(currentFrame % totalFrames);
+            //         currentFrame++;
+            //         if (currentFrame >= totalFrames * 2) {
+            //             phase = 'waitSound';
+            //         }
+            //         setTimeout(tickSpin, fastSpeed);
+            //     } else if (phase === 'waitSound') {
+            //         // 音效未结束：继续匀速转
+            //         if (!soundFinished) {
+            //             this.cardContainer.gotoAndStop(currentFrame % totalFrames);
+            //             currentFrame++;
+            //             setTimeout(tickSpin, extraSpinFastSpeed);
+            //         } else {
+            //             // 进入最终收敛
+            //             phase = 'final';
+            //             finalPhase();
+            //         }
+            //     }
+            // };
+
+            const finalPhase = () => {
+                // 根据概率确定最终卡牌
+                const cardResult = this.getCardByProbability();
+                const targetFrame = this.getFrameByCardId(cardResult.id);
+
+                const currentPos = currentFrame % totalFrames;
+                const frameDistance = Math.abs(targetFrame - currentPos);
+                const steps = Math.min(frameDistance, 10);
+                let step = 0;
+
+                const easeStep = () => {
+                    if (step < steps) {
+                        const progress = step / steps;
+                        const framePos = Math.round(currentPos + (targetFrame - currentPos) * progress);
+                        this.cardContainer.gotoAndStop(framePos % totalFrames);
+                        step++;
+                        setTimeout(easeStep, 100);
+                    } else {
+                        this.cardContainer.gotoAndStop(targetFrame);
+                        // console.log(`🎲 最终停在帧 ${targetFrame} -> ${cardResult.name}`);
+                        // 结果音效
+                        this.playSound('cardReveal');
+                        // this.showMessage(`恭喜获得: ${cardResult.name}`);
+                        this.showRewardedAd(cardResult);
+                        spinning = false;
+                        resolve();
+                    }
+                };
+                easeStep();
+            };
+
+            // tickSpin();
+        });
+    }
+
+    // /**
+    //  * 根据帧数获取对应的卡牌
+    //  * @param {number} frame - 动画停止的帧数
+    //  * @returns {Object} 卡牌配置对象
+    //  */
+    // getCardByFrame(frame) {
+    //     // 使用概率抽取卡牌，而不是简单的帧数映射
+    //     const randomNum = Math.random() * 100;
+    //     let currentProbability = 0;
+
+    //     for (const [cardId, config] of Object.entries(this.cardConfig)) {
+    //         currentProbability += config.probability;
+    //         if (randomNum <= currentProbability) {
+    //             return config;
+    //         }
+    //     }
+
+    //     // 默认返回灰龙
+    //     return this.cardConfig[0];
+    // }
+
+    /**
+     * 更新积分显示
+     */
+    updateScoreDisplay() {
+        if (this.scoreDisplay && this.scoreDisplay.text !== undefined) {
+            this.scoreDisplay.text = `${this.playerScore}`;
+        }
+    }
+
+
+    /**
+ * 根据概率获取卡牌
+ * @returns {Object} 卡牌配置对象（包含id）
+ */
+    getCardByProbability() {
+        // 将 cardConfig[].probability 视为权重（weight），更灵活且易于和转盘增量相加
+        const entries = Object.entries(this.cardConfig);
+        const types = entries.map(([id, cfg]) => ({ id, config: cfg }));
+
+        // 构造权重数组，负值或非数视为 0
+        const weights = types.map(t => {
+            const w = Number(t.config.probability);
+            return (isFinite(w) && w > 0) ? w : 0;
+        });
+
+        const total = weights.reduce((s, x) => s + x, 0);
+        // console.log(`🎲 权重总和: ${total}`);
+
+        // 全为 0 的兜底 -> 均匀随机
+        if (total <= 0) {
+            const idx = Math.floor(Math.random() * types.length);
+            // console.log(`⚠️ 所有权重为0，均匀随机选中 ${types[idx].config.name}`);
+            return { ...types[idx].config, id: types[idx].id };
+        }
+
+        // 快速路径：若所有权重相等（例如全 1 或全 100），直接均匀随机
+        const mn = Math.min(...weights);
+        const mx = Math.max(...weights);
+        if (mn === mx) {
+            const idx = Math.floor(Math.random() * types.length);
+            // console.log(`ℹ️ 权重相等，均匀随机选中 ${types[idx].config.name}`);
+            return { ...types[idx].config, id: types[idx].id };
+        }
+
+        // 标准加权随机（累减法）
+        let r = Math.random() * total;
+        for (let i = 0; i < types.length; i++) {
+            r -= weights[i];
+            if (r <= 0) {
+                // console.log(`✅ 按权重抽中: ${types[i].config.name} (weight=${weights[i]}/${total})`);
+                return { ...types[i].config, id: types[i].id };
+            }
+        }
+
+        // 浮点误差兜底
+        const last = types[types.length - 1];
+        // console.log(`⚠️ 浮点误差兜底，返回 ${last.config.name}`);
+        return { ...last.config, id: last.id };
+    }
+
+    /**
+     * 根据卡牌ID获取对应的帧数
+     * @param {string} cardId - 卡牌ID
+     * @returns {number} 对应的帧数
+     */
+    getFrameByCardId(cardId) {
+        const totalFrames = this.cardContainer.totalFrames;
+        const cardIndex = parseInt(cardId);
+        // 将8个卡牌平均分布到总帧数中
+        return Math.floor((cardIndex * totalFrames) / 8);
+    }
+
+    /**
+     * 调用激励广告
+     * @param {Object} cardResult - 抽中的卡牌结果
+     */
+    showRewardedAd(cardResult) {
+
+
+        // 这里调用激励广告API
+        // 假设广告成功后会调用回调函数
+        if (window.showRewardedVideo) {
+            window.showRewardedVideo(() => {
+                // 广告观看完成后的回调
+                this.onAdWatchComplete(cardResult);
+            });
+        } else {
+            console.log('🎬 激励广告API不可用，直接给予奖励');
+            this.onAdWatchComplete(cardResult);
+        }
+    }
+
+    /**
+     * 广告观看完成回调
+     * @param {Object} cardResult - 抽中的卡牌结果
+     */
+    onAdWatchComplete(cardResult) {
+        console.log(`🎉 广告观看完成，获得奖励: ${cardResult.name} (+${100 - cardResult.probability}分)`);
+
+        // 显示奖励提示文字（1秒后自动消失）
+        const rewardText = `获得 ${cardResult.name} (+${100 - cardResult.probability}分)`;
+        this.showRewardMessage(rewardText);
+
+        // 1秒后关闭失败面板并重新开始游戏
+        setTimeout(() => {
+            // 关闭失败面板并重新开始游戏
+            if (this.scene && typeof this.scene.failureHandler === 'function') {
+                this.scene.failureHandler(false);
+            } else {
+                console.warn('⚠️ scene.failureHandler 方法不可用');
+            }
+        }, 1000);
+    }
+
+    /**
+     * 显示奖励消息（1秒后自动消失）
+     */
+    showRewardMessage(message) {
+        console.log(`💬 奖励消息: ${message}`);
+
+        // 使用scene的tips方法在mc_tips中显示消息
+        if (this.scene && typeof this.scene.tips === 'function') {
+            this.scene.tips(message, null, "bold 28px Arial", "#FFD700", 1);
+        } else {
+            console.warn('⚠️ scene.tips 方法不可用，使用备用方式');
+            // 备用方式：直接创建文本对象
+            const messageText = new createjs.Text(message, 'bold 24px Arial', '#FFD700');
+            messageText.textAlign = 'center';
+            messageText.x = this.cardContainer.x || 400;
+            messageText.y = (this.cardContainer.y || 300) - 100;
+            messageText.alpha = 0;
+
+            this.stage.addChild(messageText);
+
+            // 奖励消息动画（1秒后消失）
+            createjs.Tween.get(messageText)
+                .to({ alpha: 1, y: messageText.y - 20 }, 300)
+                .wait(700) // 等待0.7秒，总共1秒
+                .to({ alpha: 0, y: messageText.y - 40 }, 300)
+                .call(() => {
+                    this.stage.removeChild(messageText);
+                });
+        }
+    }
+
+    /**
+     * 播放音效
+     */
+    playSound(soundName) {
+        if (this.engine && this.loadedSounds && this.loadedSounds.has(soundName)) {
+            this.engine.playSound(soundName);
+        }
+    }
+
+    /**
+     * 获取玩家积分
+     */
+    getPlayerScore() {
+        return 1000; // 默认积分
+    }
+
+    /**
+     * 显示抽卡界面
+     */
+    show() {
+        if (this.cardContainer) {
+            this.cardContainer.visible = true;
+        }
+    }
+
+    /**
+     * 隐藏抽卡界面
+     */
+    hide() {
+        if (this.cardContainer) {
+            this.cardContainer.visible = false;
+        }
+    }
+}
+
+// 导出类
+window.CardGame = CardGame;
+
+/***/ }),
+
+/***/ 864:
+/***/ ((module, __unused_webpack___webpack_exports__, __webpack_require__) => {
+
+"use strict";
+/* module decorator */ module = __webpack_require__.hmd(module);
+// Android Ad SDK for Google Play platform
+// Only initializes if platform is set to "googleplay"
+
+// Helper: call Android native ad and wait for native to call back via window.SuccessAd
+function androidShowAdWithCallback(callNativeFn, callback, timeoutMs) {
+    timeoutMs = timeoutMs || 8000; // default 8s timeout
+    let called = false;
+    const prev = window.SuccessAd;
+
+    function cleanup() {
+        try {
+            if (prev === undefined) delete window.SuccessAd;
+            else window.SuccessAd = prev;
+        } catch (e) { }
+    }
+
+    function onDone(success) {
+        if (called) return;
+        called = true;
+        cleanup();
+        try { resumeAudioAfterAd(); } catch (e) { }
+        try { if (typeof callback === 'function') callback(success === false ? false : true); } catch (e) { }
+    }
+
+    // Install temporary global that native will call
+    try {
+        window.SuccessAd = function () {
+            try { console.log('[ovosdk] native SuccessAd called'); } catch (e) { }
+            onDone(true);
+        };
+    } catch (e) { }
+
+    // Safety timeout
+    const timer = setTimeout(function () {
+        try { console.log('[ovosdk] androidShowAd timeout'); } catch (e) { }
+        onDone(false);
+    }, timeoutMs);
+
+    // Wrap onDone to also clear timer
+    const origOnDone = onDone;
+    onDone = function (success) {
+        clearTimeout(timer);
+        origOnDone(success);
+    };
+
+    // Pause audio then call native
+    try { pauseAudioForAd(); } catch (e) { }
+
+    try {
+        callNativeFn();
+    } catch (e) {
+        try { console.log('[ovosdk] callNativeFn failed, falling back', e); } catch (e) { }
+        // fallback: immediately resume and call callback(false)
+        onDone(false);
+    }
+
+    return {
+        cancel: function () {
+            onDone(false);
+        }
+    };
+}
+
+// Define android_ad object with ad methods
+const android_ad = {
+    // Initialize Android Ad SDK
+    init: function() {
+        // Only initialize if platform is googleplay
+        if (window.Platform !== "googleplay") {
+            console.log('[android_ad] Platform is not googleplay, skipping initialization');
+            return;
+        }
+
+        console.log('[android_ad] Initializing for Google Play platform');
+
+        // Initialize GA4
+        this.initGA4();
+
+        // Set up gtag wrapper
+        this.setupGtagWrapper();
+
+        // Attach methods to window
+        this.attachToWindow();
+    },
+
+    // Initialize Google Analytics 4
+    initGA4: function() {
+        try {
+            if (typeof window !== 'undefined' && typeof document !== 'undefined') {
+                const gameConfig = {
+                    gameid: "GooglePlay",
+                    dev_name: "Dragon Egg"
+                };
+
+                const script = document.createElement("script");
+                script.async = true;
+                script.src = "https://www.googletagmanager.com/gtag/js?id=G-PM5MNMLL3R";
+                script.setAttribute("crossorigin", "anonymous");
+
+                script.onload = () => {
+                    // Set consent configuration
+                    window.gtag("consent", "default", {
+                        ad_storage: "granted",
+                        ad_user_data: "granted",
+                        ad_personalization: "granted",
+                        analytics_storage: "granted"
+                    });
+
+                    // Initialize gtag
+                    window.gtag("js", new Date());
+                    window.gtag("set", "cookie_flags", "SameSite=None;Secure");
+                    window.gtag("config", "G-PM5MNMLL3R", {
+                        game_id: gameConfig.gameid,
+                        dev_name: gameConfig.dev_name
+                    });
+
+                    console.log('✅ gtag.js loaded with consent and game config');
+                };
+
+                script.onerror = function (err) {
+                    console.warn('⚠️ gtag.js failed to load', err);
+                };
+
+                // Initialize dataLayer
+                window.dataLayer = window.dataLayer || [];
+
+                document.getElementsByTagName("head")[0].appendChild(script);
+            }
+        } catch (e) {
+            console.error('[android_ad] GA4 initialization failed', e);
+        }
+    },
+
+    // Set up enhanced gtag wrapper
+    setupGtagWrapper: function() {
+        let gamePlayTimeIntervalSet = false;
+
+        window.gtag = function () {
+            let args = [...arguments];
+            let eventAction = args[1];
+            let eventParams = args[2];
+
+            // Allow specific gtag commands and events
+            const allowedCommands = ["set", "js", "config", "consent"];
+            const allowedGameEvents = ["game_start", "level_start", "level_end"];
+            const allowedSdkEvents = [
+                "ad_impression", "ad_click", "ad_error", "earn_virtual_currency",
+                "select_content", "game_play_time", "tutorial_complete",
+                "game_reward_open", "game_interstitialad_open",
+                "game_reward_dismissed", "game_interstitialad",
+                "game_reward", "game_reward_viewed", "game_interstitialad_viewed",
+                "click_ad"
+            ];
+
+            // Filter events: allow commands, game events, or SDK events with send: "sdk"
+            if (allowedCommands.includes(args[0]) ||
+                allowedGameEvents.includes(eventAction) ||
+                (allowedSdkEvents.includes(eventAction) && eventParams && eventParams.send === "sdk")) {
+
+                // Log filtered events
+                if (typeof window.__sdklog3 === 'function') {
+                    window.__sdklog3('gtag_filtered', arguments);
+                }
+
+                // Push to dataLayer
+                try {
+                    if (window.dataLayer && typeof window.dataLayer.push === 'function') {
+                        window.dataLayer.push(arguments);
+                    }
+                } catch (e) {
+                    console.log("dataLayer error:", e);
+                }
+            }
+
+            // Set up automatic game_play_time interval on first level_start
+            if (eventAction === "level_start" && !gamePlayTimeIntervalSet) {
+                gamePlayTimeIntervalSet = true;
+                setInterval(function () {
+                    if (typeof window.gtag === 'function') {
+                        window.gtag("event", "game_play_time", {
+                            send: "sdk"
+                        });
+                    }
+                }, 30000); // 30 seconds
+
+                console.log('🕒 Automatic game_play_time interval started (30s)');
+            }
+        };
+    },
+
+    // Attach methods to window
+    attachToWindow: function() {
+        window.showInterstitialAd = this.showInterstitialAd;
+        window.showRewardedAd = this.showRewardedAd;
+        window.showBannerAd = this.showBannerAd;
+        window.hideBannerAd = this.hideBannerAd;
+        window.vibrate = this.vibrate;
+    },
+
+    // Interstitial Ad
+    showInterstitialAd: function (callback, opts) {
+        opts = opts || {};
+        const timeoutMs = opts.timeoutMs || 8000;
+        try {
+            console.log('[android_ad] showInterstitialAd invoked');
+            // GA event: ad_impression
+            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                window.gtag('event', 'ad_impression', {
+                    ad_platform: 'android',
+                    ad_source: 'interstitial',
+                    ad_format: 'display',
+                    platform: window.Platform || 'unknown',
+                    send: 'sdk'
+                });
+            }
+        } catch (e) {}
+
+        if (typeof window.Android !== 'undefined' && typeof window.Android.showInterstitialAd === 'function') {
+            return androidShowAdWithCallback(
+                () => {
+                    try {
+                        window.Android.showInterstitialAd();
+                    } catch (e) {
+                        // GA event: ad_error
+                        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                            window.gtag('event', 'ad_error', {
+                                ad_platform: 'android',
+                                ad_source: 'interstitial',
+                                error_reason: 'native_call_failed',
+                                platform: window.Platform || 'unknown',
+                                send: 'sdk'
+                            });
+                        }
+                        throw e;
+                    }
+                },
+                (success) => {
+                    if (success) {
+                        // GA event: ad_click (assuming success means user interacted)
+                        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                            window.gtag('event', 'ad_click', {
+                                ad_platform: 'android',
+                                ad_source: 'interstitial',
+                                platform: window.Platform || 'unknown',
+                                send: 'sdk'
+                            });
+                        }
+                    } else {
+                        // GA event: ad_error
+                        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                            window.gtag('event', 'ad_error', {
+                                ad_platform: 'android',
+                                ad_source: 'interstitial',
+                                error_reason: 'closed_or_failed',
+                                platform: window.Platform || 'unknown',
+                                send: 'sdk'
+                            });
+                        }
+                    }
+                    if (typeof callback === 'function') callback(success);
+                },
+                timeoutMs
+            );
+        } else {
+            console.warn('[android_ad] Android.showInterstitialAd not available');
+            // GA event: ad_error
+            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                window.gtag('event', 'ad_error', {
+                    ad_platform: 'android',
+                    ad_source: 'interstitial',
+                    error_reason: 'not_available',
+                    platform: window.Platform || 'unknown',
+                    send: 'sdk'
+                });
+            }
+            if (typeof callback === 'function') callback(false);
+        }
+    },
+
+    // Rewarded Ad
+    showRewardedAd: function (callback, opts) {
+        opts = opts || {};
+        const timeoutMs = opts.timeoutMs || 10000; // Longer timeout for rewarded
+        try {
+            console.log('[android_ad] showRewardedAd invoked');
+            // GA event: ad_impression
+            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                window.gtag('event', 'ad_impression', {
+                    ad_platform: 'android',
+                    ad_source: 'rewarded',
+                    ad_format: 'video',
+                    platform: window.Platform || 'unknown',
+                    send: 'sdk'
+                });
+            }
+        } catch (e) {}
+
+        if (typeof window.Android !== 'undefined' && typeof window.Android.showRewardedAd === 'function') {
+            return androidShowAdWithCallback(
+                () => {
+                    try {
+                        window.Android.showRewardedAd();
+                    } catch (e) {
+                        // GA event: ad_error
+                        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                            window.gtag('event', 'ad_error', {
+                                ad_platform: 'android',
+                                ad_source: 'rewarded',
+                                error_reason: 'native_call_failed',
+                                platform: window.Platform || 'unknown',
+                                send: 'sdk'
+                            });
+                        }
+                        throw e;
+                    }
+                },
+                (success) => {
+                    if (success) {
+                        // GA event: earn_virtual_currency
+                        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                            window.gtag('event', 'earn_virtual_currency', {
+                                virtual_currency_name: 'reward',
+                                value: 1,
+                                ad_platform: 'android',
+                                platform: window.Platform || 'unknown',
+                                send: 'sdk'
+                            });
+                        }
+                    } else {
+                        // GA event: ad_error
+                        if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                            window.gtag('event', 'ad_error', {
+                                ad_platform: 'android',
+                                ad_source: 'rewarded',
+                                error_reason: 'closed_or_failed',
+                                platform: window.Platform || 'unknown',
+                                send: 'sdk'
+                            });
+                        }
+                    }
+                    if (typeof callback === 'function') callback(success);
+                },
+                timeoutMs
+            );
+        } else {
+            console.warn('[android_ad] Android.showRewardedAd not available');
+            // GA event: ad_error
+            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                window.gtag('event', 'ad_error', {
+                    ad_platform: 'android',
+                    ad_source: 'rewarded',
+                    error_reason: 'not_available',
+                    platform: window.Platform || 'unknown',
+                    send: 'sdk'
+                });
+            }
+            if (typeof callback === 'function') callback(false);
+        }
+    },
+
+    // Banner Ad
+    showBannerAd: function (callback, opts) {
+        opts = opts || {};
+        try {
+            console.log('[android_ad] showBannerAd invoked');
+            // GA event: ad_impression
+            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                window.gtag('event', 'ad_impression', {
+                    ad_platform: 'android',
+                    ad_source: 'banner',
+                    ad_format: 'display',
+                    platform: window.Platform || 'unknown',
+                    send: 'sdk'
+                });
+            }
+        } catch (e) {}
+
+        if (typeof window.Android !== 'undefined' && typeof window.Android.showBannerAd === 'function') {
+            try {
+                window.Android.showBannerAd();
+                if (typeof callback === 'function') callback(true);
+            } catch (e) {
+                console.error('[android_ad] showBannerAd failed', e);
+                // GA event: ad_error
+                if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                    window.gtag('event', 'ad_error', {
+                        ad_platform: 'android',
+                        ad_source: 'banner',
+                        error_reason: 'native_call_failed',
+                        platform: window.Platform || 'unknown',
+                        send: 'sdk'
+                    });
+                }
+                if (typeof callback === 'function') callback(false);
+            }
+        } else {
+            console.warn('[android_ad] Android.showBannerAd not available');
+            // GA event: ad_error
+            if (typeof window !== 'undefined' && typeof window.gtag === 'function') {
+                window.gtag('event', 'ad_error', {
+                    ad_platform: 'android',
+                    ad_source: 'banner',
+                    error_reason: 'not_available',
+                    platform: window.Platform || 'unknown',
+                    send: 'sdk'
+                });
+            }
+            if (typeof callback === 'function') callback(false);
+        }
+    },
+
+    hideBannerAd: function (callback) {
+        try {
+            console.log('[android_ad] hideBannerAd invoked');
+        } catch (e) {}
+
+        if (typeof window.Android !== 'undefined' && typeof window.Android.hideBannerAd === 'function') {
+            try {
+                window.Android.hideBannerAd();
+                if (typeof callback === 'function') callback(true);
+            } catch (e) {
+                console.error('[android_ad] hideBannerAd failed', e);
+                if (typeof callback === 'function') callback(false);
+            }
+        } else {
+            console.warn('[android_ad] Android.hideBannerAd not available');
+            if (typeof callback === 'function') callback(false);
+        }
+    },
+
+    // Vibration
+    vibrate: function (pattern) {
+        try {
+            console.log('[android_ad] vibrate invoked, pattern:', pattern);
+            
+            if (typeof window.Android !== 'undefined' && typeof window.Android.vibrate === 'function') {
+                try {
+                    if (Array.isArray(pattern)) {
+                        // 如果是数组，转换为字符串传递给 Android
+                        window.Android.vibrate(pattern.join(','));
+                    } else {
+                        window.Android.vibrate(String(pattern));
+                    }
+                    return true;
+                } catch (e) {
+                    console.error('[android_ad] Android.vibrate failed', e);
+                    return false;
+                }
+            } else {
+                console.warn('[android_ad] Android.vibrate not available');
+                return false;
+            }
+        } catch (e) {
+            console.error('[android_ad] vibrate error:', e);
+            return false;
+        }
+    }
+};
+
+// Initialize the SDK
+android_ad.init();
+
+// Export for module systems
+if ( true && module.exports) {
+    module.exports = android_ad;
+}
+/* unused harmony default export */ var __WEBPACK_DEFAULT_EXPORT__ = ((/* unused pure expression or super */ null && (android_ad)));
+
+/***/ }),
+
+/***/ 883:
+/***/ ((module) => {
+
+// 图形类型枚举
+const graphType = {
+    open: 0,
+    wall: 1,
+    clos: -1
+};
+
+// A* 4方向寻路算法类
+class OvoAstar4 {
+    constructor() {
+        this.grid = null;
+        this.mapWidth = 0;
+        this.mapHeight = 0;
+        this.moveD = 10;
+        this.moveR = 14;
+        this.move = [this.moveD, this.moveR];
+        this.mapCell = [];
+        this.lastOpenCell = null;
+        this.markTag = 0;
+    }
+
+    // 单例模式
+    static getInstance() {
+        if (!OvoAstar4._instance) {
+            OvoAstar4._instance = new OvoAstar4();
+        }
+        return OvoAstar4._instance;
+    }
+
+    // 静态变量只包含四个方向的移动（上、下、左、右）
+    static get posXarr() { return [0, 1, 0, -1]; }
+    static get posYarr() { return [-1, 0, 1, 0]; }
+
+    init(rows, clos, _size, gridCell) {
+        this.grid = gridCell;
+        this.mapWidth = rows;
+        this.mapHeight = clos;
+        this.moveD = _size;
+        this.move = [this.moveD, this.moveD, this.moveD, this.moveD];
+
+        let cellLen = this.mapWidth * this.mapHeight;
+        if (cellLen > this.mapCell.length) {
+            this.mapCell.length = cellLen;
+        }
+
+        let cid = 0;
+
+        for (let i = 0; i < this.mapWidth; ++i) {
+            for (let j = 0; j < this.mapHeight; ++j) {
+                this.mapCell[cid] = new MapCell();
+                this.mapCell[cid].x = i;
+                this.mapCell[cid].y = j;
+                this.mapCell[cid].unMove = gridCell[i][j].type !== graphType.open;
+                cid++;
+            }
+        }
+    }
+
+    search(p1, p2) {
+        if (p1.x === p2.x && p1.y === p2.y) return [];
+
+        this.reStartXY(p1.x, p1.y);
+
+        let isPath = false;
+        let currX = p1.x;
+        let currY = p1.y;
+
+        let currCell = this.mapCell[currX * this.mapHeight + currY];
+        currCell.lastX = -1;
+        currCell.lastY = -1;
+        currCell.x = currX;
+        currCell.y = currY;
+        currCell.markTag = this.markTag;
+        currCell.h = Math.abs(p2.x - p1.x) + Math.abs(p2.y - p1.y);
+
+        while (true) {
+            if (currX === p2.x && currY === p2.y) {
+                isPath = true;
+                break;
+            }
+
+            if (currCell.state !== MapCell.close) {
+                this.closeCell(currCell);
+            }
+
+            for (let i = 0; i < 4; i++) {
+                let x = currX + OvoAstar4.posXarr[i];
+                let y = currY + OvoAstar4.posYarr[i];
+
+                if (x < 0 || x >= this.mapWidth || y < 0 || y >= this.mapHeight)
+                    continue;
+
+                let cell = this.mapCell[x * this.mapHeight + y];
+                cell.unMove = this.grid[x][y].type !== graphType.open;
+                if (cell.unMove) continue;
+
+                let moveCost = this.moveD;
+                if (cell.markTag !== this.markTag || cell.state === MapCell.none) {
+                    cell.markTag = this.markTag;
+                    cell.lastX = currX;
+                    cell.lastY = currY;
+                    cell.dir = i;
+                    cell.g = currCell.g + moveCost;
+                    cell.h = Math.abs(p2.x - x) + Math.abs(p2.y - y);
+                    this.openCell(cell);
+                } else if (cell.state === MapCell.open) {
+                    if (cell.g > currCell.g + moveCost) {
+                        cell.lastX = currX;
+                        cell.lastY = currY;
+                        cell.dir = i;
+                        cell.g = currCell.g + moveCost;
+                        this.reopenCell(cell);
+                    }
+                }
+            }
+
+            if (!this.lastOpenCell) break;
+
+            currCell = this.lastOpenCell;
+            currX = currCell.x;
+            currY = currCell.y;
+        }
+
+        if (isPath) {
+            let result = [];
+            while (currCell && currCell.lastX >= 0 && currCell.lastY >= 0) {
+                let lastNode = {
+                    x: currCell.x,
+                    y: currCell.y,
+                    dir: currCell.dir,
+                };
+                result.unshift(lastNode);
+                if (currCell.lastX === p1.x && currCell.lastY === p1.y) break;
+                currCell = this.mapCell[currCell.lastX * this.mapHeight + currCell.lastY];
+            }
+            return result.length > 0 ? result : [];
+        }
+
+        return [];
+    }
+
+    reopenCell(cell) {
+        let f = cell.h + cell.g;
+        cell.f = f;
+
+        let nextCell = cell.next;
+        if (nextCell && nextCell.f > f) {
+            do {
+                nextCell = nextCell.next;
+            } while (nextCell && nextCell.f > f);
+            if (cell.prev) {
+                cell.prev.next = cell.next;
+            }
+            if (cell.next) {
+                cell.next.prev = cell.prev;
+            }
+            if (nextCell) {
+                cell.next = nextCell;
+                if (nextCell.prev) {
+                    cell.prev = nextCell.prev;
+                    nextCell.prev.next = cell;
+                } else {
+                    cell.prev = this.lastOpenCell;
+                    cell.next = null;
+                    this.lastOpenCell.next = cell;
+                    this.lastOpenCell = cell;
+                }
+            }
+        }
+    }
+
+    openCell(cell) {
+        cell.state = MapCell.open;
+        let f = cell.h + cell.g;
+        cell.f = f;
+        let lastCell = this.lastOpenCell;
+        if (!lastCell) {
+            this.lastOpenCell = cell;
+            cell.prev = null;
+            cell.next = null;
+        } else {
+            while (lastCell.f < f) {
+                if (lastCell.prev == null) {
+                    lastCell.prev = cell;
+                    cell.prev = null;
+                    cell.next = lastCell;
+                    return;
+                }
+                lastCell = lastCell.prev;
+            }
+
+            cell.prev = lastCell;
+            if (lastCell.next) {
+                cell.next = lastCell.next;
+                lastCell.next.prev = cell;
+                lastCell.next = cell;
+            } else {
+                cell.next = null;
+                lastCell.next = cell;
+                this.lastOpenCell = cell;
+            }
+        }
+    }
+
+    closeCell(cell) {
+        if (cell.state == MapCell.open) {
+            if (cell.prev) {
+                cell.prev.next = cell.next;
+            }
+            if (cell.next) {
+                cell.next.prev = cell.prev;
+            }
+            if (cell == this.lastOpenCell) {
+                this.lastOpenCell = cell.prev;
+            }
+        }
+        cell.state = MapCell.close;
+    }
+
+    reStartXY(x, y) {
+        let cell = this.mapCell[x * this.mapHeight + y];
+        cell.lastX = 0;
+        cell.lastY = 0;
+        cell.h = 0;
+        cell.g = 0;
+        cell.f = 0;
+        cell.prev = null;
+        cell.next = null;
+        cell.state = 0;
+        cell.dir = 0;
+        this.lastOpenCell = null;
+        this.markTag = this.markTag + 1;
+    }
+}
+
+// MapCell 类
+class MapCell {
+    static get none() { return 0; }
+    static get open() { return 1; }
+    static get close() { return 2; }
+
+    constructor() {
+        this.x = 0;
+        this.y = 0;
+        this.unMove = false;
+        this.markTag = 0;
+        this.lastX = -1;
+        this.lastY = -1;
+        this.h = 0;
+        this.g = 0;
+        this.f = 0;
+        this.prev = null;
+        this.next = null;
+        this.dir = 0;
+        this.state = MapCell.none;
+    }
+}
+
+// 导出类和常量
+if (typeof window !== 'undefined') {
+    window.OvoAstar4 = OvoAstar4;
+    window.MapCell = MapCell;
+    window.graphType = graphType;
+}
+if ( true && module.exports) {
+    module.exports = { OvoAstar4, MapCell, graphType };
+}
+
+
+/***/ }),
+
+/***/ 905:
+/***/ (() => {
+
+/**
+ * 排行榜管理模块
+ * 负责用户成就记录、排行榜数据管理
+ */
+class LeaderBoard {
+    constructor() {
+        // 排行榜数据存储键名
+        this.STORAGE_KEY = 'gameLeaderBoard';
+
+        // 排行榜数据缓存
+        this.leaderboardData = new Map();
+
+        // console.log('🏆 LeaderBoard 排行榜模块初始化完成');
+
+        // 加载排行榜数据
+        this.loadLeaderboardData();
+    }
+
+    /**
+     * 加载排行榜数据
+     */
+    loadLeaderboardData() {
+        try {
+            const data = localStorage.getItem(this.STORAGE_KEY);
+            if (data) {
+                const parsedData = JSON.parse(data);
+
+                // 转换为 Map 格式
+                for (const [userId, userRecord] of Object.entries(parsedData)) {
+                    this.leaderboardData.set(userId, userRecord);
+                }
+
+                // console.log(`📊 排行榜数据加载完成，共 ${this.leaderboardData.size} 条记录`);
+            } else {
+                // console.log('📊 首次使用，排行榜数据为空');
+            }
+        } catch (error) {
+            console.error('❌ 排行榜数据加载失败:', error);
+            this.leaderboardData = new Map();
+        }
+    }
+
+    /**
+     * 保存排行榜数据
+     */
+    saveLeaderboardData() {
+        try {
+            // 转换 Map 为普通对象
+            const dataToSave = {};
+            for (const [userId, userRecord] of this.leaderboardData.entries()) {
+                dataToSave[userId] = userRecord;
+            }
+
+            localStorage.setItem(this.STORAGE_KEY, JSON.stringify(dataToSave));
+            // console.log('💾 排行榜数据保存成功');
+            return true;
+        } catch (error) {
+            console.error('❌ 排行榜数据保存失败:', error);
+            return false;
+        }
+    }
+
+    /**
+     * 从 GameServer 获取当前用户数据
+     * @param {Object} gameServer - GameServer 实例
+     * @returns {Object|null} 当前用户数据
+     */
+    getCurrentUserStats(gameServer) {
+        if (!gameServer) {
+            console.error('❌ GameServer 未找到');
+            return {
+                userId: 'guest',
+                currentCoins: 0,
+                currentEggLevel: 0,
+                userStatus: null,
+                message: 'GameServer 未初始化，返回默认数据'
+            };
+        }
+
+        try {
+            // 获取用户状态
+            const userStatus = gameServer.checkUserStatus('currentUser');
+            if (!userStatus) {
+                console.error('❌ 用户状态获取失败');
+                return {
+                    userId: 'guest',
+                    currentCoins: 0,
+                    currentEggLevel: 0,
+                    userStatus: null,
+                    message: '用户状态获取失败，返回默认数据'
+                };
+            }
+
+            // 获取分数系统数据
+            const scoreSystem = gameServer.scoreSystem || { currentScore: 0 };
+
+            return {
+                userId: userStatus.userId || 'guest',
+                currentCoins: scoreSystem.currentScore,
+                currentEggLevel: userStatus.maxUnlockedEggType || 0,
+                userStatus: userStatus,
+                message: '用户数据获取成功'
+            };
+        } catch (error) {
+            console.error('❌ 获取用户数据失败:', error);
+            return {
+                userId: 'guest',
+                currentCoins: 0,
+                currentEggLevel: 0,
+                userStatus: null,
+                message: '发生错误，返回默认数据'
+            };
+        }
+    }
+
+    /**
+     * 更新用户记录
+     * @param {string} userId - 用户ID，可选，默认使用当前用户
+     */
+    updateUserRecord(userId = null) {
+        // console.log('🔄 更新用户排行榜记录...');
+
+        // 获取当前用户数据
+        const gameServer = window.GameServer || null;
+        const userStats = leaderboard.getCurrentUserStats(gameServer);
+
+        if (userStats.userStatus) {
+            // console.log(`✅ 用户数据: ID=${userStats.userId}, 金币=${userStats.currentCoins}, 蛋等级=${userStats.currentEggLevel}`);
+        } else {
+            console.warn(`⚠️ 用户数据不可用: ${userStats.message}`);
+        }
+
+        const targetUserId = userId || currentStats.userId;
+        const { currentCoins, currentEggLevel } = currentStats;
+
+        // console.log(`📊 当前用户数据 - ID: ${targetUserId}, 金币: ${currentCoins}, 蛋等级: ${currentEggLevel}`);
+
+        // 获取历史记录
+        const existingRecord = this.leaderboardData.get(targetUserId);
+
+        let needUpdate = false;
+        let newRecord = {
+            userId: targetUserId,
+            maxCoins: currentCoins,
+            maxEggLevel: currentEggLevel,
+            lastUpdateTime: Date.now(),
+            userName: `用户${targetUserId.slice(-6)}` // 简单的用户名生成
+        };
+
+        if (existingRecord) {
+            // 检查是否需要更新金币记录
+            if (currentCoins > existingRecord.maxCoins) {
+                // console.log(`🪙 金币新记录: ${existingRecord.maxCoins} -> ${currentCoins}`);
+                needUpdate = true;
+            } else {
+                newRecord.maxCoins = existingRecord.maxCoins;
+            }
+
+            // 检查是否需要更新蛋等级记录
+            if (currentEggLevel > existingRecord.maxEggLevel) {
+                // console.log(`🥚 蛋等级新记录: ${existingRecord.maxEggLevel} -> ${currentEggLevel}`);
+                needUpdate = true;
+            } else {
+                newRecord.maxEggLevel = existingRecord.maxEggLevel;
+            }
+
+            // 保留用户名
+            newRecord.userName = existingRecord.userName || newRecord.userName;
+        } else {
+            // 新用户，直接记录
+            // console.log(`👤 新用户记录: ${targetUserId}`);
+            needUpdate = true;
+        }
+
+        if (needUpdate) {
+            // 更新记录
+            this.leaderboardData.set(targetUserId, newRecord);
+            this.saveLeaderboardData();
+
+            // console.log(`✅ 用户 ${targetUserId} 排行榜记录已更新`);
+            // console.log(`🏆 最高金币: ${newRecord.maxCoins}, 最高蛋等级: ${newRecord.maxEggLevel}`);
+
+            return true;
+        } else {
+            // console.log(`📊 用户 ${targetUserId} 无新记录，无需更新`);
+            return false;
+        }
+    }
+
+    /**
+     * 获取排行榜（按金币排序）
+     * @param {number} limit - 返回条数限制，默认10条
+     * @returns {Array} 排行榜数组
+     */
+    getLeaderboard(limit = 10) {
+        // console.log('🏆 获取排行榜数据...');
+
+        // 转换为数组并按金币排序
+        const leaderboard = Array.from(this.leaderboardData.values())
+            .sort((a, b) => {
+                // 首先按金币排序
+                if (b.maxCoins !== a.maxCoins) {
+                    return b.maxCoins - a.maxCoins;
+                }
+                // 金币相同时按蛋等级排序
+                return b.maxEggLevel - a.maxEggLevel;
+            })
+            .slice(0, limit)
+            .map((record, index) => ({
+                rank: index + 1,
+                ...record
+            }));
+
+        // console.log(`📊 排行榜获取完成，共 ${leaderboard.length} 条记录`);
+        return leaderboard;
+    }
+
+    /**
+     * 获取用户排名
+     * @param {string} userId - 用户ID
+     * @returns {Object} 用户排名信息
+     */
+    getUserRank(userId) {
+        // console.log(`🔍 查询用户 ${userId} 的排名...`);
+
+        const userRecord = this.leaderboardData.get(userId);
+        if (!userRecord) {
+            // console.log(`❌ 用户 ${userId} 无排行榜记录`);
+            return null;
+        }
+
+        // 获取完整排行榜
+        const fullLeaderboard = this.getLeaderboard(1000); // 获取所有记录
+
+        // 查找用户排名
+        const userRankInfo = fullLeaderboard.find(record => record.userId === userId);
+
+        if (userRankInfo) {
+            // console.log(`🏆 用户 ${userId} 排名: ${userRankInfo.rank}`);
+            return {
+                rank: userRankInfo.rank,
+                totalUsers: fullLeaderboard.length,
+                userRecord: userRecord
+            };
+        } else {
+            // console.log(`❌ 用户 ${userId} 排名查询失败`);
+            return null;
+        }
+    }
+
+    /**
+     * 获取排行榜统计信息
+     */
+    getLeaderboardStats() {
+        const totalUsers = this.leaderboardData.size;
+        const allRecords = Array.from(this.leaderboardData.values());
+
+        const maxCoins = Math.max(...allRecords.map(r => r.maxCoins), 0);
+        const maxEggLevel = Math.max(...allRecords.map(r => r.maxEggLevel), 0);
+        const avgCoins = totalUsers > 0 ?
+            Math.round(allRecords.reduce((sum, r) => sum + r.maxCoins, 0) / totalUsers) : 0;
+
+        return {
+            totalUsers,
+            maxCoins,
+            maxEggLevel,
+            avgCoins
+        };
+    }
+
+    /**
+     * 清空排行榜数据（调试用）
+     */
+    clearLeaderboard() {
+        // console.log('🗑️ 清空排行榜数据...');
+        this.leaderboardData.clear();
+        localStorage.removeItem(this.STORAGE_KEY);
+        // console.log('✅ 排行榜数据已清空');
+    }
+
+    /**
+     * 打印排行榜数据（调试用）
+     */
+    printLeaderboard() {
+        // console.log('🏆 当前排行榜数据:');
+        const leaderboard = this.getLeaderboard(10);
+
+        leaderboard.forEach(record => {
+            // console.log(`  ${record.rank}. ${record.userName} - 金币: ${record.maxCoins}, 蛋等级: ${record.maxEggLevel}`);
+        });
+
+        const stats = this.getLeaderboardStats();
+        // console.log(`📊 统计: 总用户 ${stats.totalUsers}, 最高金币 ${stats.maxCoins}, 最高蛋等级 ${stats.maxEggLevel}`);
+    }
+}
+
+// 创建全局 LeaderBoard 实例
+window.LeaderBoard = new LeaderBoard();
+
+// console.log('🏆 LeaderBoard 模块加载完成');
+
+/***/ }),
+
+/***/ 911:
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+"use strict";
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   A: () => (__WEBPACK_DEFAULT_EXPORT__)
+/* harmony export */ });
+var utile = utile || {};
+
+/**
+ * 查找影片剪辑
+ * @param {Object} mc - 要搜索的容器对象
+ * @param {string} name - 要查找的元件名称
+ * @returns {Object|null} 找到的元件或null
+ */
+utile.findMc = function (mc, name) {
+    if (!mc || !name) {
+        console.warn('⚠️ findMc: 参数无效', { mc: !!mc, name });
+        return null;
+    }
+
+    // console.log(`🔍 在容器中查找元件: ${name}`);
+
+    // 检查当前元件本身
+    if (mc.name === name) {
+        // console.log(`✅ 找到目标元件 (自身): ${name}`);
+        return mc;
+    }
+
+    // 方法1: 直接通过名称查找
+    if (mc.getChildByName) {
+        const found = mc.getChildByName(name);
+        if (found) {
+            // console.log(`✅ 通过 getChildByName 找到元件: ${name}`);
+            return found;
+        }
+    }
+
+    // 方法2: 遍历查找名称匹配的元件
+    if (mc.children && mc.children.length > 0) {
+        for (let child of mc.children) {
+            const childName = child.name || '';
+            if (childName === name) {
+                // console.log(`✅ 通过遍历找到元件: ${name}`);
+                return child;
+            }
+        }
+    }
+
+    // 方法3: 检查构造函数名称
+    if (mc.children && mc.children.length > 0) {
+        for (let child of mc.children) {
+            const constructorName = child.constructor.name || '';
+            if (constructorName.toLowerCase().includes(name.toLowerCase()) ||
+                constructorName === name) {
+                // console.log(`✅ 通过构造函数名找到元件: ${name} (构造函数: ${constructorName})`);
+                return child;
+            }
+        }
+    }
+
+    // 方法4: 递归查找子元件
+    if (mc.children && mc.children.length > 0) {
+        for (let child of mc.children) {
+            const found = utile.findMc(child, name);
+            if (found) {
+                // console.log(`✅ 通过递归查找找到元件: ${name}`);
+                return found;
+            }
+        }
+    }
+
+    console.log(`❌ 未找到元件: ${name}`);
+    return null;
+}
+
+// ========== 简单可逆异或混淆工具（用于本地存储轻量加密 / 非高安全） ==========
+// 注意：此方法只是对明文做轻量混淆，不能替代真实加密；适合防止 casual 查看 localStorage
+utile._strToUint8 = function (str) {
+    try {
+        return new TextEncoder().encode(String(str));
+    } catch (e) {
+        // 兼容性回退
+        const arr = new Uint8Array(str.length);
+        for (let i = 0; i < str.length; i++) arr[i] = str.charCodeAt(i);
+        return arr;
+    }
+};
+
+utile._uint8ToStr = function (u8) {
+    try {
+        return new TextDecoder().decode(u8);
+    } catch (e) {
+        let s = '';
+        for (let i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]);
+        return s;
+    }
+};
+
+utile._base64Encode = function (u8) {
+    let s = '';
+    for (let i = 0; i < u8.length; i++) s += String.fromCharCode(u8[i]);
+    return btoa(s);
+};
+
+utile._base64Decode = function (b64) {
+    const s = atob(String(b64));
+    const u8 = new Uint8Array(s.length);
+    for (let i = 0; i < s.length; i++) u8[i] = s.charCodeAt(i);
+    return u8;
+};
+
+utile._xorBytes = function (dataU8, keyStr) {
+    const keyU8 = utile._strToUint8(String(keyStr || 'k'));
+    const out = new Uint8Array(dataU8.length);
+    if (!keyU8 || keyU8.length === 0) return dataU8;
+    for (let i = 0; i < dataU8.length; i++) {
+        out[i] = dataU8[i] ^ keyU8[i % keyU8.length];
+    }
+    return out;
+};
+
+/**
+ * 将对象加密为 base64 字符串（使用简单异或混淆）
+ * @param {Object} obj
+ * @param {string} key
+ * @returns {string|null}
+ */
+utile.xorEncryptObject = function (obj, key) {
+    try {
+        const json = JSON.stringify(obj);
+        const dataU8 = utile._strToUint8(json);
+        const x = utile._xorBytes(dataU8, key);
+        return utile._base64Encode(x);
+    } catch (e) {
+        console.error('❌ xorEncryptObject 失败:', e);
+        return null;
+    }
+};
+
+/**
+ * 从 base64 异或混淆串解密为对象
+ * @param {string} b64
+ * @param {string} key
+ * @returns {Object|null}
+ */
+utile.xorDecryptToObject = function (b64, key) {
+    try {
+        if (!b64) return null;
+        const u8 = utile._base64Decode(b64);
+        const plainU8 = utile._xorBytes(u8, key);
+        const json = utile._uint8ToStr(plainU8);
+        return JSON.parse(json);
+    } catch (e) {
+        console.error('❌ xorDecryptToObject 失败:', e);
+        return null;
+    }
+};
+
+
+/**
+ * 打印可用的子元件名称（用于调试）
+ * @param {Object} mc - 要检查的容器对象
+ */
+utile.logAvailableChildren = function (mc) {
+    console.log('🔍 可用的子元件列表:');
+    if (mc && mc.children) {
+        mc.children.forEach((child, index) => {
+            const name = child.name || 'unnamed';
+            const constructor = child.constructor.name || 'unknown';
+            console.log(`  ${index}: name="${name}", constructor="${constructor}"`);
+
+            // 特别标记包含特定关键词的元件
+            if (name.includes('guide') || constructor.includes('guide') ||
+                name.includes('egg') || constructor.includes('egg')) {
+                console.log(`    🎯 这可能是目标元件！`);
+            }
+        });
+    } else {
+        console.log('  ❌ 容器为空或没有子元件');
+    }
+}
+
+
+/**
+ * 默认不可见不绘制
+ * 使影片剪辑停止播放
+ */
+utile.goStop = function (mc, isShow) {
+    if (!mc) return;
+    if (mc["visible"] == undefined) return;
+    if (mc["visible"] == null) return;
+    if (mc["stop"] == undefined) return;
+    if (mc["stop"]) {
+        mc.gotoAndStop(0);
+    }
+    mc.visible = isShow || false;
+
+    if (mc["children"] && mc.children.length > 0) {
+        for (var k in mc.children) {
+            //if (mc.children[k]) mc.children[k].stop();
+            if (mc.children[k]["children"] && mc.children[k]["children"].length > 0) {
+                utile.goStop(mc.children[k], isShow);
+            }
+        }
+    }
+}
+
+utile.goPlay = function (mc) {
+    if (mc["visible"] != null || mc["visible"] != undefined) {
+
+        mc.visible = true;
+        mc.play();
+    };
+    if (mc["parent"] && mc["parent"]["play"]) {
+        utile.goPlay(mc["parent"]);
+    }
+}
+/**
+ * 
+ * @param {显示} mc 
+ */
+utile.toShow = function (mc) {
+
+    function downShow(mc) {
+        if (!mc) return;
+        if (mc["visible"] == undefined) return;
+        if (mc["visible"] == null) return
+        mc.visible = true;
+
+        if (mc["children"] && mc.children.length > 0) {
+            for (var k in mc.children) {
+                if (mc.children[k]["children"] && mc.children[k]["children"].length > 0) {
+                    downShow(mc.children[k])
+                }
+            }
+        }
+    }
+    downShow(mc);
+
+    function upShow(mc) {
+        if (!mc) return;
+        if (mc["visible"] == undefined) return;
+        if (mc["visible"] == null) return
+        mc.visible = true;
+        mc.visible = true;
+
+        if (mc["parent"] && mc["parent"]["play"]) {
+            upShow(mc["parent"]);
+        }
+    }
+
+    upShow(mc);
+}
+
+/**
+ * 从字库中随机文字
+ * long指定范围
+ * range取出范围
+ */
+utile.randomWord = function (long, range) {
+    var tempArr = [];
+    for (var k = 0; k < long; k++) {
+        tempArr.push(k);
+    }
+    var arr = [];
+    for (var j = 0; j < range; j++) {
+        var len = tempArr.length;
+        var n = Math.floor(Math.random() * len);
+        arr.push(tempArr.splice(n, 1)[0]);
+    }
+    return arr;
+}
+
+/**
+ * 正确答案只有一个的情况,随机出每轮5关的出题数组
+ * @param {long} 指定范围
+ * @param {totalLevel} 每轮关数
+ * @param {answerLength} 选项个数（每轮的关数）
+ * @param {maxTurn} 最大轮数
+ * @returns 
+ */
+var turnArr = [];
+var turnIndex = 0;
+utile.randomWordByTurn = function (long, totalLevel, answerLength, maxTurn) {
+    var result = [];
+
+    turnIndex++;
+
+    if (turnIndex > maxTurn) {
+        turnIndex = 1;
+    }
+
+    var startIndex = (turnIndex - 1) * totalLevel;
+    if (startIndex > (long - 1)) {
+        turnIndex = 1;
+    }
+
+    if (turnIndex == 1) {
+        turnArr = utile.randomWord(long, long);
+    }
+
+    var endIndex = turnIndex * totalLevel;
+    if (endIndex > turnArr.length) {
+        endIndex = turnArr.length;
+    }
+
+
+
+    var tempList = [];
+    for (var i = startIndex; i < endIndex; i++) {
+        tempList.push(turnArr[i]);
+    }
+
+    if (tempList.length < totalLevel) {
+        var tempArr = utile.copyAry(turnArr).slice(0, startIndex - 1);
+        tempArr = utile.getRandomByNum(tempArr, totalLevel - tempList.length);
+        tempList = tempList.concat(tempArr);
+    }
+
+    for (var j = 0; j < tempList.length; j++) {
+        var tObj = {};
+        tObj.answer = tempList[j];
+        var tOptions = utile.getRanNumWithout(turnArr, answerLength - 1, tObj.answer).concat([tObj.answer]);
+        utile.randomArray(tOptions)
+        tObj.options = tOptions;
+        result.push(tObj);
+    }
+
+
+
+    return result;
+}
+
+utile.randomWordByTurnNoAnswer = function (long, totalLevel, maxTurn) {
+    var result = [];
+
+    turnIndex++;
+
+    if (turnIndex > maxTurn) {
+        turnIndex = 1;
+    }
+
+    var startIndex = (turnIndex - 1) * totalLevel;
+    if (startIndex > (long - 1)) {
+        turnIndex = 1;
+    }
+
+    if (turnIndex == 1) {
+        turnArr = utile.randomWord(long, long);
+    }
+
+    var endIndex = turnIndex * totalLevel;
+    if (endIndex > turnArr.length) {
+        endIndex = turnArr.length;
+    }
+
+
+
+    var tempList = [];
+    for (var i = startIndex; i < endIndex; i++) {
+        tempList.push(turnArr[i]);
+    }
+
+    if (tempList.length < totalLevel) {
+        var tempArr = utile.copyAry(turnArr).slice(0, startIndex - 1);
+        tempArr = utile.getRandomByNum(tempArr, totalLevel - tempList.length);
+        tempList = tempList.concat(tempArr);
+    }
+
+    return tempList;
+}
+
+/**随机不重复数组 */
+utile.randomArr = function (a) {
+    var stack = [];
+    stack.push(a);
+    while (true) {
+        var ok = true;
+        if (stack.length >= 3) break;
+        var index = Math.floor(Math.random() * 10) + 1;
+        for (var k in stack) {
+            if (stack[k] == index) {
+                ok = false;
+            };
+        };
+        if (ok) {
+            stack.push(index);
+        }
+    };
+    return stack;
+}
+/**
+ * 随机范围内整数
+ */
+utile.randomInt = function (range) {
+    return Math.floor(Math.random() * range);
+}
+
+/** 获取随机数，包含min和max */
+utile.getRandom = function (min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+/** 获取范围内N个不重复的随机数 
+ * @param num: 数量
+*/
+utile.getMultRandom = function (min, max, num) {
+    if ((max - min) < num) return [];
+    let out = [];
+    for (var i = 0; i < num; ++i) {
+        let result = this.getRandom(min, max);
+        if (out.indexOf(result) != -1) {
+            --i;
+        } else {
+            out.push(result);
+        }
+    }
+    return out;
+}
+
+/** 打乱数组 */
+utile.randomArray = utile.randomAry = function (value) {
+    //Fisher–Yates随机算法:
+    let m = value.length, t, i;
+    while (m) {
+        i = Math.floor(Math.random() * m--);
+        t = value[m];
+        value[m] = value[i];
+        value[i] = t;
+    }
+}
+
+/**监听播放完成 */
+utile.addFrameEnd = function (taget, callback, tf) {
+    taget.timeline.addTween(
+        createjs.Tween.get(taget)
+            .wait(taget.totalFrames - 1)
+            .call(function () {
+                if (tf) {
+                    taget.gotoAndStop(taget.totalFrames - 2);
+                } else {
+                    taget.gotoAndStop(0)
+                }
+                taget.timeline.removeTween();
+                taget.removeAllEventListeners();
+                callback && callback(taget);
+            }).wait(1)
+    );
+}
+
+/**播放声音 */
+utile.addPlaySound = function (name, callback) {
+    var sound = createjs.Sound.play(name);
+    sound.name = name;
+    if (callback) {
+        sound.on("complete", function (evt) {
+            sound.removeAllEventListeners()
+            sound = null;
+            callback(evt)
+        });
+    }
+    //sound.on("failed", this.onErrorHandler, this);
+}
+/**延迟 */
+utile.delayTimer = function (time, callback) {
+    createjs.Tween.get(stage)
+        .wait(time || 1000)
+        .call(function () {
+            createjs.Tween.removeAllTweens();
+            if (callback) callback()
+        })
+}
+
+utile.get16To10 = function (num) {
+    var n = -1;
+    switch (num) {
+        case "A":
+            n = 10;
+            break;
+        case "B":
+            n = 11;
+            break;
+        case "C":
+            n = 12;
+            break;
+        case "D":
+            n = 13;
+            break;
+        case "E":
+            n = 14;
+            break;
+        case "F":
+            n = 15;
+            break;
+        case "G":
+            n = 16;
+            break;
+        default:
+            n = Number(num);
+            break;
+    }
+    return n;
+}
+utile.randomOK = function () {
+    return Math.random() > .5 ? true : false;
+}
+
+utile.randomSortArray = function (arr) {
+    var stack = [];
+    while (arr.length) {
+        var index = parseInt(Math.random() * arr.length);
+        stack.push(arr[index]);
+        arr.splice(index, 1);
+    }
+    return stack;
+}
+
+var whether = false;
+
+/**
+ * 生成不重复的随机数
+ * from: 开始数字（包含）
+ * to：结束数字（包含）
+ * exclued：需要排除的数组
+*/
+utile.getUniqueRandom = function (from, to, exclude) {
+    var tempArr = [];
+    var excludeArr = exclude ? exclude : [];
+
+    for (var i = from; i <= to; i++) {
+        if (excludeArr.indexOf(i) == -1) {
+            tempArr.push(i);
+        }
+    }
+
+    var randomIndex = Math.floor(Math.random() * tempArr.length);
+
+    return tempArr[randomIndex]
+}
+
+/** 随机从数组中取出count个元素 原数组不变 */
+utile.getRandomByNum = function (ary, count) {
+    if (!ary || ary.length == 0) return [];
+    let indexs = [], out = [], i;
+    for (i = 0; i < ary.length; ++i) {
+        indexs.push(i);
+    }
+    this.randomArray(indexs);
+    let length = Math.min(ary.length, count);
+    for (i = 0; i < length; ++i) {
+        out.push(ary[indexs[i]]);
+    }
+    return out;
+}
+
+utile.getRanNumWithout = function (ary, count, without) {
+    let newAry = utile.copyAry(ary)
+    let index = newAry.indexOf(without)
+    if (index != -1) {
+        newAry.splice(index, 1);
+    }
+    return this.getRandomByNum(newAry, count)
+}
+
+utile.copyAry = function (value) {
+    let out = [];
+    for (i = 0; i < value.length; ++i) {
+        out[i] = value[i];
+    }
+    return out;
+}
+
+
+utile.shake = function (mc) {
+    if (createjs.Tween.hasActiveTweens(mc)) {
+        return;
+    }
+
+    let initx = mc.x;
+    let inity = mc.y;
+    createjs.Tween.get(mc)
+        .to({ x: mc.x + 30 }, 30)
+        .wait(50)
+        .to({ x: mc.x - 30 }, 30)
+        .wait(50)
+        .to({ x: mc.x + 20 }, 20)
+        .wait(50)
+        .to({ x: mc.x - 20 }, 20)
+        .wait(50)
+        .to({ x: mc.x + 10 }, 10)
+        .wait(50)
+        .to({ x: mc.x - 10 }, 10)
+        .wait(50)
+        .call(() => {
+            mc.x = initx;
+            mc.y = inity;
+            createjs.Tween.removeTweens(mc);
+        })
+}
+
+
+utile.__sdklog = function (...args) {
+    if (true) return; // 生产环境不输出
+    // removed by dead control flow
+{}
+
+    // removed by dead control flow
+{}
+
+    // removed by dead control flow
+{}
+}
+
+
+utile.__sdklog2 = function (...args) {
+    if (true) return; // 生产环境不输出
+    // removed by dead control flow
+{}
+
+    // removed by dead control flow
+{}
+
+    // removed by dead control flow
+{}
+}
+
+
+utile.__sdklog3 = function (...args) {
+    if (true) return; // 生产环境不输出
+    // removed by dead control flow
+{}
+
+    // removed by dead control flow
+{}
+
+    // removed by dead control flow
+{}
+}
+
+/* harmony default export */ const __WEBPACK_DEFAULT_EXPORT__ = (utile);
+
+
+/***/ })
+
+/******/ 	});
+/************************************************************************/
+/******/ 	// The module cache
+/******/ 	var __webpack_module_cache__ = {};
+/******/ 	
+/******/ 	// The require function
+/******/ 	function __webpack_require__(moduleId) {
+/******/ 		// Check if module is in cache
+/******/ 		var cachedModule = __webpack_module_cache__[moduleId];
+/******/ 		if (cachedModule !== undefined) {
+/******/ 			return cachedModule.exports;
+/******/ 		}
+/******/ 		// Create a new module (and put it into the cache)
+/******/ 		var module = __webpack_module_cache__[moduleId] = {
+/******/ 			id: moduleId,
+/******/ 			loaded: false,
+/******/ 			exports: {}
+/******/ 		};
+/******/ 	
+/******/ 		// Execute the module function
+/******/ 		__webpack_modules__[moduleId](module, module.exports, __webpack_require__);
+/******/ 	
+/******/ 		// Flag the module as loaded
+/******/ 		module.loaded = true;
+/******/ 	
+/******/ 		// Return the exports of the module
+/******/ 		return module.exports;
+/******/ 	}
+/******/ 	
+/************************************************************************/
+/******/ 	/* webpack/runtime/define property getters */
+/******/ 	(() => {
+/******/ 		// define getter functions for harmony exports
+/******/ 		__webpack_require__.d = (exports, definition) => {
+/******/ 			for(var key in definition) {
+/******/ 				if(__webpack_require__.o(definition, key) && !__webpack_require__.o(exports, key)) {
+/******/ 					Object.defineProperty(exports, key, { enumerable: true, get: definition[key] });
+/******/ 				}
+/******/ 			}
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/harmony module decorator */
+/******/ 	(() => {
+/******/ 		__webpack_require__.hmd = (module) => {
+/******/ 			module = Object.create(module);
+/******/ 			if (!module.children) module.children = [];
+/******/ 			Object.defineProperty(module, 'exports', {
+/******/ 				enumerable: true,
+/******/ 				set: () => {
+/******/ 					throw new Error('ES Modules may not assign module.exports or exports.*, Use ESM export syntax, instead: ' + module.id);
+/******/ 				}
+/******/ 			});
+/******/ 			return module;
+/******/ 		};
+/******/ 	})();
+/******/ 	
+/******/ 	/* webpack/runtime/hasOwnProperty shorthand */
+/******/ 	(() => {
+/******/ 		__webpack_require__.o = (obj, prop) => (Object.prototype.hasOwnProperty.call(obj, prop))
+/******/ 	})();
+/******/ 	
+/************************************************************************/
+/******/ 	
+/******/ 	// startup
+/******/ 	// Load entry module and return exports
+/******/ 	// This entry module is referenced by other modules so it can't be inlined
+/******/ 	__webpack_require__(911);
+/******/ 	__webpack_require__(883);
+/******/ 	__webpack_require__(15);
+/******/ 	__webpack_require__(804);
+/******/ 	__webpack_require__(104);
+/******/ 	__webpack_require__(905);
+/******/ 	__webpack_require__(434);
+/******/ 	__webpack_require__(289);
+/******/ 	var __webpack_exports__ = __webpack_require__(801);
+/******/ 	
+/******/ })()
+;
+//# sourceMappingURL=bundle.js.map
