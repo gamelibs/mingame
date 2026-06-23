@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>人生选择器 - Life Grid</title>
+</head>
+<body>
+  <div id="app">
+    <header class="scroll-header">
+      <div class="title-block">
+        <h1>人生选择器</h1>
+        <span class="subtitle">书写属于你的人生故事</span>
+      </div>
+      <div class="controls">
+        <button id="load-life-btn" class="seal-btn secondary">加载人生</button>
+        <button id="save-life-btn" class="seal-btn secondary">保存人生</button>
+        <button id="auto-play-btn" class="seal-btn">自动人生</button>
+        <button id="reset-btn" class="seal-btn secondary">重新开始</button>
+        <select id="speed-select">
+          <option value="1000">慢读</option>
+          <option value="500" selected>常速</option>
+          <option value="200">快进</option>
+        </select>
+      </div>
+    </header>
+
+    <!-- 顶部：人生时间轴 -->
+    <section class="timeline-panel scroll-panel">
+      <h3 class="panel-title">人生时间轴</h3>
+      <div class="timeline-wrapper">
+        <span class="timeline-label start">出生</span>
+        <div id="timeline" class="timeline"></div>
+        <span class="timeline-label end">长生</span>
+      </div>
+    </section>
+
+    <!-- 移动端：顶部面板触发按钮 -->
+    <div class="mobile-only mobile-top-triggers">
+      <button id="mobile-timeline-btn" class="seal-btn secondary mobile-panel-btn">📈 时间轴</button>
+      <button id="mobile-status-btn" class="seal-btn secondary mobile-panel-btn">📊 当前状态</button>
+    </div>
+
+    <main class="main-layout">
+      <!-- 右侧区域：当前状态 + 人生日志 -->
+      <section class="top-panel">
+        <div id="attributes" class="attributes-card scroll-panel">
+          <div class="card-header">
+            <h3 class="panel-title">当前状态</h3>
+            <span id="current-age">年龄：1 岁</span>
+            <button id="state-editor-btn" class="seal-btn secondary state-editor-btn" title="全局规则配置">⚙️</button>
+          </div>
+          <div id="attributes-content"></div>
+        </div>
+
+        <div id="logs" class="logs-card scroll-panel">
+          <h3 class="panel-title">人生日志</h3>
+          <div id="logs-content"></div>
+        </div>
+      </section>
+
+      <!-- 中间区域：人生棋盘（始终居中） -->
+      <section class="center-panel scroll-panel">
+        <div class="board-header">
+          <div class="board-title-row">
+            <h2 class="panel-title">人生棋盘</h2>
+            <span class="board-size">10×10</span>
+          </div>
+          <p class="board-hint">点击格子选择你的人生事件</p>
+        </div>
+        <div id="grid" class="grid"></div>
+        <div id="board-legend" class="board-legend"></div>
+      </section>
+
+      <!-- 左侧区域：人生阶段 + 卡牌库 -->
+      <section class="bottom-panel">
+        <div id="life-stages-card" class="scroll-panel">
+          <h3 class="panel-title">人生阶段</h3>
+          <div id="life-stages"></div>
+        </div>
+
+        <div id="card-library" class="card-library scroll-panel">
+          <div class="library-header">
+            <h3 class="panel-title">人生卡牌库</h3>
+            <span id="library-stats"></span>
+          </div>
+          <div id="library-tags"></div>
+        </div>
+      </section>
+    </main>
+
+    <!-- 移动端：底部面板触发按钮 -->
+    <div class="mobile-only mobile-bottom-triggers">
+      <button class="seal-btn secondary mobile-panel-btn" data-drawer="logs">📜 日志</button>
+      <button class="seal-btn secondary mobile-panel-btn" data-drawer="stages">🌱 阶段</button>
+      <button class="seal-btn secondary mobile-panel-btn" data-drawer="library">🃏 卡牌库</button>
+    </div>
+  </div>
+
+  <!-- 事件卡弹窗 -->
+  <div id="event-modal" class="event-modal hidden">
+    <div class="event-modal-backdrop"></div>
+    <div class="event-modal-content">
+      <button id="event-modal-close" class="event-modal-close" aria-label="关闭">×</button>
+      <div id="event-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- 加载人生弹窗 -->
+  <div id="load-life-modal" class="life-modal hidden">
+    <div class="life-modal-backdrop"></div>
+    <div class="life-modal-content">
+      <button id="load-life-modal-close" class="life-modal-close" aria-label="关闭">×</button>
+      <h2>加载人生数据</h2>
+      <div class="life-modal-section">
+        <div class="life-modal-section-header">
+          <h3>自动人生案例</h3>
+          <button id="toggle-generated-cases-btn" class="seal-btn secondary small">删除全部案例</button>
+        </div>
+        <div id="generated-cases-list" class="life-list"></div>
+      </div>
+      <div class="life-modal-section">
+        <h3>本地保存</h3>
+        <div id="saved-life-list" class="life-list"></div>
+      </div>
+      <div class="life-modal-section">
+        <h3>导入文件</h3>
+        <input type="file" id="import-life-file" accept=".json" />
+      </div>
+    </div>
+  </div>
+
+  <!-- 保存人生弹窗 -->
+  <div id="save-life-modal" class="life-modal hidden">
+    <div class="life-modal-backdrop"></div>
+    <div class="life-modal-content">
+      <button id="save-life-modal-close" class="life-modal-close" aria-label="关闭">×</button>
+      <h2>保存人生数据</h2>
+      <div class="life-modal-section">
+        <label for="save-life-name">人生名称</label>
+        <input type="text" id="save-life-name" placeholder="例如：平凡而幸福的一生" />
+      </div>
+      <div class="life-modal-actions">
+        <button id="confirm-save-life-btn" class="seal-btn">保存到本地</button>
+        <button id="download-life-btn" class="seal-btn secondary">下载 JSON</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 人生目标选择弹窗 -->
+  <div id="life-goal-modal" class="life-goal-modal hidden">
+    <div class="life-goal-modal-backdrop"></div>
+    <div class="life-goal-modal-content">
+      <div id="life-goal-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- 目标评价弹窗 -->
+  <div id="evaluation-modal" class="evaluation-modal hidden">
+    <div class="evaluation-modal-backdrop"></div>
+    <div class="evaluation-modal-content">
+      <button id="evaluation-modal-close" class="evaluation-modal-close" aria-label="关闭">×</button>
+      <div id="evaluation-modal-body"></div>
+    </div>
+  </div>
+
+  <!-- AI 开局寄语弹窗 -->
+  <div id="ai-opening-modal" class="ai-opening-modal hidden">
+    <div class="ai-opening-modal-backdrop"></div>
+    <div class="ai-opening-modal-content">
+      <div class="ai-opening-modal-header">
+        <h2>🌟 AI 开局寄语</h2>
+      </div>
+      <div id="ai-opening-modal-body" class="ai-opening-modal-body">正在书写你的人生开场白……</div>
+      <div class="ai-opening-modal-footer">
+        <button id="ai-opening-modal-start" class="seal-btn">开始人生</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/web/main.ts"></script>
+</body>
+</html>

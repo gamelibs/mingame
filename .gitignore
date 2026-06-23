@@ -1,3 +1,43 @@
-.DS_Store
-
+# Dependencies
 node_modules/
+.pnpm-store/
+
+# Build outputs
+dist/
+dist-web/
+build/
+out/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Runtime / test artifacts
+test-results/
+playwright-report/
+coverage/
+.cache/
+*.local
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# Editor / OS
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+.temp/
+
+# Source-level backups (保留根目录 data.json.bak 作为配置对比基线)
+src/**/*.bak

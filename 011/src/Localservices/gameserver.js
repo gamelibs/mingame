@@ -52,7 +52,12 @@ class GameServer {
             maxUnlockedEggType: 1, // 最大解锁蛋类型
             totalScore: 0, // 总分数
             completedSteps: [] // 完成的步骤列表
-        }
+        };
+
+        // AAI 改造：关卡系统
+        this.level = 1;                  // 当前关卡
+        this.targetEggType = 4;          // 当前关卡目标蛋等级
+        this.spawnHistory = [];          // 每波生成记录，用于复活时回退
 
         // 寻路系统
         this.pathfindingGrid = null;
@@ -492,6 +497,192 @@ class GameServer {
 
 
     /**
+     * 获取关卡配置
+     * @param {number} level - 关卡等级
+     * @returns {Object} 关卡配置 { target, spawnCount, maxSpawnLevel }
+     */
+    getLevelConfig(level) {
+        const configs = [
+            { level: 1, target: 4, spawnCount: 2, maxSpawnLevel: 2, coinReward: 50 },
+            { level: 2, target: 4, spawnCount: 2, maxSpawnLevel: 2, coinReward: 60 },
+            { level: 3, target: 5, spawnCount: 3, maxSpawnLevel: 3, coinReward: 80 },
+            { level: 4, target: 5, spawnCount: 3, maxSpawnLevel: 3, coinReward: 100 },
+            { level: 5, target: 6, spawnCount: 3, maxSpawnLevel: 3, coinReward: 130 },
+            { level: 6, target: 6, spawnCount: 3, maxSpawnLevel: 4, coinReward: 160 },
+            { level: 7, target: 7, spawnCount: 3, maxSpawnLevel: 4, coinReward: 200 },
+            { level: 8, target: 7, spawnCount: 3, maxSpawnLevel: 4, coinReward: 250 }
+        ];
+
+        if (level >= 1 && level <= configs.length) {
+            return configs[level - 1];
+        }
+
+        // 无尽模式：每 3 关增加 1 个生成数量，上限 5 个
+        const extraLevels = level - configs.length;
+        return {
+            level: level,
+            target: 7,
+            spawnCount: Math.min(3 + Math.floor(extraLevels / 3), 5),
+            maxSpawnLevel: 4,
+            coinReward: 250 + Math.floor(extraLevels / 3) * 50
+        };
+    }
+
+    /**
+     * 结算关卡金币奖励
+     * @param {boolean} double - 是否双倍奖励
+     * @returns {Object} 结算结果 { success, coinEarned, totalScore, double }
+     */
+    claimLevelReward(double = false) {
+        try {
+            const config = this.getLevelConfig(this.level);
+            let coinReward = config.coinReward || 0;
+            if (double) {
+                coinReward *= 2;
+            }
+
+            // 复用 totalScore 作为金币总数
+            this.scoreSystem.totalScore = (this.scoreSystem.totalScore || 0) + coinReward;
+            this.scoreSystem.sessionScore = (this.scoreSystem.sessionScore || 0) + coinReward;
+            this.scoreSystem.currentScore = (this.scoreSystem.currentScore || 0) + coinReward;
+
+            // 更新最高分
+            if (this.scoreSystem.totalScore > (this.scoreSystem.bestScore || 0)) {
+                this.scoreSystem.bestScore = this.scoreSystem.totalScore;
+            }
+
+            this.saveCurrentGameState();
+
+            console.log(`💰 关卡 ${this.level} 奖励结算: +${coinReward} 金币 (双倍=${double}), 总金币: ${this.scoreSystem.totalScore}`);
+
+            return {
+                success: true,
+                coinEarned: coinReward,
+                totalScore: this.scoreSystem.totalScore,
+                bestScore: this.scoreSystem.bestScore,
+                double: double
+            };
+        } catch (error) {
+            console.error('❌ 关卡奖励结算失败:', error);
+            return { success: false, coinEarned: 0, totalScore: this.scoreSystem.totalScore, double: double };
+        }
+    }
+
+    /**
+     * 进入下一关
+     * @returns {Object} 下一关游戏数据
+     */
+    advanceLevel() {
+        this.level += 1;
+        const config = this.getLevelConfig(this.level);
+        this.targetEggType = config.target;
+
+        console.log(`🚀 进入第 ${this.level} 关，目标：合成 ${this.targetEggType} 级蛋`);
+
+        // 清空地图但保留分数和解锁等级
+        for (const cellId in this.mapState.cells) {
+            const cell = this.mapState.cells[cellId];
+            if (cell) {
+                cell.isEmpty = true;
+                cell.hasEgg = false;
+                cell.eggType = null;
+                cell.piece = null;
+                cell.occupied = false;
+            }
+        }
+        this.mapState.occupiedCells.clear();
+        this.mapState.emptyCells.clear();
+        for (let cellId = 0; cellId < this.mapConfig.totalCells; cellId++) {
+            this.mapState.emptyCells.add(cellId);
+        }
+        this.clearSelection();
+
+        // 清空历史生成记录
+        this.spawnHistory = [];
+
+        // 根据新关卡生成初始蛋
+        const newEggs = this.generateRandomEggsFromMapState(config.spawnCount);
+
+        this.saveCurrentGameState();
+
+        return {
+            success: true,
+            level: this.level,
+            targetEggType: this.targetEggType,
+            scoreSystem: this.scoreSystem,
+            data: {
+                eggSeat: newEggs.map(egg => egg.cellId),
+                eggType: newEggs.map(egg => egg.eggType),
+                pointSeat: []
+            },
+            unlockData: {
+                maxUnlockedEggType: this.maxUnlockedEggType || 1
+            },
+            message: `Level ${this.level} started`
+        };
+    }
+
+    /**
+     * 复活：移除最近 N 波生成的蛋
+     * @param {number} waveCount - 回退波数，默认 3
+     * @returns {Object} 复活结果
+     */
+    revive(waveCount = 3) {
+        console.log(`💖 尝试复活，回退最近 ${waveCount} 波生成的蛋...`);
+
+        try {
+            if (this.spawnHistory.length === 0) {
+                console.warn('⚠️ 没有生成记录，无法复活');
+                return { success: false, message: 'No spawn history' };
+            }
+
+            // 取出最近 waveCount 波
+            const wavesToRemove = this.spawnHistory.splice(-waveCount);
+            const removedCellIds = new Set();
+
+            for (const wave of wavesToRemove) {
+                for (const egg of wave.eggs) {
+                    const cellId = egg.cellId;
+                    const cell = this.mapState.cells[cellId];
+                    // 只移除仍然存在的、且类型匹配的蛋（避免误删玩家合成结果）
+                    if (cell && cell.hasEgg && cell.eggType === egg.eggType) {
+                        this.releasePosition(cellId);
+                        removedCellIds.add(cellId);
+                    }
+                }
+            }
+
+            this.saveCurrentGameState();
+
+            // 收集当前剩余蛋
+            const remainingEggs = [];
+            for (const [cellId, cell] of Object.entries(this.mapState.cells)) {
+                if (cell.hasEgg && cell.eggType !== null) {
+                    remainingEggs.push({ cellId: parseInt(cellId), eggType: cell.eggType });
+                }
+            }
+
+            console.log(`💖 复活成功，移除 ${removedCellIds.size} 个蛋，剩余 ${remainingEggs.length} 个蛋`);
+
+            return {
+                success: true,
+                removedCount: removedCellIds.size,
+                remainingEggs: remainingEggs,
+                data: {
+                    eggSeat: remainingEggs.map(egg => egg.cellId),
+                    eggType: remainingEggs.map(egg => egg.eggType),
+                    pointSeat: []
+                },
+                scoreSystem: this.scoreSystem,
+                message: 'Revive successful'
+            };
+        } catch (error) {
+            console.error('❌ 复活失败:', error);
+            return { success: false, message: error.message };
+        }
+    }
+
+    /**
     * 获取游戏数据 - 统一入口
     * @param {Object} userStatus - 用户状态
     * @param {string} difficulty - 游戏难度 ('easy', 'normal', 'hard')
@@ -584,6 +775,17 @@ class GameServer {
             }
         }
 
+        // AAI：恢复关卡进度
+        if (gameData && gameData.level) {
+            this.level = gameData.level;
+            const config = this.getLevelConfig(this.level);
+            this.targetEggType = config.target;
+            console.log(`🔄 恢复关卡进度: 第 ${this.level} 关, 目标 ${this.targetEggType} 级蛋`);
+        } else {
+            this.level = 1;
+            this.targetEggType = this.getLevelConfig(1).target;
+        }
+
         // 🔥 设置全局游戏状态
         this.currentGameStatus = {
             // 游戏进度数据
@@ -591,6 +793,8 @@ class GameServer {
             scoreSystem: gameData ? gameData.scoreSystem : this.scoreSystem,
             difficulty: gameData ? gameData.difficulty : this.difficulty,
             maxUnlockedEggType: gameData ? gameData.maxUnlockedEggType : 1,
+            level: this.level,
+            targetEggType: this.targetEggType,
 
             // 状态标记
             isInitialized: !!gameData,
@@ -621,6 +825,8 @@ class GameServer {
                 success: true,
                 isNewUser: false,
                 difficulty: this.getDifficultyLevel(gameData.difficulty, true),
+                level: this.level,
+                targetEggType: this.targetEggType,
                 scoreSystem: gameData.scoreSystem || this.scoreSystem,
                 data: {
                     eggSeat: gameData.eggs.map(egg => egg.cellId),
@@ -634,13 +840,16 @@ class GameServer {
             };
         }
 
-        const eggCount = this.difficulty;
-        // 随机生成数据
+        // AAI：根据关卡配置生成初始蛋
+        const config = this.getLevelConfig(this.level);
+        const eggCount = config.spawnCount;
         const newEggs = this.generateRandomEggsFromMapState(eggCount);
 
         return {
             success: true,
             isNewUser: false,
+            level: this.level,
+            targetEggType: this.targetEggType,
             scoreSystem: this.scoreSystem,
             difficulty: this.getDifficultyLevel(this.difficulty, true),
             data: {
@@ -753,12 +962,17 @@ class GameServer {
             // 6. 重置用户解锁蛋等级为0（从蛋1重新开始解锁）
             this.maxUnlockedEggType = 1;
             this.difficulty = gameData ? gameData.difficulty : 4; // 恢复之前的难度
+            this.level = 1;
+            this.targetEggType = this.getLevelConfig(1).target;
+            this.spawnHistory = [];
 
             // 7. 重置全局游戏状态
             if (this.currentGameStatus) {
                 this.currentGameStatus.eggs = [];
                 this.currentGameStatus.totalScore = 0;
                 this.currentGameStatus.maxUnlockedEggType = 1;
+                this.currentGameStatus.level = 1;
+                this.currentGameStatus.targetEggType = this.targetEggType;
                 this.currentGameStatus.hasGameData = false;
                 this.currentGameStatus.isInitialized = false;
                 this.currentGameStatus.saveTime = null;
@@ -770,6 +984,8 @@ class GameServer {
                 scoreSystem: this.scoreSystem,
                 difficulty: this.difficulty,
                 maxUnlockedEggType: this.maxUnlockedEggType,
+                level: this.level,
+                targetEggType: this.targetEggType,
                 saveTime: Date.now()
             };
             this._persistGameData(newGameData);
@@ -1144,7 +1360,7 @@ class GameServer {
         return new Promise((resolve) => {
             const synthesisResult = this.findEggMatches(cellId, gameState);
 
-            if (synthesisResult && synthesisResult.matches.length >= 3) {
+            if (synthesisResult && synthesisResult.matches.length >= 2) {
                 resolve({
                     code: 0,
                     matches: synthesisResult.matches,
@@ -1164,56 +1380,96 @@ class GameServer {
     }
 
     /**
-     * 查找蛋匹配（用于合成检测）
-     * @param {number} cellId - 检查的格子ID
-     * @param {Object} gameState - 游戏状态
+     * AAI：查找可参与合成的蛋（全图可达的相同类型蛋）
+     * @param {number} cellId - 合成中心格子ID
+     * @param {Object} gameState - 兼容旧接口，实际使用 this.mapState
      * @returns {Object|null} 匹配结果
      */
     findEggMatches(cellId, gameState) {
-        if (!gameState.cells[cellId] || !gameState.cells[cellId].hasEgg) {
+        const targetCell = this.mapState.cells[cellId];
+        if (!targetCell || !targetCell.hasEgg) {
             return null;
         }
 
-        const targetEggType = gameState.cells[cellId].eggType;
-        const matches = [];
-        const visited = new Set();
-        const queue = [cellId];
-        visited.add(cellId);
+        const targetEggType = targetCell.eggType;
+        const matches = [cellId];
+        const extraPaths = [];
 
-        // BFS 查找相邻的相同类型蛋
-        while (queue.length > 0) {
-            const currentCellId = queue.shift();
-            matches.push(currentCellId);
-
-            // 获取相邻格子
-            const adjacentCells = this.getAdjacentCells(currentCellId);
-
-            for (const adjCellId of adjacentCells) {
-                if (!visited.has(adjCellId) &&
-                    gameState.cells[adjCellId] &&
-                    gameState.cells[adjCellId].hasEgg &&
-                    gameState.cells[adjCellId].eggType === targetEggType) {
-
-                    visited.add(adjCellId);
-                    queue.push(adjCellId);
+        // 遍历全图，寻找所有路线未被挡住的同类型蛋
+        for (const [idStr, cell] of Object.entries(this.mapState.cells)) {
+            const cid = parseInt(idStr);
+            if (cid === cellId) continue;
+            if (cell.hasEgg && cell.eggType === targetEggType) {
+                const path = this.findPathForSynthesis(cid, cellId);
+                if (path && path.length > 0) {
+                    matches.push(cid);
+                    extraPaths.push({ cellId: cid, path });
                 }
             }
         }
 
-        if (matches.length >= 3) {
-            const newEggType = Math.min(targetEggType + 1, 8);
+        // AAI：逐个升级规则，初始为当前蛋类型，每多一个同类型蛋到达升 1 级，上限 7 级
+        if (matches.length >= 2) {
+            const newEggType = Math.min(targetEggType + matches.length - 1, 7);
             const score = this.calculateSynthesisScore(matches.length, targetEggType, newEggType);
 
             return {
                 matches: matches,
+                extraPaths: extraPaths,
                 eggType: targetEggType,
                 newEggType: newEggType,
-                synthesisPosition: cellId,  // 合成位置就是目标位置
+                synthesisPosition: cellId,
                 score: score
             };
         }
 
         return null;
+    }
+
+    /**
+     * AAI：BFS 查找从指定蛋到合成中心的路径（目标格视为可通行）
+     * @param {number} fromCellId - 起始格子ID
+     * @param {number} targetCellId - 合成中心格子ID
+     * @returns {Array} 路径格子ID数组
+     */
+    findPathForSynthesis(fromCellId, targetCellId) {
+        const rows = this.mapConfig.rows;
+        const cols = this.mapConfig.cols;
+        const start = this.getRowCol(fromCellId);
+        const end = this.getRowCol(targetCellId);
+        const targetEggType = this.mapState.cells[targetCellId].eggType;
+        const queue = [{ row: start.row, col: start.col, path: [] }];
+        const visited = new Set([fromCellId]);
+
+        while (queue.length > 0) {
+            const curr = queue.shift();
+            if (curr.row === end.row && curr.col === end.col) {
+                return curr.path;
+            }
+
+            const dirs = [[-1, 0], [1, 0], [0, -1], [0, 1]];
+            for (const [dr, dc] of dirs) {
+                const nr = curr.row + dr;
+                const nc = curr.col + dc;
+                if (nr < 0 || nr >= rows || nc < 0 || nc >= cols) continue;
+
+                const nid = this.getCellId(nr, nc);
+                if (visited.has(nid)) continue;
+
+                const cell = this.mapState.cells[nid];
+                const isWalkable = nid === targetCellId ||
+                    nid === fromCellId ||
+                    (cell && cell.isEmpty && !cell.hasEgg) ||
+                    (cell && cell.hasEgg && cell.eggType === targetEggType);
+                // 目标格、起始格、空格、同类型蛋均可通行；不同类型蛋视为阻挡
+                if (isWalkable) {
+                    visited.add(nid);
+                    queue.push({ row: nr, col: nc, path: [...curr.path, nid] });
+                }
+            }
+        }
+
+        return [];
     }
 
     /**
@@ -1227,7 +1483,8 @@ class GameServer {
         // 🔥 修正：使用原蛋等级（eggType）计算分数，不是新蛋等级
         const baseScore = Math.min(eggType * 2, 20);
         const typeMultiplier = eggType;//eggType * 10;
-        const countBonus = Math.round(Math.pow(eggCount - 3, 1.5))//Math.round(Math.pow(eggCount - 3, 1.5) * 10);
+        // AAI：2 个蛋也能合成，数量奖励兼容 2 个蛋的情况
+        const countBonus = eggCount >= 3 ? Math.round(Math.pow(eggCount - 3, 1.5)) : 0;
         const levelBonus = Math.pow(eggType, 2)//Math.pow(eggType, 2) * 5;
         // 新加难度分
         const totalScore = Math.round(baseScore + typeMultiplier + countBonus + levelBonus) * this.difficulty;
@@ -1741,6 +1998,9 @@ class GameServer {
                 scoreSystem: this.scoreSystem, // 只保存总分数
                 difficulty: this.difficulty || 4,
                 maxUnlockedEggType: this.maxUnlockedEggType || 1,
+                level: this.level || 1,
+                targetEggType: this.targetEggType || 4,
+                spawnHistory: this.spawnHistory || [],
                 // 注释掉保存 cardBoosts，确保不保存到缓存
                 // cardBoosts: this.cardBoosts || {},
                 saveTime: Date.now()
@@ -1832,6 +2092,19 @@ class GameServer {
             if (gameData.difficulty !== undefined) {
                 this.difficulty = gameData.difficulty;
                 // console.log(`🎯 难度已恢复: ${this.difficulty}`);
+            }
+
+            // 🔥 恢复关卡进度
+            if (gameData.level !== undefined) {
+                this.level = gameData.level;
+                this.targetEggType = gameData.targetEggType || this.getLevelConfig(this.level).target;
+                console.log(`🚀 关卡已恢复: 第 ${this.level} 关, 目标 ${this.targetEggType} 级蛋`);
+            }
+
+            // 🔥 恢复生成历史，用于复活
+            if (gameData.spawnHistory !== undefined) {
+                this.spawnHistory = gameData.spawnHistory;
+                console.log(`💖 生成历史已恢复: ${this.spawnHistory.length} 波`);
             }
 
             // 🔥 恢复用户解锁等级
@@ -2096,10 +2369,11 @@ class GameServer {
 
         let positionsToDelete = [fromCellId]; // 默认只删除起始位置
         let synthesisData = { canSynthesize: false };
-        if (synthesisResult && synthesisResult.matches.length >= 3) {
+        if (synthesisResult && synthesisResult.matches.length >= 2) {
             synthesisData = {
                 canSynthesize: true,
                 matches: synthesisResult.matches,
+                extraPaths: synthesisResult.extraPaths || [],
                 eggType: synthesisResult.eggType,
                 newEggType: synthesisResult.newEggType,
                 synthesisPosition: toCellId,  // 合成位置就是移动的目标位置
@@ -2107,13 +2381,8 @@ class GameServer {
 
             };
 
-            // 如果可以合成，需要删除所有参与合成的位置（除了目标位置）
+            // AAI：删除所有参与合成的位置（除了目标位置）
             positionsToDelete = synthesisResult.matches.filter(cellId => cellId !== toCellId);
-
-            // 添加起始位置（如果不在合成列表中）
-            if (!positionsToDelete.includes(fromCellId)) {
-                positionsToDelete.push(fromCellId);
-            }
 
             // console.log(`🗑️ 合成时需要删除的位置: [${positionsToDelete}]`);
 
@@ -2122,8 +2391,7 @@ class GameServer {
             this.processSynthesisResult(synthesisResult, toCellId);
         }
 
-        // const newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
-        // 加入新用户判定
+        // AAI：根据关卡配置生成新蛋
         let newEggsResult;
         if (this.currentUserStatus.isNewUser) {
             // console.log('🆕 当前用户是新用户，调用引导数据');
@@ -2159,15 +2427,15 @@ class GameServer {
                 // 引导完成的情况
                 // console.log('🎉 引导完成，切换到老用户模式');
 
-                newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
+                newEggsResult = this.generateRandomEggsFromMapState() || [];
 
             } else {
                 console.warn('⚠️ 未找到引导数据，使用随机生成数据');
-                newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
+                newEggsResult = this.generateRandomEggsFromMapState() || [];
             }
         } else {
             // console.log('🎮 当前用户是老用户，使用随机生成数据');
-            newEggsResult = this.generateRandomEggsFromMapState(this.difficulty) || [];
+            newEggsResult = this.generateRandomEggsFromMapState() || [];
         }
 
         // this.currNum++;
@@ -2222,53 +2490,72 @@ class GameServer {
         //         message: "恭喜！您合成了最高等级的蛋！"
         //     };
         // }
-        // 6. 检查胜利条件
-        if (synthesisData.canSynthesize && synthesisData.newEggType > 7) {
-            // console.log('🏆 达成胜利条件：合成最高等级蛋！');
-            // 将返回的参与合成位置改为地图上所有有蛋的位置，便于前端清除/收集所有蛋
-            const allEggPositions = [];
-            try {
-                // 优先使用 mapState.occupiedCells（性能优），兜底遍历 cells
-                if (this.mapState && this.mapState.occupiedCells && this.mapState.occupiedCells.size > 0) {
-                    allEggPositions.push(...Array.from(this.mapState.occupiedCells));
-                } else if (this.mapState && this.mapState.cells) {
-                    for (const [cid, cell] of Object.entries(this.mapState.cells)) {
-                        if (cell && cell.hasEgg) allEggPositions.push(Number(cid));
+        // 6. 检查胜利条件（AAI：按关卡目标等级判断）
+        if (synthesisData.canSynthesize && synthesisData.newEggType >= this.targetEggType) {
+            console.log(`🏆 达成胜利条件：合成 ${this.targetEggType} 级蛋！`);
+
+            // 只有最终目标（7级）才清除全图所有蛋，普通关卡只清除参与合成的蛋
+            if (this.targetEggType >= 7) {
+                // 将返回的参与合成位置改为地图上所有有蛋的位置，便于前端清除/收集所有蛋
+                const allEggPositions = [];
+                try {
+                    // 优先使用 mapState.occupiedCells（性能优），兜底遍历 cells
+                    if (this.mapState && this.mapState.occupiedCells && this.mapState.occupiedCells.size > 0) {
+                        allEggPositions.push(...Array.from(this.mapState.occupiedCells));
+                    } else if (this.mapState && this.mapState.cells) {
+                        for (const [cid, cell] of Object.entries(this.mapState.cells)) {
+                            if (cell && cell.hasEgg) allEggPositions.push(Number(cid));
+                        }
                     }
+                } catch (e) {
+                    // ignore errors and fallback to positionsToDelete
+                    console.error('⚠️ 获取所有蛋位置失败，使用默认参与位置', e);
                 }
-            } catch (e) {
-                // ignore errors and fallback to positionsToDelete
-                console.error('⚠️ 获取所有蛋位置失败，使用默认参与位置', e);
+
+                // 将地图上所有蛋位置追加到原始参与合成的位置后面（去重）
+                const mergedPositions = Array.isArray(positionsToDelete) ? positionsToDelete.slice() : [];
+                try {
+                    const seen = new Set(mergedPositions.map(p => Number(p)));
+                    for (const p of allEggPositions) {
+                        const n = Number(p);
+                        if (!seen.has(n)) {
+                            mergedPositions.push(n);
+                            seen.add(n);
+                        }
+                    }
+                } catch (e) {
+                    console.error('⚠️ 合并全图蛋位置失败，使用原参与位置', e);
+                }
+
+                return {
+                    code: 0,
+                    fromCellId: fromCellId,
+                    toCellId: toCellId,
+                    path: path,
+                    eggType: eggType,
+                    // 重要：返回的 positionsToDelete 现在包含原参与合成的位置，随后追加地图上所有蛋的位置
+                    positionsToDelete: mergedPositions,
+                    synthesis: synthesisData,
+                    newEggs: [],//newEggsResult,
+                    isVictory: true,
+                    reason: 'max_egg_level_reached',
+                    message: "恭喜！您合成了最高等级的蛋！"
+                };
             }
 
-            // 将地图上所有蛋位置追加到原始参与合成的位置后面（去重）
-            const mergedPositions = Array.isArray(positionsToDelete) ? positionsToDelete.slice() : [];
-            try {
-                const seen = new Set(mergedPositions.map(p => Number(p)));
-                for (const p of allEggPositions) {
-                    const n = Number(p);
-                    if (!seen.has(n)) {
-                        mergedPositions.push(n);
-                        seen.add(n);
-                    }
-                }
-            } catch (e) {
-                console.error('⚠️ 合并全图蛋位置失败，使用原参与位置', e);
-            }
-
+            // 普通关卡胜利：不清除全图，只返回正常结果
             return {
                 code: 0,
                 fromCellId: fromCellId,
                 toCellId: toCellId,
                 path: path,
                 eggType: eggType,
-                // 重要：返回的 positionsToDelete 现在包含原参与合成的位置，随后追加地图上所有蛋的位置
-                positionsToDelete: mergedPositions,
+                positionsToDelete: positionsToDelete,
                 synthesis: synthesisData,
-                newEggs: [],//newEggsResult,
+                newEggs: newEggsResult,
                 isVictory: true,
-                reason: 'max_egg_level_reached',
-                message: "恭喜！您合成了最高等级的蛋！"
+                reason: 'level_target_reached',
+                message: `恭喜！通过第 ${this.level} 关！`
             };
         }
 
@@ -2387,7 +2674,13 @@ class GameServer {
      * @param {number} count - 生成数量
      * @returns {Array} 生成的蛋数据
      */
-    generateRandomEggsFromMapState(count = 3) {
+    generateRandomEggsFromMapState(count = null) {
+        // AAI：根据关卡配置确定生成数量和最大等级
+        const levelConfig = this.getLevelConfig(this.level || 1);
+        if (count === null || count === undefined) {
+            count = levelConfig.spawnCount;
+        }
+
         // console.log(`🎲 从地图状态生成 ${count} 个随机蛋...`);
 
         // 从地图状态获取空闲位置
@@ -2398,10 +2691,13 @@ class GameServer {
             count = emptyCells.length;
         }
 
-        // 获取用户解锁状态
-        const maxUnlockedEggType = this.maxUnlockedEggType;
+        // 获取用户解锁状态，但受关卡最大生成等级限制
+        const maxUnlockedEggType = Math.min(
+            this.maxUnlockedEggType,
+            levelConfig.maxSpawnLevel
+        );
 
-        // console.log(`🏆 用户当前最高解锁等级: ${maxUnlockedEggType}`);
+        // console.log(`🏆 用户当前最高解锁等级: ${this.maxUnlockedEggType}, 本关限制: ${maxUnlockedEggType}`);
 
         // 获取可用蛋类型并随机选择
         const availableTypes = this.getAvailableEggTypes(maxUnlockedEggType);//
@@ -2423,6 +2719,12 @@ class GameServer {
             cellId: cellId,
             eggType: selectedTypes[index]
         }));
+
+        // AAI：记录本波生成，用于复活回退
+        this.spawnHistory.push({
+            wave: this.spawnHistory.length + 1,
+            eggs: newEggs.map(egg => ({ cellId: egg.cellId, eggType: egg.eggType }))
+        });
 
         // console.log('🗺️ 当前地图蛋状态:');
         const existingEggs = [];

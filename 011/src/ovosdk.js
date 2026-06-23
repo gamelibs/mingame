@@ -4,7 +4,7 @@
 if (typeof window !== 'undefined') window.ovo = window.ovo || {};
 const ovo = (typeof window !== 'undefined') ? window.ovo : {};
 
-// Banner广告标志，确保只显示一次
+// Banner广告标志（不再限制只显示一次，支持首页/设置页常驻切换）
 ovo.bannerShown = false;
 
 // 插页广告冷却时间控制
@@ -153,13 +153,7 @@ ovo.showBannerAd = function (callback, opts) {
     opts = opts || {};
     try { console.log('[ovosdk] showBannerAd invoked, Platform=', window.Platform); } catch (e) { }
 
-    // 检查是否已经显示过banner
-    if (ovo.bannerShown) {
-        try { console.log('[ovosdk] Banner already shown, skipping'); } catch (e) { }
-        if (typeof callback === 'function') callback(false);
-        return;
-    }
-
+    // AAI：不再限制 Banner 只显示一次，允许首页/设置页多次显示
     if (typeof window.showBannerAd === 'function') {
         window.showBannerAd(function (result) {
             if (result) {

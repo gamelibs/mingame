@@ -101,6 +101,7 @@ module.exports = (env, argv) => {
                     { from: 'assets', to: 'assets' },
                     { from: 'images', to: 'resan/images' }, // 将 Animate images 移动到 resan/images
                     { from: 'style.css', to: '' },
+                    { from: 'src/aai-test-overlay.js', to: 'aai-test-overlay.js' }, // AAI 数值测试插件
                     // { from: 'manifest.json', to: '' }, // 复制 manifest.json 到 dist 根目录
                     // 不再逐一复制外部脚本，已合并为 resan/vendor-animate.js
                 ],

@@ -1184,14 +1184,7 @@ class GameEngine {
                 console.log('🎮 level_start 事件已发送');
             }
 
-            // 🎯 游戏开始30秒后显示banner广告
-            setTimeout(() => {
-                if (typeof window.ovo !== 'undefined' && typeof window.ovo.showBannerAd === 'function') {
-                    window.ovo.showBannerAd(() => {
-                        console.log('📢 Banner ad shown 30s after game start');
-                    });
-                }
-            }, 30000); // 30秒 = 30000毫秒
+            // AAI：首页 Banner 已由 GameScense.init 在游戏场景初始化完成后显示
 
         } catch (e) {
             console.warn('⚠️ 发送游戏开始事件失败', e);
@@ -1962,6 +1955,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     const engine = new GameEngine();
+    window.__GAME_ENGINE_INSTANCE__ = engine;
     engine.init().catch(error => {
         console.error('Game engine failed to start:', error);
     });

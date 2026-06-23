@@ -1,0 +1,8043 @@
+import { Behavior } from '../types';
+
+export const modernBehaviors: Behavior[] = [
+  {
+    "id": "m_sleep",
+    "name": "睡觉",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 1,
+    "failureLevel": 1,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "健康",
+      "基础",
+      "恢复"
+    ],
+    "description": "充足的睡眠是成长的基石。",
+    "narrative": {
+      "title": "安睡",
+      "story": "夜色深沉，你选择早早睡下。身体在沉睡中自我修复，等待明天的到来。",
+      "successText": "你一觉到天亮，精神焕发，整个人都轻盈了许多。",
+      "failureText": "你辗转反侧，梦境纷扰，醒来依然疲惫不堪。",
+      "normalText": "睡眠普普通通，既没太好，也不算太差。"
+    }
+  },
+  {
+    "id": "m_eat",
+    "name": "吃饭",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 1,
+    "failureLevel": 1,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康",
+      "基础",
+      "能量"
+    ],
+    "description": "一日三餐，维持生命能量。",
+    "narrative": {
+      "title": "一日三餐",
+      "story": "你决定好好吃一顿饭。食物是最原始的安慰，也是生命的燃料。",
+      "successText": "饭菜可口，营养均衡，你感到浑身充满了能量。",
+      "failureText": "食物不新鲜，你吃坏了肚子，整个人都没精打采。",
+      "normalText": "这顿饭平淡无奇，填饱了肚子而已。"
+    }
+  },
+  {
+    "id": "m_learn_speak",
+    "name": "学说话",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 5,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 1,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识",
+      "启蒙",
+      "沟通"
+    ],
+    "description": "牙牙学语，开启与世界沟通的大门。"
+  },
+  {
+    "id": "m_recognize_chars",
+    "name": "识字",
+    "category": "教育",
+    "minAge": 3,
+    "maxAge": 7,
+    "riskLevel": 1,
+    "rewardLevel": 3,
+    "failureLevel": 1,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识",
+      "启蒙",
+      "认知"
+    ],
+    "description": "认识文字，获得知识的第一把钥匙。"
+  },
+  {
+    "id": "m_play",
+    "name": "玩耍",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 12,
+    "riskLevel": 2,
+    "rewardLevel": 2,
+    "failureLevel": 1,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力",
+      "娱乐",
+      "社交"
+    ],
+    "description": "在玩耍中学习社交与规则。"
+  },
+  {
+    "id": "m_explore",
+    "name": "探索",
+    "category": "教育",
+    "minAge": 2,
+    "maxAge": 6,
+    "riskLevel": 2,
+    "rewardLevel": 2,
+    "failureLevel": 1,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识",
+      "好奇",
+      "探索"
+    ],
+    "description": "对周围世界充满好奇地探索。"
+  },
+  {
+    "id": "m_school",
+    "name": "上学",
+    "category": "教育",
+    "minAge": 6,
+    "maxAge": 18,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 1,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "知识",
+      "基础",
+      "校园"
+    ],
+    "description": "系统学习基础知识。",
+    "narrative": {
+      "title": "校园时光",
+      "story": "你背着书包走进校园，开始学习新的知识。",
+      "successText": "你成绩优异，得到了老师的赞许和同学的认可。",
+      "failureText": "学习遇到了瓶颈，你开始怀疑自己的能力。",
+      "normalText": "这一学期平平常常，没有大起大落。"
+    }
+  },
+  {
+    "id": "m_homework",
+    "name": "做作业",
+    "category": "教育",
+    "minAge": 6,
+    "maxAge": 18,
+    "riskLevel": 2,
+    "rewardLevel": 2,
+    "failureLevel": 1,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识",
+      "学习",
+      "自律"
+    ],
+    "description": "巩固课堂所学。"
+  },
+  {
+    "id": "m_read",
+    "name": "阅读",
+    "category": "教育",
+    "minAge": 6,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 1,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识",
+      "幸福",
+      "阅读"
+    ],
+    "description": "阅读书籍，开阔眼界。"
+  },
+  {
+    "id": "m_sports_training",
+    "name": "运动训练",
+    "category": "兴趣",
+    "minAge": 6,
+    "maxAge": 50,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "健康",
+      "体能",
+      "训练"
+    ],
+    "description": "规律运动，增强体质。"
+  },
+  {
+    "id": "m_painting",
+    "name": "绘画",
+    "category": "兴趣",
+    "minAge": 5,
+    "maxAge": 25,
+    "riskLevel": 3,
+    "rewardLevel": 2,
+    "failureLevel": 1,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "技能",
+      "艺术",
+      "创作"
+    ],
+    "description": "用画笔表达内心世界。"
+  },
+  {
+    "id": "m_music",
+    "name": "音乐",
+    "category": "兴趣",
+    "minAge": 5,
+    "maxAge": 30,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 1,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "技能",
+      "艺术",
+      "音乐"
+    ],
+    "description": "学习乐器或声乐。"
+  },
+  {
+    "id": "m_math",
+    "name": "数学",
+    "category": "教育",
+    "minAge": 7,
+    "maxAge": 22,
+    "riskLevel": 2,
+    "rewardLevel": 4,
+    "failureLevel": 1,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识",
+      "逻辑",
+      "数学"
+    ],
+    "description": "锻炼逻辑思维能力。"
+  },
+  {
+    "id": "m_make_friends",
+    "name": "交朋友",
+    "category": "社交",
+    "minAge": 5,
+    "maxAge": 80,
+    "riskLevel": 2,
+    "rewardLevel": 2,
+    "failureLevel": 1,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉",
+      "社交",
+      "友谊"
+    ],
+    "description": "结识志同道合的朋友。"
+  },
+  {
+    "id": "m_exam",
+    "name": "考试",
+    "category": "教育",
+    "minAge": 13,
+    "maxAge": 22,
+    "riskLevel": 3,
+    "rewardLevel": 4,
+    "failureLevel": 3,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识",
+      "压力",
+      "竞争"
+    ],
+    "description": "检验学习成果的重要节点。",
+    "narrative": {
+      "title": "考场风云",
+      "story": "考试铃声响起，你握紧笔杆，准备迎接人生的又一次检验。",
+      "successText": "你超常发挥，取得了令人惊喜的好成绩。",
+      "failureText": "你发挥失常，分数远低于预期，心情跌到谷底。"
+    }
+  },
+  {
+    "id": "m_competition",
+    "name": "比赛",
+    "category": "教育",
+    "minAge": 12,
+    "maxAge": 25,
+    "riskLevel": 3,
+    "rewardLevel": 5,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "知识",
+      "竞争",
+      "荣誉"
+    ],
+    "description": "参加学科或体育竞赛。"
+  },
+  {
+    "id": "m_club",
+    "name": "社团",
+    "category": "教育",
+    "minAge": 13,
+    "maxAge": 22,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 1,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识",
+      "社交",
+      "组织"
+    ],
+    "description": "加入学校社团，培养兴趣与领导力。"
+  },
+  {
+    "id": "m_foreign_language",
+    "name": "外语",
+    "category": "教育",
+    "minAge": 10,
+    "maxAge": 35,
+    "riskLevel": 2,
+    "rewardLevel": 4,
+    "failureLevel": 1,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "知识",
+      "语言",
+      "视野"
+    ],
+    "description": "掌握一门外语，打开新世界。"
+  },
+  {
+    "id": "m_science",
+    "name": "科学",
+    "category": "教育",
+    "minAge": 10,
+    "maxAge": 30,
+    "riskLevel": 2,
+    "rewardLevel": 5,
+    "failureLevel": 1,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "知识",
+      "探索",
+      "理性"
+    ],
+    "description": "学习自然科学知识。"
+  },
+  {
+    "id": "m_part_time_job",
+    "name": "兼职",
+    "category": "事业",
+    "minAge": 16,
+    "maxAge": 30,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能",
+      "收入",
+      "经验"
+    ],
+    "description": "利用课余时间赚取零花钱。"
+  },
+  {
+    "id": "m_self_study",
+    "name": "自学",
+    "category": "教育",
+    "minAge": 13,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 4,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "知识",
+      "自律",
+      "技能"
+    ],
+    "description": "不依赖课堂，自主学习新技能。"
+  },
+  {
+    "id": "m_programming",
+    "name": "编程",
+    "category": "教育",
+    "minAge": 14,
+    "maxAge": 45,
+    "riskLevel": 3,
+    "rewardLevel": 6,
+    "failureLevel": 2,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能",
+      "技术",
+      "高薪"
+    ],
+    "description": "学习计算机编程，掌握未来语言。",
+    "narrative": {
+      "title": "代码人生",
+      "story": "你打开编辑器，开始与机器对话。每一行代码都可能改变未来。",
+      "successText": "你写出了一个优雅高效的程序，技术水平突飞猛进。",
+      "failureText": "项目出现严重bug，你不得不熬夜修复，身心俱疲。",
+      "normalText": "你完成了一些常规功能，能力在稳步积累。"
+    }
+  },
+  {
+    "id": "m_work",
+    "name": "打工",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 60,
+    "riskLevel": 3,
+    "rewardLevel": 4,
+    "failureLevel": 2,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能",
+      "收入",
+      "稳定"
+    ],
+    "description": "找一份稳定的工作。",
+    "narrative": {
+      "title": "日常工作",
+      "story": "你按部就班地完成手头的工作。",
+      "successText": "你出色地完成了任务，获得了领导的表扬。",
+      "failureText": "工作中出现了失误，被领导批评了一顿。",
+      "normalText": "一天的工作平平常常地结束了。"
+    }
+  },
+  {
+    "id": "m_job_hunt",
+    "name": "求职",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 50,
+    "riskLevel": 3,
+    "rewardLevel": 4,
+    "failureLevel": 3,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能",
+      "竞争",
+      "机遇"
+    ],
+    "description": "投递简历，参加面试。",
+    "narrative": {
+      "title": "求职之路",
+      "story": "你更新简历，投递了一家又一家公司，等待回音。",
+      "successText": "你收到了心仪的offer，薪资与平台都令人满意。",
+      "failureText": "面试屡屡碰壁，自信心受到了严重打击。",
+      "normalText": "你拿到了一份尚可的offer，先安顿下来再说。"
+    }
+  },
+  {
+    "id": "m_promotion",
+    "name": "晋升",
+    "category": "事业",
+    "minAge": 25,
+    "maxAge": 55,
+    "riskLevel": 4,
+    "rewardLevel": 6,
+    "failureLevel": 3,
+    "balanceEffect": -1,
+    "unlockWealth": 20,
+    "tags": [
+      "技能",
+      "事业",
+      "收入"
+    ],
+    "description": "争取职位晋升与加薪。",
+    "narrative": {
+      "title": "晋升之战",
+      "story": "你争取一次晋升机会，办公室里的竞争暗流涌动。",
+      "successText": "你凭借出色的业绩成功晋升，职业生涯迈上新台阶。",
+      "failureText": "晋升失败，你感到付出没有得到应有的回报。",
+      "normalText": "晋升结果悬而未决，你还需要继续等待。"
+    }
+  },
+  {
+    "id": "m_overtime",
+    "name": "加班",
+    "category": "事业",
+    "minAge": 20,
+    "maxAge": 55,
+    "riskLevel": 3,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": -3,
+    "unlockWealth": 0,
+    "tags": [
+      "技能",
+      "收入",
+      "压力"
+    ],
+    "description": "牺牲休息时间换取收入。",
+    "narrative": {
+      "title": "加班之夜",
+      "story": "办公室只剩下你一个人，键盘声在寂静中格外清晰。",
+      "successText": "加班换来了项目的突破性进展，你得到了认可。",
+      "failureText": "长期加班拖垮了身体，工作效率也大幅下降。",
+      "normalText": "你熬过了这个夜晚，但疲惫不堪。"
+    }
+  },
+  {
+    "id": "m_relationship",
+    "name": "恋爱",
+    "category": "感情",
+    "minAge": 16,
+    "maxAge": 50,
+    "riskLevel": 3,
+    "rewardLevel": 5,
+    "failureLevel": 3,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福",
+      "情感",
+      "社交"
+    ],
+    "description": "投入一段感情。",
+    "narrative": {
+      "title": "恋爱季节",
+      "story": "你决定投入一段感情，心里既期待又忐忑。",
+      "successText": "你们彼此欣赏，感情迅速升温，生活仿佛涂上了亮色。",
+      "failureText": "性格差异让你们争吵不断，最终不欢而散。",
+      "normalText": "感情进展不温不火，你们还在互相了解。"
+    }
+  },
+  {
+    "id": "m_marriage",
+    "name": "结婚",
+    "category": "感情",
+    "minAge": 22,
+    "maxAge": 50,
+    "riskLevel": 4,
+    "rewardLevel": 6,
+    "failureLevel": 4,
+    "balanceEffect": 1,
+    "unlockWealth": 10,
+    "tags": [
+      "幸福",
+      "家庭",
+      "责任"
+    ],
+    "description": "与爱人步入婚姻殿堂。",
+    "narrative": {
+      "title": "婚姻殿堂",
+      "story": "你牵着爱人的手，走进了婚姻的殿堂。新的责任与承诺开始了。",
+      "successText": "婚后生活幸福美满，你们成为了彼此最坚实的依靠。",
+      "failureText": "婚后的琐碎与矛盾消磨了感情，家庭气氛日渐紧张。",
+      "normalText": "日子平淡而真实，婚姻需要慢慢经营。"
+    }
+  },
+  {
+    "id": "m_travel",
+    "name": "旅行",
+    "category": "兴趣",
+    "minAge": 18,
+    "maxAge": 75,
+    "riskLevel": 3,
+    "rewardLevel": 4,
+    "failureLevel": 2,
+    "balanceEffect": 3,
+    "unlockWealth": 5,
+    "tags": [
+      "魅力",
+      "旅行",
+      "视野"
+    ],
+    "description": "去远方看看世界。"
+  },
+  {
+    "id": "m_saving",
+    "name": "储蓄",
+    "category": "投资",
+    "minAge": 18,
+    "maxAge": 100,
+    "riskLevel": 2,
+    "rewardLevel": 2,
+    "failureLevel": 1,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富",
+      "稳健",
+      "积累"
+    ],
+    "description": "把收入存起来以备不时之需。",
+    "narrative": {
+      "title": "积少成多",
+      "story": "你把一部分收入存起来，为未来的不确定性做准备。",
+      "successText": "你的储蓄计划执行得很好，账户里的数字稳步增长。",
+      "failureText": "通货膨胀蚕食了你的存款，购买力大不如前。",
+      "normalText": "储蓄略有增加，但距离目标还有很长的路要走。"
+    }
+  },
+  {
+    "id": "m_stocks",
+    "name": "买股票",
+    "category": "投资",
+    "minAge": 18,
+    "maxAge": 80,
+    "riskLevel": 5,
+    "rewardLevel": 7,
+    "failureLevel": 6,
+    "balanceEffect": -2,
+    "unlockWealth": 10,
+    "tags": [
+      "财富",
+      "投资",
+      "股票"
+    ],
+    "description": "投资股票市场，追求资本增值。",
+    "narrative": {
+      "title": "股市沉浮",
+      "story": "你把资金投入了变幻莫测的股市，心跳随着K线起伏。",
+      "successText": "你精准抄底，账户盈利丰厚，财务自由似乎触手可及。",
+      "failureText": "市场突然暴跌，你的资产腰斩，账户一片惨绿。"
+    }
+  },
+  {
+    "id": "m_startup",
+    "name": "创业",
+    "category": "事业",
+    "minAge": 22,
+    "maxAge": 55,
+    "riskLevel": 6,
+    "rewardLevel": 9,
+    "failureLevel": 8,
+    "balanceEffect": -3,
+    "unlockWealth": 30,
+    "tags": [
+      "财富",
+      "事业",
+      "高风险"
+    ],
+    "description": "创办自己的公司，高风险高回报。",
+    "narrative": {
+      "title": "创业赌局",
+      "story": "你决定辞去稳定工作，全身心投入创业。前路未知，这可能改变你的一生。",
+      "successText": "你的产品恰好赶上风口，获得第一桶金，事业蒸蒸日上。",
+      "failureText": "市场环境恶化，合作伙伴卷款跑路，你被骗走全部积蓄。"
+    }
+  },
+  {
+    "id": "m_manage_team",
+    "name": "管理团队",
+    "category": "事业",
+    "minAge": 28,
+    "maxAge": 65,
+    "riskLevel": 4,
+    "rewardLevel": 6,
+    "failureLevel": 3,
+    "balanceEffect": -1,
+    "unlockWealth": 25,
+    "tags": [
+      "技能",
+      "领导",
+      "管理"
+    ],
+    "description": "带领团队完成目标。",
+    "narrative": {
+      "title": "团队管理",
+      "story": "你作为管理者，需要带领团队完成一个关键项目。",
+      "successText": "团队配合默契，项目提前完成，你赢得了上级的信任。",
+      "failureText": "团队内部冲突不断，项目延期，你备受质疑。",
+      "normalText": "项目勉强完成，团队还需要进一步磨合。"
+    }
+  },
+  {
+    "id": "m_real_estate",
+    "name": "投资房产",
+    "category": "投资",
+    "minAge": 25,
+    "maxAge": 70,
+    "riskLevel": 4,
+    "rewardLevel": 7,
+    "failureLevel": 5,
+    "balanceEffect": -1,
+    "unlockWealth": 50,
+    "tags": [
+      "财富",
+      "投资",
+      "房产"
+    ],
+    "description": "购买房产用于居住或投资。",
+    "narrative": {
+      "title": "房产投资",
+      "story": "你看中了一处房产，决定把积蓄换成砖瓦。",
+      "successText": "房价大涨，你的资产翻了几番，成为身边人羡慕的对象。",
+      "failureText": "政策调整，房价下跌，你的首付几乎打了水漂。"
+    }
+  },
+  {
+    "id": "m_parenting",
+    "name": "育儿",
+    "category": "家庭",
+    "minAge": 22,
+    "maxAge": 55,
+    "riskLevel": 4,
+    "rewardLevel": 5,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 10,
+    "tags": [
+      "幸福",
+      "家庭",
+      "责任"
+    ],
+    "description": "抚养教育下一代。",
+    "narrative": {
+      "title": "为人父母",
+      "story": "你把精力投入到孩子身上，教导他们认识这个世界。",
+      "successText": "孩子健康成长，亲子关系融洽，你感到无比欣慰。",
+      "failureText": "教育方式出了问题，孩子叛逆，家庭矛盾加剧。",
+      "normalText": "育儿之路磕磕绊绊，你在不断学习。"
+    }
+  },
+  {
+    "id": "m_fitness",
+    "name": "健身",
+    "category": "兴趣",
+    "minAge": 16,
+    "maxAge": 70,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 5,
+    "tags": [
+      "健康",
+      "自律",
+      "体能"
+    ],
+    "description": "系统锻炼身体，保持健康。",
+    "narrative": {
+      "title": "挥洒汗水",
+      "story": "你换上运动服，走进健身房。身体的疲惫即将被多巴胺取代。",
+      "successText": "你突破了个人纪录，身材与精神状态都焕然一新。",
+      "failureText": "你不慎拉伤了肌肉，训练计划被迫中断。",
+      "normalText": "你完成了一次常规训练，感觉还算不错。"
+    }
+  },
+  {
+    "id": "m_networking",
+    "name": "建立人脉",
+    "category": "社交",
+    "minAge": 20,
+    "maxAge": 70,
+    "riskLevel": 3,
+    "rewardLevel": 4,
+    "failureLevel": 1,
+    "balanceEffect": 1,
+    "unlockWealth": 10,
+    "tags": [
+      "人脉",
+      "社交",
+      "资源"
+    ],
+    "description": "扩展职业与社交圈层。",
+    "narrative": {
+      "title": "人脉拓展",
+      "story": "你参加了一场社交活动，希望能认识更多有价值的人。",
+      "successText": "你结识了一位关键人物，对方愿意在未来给予帮助。",
+      "failureText": "社交场合让你疲惫不堪，也没有收获有价值的人脉。",
+      "normalText": "你交换了几张名片，建立了初步联系。"
+    }
+  },
+  {
+    "id": "m_client_dev",
+    "name": "客户开发",
+    "category": "事业",
+    "minAge": 22,
+    "maxAge": 60,
+    "riskLevel": 4,
+    "rewardLevel": 6,
+    "failureLevel": 3,
+    "balanceEffect": -1,
+    "unlockWealth": 15,
+    "tags": [
+      "技能",
+      "销售",
+      "社交"
+    ],
+    "description": "拓展客户资源。",
+    "narrative": {
+      "title": "客户开发",
+      "story": "你主动出击，试图拓展新的客户资源。",
+      "successText": "你成功签下大单，业绩一路飘红。",
+      "failureText": "客户流失严重，你的努力付诸东流。",
+      "normalText": "你接触到几个潜在客户，还需要长期跟进。"
+    }
+  },
+  {
+    "id": "m_ipo_prep",
+    "name": "上市准备",
+    "category": "投资",
+    "minAge": 35,
+    "maxAge": 60,
+    "riskLevel": 7,
+    "rewardLevel": 9,
+    "failureLevel": 7,
+    "balanceEffect": -3,
+    "unlockWealth": 100,
+    "tags": [
+      "财富",
+      "事业",
+      "高阶"
+    ],
+    "description": "推动公司上市，资本运作。",
+    "narrative": {
+      "title": "上市前夜",
+      "story": "你带领团队冲刺上市，这是事业的高光时刻，也是最艰难的时刻。",
+      "successText": "公司成功上市，你的名字被写进了商业史册。",
+      "failureText": "监管审核未通过，上市计划搁浅，团队士气低落。"
+    }
+  },
+  {
+    "id": "m_family_invest",
+    "name": "家庭投资",
+    "category": "家庭",
+    "minAge": 25,
+    "maxAge": 60,
+    "riskLevel": 4,
+    "rewardLevel": 5,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 20,
+    "tags": [
+      "幸福",
+      "家庭",
+      "财富"
+    ],
+    "description": "为家庭未来进行投资。"
+  },
+  {
+    "id": "m_retirement_plan",
+    "name": "退休规划",
+    "category": "家庭",
+    "minAge": 45,
+    "maxAge": 70,
+    "riskLevel": 2,
+    "rewardLevel": 4,
+    "failureLevel": 1,
+    "balanceEffect": 1,
+    "unlockWealth": 30,
+    "tags": [
+      "幸福",
+      "规划",
+      "稳健"
+    ],
+    "description": "提前为退休生活做准备。",
+    "narrative": {
+      "title": "退休规划",
+      "story": "你开始为未来的退休生活做财务与生活规划。",
+      "successText": "你的规划清晰可行，未来多了一份保障。",
+      "failureText": "规划过程中忽略了某些风险，让你感到隐隐不安。",
+      "normalText": "你迈出了规划的第一步，但还有很多细节待完善。"
+    }
+  },
+  {
+    "id": "m_charity",
+    "name": "慈善捐赠",
+    "category": "社交",
+    "minAge": 35,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 4,
+    "failureLevel": 1,
+    "balanceEffect": 2,
+    "unlockWealth": 50,
+    "tags": [
+      "幸福",
+      "公益",
+      "影响力"
+    ],
+    "description": "捐赠财富，回馈社会。",
+    "narrative": {
+      "title": "慈善捐赠",
+      "story": "你决定拿出一部分财富，帮助那些需要帮助的人。",
+      "successText": "你的善举产生了深远的影响，社会声誉大大提升。",
+      "failureText": "善款被挪用，你的善意没有到达需要的人手中。",
+      "normalText": "你完成了一次普通的捐赠。"
+    }
+  },
+  {
+    "id": "m_asset_allocation",
+    "name": "资产配置",
+    "category": "投资",
+    "minAge": 35,
+    "maxAge": 90,
+    "riskLevel": 3,
+    "rewardLevel": 5,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 40,
+    "tags": [
+      "财富",
+      "规划",
+      "稳健"
+    ],
+    "description": "科学配置资产，分散风险。",
+    "narrative": {
+      "title": "资产配置",
+      "story": "你重新审视自己的资产，希望分散风险、稳健增值。",
+      "successText": "配置科学合理，各类资产相互补充，收益稳健。",
+      "failureText": "某类资产暴跌，拖累了整体收益。",
+      "normalText": "资产结构有所调整，效果还有待观察。"
+    }
+  },
+  {
+    "id": "m_wellness",
+    "name": "养生",
+    "category": "成长",
+    "minAge": 40,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 3,
+    "failureLevel": 1,
+    "balanceEffect": 3,
+    "unlockWealth": 10,
+    "tags": [
+      "健康",
+      "养生",
+      "长寿"
+    ],
+    "description": "调理身体，延缓衰老。",
+    "narrative": {
+      "title": "养生之道",
+      "story": "你开始关注身体调养，饮食作息都变得更加规律。",
+      "successText": "气色明显变好，连朋友都说你看起来年轻了几岁。",
+      "failureText": "养生方法不当，反而让身体出现了不适。",
+      "normalText": "你坚持了一些养生习惯，效果尚需时间验证。"
+    }
+  },
+  {
+    "id": "m_tour",
+    "name": "旅游",
+    "category": "兴趣",
+    "minAge": 30,
+    "maxAge": 80,
+    "riskLevel": 3,
+    "rewardLevel": 4,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 15,
+    "tags": [
+      "魅力",
+      "旅行",
+      "幸福"
+    ],
+    "description": "享受退休后的旅行生活。"
+  },
+  {
+    "id": "m_mentor",
+    "name": "指导后辈",
+    "category": "感情",
+    "minAge": 40,
+    "maxAge": 90,
+    "riskLevel": 2,
+    "rewardLevel": 4,
+    "failureLevel": 1,
+    "balanceEffect": 2,
+    "unlockWealth": 20,
+    "tags": [
+      "幸福",
+      "传承",
+      "影响力"
+    ],
+    "description": "分享经验，帮助他人成长。",
+    "narrative": {
+      "title": "指导后辈",
+      "story": "你把自己的经验分享给年轻人，希望能帮助他们少走弯路。",
+      "successText": "后辈在你的指导下取得了显著进步，你倍感自豪。",
+      "failureText": "后辈并不领情，你的好意被误解。",
+      "normalText": "你们进行了一次普通的交流。"
+    }
+  },
+  {
+    "id": "m_accompany_family",
+    "name": "陪伴家人",
+    "category": "家庭",
+    "minAge": 25,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 1,
+    "balanceEffect": 3,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福",
+      "家庭",
+      "陪伴"
+    ],
+    "description": "花时间陪伴所爱之人。",
+    "narrative": {
+      "title": "陪伴家人",
+      "story": "你放下手头的事，决定陪家人度过一段时光。",
+      "successText": "家人之间的交流让彼此更加亲密，家里充满了欢声笑语。",
+      "failureText": "一次不愉快的对话让气氛变得尴尬，陪伴变成了负担。",
+      "normalText": "你们一起度过了普通的一天。"
+    }
+  },
+  {
+    "id": "m_will",
+    "name": "写遗嘱",
+    "category": "家庭",
+    "minAge": 50,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 2,
+    "failureLevel": 1,
+    "balanceEffect": 0,
+    "unlockWealth": 30,
+    "tags": [
+      "幸福",
+      "家庭",
+      "传承"
+    ],
+    "description": "提前安排身后事。",
+    "narrative": {
+      "title": "身后之事",
+      "story": "你坐在书桌前，认真思考如何安排自己的遗产。",
+      "successText": "遗嘱清晰公正，家人对你的安排表示理解。",
+      "failureText": "分配不均引发了家庭矛盾，亲情出现了裂痕。",
+      "normalText": "你写下了初步的安排，心情复杂。"
+    }
+  },
+  {
+    "id": "m_retire",
+    "name": "退休",
+    "category": "家庭",
+    "minAge": 60,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 2,
+    "failureLevel": 1,
+    "balanceEffect": 2,
+    "unlockWealth": 20,
+    "tags": [
+      "幸福",
+      "晚年",
+      "稳定"
+    ],
+    "description": "退出职场，开始退休生活。",
+    "narrative": {
+      "title": "正式退休",
+      "story": "你离开了工作多年的岗位，开始享受属于自己的时间。",
+      "successText": "你规划得当，退休生活充实而惬意。",
+      "failureText": "突然闲下来让你无所适从，陷入了莫名的空虚。",
+      "normalText": "你开始了平静的退休生活，慢慢适应节奏。"
+    }
+  },
+  {
+    "id": "m_nursing_home",
+    "name": "养老社区",
+    "category": "家庭",
+    "minAge": 65,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 50,
+    "tags": [
+      "幸福",
+      "晚年",
+      "健康"
+    ],
+    "description": "入住专业养老社区。"
+  },
+  {
+    "id": "m_memoir",
+    "name": "回忆录",
+    "category": "社交",
+    "minAge": 60,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 1,
+    "balanceEffect": 2,
+    "unlockWealth": 10,
+    "tags": [
+      "魅力",
+      "晚年",
+      "回忆"
+    ],
+    "description": "记录一生经历，留下精神财富。"
+  },
+  {
+    "id": "m_travel_retire",
+    "name": "旅行养老",
+    "category": "家庭",
+    "minAge": 60,
+    "maxAge": 90,
+    "riskLevel": 3,
+    "rewardLevel": 4,
+    "failureLevel": 3,
+    "balanceEffect": 2,
+    "unlockWealth": 30,
+    "tags": [
+      "幸福",
+      "旅行",
+      "晚年"
+    ],
+    "description": "边旅行边养老，享受生活。"
+  },
+  {
+    "id": "m_family_gathering",
+    "name": "家族聚会",
+    "category": "家庭",
+    "minAge": 50,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 1,
+    "balanceEffect": 3,
+    "unlockWealth": 10,
+    "tags": [
+      "幸福",
+      "家庭",
+      "传承"
+    ],
+    "description": "召集家族成员团聚。"
+  },
+  {
+    "id": "m_study_abroad",
+    "name": "留学",
+    "category": "教育",
+    "minAge": 18,
+    "maxAge": 30,
+    "riskLevel": 4,
+    "rewardLevel": 6,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 20,
+    "tags": [
+      "知识",
+      "留学",
+      "视野"
+    ],
+    "description": "远赴海外求学，开阔眼界。",
+    "narrative": {
+      "title": "远渡重洋",
+      "story": "你背起行囊，前往异国他乡求学。新的文化与挑战在等着你。",
+      "successText": "你快速适应环境，学业与人脉双丰收。",
+      "failureText": "语言与文化障碍让你孤独无助，学业陷入困境。",
+      "normalText": "留学生活有苦有甜，你在慢慢成长。"
+    }
+  },
+  {
+    "id": "m_date",
+    "name": "约会",
+    "category": "感情",
+    "minAge": 16,
+    "maxAge": 50,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 1,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福",
+      "约会",
+      "情感"
+    ],
+    "description": "与心仪对象约会。",
+    "narrative": {
+      "title": "浪漫约会",
+      "story": "你和心仪的人约好了见面，心跳随着见面时间临近而加快。",
+      "successText": "约会气氛融洽，你们的关系更进一步。",
+      "failureText": "约会中发生了尴尬的小插曲，气氛降到冰点。",
+      "normalText": "约会平平无奇，你们还在互相试探。"
+    }
+  },
+  {
+    "id": "m_confession",
+    "name": "表白",
+    "category": "感情",
+    "minAge": 16,
+    "maxAge": 45,
+    "riskLevel": 4,
+    "rewardLevel": 5,
+    "failureLevel": 4,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福",
+      "表白",
+      "勇气"
+    ],
+    "description": "鼓起勇气向喜欢的人表白。",
+    "narrative": {
+      "title": "勇敢表白",
+      "story": "你决定把藏在心底的话说出来，无论结果如何。",
+      "successText": "对方红着脸答应了，你们正式走到了一起。",
+      "failureText": "对方委婉拒绝，你的心像被浇了一盆冷水。"
+    }
+  },
+  {
+    "id": "m_divorce",
+    "name": "离婚",
+    "category": "感情",
+    "minAge": 25,
+    "maxAge": 70,
+    "riskLevel": 6,
+    "rewardLevel": 3,
+    "failureLevel": 7,
+    "balanceEffect": -4,
+    "unlockWealth": 10,
+    "tags": [
+      "幸福",
+      "婚姻",
+      "分离"
+    ],
+    "description": "结束一段婚姻。",
+    "narrative": {
+      "title": "婚姻终点",
+      "story": "你决定结束这段婚姻。曾经的誓言如今成了沉重的枷锁。",
+      "successText": "你们和平分手，彼此都得到了解脱。",
+      "failureText": "离婚过程充满了争吵与撕扯，双方伤痕累累。"
+    }
+  },
+  {
+    "id": "m_childbirth",
+    "name": "生育",
+    "category": "家庭",
+    "minAge": 20,
+    "maxAge": 50,
+    "riskLevel": 5,
+    "rewardLevel": 6,
+    "failureLevel": 4,
+    "balanceEffect": -2,
+    "unlockWealth": 10,
+    "tags": [
+      "幸福",
+      "生育",
+      "家庭"
+    ],
+    "description": "迎接新生命的到来。",
+    "narrative": {
+      "title": "新生命诞生",
+      "story": "家中即将迎来新成员，你既兴奋又紧张。",
+      "successText": "孩子平安出生，家庭洋溢着幸福与希望。",
+      "failureText": "生产过程并不顺利，母婴都经历了不小的风险。"
+    }
+  },
+  {
+    "id": "m_care_parents",
+    "name": "照顾父母",
+    "category": "家庭",
+    "minAge": 30,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福",
+      "家庭",
+      "责任"
+    ],
+    "description": "照顾年迈的父母。",
+    "narrative": {
+      "title": "孝敬父母",
+      "story": "父母的背影日渐佝偻，你选择花更多时间陪伴照顾他们。",
+      "successText": "父母感受到了你的孝心，家庭关系更加融洽。",
+      "failureText": "照顾的压力让你身心俱疲，家庭气氛也变得紧张。",
+      "normalText": "你尽到了子女的责任，日子还在继续。"
+    }
+  },
+  {
+    "id": "m_psychological_counseling",
+    "name": "心理咨询",
+    "category": "社交",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 1,
+    "balanceEffect": 3,
+    "unlockWealth": 5,
+    "tags": [
+      "健康",
+      "心理",
+      "治愈"
+    ],
+    "description": "寻求专业心理咨询。",
+    "narrative": {
+      "title": "心灵疗愈",
+      "story": "你决定寻求专业心理咨询，面对内心积压已久的情绪。",
+      "successText": "咨询师帮你打开了心结，你感到前所未有的轻松。",
+      "failureText": "咨询过程触发了痛苦回忆，你一度情绪低落。",
+      "normalText": "你完成了一次咨询，内心稍微平静了一些。"
+    }
+  },
+  {
+    "id": "m_illness",
+    "name": "突发疾病",
+    "category": "风险",
+    "minAge": 20,
+    "maxAge": 90,
+    "riskLevel": 6,
+    "rewardLevel": 1,
+    "failureLevel": 20,
+    "balanceEffect": -5,
+    "unlockWealth": 0,
+    "tags": [
+      "意外",
+      "疾病",
+      "危机"
+    ],
+    "description": "一场突如其来的疾病打乱了人生节奏。",
+    "narrative": {
+      "title": "疾病来袭",
+      "story": "你突然感到身体不适，去医院检查后发现需要长期治疗。",
+      "successText": "你积极配合治疗，病情得到控制。",
+      "failureText": "病情恶化，你的健康受到严重打击。"
+    }
+  },
+  {
+    "id": "m_accident",
+    "name": "意外事故",
+    "category": "风险",
+    "minAge": 10,
+    "maxAge": 100,
+    "riskLevel": 7,
+    "rewardLevel": 1,
+    "failureLevel": 18,
+    "balanceEffect": -5,
+    "unlockWealth": 0,
+    "tags": [
+      "意外",
+      "事故",
+      "危机"
+    ],
+    "description": "一次意外事故让你猝不及防。",
+    "narrative": {
+      "title": "意外降临",
+      "story": "一场意外猝不及防地发生，你的人生轨迹被强行改变。",
+      "successText": "你幸运地逃过一劫，只受了些轻伤。",
+      "failureText": "意外造成了严重后果，你的健康和生活都遭受重创。"
+    }
+  },
+  {
+    "id": "m_high_leverage",
+    "name": "高杠杆投资",
+    "category": "风险",
+    "minAge": 25,
+    "maxAge": 60,
+    "riskLevel": 9,
+    "rewardLevel": 10,
+    "failureLevel": 10,
+    "balanceEffect": -3,
+    "unlockWealth": 30,
+    "tags": [
+      "运气",
+      "投资",
+      "高杠杆"
+    ],
+    "description": "使用高杠杆进行投资，收益与风险都被放大。",
+    "narrative": {
+      "title": "高杠杆博弈",
+      "story": "你押上了全部身家，试图用杠杆撬动更大的财富。",
+      "successText": "市场走势如你所料，财富迅速膨胀。",
+      "failureText": "一次反向波动让你爆仓，多年积蓄化为乌有。"
+    }
+  },
+  {
+    "id": "m_medical_check",
+    "name": "体检",
+    "category": "成长",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 1,
+    "balanceEffect": 1,
+    "unlockWealth": 5,
+    "tags": [
+      "健康",
+      "预防",
+      "体检"
+    ],
+    "description": "定期体检，预防疾病。",
+    "narrative": {
+      "title": "定期体检",
+      "story": "你预约了一次全面体检，希望防患于未然。",
+      "successText": "体检结果一切正常，你对自己的身体更有信心了。",
+      "failureText": "体检发现潜在问题，需要进一步观察和治疗。",
+      "normalText": "各项指标基本正常，只有一两项需要留意。"
+    }
+  },
+  {
+    "id": "m_see_doctor",
+    "name": "看病",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 2,
+    "failureLevel": 1,
+    "balanceEffect": 1,
+    "unlockWealth": 5,
+    "tags": [
+      "健康",
+      "治疗",
+      "医疗"
+    ],
+    "description": "身体不适时及时就医。",
+    "narrative": {
+      "title": "求医",
+      "story": "身体的不适让你决定走进医院。医生的诊断将决定接下来的日子。",
+      "successText": "医生对症下药，你的病情明显好转。",
+      "failureText": "误诊耽误了治疗，你的身体状况反而更糟。",
+      "normalText": "检查结果尚无大碍，但医生叮嘱你要注意休息。"
+    }
+  },
+  {
+    "id": "m_fund",
+    "name": "买基金",
+    "category": "投资",
+    "minAge": 18,
+    "maxAge": 80,
+    "riskLevel": 3,
+    "rewardLevel": 5,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 10,
+    "tags": [
+      "财富",
+      "投资",
+      "基金"
+    ],
+    "description": "购买基金，由专业经理管理。",
+    "narrative": {
+      "title": "基金定投",
+      "story": "你选择把闲钱交给基金经理，希望细水长流。",
+      "successText": "基金净值稳步上涨，你的坚持终于见到了回报。",
+      "failureText": "市场风格切换，你持有的基金长期跑输大盘。",
+      "normalText": "收益起伏不大，定投还在继续。"
+    }
+  },
+  {
+    "id": "m_insurance",
+    "name": "买保险",
+    "category": "投资",
+    "minAge": 18,
+    "maxAge": 80,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 1,
+    "balanceEffect": 1,
+    "unlockWealth": 10,
+    "tags": [
+      "财富",
+      "保障",
+      "稳健"
+    ],
+    "description": "购买保险，对冲未来风险。",
+    "narrative": {
+      "title": "未雨绸缪",
+      "story": "你购买了一份保险，为未来可能的风雨撑起一把伞。",
+      "successText": "保险配置合理，给你带来了极大的安全感。",
+      "failureText": "条款中隐藏着陷阱，真正需要时却发现难以理赔。",
+      "normalText": "保单生效了，你多了一份保障。"
+    }
+  },
+  {
+    "id": "m_gamble",
+    "name": "赌博",
+    "category": "风险",
+    "minAge": 18,
+    "maxAge": 80,
+    "riskLevel": 9,
+    "rewardLevel": 8,
+    "failureLevel": 9,
+    "balanceEffect": -4,
+    "unlockWealth": 5,
+    "tags": [
+      "运气",
+      "赌博",
+      "高风险"
+    ],
+    "description": "以小博大，极易血本无归。",
+    "narrative": {
+      "title": "赌局",
+      "story": "你把筹码押上赌桌，试图一夜暴富。",
+      "successText": "幸运女神眷顾，你赢了一笔可观的财富。",
+      "failureText": "你输得精光，甚至背上了债务。"
+    }
+  },
+  {
+    "id": "m_extreme_sport",
+    "name": "极限运动",
+    "category": "风险",
+    "minAge": 18,
+    "maxAge": 45,
+    "riskLevel": 8,
+    "rewardLevel": 7,
+    "failureLevel": 9,
+    "balanceEffect": 1,
+    "unlockWealth": 20,
+    "tags": [
+      "运气",
+      "极限",
+      "高风险"
+    ],
+    "description": "挑战身体极限的运动。",
+    "narrative": {
+      "title": "极限挑战",
+      "story": "你决定挑战一项极限运动，肾上腺素在血管中奔涌。",
+      "successText": "你成功完成了挑战，收获了无与伦比的成就感。",
+      "failureText": "一次失误让你受了重伤，代价惨重。"
+    }
+  },
+  {
+    "id": "m_interview",
+    "name": "面试",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 55,
+    "riskLevel": 3,
+    "rewardLevel": 4,
+    "failureLevel": 3,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能",
+      "求职",
+      "沟通"
+    ],
+    "description": "参加面试争取工作机会。"
+  },
+  {
+    "id": "m_writing",
+    "name": "写作",
+    "category": "教育",
+    "minAge": 10,
+    "maxAge": 90,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 1,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识",
+      "写作",
+      "表达"
+    ],
+    "description": "通过文字记录思想、传递观点。",
+    "narrative": {
+      "title": "笔尖世界",
+      "story": "你坐下来，用文字记录自己的思考与故事。",
+      "successText": "你的作品引起了共鸣，收获了读者的喜爱。",
+      "failureText": "写作陷入瓶颈，你对自己产生了怀疑。",
+      "normalText": "你写了一些文字，虽然还不够成熟。"
+    }
+  },
+  {
+    "id": "m_public_speech",
+    "name": "公共演讲",
+    "category": "兴趣",
+    "minAge": 16,
+    "maxAge": 80,
+    "riskLevel": 4,
+    "rewardLevel": 5,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 5,
+    "tags": [
+      "人脉",
+      "表达",
+      "影响力"
+    ],
+    "description": "在公众面前发表演讲。",
+    "narrative": {
+      "title": "登台演讲",
+      "story": "你站在台上，面对众多目光，准备发表演讲。",
+      "successText": "你的演讲打动全场，掌声雷动。",
+      "failureText": "你紧张得忘词了，场面一度十分尴尬。",
+      "normalText": "演讲顺利完成，中规中矩。"
+    }
+  },
+  {
+    "id": "m_career_change",
+    "name": "转行",
+    "category": "事业",
+    "minAge": 25,
+    "maxAge": 50,
+    "riskLevel": 4,
+    "rewardLevel": 6,
+    "failureLevel": 4,
+    "balanceEffect": -2,
+    "unlockWealth": 10,
+    "tags": [
+      "技能",
+      "职业",
+      "转行"
+    ],
+    "description": "离开熟悉领域，进入新行业。",
+    "narrative": {
+      "title": "转行新起点",
+      "story": "你决定离开熟悉的领域，进入一个全新的行业。",
+      "successText": "新行业与你的能力完美契合，事业发展顺风顺水。",
+      "failureText": "隔行如隔山，你发现自己难以适应新的环境。",
+      "normalText": "转行后的生活充满挑战，你在慢慢摸索。"
+    }
+  },
+  {
+    "id": "m_volunteer",
+    "name": "志愿活动",
+    "category": "社交",
+    "minAge": 12,
+    "maxAge": 90,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 1,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉",
+      "公益",
+      "社交"
+    ],
+    "description": "参与志愿服务，帮助他人。"
+  },
+  {
+    "id": "m_health_74",
+    "name": "午睡",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "午睡，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_75",
+    "name": "早起",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "早起，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_76",
+    "name": "熬夜",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "熬夜，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_77",
+    "name": "赖床",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "赖床，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_78",
+    "name": "散步",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "散步，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_79",
+    "name": "骑车",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "骑车，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_80",
+    "name": "游泳",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "游泳，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_81",
+    "name": "爬山",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "爬山，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_82",
+    "name": "瑜伽",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "瑜伽，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_83",
+    "name": "拉伸",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "拉伸，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_84",
+    "name": "冥想",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "冥想，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_85",
+    "name": "深呼吸",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "深呼吸，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_86",
+    "name": "看牙医",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "看牙医，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_87",
+    "name": "打疫苗",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "打疫苗，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_88",
+    "name": "戒酒",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "戒酒，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_89",
+    "name": "增肌",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "增肌，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_90",
+    "name": "做饭",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "做饭，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_91",
+    "name": "学习营养",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "学习营养，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_92",
+    "name": "控制饮食",
+    "category": "社交",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "控制饮食，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_93",
+    "name": "低糖饮食",
+    "category": "社交",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "低糖饮食，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_94",
+    "name": "高蛋白饮食",
+    "category": "社交",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "高蛋白饮食，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_95",
+    "name": "喝奶茶",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "喝奶茶，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_96",
+    "name": "喝咖啡",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "喝咖啡，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_97",
+    "name": "吃零食",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "吃零食，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_98",
+    "name": "暴饮暴食",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "暴饮暴食，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_99",
+    "name": "节食",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "节食，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_100",
+    "name": "吃保健品",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "吃保健品，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_101",
+    "name": "喝酒聚餐",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "喝酒聚餐，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_102",
+    "name": "住院",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "住院，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_103",
+    "name": "手术",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 7,
+    "rewardLevel": 7,
+    "failureLevel": 6,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "手术，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_104",
+    "name": "物理治疗",
+    "category": "社交",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "物理治疗，属于健康类人生行为。"
+  },
+  {
+    "id": "m_knowledge_105",
+    "name": "背单词",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "背单词，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_106",
+    "name": "写笔记",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "写笔记，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_107",
+    "name": "记忆训练",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "记忆训练，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_108",
+    "name": "刷题",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "刷题，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_109",
+    "name": "预习",
+    "category": "教育",
+    "minAge": 6,
+    "maxAge": 25,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "预习，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_110",
+    "name": "复习",
+    "category": "教育",
+    "minAge": 6,
+    "maxAge": 25,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "复习，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_111",
+    "name": "考研",
+    "category": "教育",
+    "minAge": 20,
+    "maxAge": 35,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "考研，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_112",
+    "name": "考博",
+    "category": "教育",
+    "minAge": 22,
+    "maxAge": 40,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "考博，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_113",
+    "name": "小说",
+    "category": "社交",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "小说，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_114",
+    "name": "历史",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "历史，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_115",
+    "name": "哲学",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "哲学，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_116",
+    "name": "经济学",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "经济学，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_117",
+    "name": "心理学",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "心理学，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_118",
+    "name": "科幻",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "科幻，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_119",
+    "name": "传记",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "传记，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_120",
+    "name": "管理学",
+    "category": "教育",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "管理学，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_121",
+    "name": "法律",
+    "category": "教育",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "法律，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_122",
+    "name": "医学",
+    "category": "教育",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "医学，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_123",
+    "name": "看纪录片",
+    "category": "社交",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "看纪录片，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_124",
+    "name": "听播客",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "听播客，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_125",
+    "name": "参加讲座",
+    "category": "教育",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "参加讲座，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_126",
+    "name": "公开课",
+    "category": "教育",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "公开课，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_127",
+    "name": "线上课程",
+    "category": "教育",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "线上课程，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_128",
+    "name": "读论文",
+    "category": "教育",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "读论文，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_129",
+    "name": "研究报告",
+    "category": "教育",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "研究报告，属于知识类人生行为。"
+  },
+  {
+    "id": "m_skill_130",
+    "name": "演讲",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "演讲，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_131",
+    "name": "表达",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "表达，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_132",
+    "name": "沟通",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "沟通，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_133",
+    "name": "谈判",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "谈判，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_134",
+    "name": "销售",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "销售，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_135",
+    "name": "组织活动",
+    "category": "事业",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "组织活动，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_136",
+    "name": "项目管理",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "项目管理，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_137",
+    "name": "时间管理",
+    "category": "社交",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "时间管理，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_138",
+    "name": "设计",
+    "category": "兴趣",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "设计，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_139",
+    "name": "建模",
+    "category": "事业",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "建模，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_140",
+    "name": "摄影",
+    "category": "兴趣",
+    "minAge": 10,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "摄影，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_141",
+    "name": "视频剪辑",
+    "category": "兴趣",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "视频剪辑，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_142",
+    "name": "动画制作",
+    "category": "兴趣",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "动画制作，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_143",
+    "name": "AI应用",
+    "category": "社交",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "AI应用，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_144",
+    "name": "数据分析",
+    "category": "事业",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "数据分析，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_145",
+    "name": "产品设计",
+    "category": "兴趣",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "产品设计，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_146",
+    "name": "钢琴",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "钢琴，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_147",
+    "name": "吉他",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "吉他，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_148",
+    "name": "唱歌",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "唱歌，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_149",
+    "name": "舞蹈",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "舞蹈，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_150",
+    "name": "书法",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "书法，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_151",
+    "name": "雕塑",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "雕塑，属于技能类人生行为。"
+  },
+  {
+    "id": "m_luck_152",
+    "name": "中奖",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 5,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "中奖，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_153",
+    "name": "抽奖",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "抽奖，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_154",
+    "name": "贵人相助",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 4,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "贵人相助，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_155",
+    "name": "意外收入",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 5,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "意外收入，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_156",
+    "name": "彩票中奖",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 8,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "彩票中奖，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_157",
+    "name": "捡到钱",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "捡到钱，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_158",
+    "name": "获得推荐",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "获得推荐，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_159",
+    "name": "遇见机会",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 4,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "遇见机会，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_160",
+    "name": "投资暴涨",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 8,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "投资暴涨，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_161",
+    "name": "错失机会",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "错失机会，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_162",
+    "name": "被骗",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "被骗，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_163",
+    "name": "被盗",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "被盗，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_164",
+    "name": "项目取消",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "项目取消，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_165",
+    "name": "航班延误",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "航班延误，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_166",
+    "name": "设备损坏",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "设备损坏，属于运气类人生行为。"
+  },
+  {
+    "id": "m_charm_167",
+    "name": "护肤",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "护肤，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_168",
+    "name": "理发",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "理发，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_169",
+    "name": "健身塑形",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "健身塑形，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_170",
+    "name": "学习穿搭",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "学习穿搭，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_171",
+    "name": "化妆",
+    "category": "兴趣",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "化妆，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_172",
+    "name": "美容",
+    "category": "兴趣",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "美容，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_173",
+    "name": "拍写真",
+    "category": "兴趣",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "拍写真，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_174",
+    "name": "阅读提升气质",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "阅读提升气质，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_175",
+    "name": "学习礼仪",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "学习礼仪，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_176",
+    "name": "练习微笑",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "练习微笑，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_177",
+    "name": "公开演讲",
+    "category": "兴趣",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "公开演讲，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_178",
+    "name": "社交训练",
+    "category": "兴趣",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "社交训练，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_happiness_179",
+    "name": "玩游戏",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "玩游戏，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_180",
+    "name": "看电影",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "看电影，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_181",
+    "name": "追剧",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "追剧，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_182",
+    "name": "听音乐",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "听音乐，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_183",
+    "name": "露营",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "露营，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_184",
+    "name": "逛街",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "逛街，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_185",
+    "name": "泡温泉",
+    "category": "兴趣",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "泡温泉，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_186",
+    "name": "完成目标",
+    "category": "感情",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "完成目标，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_187",
+    "name": "获得奖励",
+    "category": "感情",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "获得奖励，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_188",
+    "name": "帮助别人",
+    "category": "感情",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "帮助别人，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_189",
+    "name": "养宠物",
+    "category": "家庭",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "养宠物，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_190",
+    "name": "家庭聚会",
+    "category": "家庭",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "家庭聚会，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_191",
+    "name": "实现梦想",
+    "category": "感情",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 5,
+    "failureLevel": 3,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "实现梦想，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_relationship_192",
+    "name": "参加社团",
+    "category": "教育",
+    "minAge": 10,
+    "maxAge": 30,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "参加社团，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_193",
+    "name": "聚会",
+    "category": "社交",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "聚会，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_194",
+    "name": "同学会",
+    "category": "社交",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "同学会，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_195",
+    "name": "行业交流",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "行业交流，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_196",
+    "name": "兴趣小组",
+    "category": "社交",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "兴趣小组，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_197",
+    "name": "认识领导",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "认识领导，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_198",
+    "name": "结识客户",
+    "category": "社交",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "结识客户，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_199",
+    "name": "参加峰会",
+    "category": "社交",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "参加峰会，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_200",
+    "name": "商务饭局",
+    "category": "社交",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "商务饭局，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_201",
+    "name": "建立团队",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "建立团队，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_202",
+    "name": "寻找合伙人",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "寻找合伙人，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_203",
+    "name": "陪伴父母",
+    "category": "家庭",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "陪伴父母，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_204",
+    "name": "探望亲人",
+    "category": "家庭",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "探望亲人，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_205",
+    "name": "教育孩子",
+    "category": "家庭",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "教育孩子，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_wealth_206",
+    "name": "实习",
+    "category": "事业",
+    "minAge": 16,
+    "maxAge": 30,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "实习，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_207",
+    "name": "上班",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 65,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "上班，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_208",
+    "name": "升职",
+    "category": "事业",
+    "minAge": 22,
+    "maxAge": 60,
+    "riskLevel": 4,
+    "rewardLevel": 5,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "升职，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_209",
+    "name": "跳槽",
+    "category": "事业",
+    "minAge": 22,
+    "maxAge": 55,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "跳槽，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_210",
+    "name": "存钱",
+    "category": "投资",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "存钱，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_211",
+    "name": "定投",
+    "category": "投资",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "定投，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_212",
+    "name": "买黄金",
+    "category": "投资",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "买黄金，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_213",
+    "name": "买房",
+    "category": "投资",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 50,
+    "tags": [
+      "财富"
+    ],
+    "description": "买房，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_214",
+    "name": "开网店",
+    "category": "投资",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "开网店，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_215",
+    "name": "直播带货",
+    "category": "投资",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "直播带货，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_216",
+    "name": "做自媒体",
+    "category": "投资",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "做自媒体，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_217",
+    "name": "广告变现",
+    "category": "投资",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "广告变现，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_218",
+    "name": "知识付费",
+    "category": "投资",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "知识付费，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_219",
+    "name": "加盟创业",
+    "category": "投资",
+    "minAge": 22,
+    "maxAge": 120,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "加盟创业，属于财富类人生行为。"
+  },
+  {
+    "id": "m_risk_220",
+    "name": "感冒",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "感冒，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_221",
+    "name": "发烧",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "发烧，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_222",
+    "name": "受伤",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "受伤，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_223",
+    "name": "骨折",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "骨折，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_224",
+    "name": "车祸",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 9,
+    "rewardLevel": 8,
+    "failureLevel": 7,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "车祸，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_225",
+    "name": "重大疾病",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 10,
+    "rewardLevel": 9,
+    "failureLevel": 8,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "重大疾病，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_226",
+    "name": "失业",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "失业，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_227",
+    "name": "裁员",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "裁员，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_228",
+    "name": "诈骗",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 7,
+    "rewardLevel": 7,
+    "failureLevel": 5,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "诈骗，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_229",
+    "name": "投资失败",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "投资失败，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_230",
+    "name": "官司",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 7,
+    "rewardLevel": 7,
+    "failureLevel": 5,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "官司，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_231",
+    "name": "债务危机",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 9,
+    "rewardLevel": 8,
+    "failureLevel": 8,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "债务危机，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_232",
+    "name": "火灾",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 9,
+    "rewardLevel": 8,
+    "failureLevel": 7,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "火灾，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_233",
+    "name": "洪水",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 9,
+    "rewardLevel": 8,
+    "failureLevel": 7,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "洪水，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_234",
+    "name": "地震",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 10,
+    "rewardLevel": 9,
+    "failureLevel": 8,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "地震，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_235",
+    "name": "疫情",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 8,
+    "rewardLevel": 7,
+    "failureLevel": 7,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "疫情，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_236",
+    "name": "战争",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 10,
+    "rewardLevel": 9,
+    "failureLevel": 8,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "战争，属于意外类人生行为。"
+  },
+  {
+    "id": "m_mystery_237",
+    "name": "神秘来信",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "神秘来信，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_238",
+    "name": "陌生电话",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "陌生电话，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_239",
+    "name": "偶遇老人",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "偶遇老人，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_240",
+    "name": "神秘网站",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "神秘网站，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_241",
+    "name": "隐藏任务",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "隐藏任务，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_242",
+    "name": "未知宝箱",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "未知宝箱，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_243",
+    "name": "神秘投资机会",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 7,
+    "rewardLevel": 7,
+    "failureLevel": 6,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "神秘投资机会，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_244",
+    "name": "穿越梦境",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "穿越梦境，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_245",
+    "name": "遗失的日记",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "遗失的日记，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_246",
+    "name": "地下组织邀请",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 8,
+    "rewardLevel": 7,
+    "failureLevel": 7,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "地下组织邀请，属于未知类人生行为。"
+  },
+  {
+    "id": "m_happiness_247",
+    "name": "暗恋",
+    "category": "感情",
+    "minAge": 10,
+    "maxAge": 40,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "暗恋，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_248",
+    "name": "同居",
+    "category": "感情",
+    "minAge": 18,
+    "maxAge": 50,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "同居，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_249",
+    "name": "订婚",
+    "category": "感情",
+    "minAge": 20,
+    "maxAge": 50,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "订婚，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_250",
+    "name": "蜜月",
+    "category": "感情",
+    "minAge": 20,
+    "maxAge": 50,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "蜜月，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_251",
+    "name": "复婚",
+    "category": "感情",
+    "minAge": 25,
+    "maxAge": 70,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "复婚，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_wealth_252",
+    "name": "摆摊",
+    "category": "投资",
+    "minAge": 16,
+    "maxAge": 70,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "摆摊，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_253",
+    "name": "接私活",
+    "category": "投资",
+    "minAge": 18,
+    "maxAge": 65,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "接私活，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_254",
+    "name": "开工作室",
+    "category": "投资",
+    "minAge": 20,
+    "maxAge": 65,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "开工作室，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_255",
+    "name": "融资",
+    "category": "投资",
+    "minAge": 22,
+    "maxAge": 60,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 30,
+    "tags": [
+      "财富"
+    ],
+    "description": "融资，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_256",
+    "name": "招聘员工",
+    "category": "事业",
+    "minAge": 22,
+    "maxAge": 65,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "招聘员工，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_257",
+    "name": "开分公司",
+    "category": "事业",
+    "minAge": 25,
+    "maxAge": 65,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 80,
+    "tags": [
+      "财富"
+    ],
+    "description": "开分公司，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_258",
+    "name": "出售公司",
+    "category": "投资",
+    "minAge": 30,
+    "maxAge": 75,
+    "riskLevel": 5,
+    "rewardLevel": 8,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "出售公司，属于财富类人生行为。"
+  },
+  {
+    "id": "m_knowledge_259",
+    "name": "学习AI",
+    "category": "教育",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "学习AI，属于知识类人生行为。"
+  },
+  {
+    "id": "m_skill_260",
+    "name": "制作小游戏",
+    "category": "兴趣",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "制作小游戏，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_261",
+    "name": "开发APP",
+    "category": "社交",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "开发APP，属于技能类人生行为。"
+  },
+  {
+    "id": "m_wealth_262",
+    "name": "经营网站",
+    "category": "投资",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "经营网站，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_263",
+    "name": "自媒体创作",
+    "category": "投资",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "自媒体创作，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_264",
+    "name": "短视频运营",
+    "category": "事业",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "短视频运营，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_265",
+    "name": "直播",
+    "category": "投资",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "直播，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_266",
+    "name": "跨境电商",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "跨境电商，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_267",
+    "name": "独立开发",
+    "category": "投资",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "独立开发，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_268",
+    "name": "数字游民",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "数字游民，属于财富类人生行为。"
+  },
+  {
+    "id": "m_health_269",
+    "name": "按摩",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "按摩，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_270",
+    "name": "针灸",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "针灸，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_271",
+    "name": "拔罐",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "拔罐，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_272",
+    "name": "推拿",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "推拿，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_273",
+    "name": "足疗",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "足疗，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_274",
+    "name": "滑雪",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "滑雪，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_275",
+    "name": "潜水",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "潜水，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_276",
+    "name": "跳伞",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 9,
+    "rewardLevel": 8,
+    "failureLevel": 7,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "跳伞，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_277",
+    "name": "马术",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "马术，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_278",
+    "name": "高尔夫",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "高尔夫，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_279",
+    "name": "台球",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "台球，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_280",
+    "name": "羽毛球",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "羽毛球，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_281",
+    "name": "篮球",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "篮球，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_282",
+    "name": "足球",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "足球，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_283",
+    "name": "网球",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "网球，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_284",
+    "name": "乒乓球",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "乒乓球，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_285",
+    "name": "马拉松",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "马拉松，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_286",
+    "name": "普拉提",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "普拉提，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_287",
+    "name": "正念",
+    "category": "社交",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "正念，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_288",
+    "name": "芳香疗法",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "芳香疗法，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_289",
+    "name": "基因检测",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "基因检测，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_290",
+    "name": "视力检查",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "视力检查，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_291",
+    "name": "洗牙",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "洗牙，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_292",
+    "name": "拔智齿",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "拔智齿，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_293",
+    "name": "医美",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "医美，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_294",
+    "name": "急救",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "急救，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_295",
+    "name": "器官移植",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 9,
+    "rewardLevel": 8,
+    "failureLevel": 7,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "器官移植，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_296",
+    "name": "化疗",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 9,
+    "rewardLevel": 8,
+    "failureLevel": 7,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "化疗，属于健康类人生行为。"
+  },
+  {
+    "id": "m_health_297",
+    "name": "透析",
+    "category": "成长",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 8,
+    "rewardLevel": 7,
+    "failureLevel": 7,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "健康"
+    ],
+    "description": "透析，属于健康类人生行为。"
+  },
+  {
+    "id": "m_knowledge_298",
+    "name": "英语",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "英语，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_299",
+    "name": "日语",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "日语，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_300",
+    "name": "法语",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "法语，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_301",
+    "name": "算法",
+    "category": "教育",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "算法，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_302",
+    "name": "机器学习",
+    "category": "事业",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "机器学习，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_303",
+    "name": "深度学习",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "深度学习，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_304",
+    "name": "区块链",
+    "category": "事业",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "区块链，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_305",
+    "name": "量子计算",
+    "category": "教育",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "量子计算，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_306",
+    "name": "生物学",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "生物学，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_307",
+    "name": "化学",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "化学，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_308",
+    "name": "物理学",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "物理学，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_309",
+    "name": "地理",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "地理，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_310",
+    "name": "政治",
+    "category": "教育",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "政治，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_311",
+    "name": "社会学",
+    "category": "教育",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "社会学，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_312",
+    "name": "艺术史",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "艺术史，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_313",
+    "name": "文学",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "文学，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_314",
+    "name": "诗歌",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "诗歌，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_315",
+    "name": "戏剧",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "戏剧，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_316",
+    "name": "建筑",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "建筑，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_317",
+    "name": "批判性思维",
+    "category": "社交",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "批判性思维，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_318",
+    "name": "财务知识",
+    "category": "事业",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "财务知识，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_319",
+    "name": "税务知识",
+    "category": "教育",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "税务知识，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_320",
+    "name": "会计",
+    "category": "教育",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "会计，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_321",
+    "name": "统计学",
+    "category": "教育",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "统计学，属于知识类人生行为。"
+  },
+  {
+    "id": "m_knowledge_322",
+    "name": "微积分",
+    "category": "社交",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "知识"
+    ],
+    "description": "微积分，属于知识类人生行为。"
+  },
+  {
+    "id": "m_skill_323",
+    "name": "烹饪",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "烹饪，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_324",
+    "name": "烘焙",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "烘焙，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_325",
+    "name": "西餐",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "西餐，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_326",
+    "name": "中餐",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "中餐，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_327",
+    "name": "日本料理",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "日本料理，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_328",
+    "name": "咖啡拉花",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "咖啡拉花，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_329",
+    "name": "调酒",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "调酒，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_330",
+    "name": "茶艺",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "茶艺，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_331",
+    "name": "花艺",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "花艺，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_332",
+    "name": "园艺",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "园艺，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_333",
+    "name": "木工",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "木工，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_334",
+    "name": "电工",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "电工，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_335",
+    "name": "汽修",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "汽修，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_336",
+    "name": "缝纫",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "缝纫，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_337",
+    "name": "陶艺",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "陶艺，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_338",
+    "name": "珠宝设计",
+    "category": "事业",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "珠宝设计，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_339",
+    "name": "服装设计",
+    "category": "事业",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "服装设计，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_340",
+    "name": "室内设计",
+    "category": "兴趣",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "室内设计，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_341",
+    "name": "UI设计",
+    "category": "兴趣",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "UI设计，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_342",
+    "name": "UX设计",
+    "category": "兴趣",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "UX设计，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_343",
+    "name": "工业设计",
+    "category": "兴趣",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "工业设计，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_344",
+    "name": "游戏设计",
+    "category": "事业",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "游戏设计，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_345",
+    "name": "VR开发",
+    "category": "事业",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "VR开发，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_346",
+    "name": "机器人",
+    "category": "事业",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "机器人，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_347",
+    "name": "无人机",
+    "category": "事业",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "无人机，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_348",
+    "name": "3D打印",
+    "category": "事业",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "3D打印，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_349",
+    "name": "修图",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "修图，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_350",
+    "name": "混音",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "混音，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_351",
+    "name": "编曲",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "编曲，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_352",
+    "name": "魔术",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "魔术，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_353",
+    "name": "围棋",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "围棋，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_354",
+    "name": "象棋",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "象棋，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_355",
+    "name": "桥牌",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "桥牌，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_356",
+    "name": "电子竞技",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "电子竞技，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_357",
+    "name": "拳击",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "拳击，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_358",
+    "name": "跆拳道",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "跆拳道，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_359",
+    "name": "柔道",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "柔道，属于技能类人生行为。"
+  },
+  {
+    "id": "m_skill_360",
+    "name": "攀岩",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "技能"
+    ],
+    "description": "攀岩，属于技能类人生行为。"
+  },
+  {
+    "id": "m_luck_361",
+    "name": "天气突变",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "天气突变，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_362",
+    "name": "交通堵塞",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "交通堵塞，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_363",
+    "name": "得到遗产",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 8,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "得到遗产，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_364",
+    "name": "意外升职",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 5,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "意外升职，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_365",
+    "name": "一见钟情",
+    "category": "感情",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "一见钟情，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_366",
+    "name": "偶遇老友",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "偶遇老友，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_367",
+    "name": "网络走红",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 5,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "网络走红，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_368",
+    "name": "爆款产品",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 6,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "爆款产品，属于运气类人生行为。"
+  },
+  {
+    "id": "m_luck_369",
+    "name": "幸运抽奖",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "运气"
+    ],
+    "description": "幸运抽奖，属于运气类人生行为。"
+  },
+  {
+    "id": "m_charm_370",
+    "name": "穿搭改造",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "穿搭改造，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_371",
+    "name": "形象顾问",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "形象顾问，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_372",
+    "name": "声音训练",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "声音训练，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_373",
+    "name": "体态矫正",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "体态矫正，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_374",
+    "name": "礼仪培训",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "礼仪培训，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_375",
+    "name": "演讲比赛",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "演讲比赛，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_376",
+    "name": "主持",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "主持，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_377",
+    "name": "配音",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "配音，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_378",
+    "name": "个人品牌",
+    "category": "事业",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "个人品牌，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_charm_379",
+    "name": "粉丝运营",
+    "category": "事业",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "魅力"
+    ],
+    "description": "粉丝运营，属于魅力类人生行为。"
+  },
+  {
+    "id": "m_happiness_380",
+    "name": "美食",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "美食，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_381",
+    "name": "火锅",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "火锅，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_382",
+    "name": "烧烤",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "烧烤，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_383",
+    "name": "日料",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "日料，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_384",
+    "name": "野餐",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "野餐，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_385",
+    "name": "游乐园",
+    "category": "感情",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "游乐园，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_386",
+    "name": "演唱会",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "演唱会，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_387",
+    "name": "音乐节",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "音乐节，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_388",
+    "name": "博物馆",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "博物馆，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_389",
+    "name": "书店",
+    "category": "教育",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "书店，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_390",
+    "name": "猫咖",
+    "category": "感情",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "猫咖，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_391",
+    "name": "海岛游",
+    "category": "感情",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "海岛游，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_392",
+    "name": "自驾游",
+    "category": "感情",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "自驾游，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_393",
+    "name": "钓鱼",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "钓鱼，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_394",
+    "name": "手办",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "手办，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_395",
+    "name": "乐高",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "乐高，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_396",
+    "name": "桌游",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "桌游，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_397",
+    "name": "K歌",
+    "category": "感情",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "K歌，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_happiness_398",
+    "name": "SPA",
+    "category": "兴趣",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 2,
+    "unlockWealth": 0,
+    "tags": [
+      "幸福"
+    ],
+    "description": "SPA，属于幸福类人生行为。"
+  },
+  {
+    "id": "m_relationship_399",
+    "name": "相亲",
+    "category": "感情",
+    "minAge": 20,
+    "maxAge": 50,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "相亲，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_400",
+    "name": "网恋",
+    "category": "感情",
+    "minAge": 14,
+    "maxAge": 50,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "网恋，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_401",
+    "name": "异地恋",
+    "category": "感情",
+    "minAge": 16,
+    "maxAge": 45,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "异地恋，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_402",
+    "name": "同学聚会",
+    "category": "社交",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "同学聚会，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_403",
+    "name": "同乡会",
+    "category": "社交",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "同乡会，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_404",
+    "name": "读书会",
+    "category": "教育",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "读书会，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_405",
+    "name": "跑团",
+    "category": "社交",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "跑团，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_406",
+    "name": "健身伙伴",
+    "category": "兴趣",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "健身伙伴，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_407",
+    "name": "游戏队友",
+    "category": "兴趣",
+    "minAge": 10,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "游戏队友，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_408",
+    "name": "开源社区",
+    "category": "事业",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "开源社区，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_409",
+    "name": "志愿者组织",
+    "category": "事业",
+    "minAge": 12,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "志愿者组织，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_410",
+    "name": "行业协会",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "行业协会，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_411",
+    "name": "商会",
+    "category": "社交",
+    "minAge": 22,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "商会，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_412",
+    "name": "导师关系",
+    "category": "教育",
+    "minAge": 14,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "导师关系，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_413",
+    "name": "邻里关系",
+    "category": "社交",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "邻里关系，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_414",
+    "name": "家长会",
+    "category": "社交",
+    "minAge": 22,
+    "maxAge": 60,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "家长会，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_relationship_415",
+    "name": "亲子活动",
+    "category": "家庭",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 1,
+    "unlockWealth": 0,
+    "tags": [
+      "人脉"
+    ],
+    "description": "亲子活动，属于人脉类人生行为。"
+  },
+  {
+    "id": "m_wealth_416",
+    "name": "副业",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "副业，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_417",
+    "name": "自由职业",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "自由职业，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_418",
+    "name": "咨询",
+    "category": "投资",
+    "minAge": 22,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "咨询，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_419",
+    "name": "培训",
+    "category": "教育",
+    "minAge": 20,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "培训，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_420",
+    "name": "写作变现",
+    "category": "教育",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "写作变现，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_421",
+    "name": "翻译",
+    "category": "事业",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "翻译，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_422",
+    "name": "家教",
+    "category": "投资",
+    "minAge": 16,
+    "maxAge": 120,
+    "riskLevel": 1,
+    "rewardLevel": 2,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "家教，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_423",
+    "name": "设计师接单",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "设计师接单，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_424",
+    "name": "程序员接单",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "程序员接单，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_425",
+    "name": "接广告",
+    "category": "投资",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "接广告，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_426",
+    "name": "会员订阅",
+    "category": "社交",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "会员订阅，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_427",
+    "name": "众筹",
+    "category": "社交",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "众筹，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_428",
+    "name": "租房",
+    "category": "投资",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "租房，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_429",
+    "name": "收租",
+    "category": "投资",
+    "minAge": 22,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 50,
+    "tags": [
+      "财富"
+    ],
+    "description": "收租，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_430",
+    "name": "REITs",
+    "category": "社交",
+    "minAge": 22,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "REITs，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_431",
+    "name": "期货",
+    "category": "投资",
+    "minAge": 22,
+    "maxAge": 120,
+    "riskLevel": 8,
+    "rewardLevel": 7,
+    "failureLevel": 7,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "期货，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_432",
+    "name": "外汇",
+    "category": "投资",
+    "minAge": 22,
+    "maxAge": 120,
+    "riskLevel": 7,
+    "rewardLevel": 7,
+    "failureLevel": 6,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "外汇，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_433",
+    "name": "加密货币",
+    "category": "投资",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 8,
+    "rewardLevel": 7,
+    "failureLevel": 7,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "加密货币，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_434",
+    "name": "期权",
+    "category": "投资",
+    "minAge": 22,
+    "maxAge": 120,
+    "riskLevel": 8,
+    "rewardLevel": 7,
+    "failureLevel": 7,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "期权，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_435",
+    "name": "信托",
+    "category": "投资",
+    "minAge": 30,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 100,
+    "tags": [
+      "财富"
+    ],
+    "description": "信托，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_436",
+    "name": "私募基金",
+    "category": "投资",
+    "minAge": 25,
+    "maxAge": 120,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 80,
+    "tags": [
+      "财富"
+    ],
+    "description": "私募基金，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_437",
+    "name": "IPO",
+    "category": "投资",
+    "minAge": 30,
+    "maxAge": 120,
+    "riskLevel": 7,
+    "rewardLevel": 7,
+    "failureLevel": 6,
+    "balanceEffect": 0,
+    "unlockWealth": 150,
+    "tags": [
+      "财富"
+    ],
+    "description": "IPO，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_438",
+    "name": "并购",
+    "category": "投资",
+    "minAge": 30,
+    "maxAge": 120,
+    "riskLevel": 7,
+    "rewardLevel": 7,
+    "failureLevel": 6,
+    "balanceEffect": 0,
+    "unlockWealth": 200,
+    "tags": [
+      "财富"
+    ],
+    "description": "并购，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_439",
+    "name": "股权激励",
+    "category": "投资",
+    "minAge": 22,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "股权激励，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_440",
+    "name": "年终奖",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 65,
+    "riskLevel": 2,
+    "rewardLevel": 4,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "年终奖，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_441",
+    "name": "分红",
+    "category": "投资",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 5,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "分红，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_442",
+    "name": "遗产继承",
+    "category": "机遇",
+    "minAge": 25,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 8,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "遗产继承，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_443",
+    "name": "奖学金",
+    "category": "教育",
+    "minAge": 6,
+    "maxAge": 30,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "奖学金，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_444",
+    "name": "科研经费",
+    "category": "投资",
+    "minAge": 22,
+    "maxAge": 65,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "科研经费，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_445",
+    "name": "政府补贴",
+    "category": "投资",
+    "minAge": 18,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "政府补贴，属于财富类人生行为。"
+  },
+  {
+    "id": "m_wealth_446",
+    "name": "创业大赛",
+    "category": "事业",
+    "minAge": 18,
+    "maxAge": 40,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "财富"
+    ],
+    "description": "创业大赛，属于财富类人生行为。"
+  },
+  {
+    "id": "m_risk_447",
+    "name": "食物中毒",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "食物中毒，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_448",
+    "name": "过敏",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "过敏，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_449",
+    "name": "中暑",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "中暑，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_450",
+    "name": "溺水",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 8,
+    "rewardLevel": 7,
+    "failureLevel": 7,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "溺水，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_451",
+    "name": "触电",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 7,
+    "rewardLevel": 7,
+    "failureLevel": 6,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "触电，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_452",
+    "name": "高空坠物",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 7,
+    "rewardLevel": 7,
+    "failureLevel": 6,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "高空坠物，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_453",
+    "name": "抢劫",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 8,
+    "rewardLevel": 7,
+    "failureLevel": 7,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "抢劫，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_454",
+    "name": "斗殴",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 8,
+    "rewardLevel": 7,
+    "failureLevel": 7,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "斗殴，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_455",
+    "name": "诽谤",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "诽谤，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_456",
+    "name": "背叛",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "背叛，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_457",
+    "name": "失恋",
+    "category": "感情",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "失恋，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_458",
+    "name": "违章罚款",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 2,
+    "rewardLevel": 3,
+    "failureLevel": 2,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "违章罚款，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_459",
+    "name": "税务稽查",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "税务稽查，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_460",
+    "name": "房屋漏水",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "房屋漏水，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_461",
+    "name": "手机丢失",
+    "category": "事业",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 3,
+    "rewardLevel": 3,
+    "failureLevel": 3,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "手机丢失，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_462",
+    "name": "数据泄露",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "数据泄露，属于意外类人生行为。"
+  },
+  {
+    "id": "m_risk_463",
+    "name": "网络暴力",
+    "category": "风险",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": -1,
+    "unlockWealth": 0,
+    "tags": [
+      "意外"
+    ],
+    "description": "网络暴力，属于意外类人生行为。"
+  },
+  {
+    "id": "m_mystery_464",
+    "name": "AI失控",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 8,
+    "rewardLevel": 7,
+    "failureLevel": 7,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "AI失控，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_465",
+    "name": "外星信号",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "外星信号，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_466",
+    "name": "时间循环",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "时间循环，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_467",
+    "name": "预知梦",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "预知梦，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_468",
+    "name": "前世记忆",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 4,
+    "rewardLevel": 4,
+    "failureLevel": 4,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "前世记忆，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_469",
+    "name": "平行世界",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 6,
+    "rewardLevel": 6,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "平行世界，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_470",
+    "name": "神秘失踪",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 7,
+    "rewardLevel": 7,
+    "failureLevel": 6,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "神秘失踪，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_471",
+    "name": "午夜电梯",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "午夜电梯，属于未知类人生行为。"
+  },
+  {
+    "id": "m_mystery_472",
+    "name": "陌生包裹",
+    "category": "机遇",
+    "minAge": 1,
+    "maxAge": 120,
+    "riskLevel": 5,
+    "rewardLevel": 5,
+    "failureLevel": 5,
+    "balanceEffect": 0,
+    "unlockWealth": 0,
+    "tags": [
+      "未知"
+    ],
+    "description": "陌生包裹，属于未知类人生行为。"
+  }
+];

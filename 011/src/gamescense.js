@@ -172,16 +172,11 @@ class GameScense {
 
                 if (btnAgain && !btnAgain.hasEventListener("click")) {
 
-                    // 绑定重新开始按钮事件
+                    // AAI：失败后先弹出复活选择
                     btnAgain.on('click', (event) => {
-                        // console.log('🔄 失败界面点击重新开始按钮');
+                        // console.log('🔄 失败界面点击继续按钮');
                         event.stopPropagation();
-
-                        // 调用插页广告
-                        ovo.showInterstitialAd(() => {
-                            // 广告关闭后的回调
-                            this.failureHandler(false);
-                        });
+                        this.showReviveOptions();
                     });
 
                     // 确保按钮在屏蔽层之上
@@ -189,7 +184,7 @@ class GameScense {
                         failureMc.setChildIndex(btnAgain, failureMc.children.length - 1);
                     }
 
-                    // console.log('✅ 失败界面重新开始按钮事件已绑定');
+                    // console.log('✅ 失败界面继续按钮事件已绑定');
                 }
             }
 
@@ -219,13 +214,22 @@ class GameScense {
 
                     // 绑定重新开始按钮事件
                     btnAgain.on('click', (event) => {
-                        // console.log('🔄 胜利界面点击重新开始按钮');
+                        // console.log('🔄 胜利界面点击继续按钮');
                         event.stopPropagation();
+
+                        // AAI：根据是否完成最终关卡决定下一步
+                        const isFinalLevel = (this.targetEggType >= 7);
 
                         // 调用插页广告
                         ovo.showInterstitialAd(() => {
                             // 广告关闭后的回调
-                            this.victoryHandler(false);
+                            if (isFinalLevel) {
+                                // 最终关卡后重新开始
+                                this.victoryHandler(false);
+                            } else {
+                                // 非最终关卡进入下一关
+                                this.onNextLevel();
+                            }
                         });
                     });
 
@@ -254,11 +258,21 @@ class GameScense {
                         event.stopPropagation();
                         this.engine.playSound("select_wawa")
                         
+                        // AAI：打开设置时暂停自动飞入倒计时
+                        this.stopAutoSpawnTimer();
+
                         this.showPanel(settingsMc, true, () => {
                             // console.log('✅ 设置界面显示完成');
                             this.selectedDifficulty = window.GameServer.getDifficulty();
 
                             this.selectDifficulty(this.selectedDifficulty, this.difficultyMap); // 更新按钮状态
+
+                            // AAI：设置页 Banner 常驻
+                            if (typeof window.ovo !== 'undefined' && typeof window.ovo.showBannerAd === 'function') {
+                                window.ovo.showBannerAd(() => {
+                                    console.log('📢 设置页 Banner 已显示');
+                                });
+                            }
                         });
                     });
                     // console.log('✅ btn_setting 按钮事件已绑定');
@@ -270,6 +284,14 @@ class GameScense {
                     this.engine.playSound("select_wawa")
                     this.showPanel(settingsMc, false, () => {
                         console.log('🔧 设置界面已关闭');
+                        // AAI：回到首页后继续显示 Banner
+                        if (typeof window.ovo !== 'undefined' && typeof window.ovo.showBannerAd === 'function') {
+                            window.ovo.showBannerAd(() => {
+                                console.log('📢 设置关闭后 Banner 已恢复');
+                            });
+                        }
+                        // AAI：关闭设置后恢复自动飞入倒计时
+                        this.startAutoSpawnTimer();
                     });
                 });
 
@@ -533,7 +555,10 @@ class GameScense {
                 this.selectedDifficulty
             );
             this.gameData = gameConfig;
-            // console.log('🎯 获取到游戏配置:', gameConfig);
+            // AAI：记录关卡与目标
+            this.level = gameConfig.level || 1;
+            this.targetEggType = gameConfig.targetEggType || 4;
+            console.log(`🎯 获取到游戏配置: 第 ${this.level} 关, 目标 ${this.targetEggType} 级蛋`);
 
             // 验证游戏数据
             // this.verifyGameData();
@@ -547,6 +572,19 @@ class GameScense {
             }, 1000);
 
             this.isInitialized = true;
+
+            // AAI：初始化自动飞入倒计时系统
+            this.initAutoSpawn();
+
+            // AAI：首页 Banner 常驻（进入游戏主场景后显示）
+            setTimeout(() => {
+                if (typeof window.ovo !== 'undefined' && typeof window.ovo.showBannerAd === 'function') {
+                    window.ovo.showBannerAd(() => {
+                        console.log('📢 首页 Banner 已显示');
+                    });
+                }
+            }, 500);
+
             // console.log('✅ GameScense 初始化完成');
 
         } catch (error) {
@@ -600,6 +638,11 @@ class GameScense {
                     );
 
                     await Promise.all(createEggPromises);
+
+                    // AAI：非新手引导模式下，蛋生成完成后启动自动飞入倒计时
+                    if (!this.userStatus?.isNewUser) {
+                        this.startAutoSpawnTimer();
+                    }
 
                     // utile.__sdklog(`✅ 成功为生成 ${eggSeat.length} 个蛋`, this.chessboard);
                 }
@@ -1309,6 +1352,11 @@ class GameScense {
                 return;
             }
 
+            // AAI：玩家每次有效操作后重置自动飞入倒计时
+            if (this.autoSpawnActive) {
+                this.resetAutoSpawnTimer();
+            }
+
             if (this.userStatus?.isNewUser) {
 
                 // 🔥 检查是否在引导阶段，如果是则只允许点击引导位置
@@ -1417,6 +1465,9 @@ class GameScense {
         // 🔥 检查游戏胜利和失败
         const isVictory = result.isVictory || false;
         const isFailure = result.isFailure || false;
+
+        // AAI：移动/合成期间暂停自动飞入倒计时
+        this.stopAutoSpawnTimer();
 
         // 直接从前端获取蛋元件，不依赖后端数据
         const piece = this.chessboard.pieces.get(result.fromCellId);
@@ -1601,6 +1652,11 @@ class GameScense {
             }).finally(() => {
                 // 🔥 重要：无论成功还是失败，都要解锁游戏交互
                 // this.unlockGameInteraction();
+
+                // AAI：移动处理完成后恢复自动飞入倒计时（胜利/失败时不恢复，由对应面板控制）
+                if (!isVictory && !isFailure) {
+                    this.startAutoSpawnTimer();
+                }
             });
 
     }
@@ -1707,12 +1763,8 @@ class GameScense {
     async executeSynthesisAnimation(synthesisData, positionsToDelete) {
         // console.log('🎬 开始执行合成动画...');
 
-        const { matches, eggType, newEggType, synthesisPosition, score } = synthesisData;
-
-        // score 就是 scoreDetail
+        const { eggType, synthesisPosition, score } = synthesisData;
         const scoreDetail = score;
-
-        // console.log('🔍 使用score作为scoreDetail:', scoreDetail);
 
         // 🎯 合成开始时触发震动（如果开启）
         const isVibrationEnabled = localStorage.getItem('vibrationEnabled') === null ||
@@ -1726,29 +1778,59 @@ class GameScense {
             console.log('⚠️ 振动功能不可用，跳过振动反馈');
         }
 
-        // 收集所有参与合成的蛋元件（包括目标位置）
-        const allEggsToSynthesize = [];
-        for (const cellId of positionsToDelete) {
-            const piece = this.chessboard.pieces.get(cellId);
-            if (piece) {
-                allEggsToSynthesize.push({
-                    cellId: cellId,
-                    piece: piece,
-                    isTarget: cellId === synthesisPosition
-                });
-                // console.log(`🥚 找到参与合成的蛋: 格子${cellId} ${cellId === synthesisPosition ? '(目标位置)' : ''}, 元件名称: ${piece.name || 'unnamed'}, 元件ID: ${piece.id || 'no-id'}`);
-            } else {
-                console.warn(`⚠️ 格子 ${cellId} 没有找到对应的蛋元件`);
+        // 播放合成音乐
+        if (this.engine && this.loadedSounds.has('goodmin')) {
+            this.engine.playSound('goodmin');
+        }
+
+        // AAI：构建额外蛋的移动路径映射
+        const extraPathMap = {};
+        if (synthesisData.extraPaths) {
+            for (const extra of synthesisData.extraPaths) {
+                extraPathMap[extra.cellId] = extra.path;
             }
         }
 
-        // utile.__sdklog2(`🔍 总共 ${allEggsToSynthesize.length} 个蛋参与合成`);
+        // AAI：额外蛋按路径长度排序，近的先进，逐个移动到目标位置
+        const extras = positionsToDelete
+            .filter(cellId => cellId !== synthesisPosition)
+            .map(cellId => ({
+                cellId,
+                piece: this.chessboard.pieces.get(cellId),
+                path: extraPathMap[cellId] || []
+            }))
+            .filter(item => item.piece)
+            .sort((a, b) => a.path.length - b.path.length);
 
-        // 执行蛋收集动画
-        await this.playEggCollectionAnimation(allEggsToSynthesize, synthesisPosition);
+        let currentLevel = eggType;
+        let targetPiece = this.chessboard.pieces.get(synthesisPosition);
 
-        // 延迟后创建合成蛋
-        await this.createSynthesizedEgg(synthesisPosition, newEggType);
+        // 逐个移动额外蛋，每到达一个目标蛋升 1 级；达到 7 级后多余的直接消除
+        for (const extra of extras) {
+            if (currentLevel >= 7) {
+                await this.eliminatePieceDirectly(extra.piece);
+                continue;
+            }
+
+            // 沿路径移动到目标位置
+            await this.animatePieceAlongPath(extra.piece, extra.path);
+
+            // 到达目标后移除
+            if (extra.piece.parent) {
+                extra.piece.parent.removeChild(extra.piece);
+            }
+            this.chessboard.pieces.delete(extra.cellId);
+
+            // 目标蛋升级 1 级
+            currentLevel++;
+            targetPiece = this.replacePieceAtCell(synthesisPosition, currentLevel);
+        }
+
+        // 最终合成特效与信息
+        if (targetPiece && currentLevel > eggType) {
+            await this.playSynthesisEffect(targetPiece);
+            this.showSynthesisInfo(currentLevel);
+        }
 
         // 更新分数显示并等待完成
         // utile.__sdklog2('🔍 准备更新分数，scoreDetail:', scoreDetail);
@@ -1761,21 +1843,21 @@ class GameScense {
             console.warn('⚠️ scoreDetail 数据缺失:', scoreDetail);
         }
         // 检查是否解锁了新等级（简单检查）
-        if (newEggType > this.maxUnlockedLevel) {
-            // console.log(`🎉 解锁新等级: ${this.maxUnlockedLevel} -> ${newEggType}`);
+        if (currentLevel > this.maxUnlockedLevel) {
+            // console.log(`🎉 解锁新等级: ${this.maxUnlockedLevel} -> ${currentLevel}`);
 
             this.engine.playSound('hecheng_open');
 
             // 播放解锁动画
-            await this.playUnlockAnimation(newEggType);
+            await this.playUnlockAnimation(currentLevel);
 
             // 更新前端记录的最高等级
-            this.maxUnlockedLevel = newEggType;
+            this.maxUnlockedLevel = currentLevel;
 
-            // console.log(`🎊 恭喜解锁 ${this.getEggTypeName(newEggType)} 蛋！`);
+            // console.log(`🎊 恭喜解锁 ${this.getEggTypeName(currentLevel)} 蛋！`);
         }
 
-        // console.log(`✅ 合成完成！${window.GameServer.getEggTypeName(eggType)} -> ${window.GameServer.getEggTypeName(newEggType)}`);
+        // console.log(`✅ 合成完成！${window.GameServer.getEggTypeName(eggType)} -> ${window.GameServer.getEggTypeName(currentLevel)}`);
 
         // 返回完成标识
         return { completed: true };
@@ -1783,11 +1865,108 @@ class GameScense {
 
 
     /**
+     * 沿路径移动参与合成的蛋
+     * @param {Object} piece - 蛋元件
+     * @param {Array} path - 后端返回的路径数组 [{x, y}, ...]
+     * @returns {Promise<boolean>}
+     */
+    async animatePieceAlongPath(piece, path) {
+        const pathCellIds = path.map(step => {
+            if (typeof step === 'number') return step;
+            if (step && typeof step.x === 'number' && typeof step.y === 'number') {
+                return this.getCellId(step.x, step.y);
+            }
+            return null;
+        }).filter(id => typeof id === 'number');
+        return new Promise((resolve) => {
+            if (!piece || pathCellIds.length === 0) {
+                resolve(false);
+                return;
+            }
+            // 移动前先从原格子映射中移除
+            this.chessboard.pieces.delete(piece.cellId);
+            this.animateAlongPath(piece, pathCellIds, (success) => {
+                resolve(success);
+            });
+        });
+    }
+
+    /**
+     * 直接消除多余的蛋（达到 7 级后不再参与升级）
+     * @param {Object} piece - 要消除的蛋元件
+     * @returns {Promise<void>}
+     */
+    async eliminatePieceDirectly(piece) {
+        return new Promise((resolve) => {
+            if (!piece) {
+                resolve();
+                return;
+            }
+            createjs.Tween.get(piece)
+                .to({ scaleX: 0, scaleY: 0, alpha: 0 }, 250, createjs.Ease.quadIn)
+                .call(() => {
+                    if (piece.parent) {
+                        piece.parent.removeChild(piece);
+                    }
+                    this.chessboard.pieces.delete(piece.cellId);
+                    resolve();
+                });
+        });
+    }
+
+    /**
+     * 将指定格子的蛋替换为更高等级（保留层级与位置）
+     * @param {number} cellId - 格子ID
+     * @param {number} newEggType - 新蛋类型
+     * @returns {Object|null} 新的蛋元件
+     */
+    replacePieceAtCell(cellId, newEggType) {
+        const position = this.getCellPosition(cellId);
+        if (!position) {
+            console.error(`❌ 无法获取格子 ${cellId} 的位置坐标`);
+            return null;
+        }
+
+        const oldPiece = this.chessboard.pieces.get(cellId);
+        const newPiece = this.getEggFromFlygame(newEggType);
+        if (!newPiece) {
+            console.error(`❌ 无法创建升级蛋: egg_mc${newEggType}`);
+            return oldPiece || null;
+        }
+
+        newPiece.eggType = newEggType;
+        newPiece.cellId = cellId;
+        newPiece.x = position.centerX;
+        newPiece.y = position.centerY;
+        newPiece.scaleX = 1;
+        newPiece.scaleY = 1;
+        newPiece.alpha = 1;
+
+        if (oldPiece && oldPiece.parent) {
+            const parent = oldPiece.parent;
+            const index = parent.getChildIndex(oldPiece);
+            parent.removeChild(oldPiece);
+            if (index >= 0 && index <= parent.numChildren) {
+                parent.addChildAt(newPiece, index);
+            } else {
+                parent.addChild(newPiece);
+            }
+        } else {
+            this.gamebox.addChild(newPiece);
+        }
+
+        this.chessboard.pieces.set(cellId, newPiece);
+        return newPiece;
+    }
+
+
+    /**
      * 播放蛋收集动画
      * @param {Array} eggs - 所有参与合成的蛋数组
      * @param {number} targetCellId - 目标位置
+     * @param {Object} extraPathMap - AAI：额外蛋的 cellId -> 路径数组
      */
-    async playEggCollectionAnimation(eggs, targetCellId) {
+    async playEggCollectionAnimation(eggs, targetCellId, extraPathMap = {}) {
         const targetPosition = this.getCellPosition(targetCellId);
         if (!targetPosition) {
             console.error(`❌ 无法获取目标位置 ${targetCellId} 的坐标`);
@@ -1820,33 +1999,46 @@ class GameScense {
                     this.chessboard.pieces.delete(eggData.cellId);
                     // console.log(`🗑️ 删除目标位置蛋映射: 格子${eggData.cellId}`);
                 } else {
-                    // 非目标位置的蛋：移动到目标位置后删除
-                    // console.log(`🚶 蛋从格子 ${eggData.cellId} 移动到目标位置 ${targetCellId}`);
-
-                    const promise = new Promise((resolve) => {
-                        createjs.Tween.get(eggData.piece)
-                            .to({
-                                x: targetPosition.centerX,
-                                y: targetPosition.centerY,
-                                scaleX: 0.8,
-                                scaleY: 0.8,
-                                alpha: 0.8
-                            }, 300, createjs.Ease.quadInOut)
-                            .call(() => {
-                                // console.log(`🚶 格子 ${eggData.cellId} 的蛋移动完成`);
-
+                    // AAI：非目标位置的蛋优先按行走规则移动到目标位置
+                    const pathCellIds = extraPathMap[eggData.cellId];
+                    if (pathCellIds && pathCellIds.length > 0) {
+                        const promise = new Promise((resolve) => {
+                            this.animateAlongPath(eggData.piece, pathCellIds, () => {
                                 // 确保从父容器中移除
                                 if (eggData.piece.parent) {
                                     eggData.piece.parent.removeChild(eggData.piece);
                                 }
-
                                 this.chessboard.pieces.delete(eggData.cellId);
-                                // utile.__sdklog3(`🗑️ 删除移动后的蛋: 格子${eggData.cellId}`);
                                 resolve();
                             });
-                    });
+                        });
+                        promises.push(promise);
+                    } else {
+                        // 没有路径信息时兜底：直接飞向目标位置
+                        // console.log(`🚶 蛋从格子 ${eggData.cellId} 移动到目标位置 ${targetCellId}`);
 
-                    promises.push(promise);
+                        const promise = new Promise((resolve) => {
+                            createjs.Tween.get(eggData.piece)
+                                .to({
+                                    x: targetPosition.centerX,
+                                    y: targetPosition.centerY,
+                                    scaleX: 0.8,
+                                    scaleY: 0.8,
+                                    alpha: 0.8
+                                }, 300, createjs.Ease.quadInOut)
+                                .call(() => {
+                                    // 确保从父容器中移除
+                                    if (eggData.piece.parent) {
+                                        eggData.piece.parent.removeChild(eggData.piece);
+                                    }
+
+                                    this.chessboard.pieces.delete(eggData.cellId);
+                                    resolve();
+                                });
+                        });
+
+                        promises.push(promise);
+                    }
                 }
             }
         }
@@ -2605,6 +2797,10 @@ class GameScense {
         if (show) {
 
             this.engine.playSound('wrong2');
+
+            // AAI：失败后暂停自动飞入倒计时
+            this.stopAutoSpawnTimer();
+
             const btnAgain = utile.findMc(panelUI, 'btn_tryagain');
             btnAgain.alpha = 0;
             // const angin_x = btnAgain.x;
@@ -2654,6 +2850,225 @@ class GameScense {
                 // 重新开始游戏
                 this.onRestartGame();
             });
+        }
+    }
+
+    /**
+     * AAI：显示复活选择面板
+     */
+    showReviveOptions() {
+        console.log('💖 显示复活选择面板');
+
+        const failureMc = utile.findMc(this.exportRoot, 'mc_failure');
+        if (!failureMc) return;
+
+        // 如果已有复活面板，先移除
+        if (this.revivePanel) {
+            failureMc.removeChild(this.revivePanel);
+            this.revivePanel = null;
+        }
+
+        const panel = new createjs.Container();
+        panel.name = 'revivePanel';
+
+        // 半透明背景
+        const bg = new createjs.Shape();
+        bg.graphics.beginFill('rgba(0,0,0,0.85)').drawRoundRect(-250, -200, 500, 400, 20);
+        panel.addChild(bg);
+
+        // 标题
+        const title = new createjs.Text('游戏结束', 'bold 48px Arial', '#FFD700');
+        title.textAlign = 'center';
+        title.y = -160;
+        panel.addChild(title);
+
+        // 提示
+        const hint = new createjs.Text('地图已满，无法继续', '24px Arial', '#FFFFFF');
+        hint.textAlign = 'center';
+        hint.y = -90;
+        panel.addChild(hint);
+
+        // 创建按钮的辅助函数
+        const createBtn = (label, y, color, callback) => {
+            const btn = new createjs.Container();
+            btn.y = y;
+
+            const shape = new createjs.Shape();
+            shape.graphics.beginFill(color).drawRoundRect(-180, -30, 360, 60, 12);
+            btn.addChild(shape);
+
+            const text = new createjs.Text(label, 'bold 28px Arial', '#FFFFFF');
+            text.textAlign = 'center';
+            text.y = -12;
+            btn.addChild(text);
+
+            btn.cursor = 'pointer';
+            btn.on('click', (e) => {
+                e.stopPropagation();
+                callback();
+            });
+
+            return btn;
+        };
+
+        // 看广告复活
+        panel.addChild(createBtn('📺 看广告复活', -20, '#4CAF50', () => {
+            this.onReviveByAd();
+        }));
+
+        // 分享复活
+        panel.addChild(createBtn('📤 分享给好友复活', 60, '#2196F3', () => {
+            this.onReviveByShare();
+        }));
+
+        // 放弃
+        panel.addChild(createBtn('放弃并领取奖励', 140, '#9E9E9E', () => {
+            this.onGiveUpAfterFailure();
+        }));
+
+        panel.x = this.stage.canvas.width / 2;
+        panel.y = this.stage.canvas.height / 2;
+        panel.scaleX = panel.scaleY = 0.1;
+        panel.alpha = 0;
+
+        failureMc.addChild(panel);
+        this.revivePanel = panel;
+
+        createjs.Tween.get(panel)
+            .to({ scaleX: 1, scaleY: 1, alpha: 1 }, 300, createjs.Ease.backOut);
+    }
+
+    /**
+     * AAI：通过激励视频复活
+     */
+    onReviveByAd() {
+        console.log('📺 尝试看广告复活');
+
+        if (typeof window.showRewardedAd !== 'function') {
+            console.warn('⚠️ 激励视频不可用，直接复活（测试模式）');
+            this.executeRevive();
+            return;
+        }
+
+        window.showRewardedAd((success) => {
+            if (success) {
+                console.log('📺 激励视频看完，执行复活');
+                this.executeRevive();
+            } else {
+                console.log('📺 激励视频未看完');
+                this.tips('看完广告才能复活哦~');
+            }
+        });
+    }
+
+    /**
+     * AAI：通过分享复活
+     */
+    onReviveByShare() {
+        console.log('📤 尝试分享复活');
+
+        // 优先使用微信分享
+        if (typeof wx !== 'undefined' && wx.shareAppMessage) {
+            wx.shareAppMessage({
+                title: '来挑战 Dragon Egg，我已经玩到第' + (this.level || 1) + '关了！',
+                imageUrl: 'assets/image/logo1.png'
+            });
+            // 分享回调不可信，直接复活
+            this.executeRevive();
+            return;
+        }
+
+        // H5 兜底：尝试 navigator.share
+        if (typeof navigator !== 'undefined' && navigator.share) {
+            navigator.share({
+                title: 'Dragon Egg',
+                text: '来挑战 Dragon Egg 吧！'
+            }).then(() => {
+                this.executeRevive();
+            }).catch(() => {
+                this.tips('分享失败，请重试');
+            });
+            return;
+        }
+
+        // 无分享能力时直接复活（测试）
+        console.warn('⚠️ 无分享能力，直接复活（测试模式）');
+        this.executeRevive();
+    }
+
+    /**
+     * AAI：放弃复活，显示插屏后重开
+     */
+    onGiveUpAfterFailure() {
+        console.log('💀 放弃复活');
+
+        // 移除复活面板
+        if (this.revivePanel) {
+            const panel = this.revivePanel;
+            createjs.Tween.get(panel)
+                .to({ scaleX: 0.1, scaleY: 0.1, alpha: 0 }, 200)
+                .call(() => {
+                    if (panel.parent) panel.parent.removeChild(panel);
+                    this.revivePanel = null;
+                });
+        }
+
+        // 调用插页广告后重开
+        ovo.showInterstitialAd(() => {
+            this.failureHandler(false);
+        });
+    }
+
+    /**
+     * AAI：执行复活逻辑
+     */
+    async executeRevive() {
+        console.log('💖 执行复活逻辑');
+
+        try {
+            if (!window.GameServer) {
+                console.error('❌ GameServer 未找到');
+                return;
+            }
+
+            const reviveResult = window.GameServer.revive(3);
+            if (!reviveResult.success) {
+                this.tips('复活失败，请重试');
+                return;
+            }
+
+            // 更新 gameData
+            this.gameData = {
+                ...this.gameData,
+                data: reviveResult.data,
+                scoreSystem: reviveResult.scoreSystem
+            };
+
+            // 移除复活面板
+            if (this.revivePanel) {
+                const panel = this.revivePanel;
+                if (panel.parent) panel.parent.removeChild(panel);
+                this.revivePanel = null;
+            }
+
+            // 隐藏失败界面
+            const failureMc = utile.findMc(this.exportRoot, 'mc_failure');
+            if (failureMc) {
+                failureMc.visible = false;
+            }
+
+            // 清理前端所有蛋，然后按复活后状态重新生成
+            this.clearAllEggs();
+            this.gameDataState.cells = {};
+
+            // 重新生成剩余蛋
+            await this.generateUserEggs();
+
+            this.tips('复活成功！继续挑战吧！');
+
+        } catch (error) {
+            console.error('❌ 复活执行失败:', error);
+            this.tips('复活失败');
         }
     }
 
@@ -2717,6 +3132,166 @@ class GameScense {
     }
 
     /**
+     * 创建文本按钮（用于动态弹窗）
+     */
+    createTextButton(label, y, color, callback) {
+        const btn = new createjs.Container();
+        btn.y = y;
+
+        const shape = new createjs.Shape();
+        shape.graphics.beginFill(color).drawRoundRect(-180, -30, 360, 60, 12);
+        btn.addChild(shape);
+
+        const text = new createjs.Text(label, 'bold 28px Arial', '#FFFFFF');
+        text.textAlign = 'center';
+        text.y = -12;
+        btn.addChild(text);
+
+        btn.cursor = 'pointer';
+        btn.on('click', (e) => {
+            e.stopPropagation();
+            callback();
+        });
+
+        return btn;
+    }
+
+    /**
+     * AAI：显示胜利奖励领取面板
+     */
+    showVictoryRewardUI(panelUI) {
+        if (!window.GameServer) return;
+
+        // 移除旧奖励面板
+        if (this.victoryRewardPanel && this.victoryRewardPanel.parent) {
+            this.victoryRewardPanel.parent.removeChild(this.victoryRewardPanel);
+        }
+
+        const coinReward = window.GameServer.getLevelConfig(this.level).coinReward || 0;
+        const isFinalLevel = (this.targetEggType >= 7);
+
+        // 隐藏原始按钮，避免与自定义按钮冲突
+        const btnAgain = utile.findMc(panelUI, 'btn_playagain');
+        if (btnAgain) {
+            btnAgain.visible = false;
+            btnAgain.removeAllEventListeners('click');
+        }
+
+        // 更新标题文案
+        try {
+            if (panelUI.txt_title && panelUI.txt_title.text) {
+                panelUI.txt_title.text.text = isFinalLevel ? '恭喜解锁神龙！' : `第 ${this.level} 关完成！`;
+            }
+            if (panelUI.txt_level && panelUI.txt_level.text) {
+                panelUI.txt_level.text.text = `目标: ${this.targetEggType}级蛋`;
+            }
+        } catch (e) {}
+
+        const container = new createjs.Container();
+        container.name = 'victoryRewardPanel';
+
+        // 奖励提示
+        const rewardText = new createjs.Text(`奖励 ${coinReward} 金币`, 'bold 40px Arial', '#FFD700');
+        rewardText.textAlign = 'center';
+        rewardText.y = -150;
+        container.addChild(rewardText);
+
+        // 双倍领取按钮
+        container.addChild(this.createTextButton('📺 看广告双倍领取', -50, '#FF6B35', () => {
+            this.onClaimLevelReward(true);
+        }));
+
+        // 普通领取按钮
+        const normalLabel = isFinalLevel ? '普通领取并重开' : '普通领取并继续';
+        container.addChild(this.createTextButton(normalLabel, 40, '#4CAF50', () => {
+            this.onClaimLevelReward(false);
+        }));
+
+        container.x = this.stage.canvas.width / 2;
+        container.y = this.stage.canvas.height / 2;
+        container.scaleX = container.scaleY = 0.1;
+        container.alpha = 0;
+
+        panelUI.addChild(container);
+        this.victoryRewardPanel = container;
+
+        createjs.Tween.get(container)
+            .to({ scaleX: 1, scaleY: 1, alpha: 1 }, 300, createjs.Ease.backOut);
+    }
+
+    /**
+     * AAI：领取关卡奖励并决定下一步
+     * @param {boolean} double - 是否双倍领取
+     */
+    async onClaimLevelReward(double) {
+        console.log(`💰 领取关卡奖励，双倍=${double}`);
+
+        try {
+            if (!window.GameServer) {
+                console.error('❌ GameServer 未找到');
+                return;
+            }
+
+            // 1. 先弹出激励视频（如果需要双倍）
+            if (double) {
+                if (typeof window.showRewardedAd === 'function') {
+                    window.showRewardedAd((success) => {
+                        if (success) {
+                            this._doClaimLevelReward(true);
+                        } else {
+                            this.tips('看完广告才能获得双倍奖励哦~');
+                        }
+                    });
+                    return;
+                }
+                console.warn('⚠️ 激励视频不可用，直接发放双倍奖励（测试模式）');
+            }
+
+            this._doClaimLevelReward(double);
+        } catch (error) {
+            console.error('❌ 领取关卡奖励失败:', error);
+        }
+    }
+
+    /**
+     * AAI：实际发放关卡奖励并跳转
+     */
+    _doClaimLevelReward(double) {
+        if (!window.GameServer) return;
+
+        const result = window.GameServer.claimLevelReward(double);
+        if (result.success) {
+            this.updateScoreDisplayDirectly(window.GameServer.getScoreStatus());
+            this.tips(`获得 ${result.coinEarned} 金币`);
+        }
+
+        const isFinalLevel = (this.targetEggType >= 7);
+        const currentLevel = window.GameServer.level;
+
+        const nextAction = () => {
+            if (this.victoryRewardPanel) {
+                if (this.victoryRewardPanel.parent) {
+                    this.victoryRewardPanel.parent.removeChild(this.victoryRewardPanel);
+                }
+                this.victoryRewardPanel = null;
+            }
+
+            if (isFinalLevel) {
+                this.victoryHandler(false);
+            } else {
+                this.onNextLevel();
+            }
+        };
+
+        // 每 3 关显示一次插屏广告
+        if (currentLevel % 3 === 0 && currentLevel > 0) {
+            ovo.showInterstitialAd(() => nextAction());
+        } else {
+            nextAction();
+        }
+    }
+
+    /**
      * 胜利界面控制器
      * @param {boolean} show - true显示，false隐藏
      */
@@ -2733,13 +3308,18 @@ class GameScense {
 
             this.engine.playSound('win');
 
+            // AAI：胜利后暂停自动飞入倒计时
+            this.stopAutoSpawnTimer();
+
             this.showPanel(panelUI, true, async () => {
                 if (this.gameData) {
                     this.gameData.scoreSystem = await window.GameServer.getScoreStatus();
                     panelUI.mc_ranking.mc_best.text.text = "" + this.gameData.scoreSystem.bestScore;
                     panelUI.mc_ranking.mc_score.text.text = "" + this.gameData.scoreSystem.currentScore;
                 }
-                // this.openCardRewardPanel();
+
+                // AAI：显示奖励领取 UI
+                this.showVictoryRewardUI(panelUI);
             })
             try {
                 // report victory event using ovo method
@@ -2825,6 +3405,48 @@ class GameScense {
     }
 
     /**
+     * 进入下一关
+     */
+    async onNextLevel() {
+        console.log('🚀 进入下一关...');
+
+        try {
+            // 隐藏胜利界面
+            const victoryMc = utile.findMc(this.exportRoot, 'mc_victory');
+            if (victoryMc) {
+                victoryMc.visible = false;
+            }
+
+            // 清理前端蛋元件和状态
+            this.clearAllEggs();
+            this.clearSelection();
+
+            // 调用后端进入下一关
+            if (window.GameServer) {
+                const nextLevelData = window.GameServer.advanceLevel();
+                if (nextLevelData.success) {
+                    this.gameData = nextLevelData;
+                    this.level = nextLevelData.level;
+                    this.targetEggType = nextLevelData.targetEggType;
+                    console.log(`✅ 已进入第 ${this.level} 关，目标 ${this.targetEggType} 级蛋`);
+
+                    // 重置解锁动画
+                    this.resetUnlockAnimations();
+
+                    // 生成新关卡的蛋
+                    setTimeout(() => {
+                        this.generateUserEggs();
+                    }, 500);
+                } else {
+                    console.error('❌ 进入下一关失败');
+                }
+            }
+        } catch (error) {
+            console.error('❌ 进入下一关出错:', error);
+        }
+    }
+
+    /**
      * 重新开始游戏
      */
     onRestartGame() {
@@ -2895,14 +3517,14 @@ class GameScense {
                         this.generateUserEggs();
                     }, 500);
 
-                    // 🎯 游戏重新开始30秒后显示banner广告
+                    // AAI：游戏重新开始后恢复首页 Banner 常驻
                     setTimeout(() => {
                         if (typeof window.ovo !== 'undefined' && typeof window.ovo.showBannerAd === 'function') {
                             window.ovo.showBannerAd(() => {
-                                console.log('📢 Banner ad shown 30s after game restart');
+                                console.log('📢 重新开始后 Banner 已显示');
                             });
                         }
-                    }, 30000); // 30秒 = 30000毫秒
+                    }, 500);
 
                     // console.log('✅ 游戏重置完成');
                 } else {
@@ -3168,8 +3790,154 @@ class GameScense {
         this.expectedClickCellId = null;
         this.currentPointIndex = 0;
 
+        // AAI：新手引导完成后开启自动飞入倒计时
+        if (show === false) {
+            this.startAutoSpawnTimer();
+        }
 
+    }
 
+    /**
+     * AAI：初始化自动飞入倒计时系统
+     */
+    initAutoSpawn() {
+        this.autoSpawnInterval = 10000; // AAI：10 秒倒计时
+        this.autoSpawnRemaining = 5000;
+        this.autoSpawnActive = false;
+        this.autoSpawnTimer = null;
+        this.autoSpawnDisplay = null;
+        this.createAutoSpawnDisplay();
+    }
+
+    /**
+     * AAI：创建倒计时显示文本
+     */
+    createAutoSpawnDisplay() {
+        if (!this.exportRoot || !this.stage) return;
+        const text = new createjs.Text('5.0s', 'bold 28px Arial', '#FFFFFF');
+        text.name = 'autoSpawnCountdown';
+        text.textAlign = 'center';
+        text.x = this.stage.canvas.width / 2;
+        text.y = 24;
+        text.visible = false;
+        this.exportRoot.addChild(text);
+        // 确保倒计时在最上层
+        this.exportRoot.setChildIndex(text, this.exportRoot.children.length - 1);
+        this.autoSpawnDisplay = text;
+    }
+
+    /**
+     * AAI：启动自动飞入倒计时
+     */
+    startAutoSpawnTimer() {
+        if (this.autoSpawnActive) return;
+        this.autoSpawnActive = true;
+        if (this.autoSpawnDisplay) {
+            this.autoSpawnDisplay.visible = true;
+            this.exportRoot.setChildIndex(this.autoSpawnDisplay, this.exportRoot.children.length - 1);
+        }
+        this.resetAutoSpawnTimer();
+        this.autoSpawnTimer = setInterval(() => this.tickAutoSpawn(), 100);
+    }
+
+    /**
+     * AAI：停止自动飞入倒计时
+     */
+    stopAutoSpawnTimer() {
+        this.autoSpawnActive = false;
+        if (this.autoSpawnTimer) {
+            clearInterval(this.autoSpawnTimer);
+            this.autoSpawnTimer = null;
+        }
+        if (this.autoSpawnDisplay) {
+            this.autoSpawnDisplay.visible = false;
+        }
+    }
+
+    /**
+     * AAI：重置倒计时
+     */
+    resetAutoSpawnTimer() {
+        this.autoSpawnRemaining = this.autoSpawnInterval;
+        this.updateAutoSpawnDisplay();
+    }
+
+    /**
+     * AAI：倒计时 tick
+     */
+    tickAutoSpawn() {
+        if (!this.autoSpawnActive) return;
+        if (this.isInGuideMode()) return;
+        if (!this.canInteract()) return;
+        if (typeof createjs !== 'undefined' && createjs.Ticker && createjs.Ticker.paused) return;
+
+        this.autoSpawnRemaining -= 100;
+        if (this.autoSpawnRemaining <= 0) {
+            this.doAutoSpawn();
+        } else {
+            this.updateAutoSpawnDisplay();
+        }
+    }
+
+    /**
+     * AAI：更新倒计时显示
+     */
+    updateAutoSpawnDisplay() {
+        if (!this.autoSpawnDisplay) return;
+        const seconds = (this.autoSpawnRemaining / 1000).toFixed(1);
+        this.autoSpawnDisplay.text = `${seconds}s`;
+        if (this.autoSpawnRemaining <= 1000) {
+            this.autoSpawnDisplay.color = '#FF0000';
+        } else if (this.autoSpawnRemaining <= 3000) {
+            this.autoSpawnDisplay.color = '#FFAA00';
+        } else {
+            this.autoSpawnDisplay.color = '#FFFFFF';
+        }
+        // 保持最上层
+        if (this.exportRoot && this.autoSpawnDisplay.parent === this.exportRoot) {
+            this.exportRoot.setChildIndex(this.autoSpawnDisplay, this.exportRoot.children.length - 1);
+        }
+    }
+
+    /**
+     * AAI：自动飞入一波蛋
+     */
+    async doAutoSpawn() {
+        this.resetAutoSpawnTimer();
+
+        if (!window.GameServer) return;
+
+        const emptyCount = window.GameServer.mapState.emptyCells.size;
+        if (emptyCount === 0) {
+            console.log('💀 自动飞入：棋盘已满，游戏失败');
+            this.stopAutoSpawnTimer();
+            this.failureHandler(true);
+            return;
+        }
+
+        console.log('⏰ 自动飞入一波蛋');
+        const levelConfig = window.GameServer.getLevelConfig(window.GameServer.level);
+        const spawnCount = Math.min(levelConfig.spawnCount, emptyCount);
+        const newEggs = window.GameServer.generateRandomEggsFromMapState(spawnCount);
+
+        if (!newEggs || newEggs.length === 0) {
+            console.log('💀 自动飞入：没有可用位置，游戏失败');
+            this.stopAutoSpawnTimer();
+            this.failureHandler(true);
+            return;
+        }
+
+        this.playLongbossAnimation();
+        for (const egg of newEggs) {
+            await this.createEggAtPosition(egg.cellId, egg.eggType);
+        }
+
+        // 飞入后棋盘满了也失败
+        if (window.GameServer.mapState.emptyCells.size === 0) {
+            console.log('💀 自动飞入后棋盘已满，游戏失败');
+            this.stopAutoSpawnTimer();
+            setTimeout(() => this.failureHandler(true), 500);
+        }
     }
 
     /**
